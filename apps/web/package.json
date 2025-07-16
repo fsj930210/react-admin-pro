@@ -1,0 +1,38 @@
+{
+	"name": "@rap/web",
+	"version": "1.0.0",
+	"private": true,
+	"type": "module",
+	"scripts": {
+		"build": "rsbuild build --env-mode production",
+		"dev": "rsbuild dev --open --env-mode development",
+		"preview": "rsbuild preview --env-mode preview",
+		"lint": "pnpm biome check --write"
+	},
+	"dependencies": {
+		"@rap/components-base": "workspace:*",
+		"@rap/styles": "workspace:*",
+		"@rap/utils": "workspace:*",
+		"@tanstack/react-router": "^1.127.9",
+		"lucide-react": "catalog:",
+		"react": "catalog:",
+		"react-dom": "catalog:"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "catalog:",
+		"@rap/biome": "workspace:*",
+		"@rap/commitlint": "workspace:*",
+		"@rap/rsbuild": "workspace:*",
+		"@rap/stylelint": "workspace:*",
+		"@rap/tailwindcss": "workspace:*",
+		"@rap/tsconfig": "workspace:*",
+		"@rsbuild/core": "catalog:",
+		"@tanstack/react-router-devtools": "^1.127.9",
+		"@tanstack/router-plugin": "^1.127.9",
+		"@types/node": "catalog:",
+		"@types/react": "catalog:",
+		"@types/react-dom": "catalog:",
+		"stylelint": "catalog:",
+		"typescript": "catalog:"
+	}
+}

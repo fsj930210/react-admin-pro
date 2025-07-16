@@ -1,0 +1,13 @@
+{
+	"$schema": "https://json.schemastore.org/tsconfig",
+	"extends": "@rap/tsconfig/web.json",
+	"compilerOptions": {
+		"jsx": "react-jsx",
+		"moduleResolution": "bundler",
+		"paths": {
+			"@/*": ["./src/*"]
+		}
+	},
+	"references": [{ "path": "./tsconfig.node.json" }],
+	"include": ["src/**/*.ts", "src/**/*.tsx"]
+}

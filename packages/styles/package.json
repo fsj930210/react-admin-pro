@@ -1,0 +1,12 @@
+{
+	"name": "@rap/styles",
+	"devDependencies": {
+		"tailwindcss": "catalog:",
+		"tw-animate-css": "catalog:"
+	},
+	"type": "module",
+	"exports": {
+		"./globals.css": "./src/globals.css",
+		"./utility.css": "./src/utility.css"
+	}
+}

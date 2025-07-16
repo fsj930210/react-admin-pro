@@ -1,0 +1,23 @@
+{
+	"name": "react-admin-pro",
+	"private": true,
+	"version": "1.0.0",
+	"description": "",
+	"scripts": {
+		"build": "turbo run build",
+		"dev": "turbo run dev",
+		"lint": "turbo run lint",
+		"catalog": "pnpm dlx codemod pnpm/catalog",
+		"prepare": "husky"
+	},
+	"keywords": [],
+	"author": "",
+	"license": "ISC",
+	"type": "module",
+	"packageManager": "pnpm@10.12.4",
+	"devDependencies": {
+		"@rap/commitlint": "workspace:*",
+		"husky": "catalog:",
+		"turbo": "catalog:"
+	}
+}

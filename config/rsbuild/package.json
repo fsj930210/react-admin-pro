@@ -1,0 +1,26 @@
+{
+	"name": "@rap/rsbuild",
+	"version": "0.0.1",
+	"devDependencies": {
+		"@rap/tsconfig": "workspace:*",
+		"@rsbuild/core": "catalog:",
+		"@rsbuild/plugin-react": "catalog:",
+		"@rsbuild/plugin-svgr": "catalog:",
+		"@rsbuild/plugin-type-check": "catalog:"
+	},
+	"type": "module",
+	"exports": {
+		"./base": {
+			"types": "./src/base.ts",
+			"default": "./src/base.ts"
+		},
+		"./development": {
+			"types": "./src/development.ts",
+			"default": "./src/development.ts"
+		},
+		"./production": {
+			"types": "./src/production.ts",
+			"default": "./src/production.ts"
+		}
+	}
+}

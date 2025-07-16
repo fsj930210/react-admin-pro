@@ -1,0 +1,17 @@
+{
+	"name": "@rap/tailwindcss",
+	"version": "0.0.1",
+	"devDependencies": {
+		"@tailwindcss/postcss": "catalog:",
+		"tailwindcss": "catalog:",
+		"tw-animate-css": "catalog:"
+	},
+	"files": [
+		"./src/tailwindcss.css"
+	],
+	"exports": {
+		"./postcss": {
+			"default": "./src/postcss.config.ts"
+		}
+	}
+}

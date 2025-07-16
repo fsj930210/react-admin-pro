@@ -1,0 +1,12 @@
+{
+	"$schema": "https://json.schemastore.org/tsconfig",
+	"extends": "@rap/tsconfig/node.json",
+	"compilerOptions": {
+		"moduleResolution": "bundler",
+		"composite": true,
+		"tsBuildInfoFile": "./node_modules/.tmp/tsconfig.node.tsbuildinfo",
+		"noEmit": false,
+		"allowImportingTsExtensions": false
+	},
+	"include": ["rsbuild.config.ts"]
+}

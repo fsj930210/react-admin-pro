@@ -1,0 +1,7 @@
+
+
+> @rap/ui-base@0.0.0 lint /Users/fengshaojian/Desktop/react-admin-pro/packages/ui/base
+> eslint . --max-warnings 0
+
+sh: eslint: command not found
+[41m[30m ELIFECYCLE [39m[49m [31mCommand failed.[39m

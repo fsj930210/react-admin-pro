@@ -1,0 +1,15 @@
+{
+	"name": "@rap/stylelint",
+	"version": "0.0.1",
+	"devDependencies": {
+		"@stylistic/stylelint-plugin": "catalog:",
+		"stylelint": "catalog:",
+		"stylelint-config-recess-order": "catalog:",
+		"stylelint-order": "catalog:"
+	},
+	"exports": {
+		".": {
+			"default": "./index.mjs"
+		}
+	}
+}

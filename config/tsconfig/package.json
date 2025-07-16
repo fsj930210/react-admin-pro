@@ -1,0 +1,13 @@
+{
+	"name": "@rap/tsconfig",
+	"version": "0.0.0",
+	"private": true,
+	"license": "MIT",
+	"type": "module",
+	"files": [
+		"base.json",
+		"react.json",
+		"node.json",
+		"web.json"
+	]
+}

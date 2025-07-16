@@ -1,0 +1,55 @@
+@import "tailwindcss";
+
+@utility size-full {
+  width: 100%;
+  height: 100%;
+}
+@utility text-overflow {
+  overflow: hidden;
+  text-oveflow: ellipsis;
+  white-space: nowrap;
+}
+@utility flex-center{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+@utility flex-items-center{
+  display: flex;
+  align-items: center;
+}
+@utility flex-justify-center{
+  display: flex;
+  justify-content: center;
+}
+@utility flex-col-center{
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+@utility flex-col-items-center{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+@utility flex-col-justify-center{
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+@utility flex-between{
+  display: flex;
+  justify-content: space-between;
+}
+@utility scrollbar-hidden{
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+@utility inline-flex-center {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}

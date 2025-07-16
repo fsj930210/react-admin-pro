@@ -1,0 +1,15 @@
+{
+	"name": "@rap/utils",
+	"private": true,
+	"type": "module",
+	"dependencies": {
+		"clsx": "catalog:",
+		"tailwind-merge": "catalog:"
+	},
+	"exports": {
+		".": {
+			"types": "./src/index.ts",
+			"default": "./src/index.ts"
+		}
+	}
+}

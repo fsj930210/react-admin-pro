@@ -1,0 +1,43 @@
+node_modules
+.DS_Store
+dist
+dist-ssr
+dist.zip
+dist.tar
+dist.war
+.output
+*-dist.zip
+*-dist.tar
+*-dist.war
+coverage
+*.local
+.cache
+.turbo
+.temp
+dev-dist
+yarn.lock
+.VSCodeCounter
+**/backend-mock/data
+
+# local env files
+.env.local
+.env.*.local
+
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Editor directories and files
+.idea
+# .vscode
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+.history
+.tanstack
