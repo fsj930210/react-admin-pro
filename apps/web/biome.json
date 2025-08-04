@@ -1,7 +1,7 @@
 {
 	"extends": ["@rap/biome/biome.json"],
 	"files": {
-		"includes": ["src/**"]
+		"includes": ["src/**", "!**/routeTree.gen.ts"]
 	},
 	"linter": {
 		"rules": {

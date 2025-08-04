@@ -3,7 +3,10 @@ import { createRouter, RouterProvider } from "@tanstack/react-router";
 import { routeTree } from "./routeTree.gen";
 
 // Create a new router instance
-const router = createRouter({ routeTree });
+const router = createRouter({
+	routeTree,
+	basepath: "/rap", // Set the base path for the router
+});
 
 // Register the router instance for type safety
 declare module "@tanstack/react-router" {

@@ -58,6 +58,6 @@
 		"typescript": "catalog:"
 	},
 	"exports": {
-		"./components/*": "./src/components/*.tsx"
+		"./*": "./src/components/*.tsx"
 	}
 }

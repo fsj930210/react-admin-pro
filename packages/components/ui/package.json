@@ -1,10 +1,14 @@
 {
 	"name": "@rap/components-ui",
 	"dependencies": {
+		"@radix-ui/react-slot": "catalog:",
+		"@rap/utils": "workspace:*",
+		"class-variance-authority": "catalog:",
 		"react": "catalog:",
 		"react-dom": "catalog:"
 	},
 	"devDependencies": {
+		"@rap/tailwindcss": "workspace:*",
 		"@rap/tsconfig": "workspace:^",
 		"@types/node": "catalog:",
 		"@types/react": "catalog:",
@@ -12,9 +16,6 @@
 		"typescript": "catalog:"
 	},
 	"exports": {
-		".": {
-			"types": "./src/index.ts",
-			"default": "./src/index.ts"
-		}
+		"./*": "./src/components/*.tsx"
 	}
 }

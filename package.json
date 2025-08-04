@@ -14,9 +14,10 @@
 	"author": "",
 	"license": "ISC",
 	"type": "module",
-	"packageManager": "pnpm@10.12.4",
+	"packageManager": "pnpm@10.14.0",
 	"devDependencies": {
 		"@rap/commitlint": "workspace:*",
+		"commitlint": "19.8.1",
 		"husky": "catalog:",
 		"turbo": "catalog:"
 	}
