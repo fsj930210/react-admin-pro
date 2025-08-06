@@ -49,7 +49,7 @@
 		"zod": "catalog:"
 	},
 	"devDependencies": {
-		"@rap/tailwindcss": "workspace:*",
+		"@rap/tailwindcss-config": "workspace:*",
 		"@rap/tsconfig": "workspace:^",
 		"@turbo/gen": "catalog:",
 		"@types/node": "catalog:",

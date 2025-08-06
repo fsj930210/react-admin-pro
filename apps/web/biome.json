@@ -1,5 +1,5 @@
 {
-	"extends": ["@rap/biome/biome.json"],
+	"extends": ["@rap/biome-config/biome.json"],
 	"files": {
 		"includes": ["src/**", "!**/routeTree.gen.ts"]
 	},

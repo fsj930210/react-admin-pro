@@ -1,3 +1,10 @@
 {
-	"name": "@rap/types"
+	"name": "@rap/types",
+	"type": "module",
+	"exports": {
+		"./type-utils": {
+			"types": "./src/type-utils.ts",
+			"default": "./src/type-utils.ts"
+		}
+	}
 }

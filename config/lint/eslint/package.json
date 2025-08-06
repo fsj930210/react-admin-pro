@@ -1,0 +1,17 @@
+{
+	"name": "@rap/eslint-config",
+	"version": "0.0.1",
+	"exports": {
+		".": {
+			"default": "./src/index.ts",
+			"types": "./src/index.ts"
+		}
+	},
+	"devDependencies": {
+		"@antfu/eslint-config": "catalog:",
+		"@rap/types": "workspace:*",
+		"@tanstack/eslint-plugin-query": "catalog:",
+		"eslint": "catalog:",
+		"eslint-config-prettier": "catalog:"
+	}
+}

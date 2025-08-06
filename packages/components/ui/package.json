@@ -8,7 +8,7 @@
 		"react-dom": "catalog:"
 	},
 	"devDependencies": {
-		"@rap/tailwindcss": "workspace:*",
+		"@rap/tailwindcss-config": "workspace:*",
 		"@rap/tsconfig": "workspace:^",
 		"@types/node": "catalog:",
 		"@types/react": "catalog:",

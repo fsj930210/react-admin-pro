@@ -1,5 +1,5 @@
 {
-	"name": "@rap/rsbuild",
+	"name": "@rap/rsbuild-config",
 	"version": "0.0.1",
 	"devDependencies": {
 		"@rap/tsconfig": "workspace:*",

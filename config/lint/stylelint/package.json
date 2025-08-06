@@ -1,5 +1,5 @@
 {
-	"name": "@rap/stylelint",
+	"name": "@rap/stylelint-config",
 	"version": "0.0.1",
 	"devDependencies": {
 		"@stylistic/stylelint-plugin": "catalog:",

@@ -1,10 +1,12 @@
+/** biome-ignore-all lint:correctness/noInvalidPositionAtImportRule:*/
+
 @import "tailwindcss";
 
 @utility size-full {
 	width: 100%;
 	height: 100%;
 }
-@utility text-overflow {
+@utility text-overflow-ellipsis {
 	overflow: hidden;
 	text-overflow: ellipsis;
 	white-space: nowrap;

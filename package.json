@@ -16,8 +16,8 @@
 	"type": "module",
 	"packageManager": "pnpm@10.14.0",
 	"devDependencies": {
-		"@rap/commitlint": "workspace:*",
-		"commitlint": "19.8.1",
+		"@rap/commitlint-config": "workspace:*",
+		"commitlint": "catalog:",
 		"husky": "catalog:",
 		"turbo": "catalog:"
 	}

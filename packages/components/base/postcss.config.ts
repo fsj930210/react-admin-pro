@@ -1,3 +1,3 @@
-import postcssConfig from "@rap/tailwindcss/postcss";
+import postcssConfig from "@rap/tailwindcss-config/postcss";
 
 export default postcssConfig;
