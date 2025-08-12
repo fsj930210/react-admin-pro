@@ -1,32 +1,52 @@
-import path from 'node:path'
-import { defineConfig as defineRsbuildConfig, type RsbuildConfig } from "@rsbuild/core";
+import path from "node:path";
+import {
+	defineConfig as defineRsbuildConfig,
+	type RsbuildConfig,
+} from "@rsbuild/core";
 import { pluginReact } from "@rsbuild/plugin-react";
 import { pluginSvgr } from "@rsbuild/plugin-svgr";
 import { pluginTypeCheck } from "@rsbuild/plugin-type-check";
+import { tanstackRouter } from "@tanstack/router-plugin/rspack";
 
-export function defineBaseConfig(options: RsbuildConfig) {
-	const root = process.cwd()
+export function defineRsbuildBaseConfig(options: RsbuildConfig) {
+	const root = process.cwd();
+	const srcDir = path.resolve(root, "./src");
 	return defineRsbuildConfig({
 		plugins: [
-			...(options.plugins || []), 
-			pluginReact(), 
+			...(options.plugins || []),
+			pluginReact(),
 			pluginSvgr(),
-			pluginTypeCheck()
-	],
+			pluginTypeCheck(),
+		],
 		resolve: {
 			alias: {
-				'@': path.resolve(root, './src'),
+				"@": path.resolve(root, "./src"),
 			},
-			...options.resolve
+			...options.resolve,
 		},
 		html: {
-			template: './public/index.html',
-			...options.html
+			template: "./public/index.html",
+			...options.html,
 		},
 		output: {
 			cleanDistPath: true,
-			...options.output
+			...options.output,
 		},
-		...options
+		tools: {
+			rspack: {
+				plugins: [
+					tanstackRouter({
+						target: "react",
+						autoCodeSplitting: true,
+						routesDirectory: path.resolve(srcDir, "pages"),
+						generatedRouteTree: path.resolve(srcDir, "routeTree.gen.ts"),
+						routeFileIgnorePrefix: "-",
+						quoteStyle: "double",
+						semicolons: true,
+					}),
+				],
+			},
+		},
+		...options,
 	});
 }

@@ -6,7 +6,8 @@
 		"@rsbuild/core": "catalog:",
 		"@rsbuild/plugin-react": "catalog:",
 		"@rsbuild/plugin-svgr": "catalog:",
-		"@rsbuild/plugin-type-check": "catalog:"
+		"@rsbuild/plugin-type-check": "catalog:",
+		"@tanstack/router-plugin": "catalog:"
 	},
 	"type": "module",
 	"exports": {

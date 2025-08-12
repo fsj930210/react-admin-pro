@@ -2,7 +2,8 @@
 	"name": "@rap/commitlint-config",
 	"version": "0.0.1",
 	"devDependencies": {
-		"@commitlint/config-conventional": "catalog:"
+		"@commitlint/config-conventional": "catalog:",
+		"@commitlint/types": "catalog:"
 	},
 	"exports": {
 		".": {

@@ -9,5 +9,5 @@
 		}
 	},
 	"references": [{ "path": "./tsconfig.node.json" }],
-	"include": ["src/**/*.ts", "src/**/*.tsx"]
+	"include": ["src"]
 }

@@ -1,3 +1,3 @@
-import { baseConfig } from "@rap/commitlint-config";
+import { defineCommitlintConfig } from "@rap/commitlint-config";
 
-export default baseConfig;
+export default defineCommitlintConfig();

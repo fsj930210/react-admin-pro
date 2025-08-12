@@ -4,8 +4,12 @@
 	"version": "1.0.0",
 	"description": "",
 	"scripts": {
-		"build": "turbo run build",
-		"dev": "turbo run dev",
+		"build:rsbuild": "turbo run build:rsbuild",
+		"dev:rsbuild": "turbo run dev:rsbuild",
+		"preview:rsbuild": "turbo run preview:rsbuild",
+		"dev:vite": "turbo run dev:vite",
+		"build:vite": "turbo run build:vite",
+		"preview:vite": "turbo run preview:vite",
 		"lint": "turbo run lint",
 		"catalog": "pnpm dlx codemod pnpm/catalog",
 		"prepare": "husky"

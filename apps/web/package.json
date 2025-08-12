@@ -4,16 +4,24 @@
 	"private": true,
 	"type": "module",
 	"scripts": {
-		"build": "rsbuild build --env-mode production",
-		"dev": "rsbuild dev --open --env-mode development",
-		"preview": "rsbuild preview --env-mode preview",
-		"lint": "pnpm biome check --write"
+		"build:rsbuild": "rsbuild build",
+		"dev:rsbuild": "rsbuild dev",
+		"preview:rsbuild": "rsbuild preview --env-mode preview",
+		"dev:vite": "vite",
+		"build:vite": "tsc -b && vite build",
+		"preview:vite": "vite preview",
+		"lint:eslint": "eslint --fix",
+		"lint:stylelint": "stylelint --cache --fix \"**/*.{css}\" --cache-location  node_modules/.cache/stylelint/ --allow-empty-input",
+		"lint:biome": "biome check --write",
+		"lint": " pnpm lint:biome && pnpm lint:eslint && pnpm lint:stylelint"
 	},
 	"dependencies": {
 		"@hookform/resolvers": "catalog:",
 		"@rap/components-base": "workspace:*",
 		"@rap/styles": "workspace:*",
 		"@rap/utils": "workspace:*",
+		"@tanstack/react-query": "catalog:",
+		"@tanstack/react-query-devtools": "catalog:",
 		"@tanstack/react-router": "catalog:",
 		"lucide-react": "catalog:",
 		"react": "catalog:",
@@ -25,17 +33,22 @@
 	"devDependencies": {
 		"@biomejs/biome": "catalog:",
 		"@rap/biome-config": "workspace:*",
+		"@rap/eslint-config": "workspace:*",
 		"@rap/rsbuild-config": "workspace:*",
 		"@rap/stylelint-config": "workspace:*",
 		"@rap/tailwindcss-config": "workspace:*",
 		"@rap/tsconfig": "workspace:*",
+		"@rap/vite-config": "workspace:*",
 		"@rsbuild/core": "catalog:",
 		"@tanstack/react-router-devtools": "catalog:",
-		"@tanstack/router-plugin": "catalog:",
 		"@types/node": "catalog:",
 		"@types/react": "catalog:",
 		"@types/react-dom": "catalog:",
+		"eslint": "catalog:",
+		"eslint-config-biome": "catalog:",
+		"eslint-config-prettier": "catalog:",
 		"stylelint": "catalog:",
-		"typescript": "catalog:"
+		"typescript": "catalog:",
+		"vite": "catalog:"
 	}
 }

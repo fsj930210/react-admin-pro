@@ -30,10 +30,7 @@ const FormSchema = z.object({
 	remember: z.boolean().optional(),
 });
 
-export function LoginForm({
-	className,
-	quickLoginStyle = "inline",
-}: LoginFormProps) {
+export function LoginForm({ className, quickLoginStyle = "inline" }: LoginFormProps) {
 	const form = useForm<z.infer<typeof FormSchema>>({
 		resolver: zodResolver(FormSchema),
 		defaultValues: {
@@ -55,10 +52,7 @@ export function LoginForm({
 
 	return (
 		<Form {...form}>
-			<form
-				onSubmit={form.handleSubmit(onSubmit)}
-				className={cn("space-y-4", className)}
-			>
+			<form onSubmit={form.handleSubmit(onSubmit)} className={cn("space-y-4", className)}>
 				<FormField
 					control={form.control}
 					name="username"
@@ -101,10 +95,7 @@ export function LoginForm({
 							</FormItem>
 						)}
 					/>
-					<a
-						href="#id"
-						className="ml-auto text-sm underline-offset-4 hover:underline"
-					>
+					<a href="#id" className="ml-auto text-sm underline-offset-4 hover:underline">
 						Forgot your password?
 					</a>
 				</div>
@@ -112,9 +103,7 @@ export function LoginForm({
 					Submit
 				</Button>
 				<div className="relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t after:border-border">
-					<span className="relative z-10 bg-background px-2 text-muted-foreground">
-						Or
-					</span>
+					<span className="relative z-10 bg-background px-2 text-muted-foreground">Or</span>
 				</div>
 				<QuickLogForm block={quickLoginStyle === "block"} />
 				<section className="text-center text-sm">
@@ -124,8 +113,8 @@ export function LoginForm({
 					</a>
 				</section>
 				<section className="text-balance text-center text-xs text-muted-foreground [&_a]:underline [&_a]:underline-offset-4 [&_a]:hover:text-primary">
-					By clicking continue, you agree to our{" "}
-					<a href="#1">Terms of Service</a> and <a href="#1">Privacy Policy</a>.
+					By clicking continue, you agree to our <a href="#1">Terms of Service</a> and{" "}
+					<a href="#1">Privacy Policy</a>.
 				</section>
 			</form>
 		</Form>

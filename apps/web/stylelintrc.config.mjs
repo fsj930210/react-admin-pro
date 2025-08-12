@@ -1,3 +1,3 @@
-import { baseConfig } from "@rax/stylelint-config";
+import { defineStylelintConfig } from "@rap/stylelint-config";
 
-export default baseConfig;
+export default defineStylelintConfig();

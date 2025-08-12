@@ -1,19 +1,24 @@
 import path from "node:path";
 
 import tailwindcss from "@tailwindcss/vite";
+import { tanstackRouter } from "@tanstack/router-plugin/vite";
 import react from "@vitejs/plugin-react-swc";
 import browserslist from "browserslist";
 import { browserslistToTargets } from "lightningcss";
 import { visualizer } from "rollup-plugin-visualizer";
-import type { UserConfig } from "vite";
-import { defineConfig } from "vite";
-import viteCompression from "vite-plugin-compression";
-import svgr from "vite-plugin-svgr";
 
-export function defineViteConfig(config: UserConfig) {
+export function defineViteConfig(config) {
 	const root = process.cwd();
 	return defineConfig({
 		plugins: [
+			tanstackRouter({
+				autoCodeSplitting: true,
+				routesDirectory: "./src/pages",
+				generatedRouteTree: "./src/routeTree.gen.ts",
+				routeFileIgnorePrefix: "-",
+				quoteStyle: "double",
+				semicolons: true,
+			}),
 			react(),
 			tailwindcss(),
 			svgr(),
@@ -37,7 +42,7 @@ export function defineViteConfig(config: UserConfig) {
 				".ts",
 				".tsx",
 				".js",
-				".jsx",
+				"jsx",
 				...(config.resolve?.extensions || []),
 			],
 		},
