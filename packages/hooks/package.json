@@ -1,9 +1,17 @@
 {
-	"name": "@rap/hooks",
-	"private": true,
-	"type": "module",
-	".": {
-		"types": "./src/index.ts",
-		"default": "./src/index.ts"
-	}
+  "name": "@rap/hooks",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./use-mobile": {
+      "default": "./src/use-mobile.ts",
+      "types": "./src/use-mobile.ts"
+    }
+  },
+  "dependencies": {
+    "react": "^19.1.1"
+  },
+  "devDependencies": {
+    "@types/react": "^19.1.10"
+  }
 }

@@ -1,0 +1,19 @@
+{
+  "name": "@rap/lib",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "clsx": "catalog:",
+    "react": "^19.1.1",
+    "tailwind-merge": "catalog:"
+  },
+  "exports": {
+    "./compose-refs": {
+      "types": "./src/compose-refs.ts",
+      "default": "./src/compose-refs.ts"
+    }
+  },
+  "devDependencies": {
+    "@types/react": "^19.1.10"
+  }
+}
