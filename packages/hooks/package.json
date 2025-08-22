@@ -3,15 +3,22 @@
   "private": true,
   "type": "module",
   "exports": {
-    "./use-mobile": {
-      "default": "./src/use-mobile.ts",
-      "types": "./src/use-mobile.ts"
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
     }
   },
   "dependencies": {
     "react": "^19.1.1"
   },
   "devDependencies": {
-    "@types/react": "^19.1.10"
+    "@biomejs/biome": "catalog:",
+    "@rap/biome-config": "workspace:*",
+    "@rap/eslint-config": "workspace:*",
+    "@rap/tsconfig": "workspace:*",
+    "@types/react": "^19.1.10",
+    "eslint": "catalog:",
+    "eslint-config-biome": "catalog:",
+    "typescript": "catalog:"
   }
 }

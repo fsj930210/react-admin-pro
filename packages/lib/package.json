@@ -8,12 +8,19 @@
     "tailwind-merge": "catalog:"
   },
   "exports": {
-    "./compose-refs": {
-      "types": "./src/compose-refs.ts",
-      "default": "./src/compose-refs.ts"
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
     }
   },
   "devDependencies": {
-    "@types/react": "^19.1.10"
+    "@biomejs/biome": "catalog:",
+    "@rap/biome-config": "workspace:*",
+    "@rap/eslint-config": "workspace:*",
+    "@rap/tsconfig": "workspace:*",
+    "@types/react": "^19.1.10",
+    "eslint": "catalog:",
+    "eslint-config-biome": "catalog:",
+    "typescript": "catalog:"
   }
 }

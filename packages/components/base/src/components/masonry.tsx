@@ -1,5 +1,5 @@
 import { Slot } from "@radix-ui/react-slot";
-import { useComposedRefs } from "@rap/lib/compose-refs";
+import { useComposedRefs } from "@rap/lib";
 import * as React from "react";
 
 const NODE_COLOR = {
@@ -1155,6 +1155,7 @@ const MASONRY_ERROR = {
   [ITEM_NAME]: `\`${ITEM_NAME}\` must be within \`${VIEWPORT_NAME}\``,
 } as const;
 
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 interface DivProps extends React.ComponentPropsWithoutRef<"div"> {}
 
 type RootElement = React.ComponentRef<typeof MasonryRoot>;
@@ -1176,7 +1177,7 @@ interface MasonryContextValue {
 const MasonryContext = React.createContext<MasonryContextValue | null>(null);
 
 function useMasonryContext(name: keyof typeof MASONRY_ERROR) {
-  const context = React.useContext(MasonryContext);
+  const context = React.use(MasonryContext);
   if (!context) {
     throw new Error(MASONRY_ERROR[name]);
   }
@@ -1201,146 +1202,147 @@ interface MasonryRootProps extends DivProps {
   asChild?: boolean;
 }
 
-const MasonryRoot = React.forwardRef<HTMLDivElement, MasonryRootProps>(
-  (props, forwardedRef) => {
-    const {
-      columnWidth = COLUMN_WIDTH,
-      columnCount,
-      maxColumnCount,
-      gap = GAP,
-      itemHeight = ITEM_HEIGHT,
-      defaultWidth,
-      defaultHeight,
-      overscan = OVERSCAN,
-      scrollFps = SCROLL_FPS,
-      fallback,
-      linear = false,
-      asChild,
-      children,
-      style,
-      ...rootProps
-    } = props;
+const MasonryRoot = ({
+  ref: forwardedRef,
+  ...props
+}: MasonryRootProps & { ref?: React.RefObject<HTMLDivElement | null> }) => {
+  const {
+    columnWidth = COLUMN_WIDTH,
+    columnCount,
+    maxColumnCount,
+    gap = GAP,
+    itemHeight = ITEM_HEIGHT,
+    defaultWidth,
+    defaultHeight,
+    overscan = OVERSCAN,
+    scrollFps = SCROLL_FPS,
+    fallback,
+    linear = false,
+    asChild,
+    children,
+    style,
+    ...rootProps
+  } = props;
 
-    const gapValue = typeof gap === "object" ? gap : { column: gap, row: gap };
-    const columnGap = gapValue.column;
-    const rowGap = gapValue.row;
+  const gapValue = typeof gap === "object" ? gap : { column: gap, row: gap };
+  const columnGap = gapValue.column;
+  const rowGap = gapValue.row;
 
-    const containerRef = React.useRef<RootElement | null>(null);
-    const composedRef = useComposedRefs(forwardedRef, containerRef);
+  const containerRef = React.useRef<RootElement | null>(null);
+  const composedRef = useComposedRefs(forwardedRef, containerRef);
 
-    const size = useDebouncedWindowSize({
-      containerRef,
-      defaultWidth,
-      defaultHeight,
-      delayMs: DEBOUNCE_DELAY,
-    });
+  const size = useDebouncedWindowSize({
+    containerRef,
+    defaultWidth,
+    defaultHeight,
+    delayMs: DEBOUNCE_DELAY,
+  });
 
-    const [containerPosition, setContainerPosition] = React.useState<{
-      offset: number;
-      width: number;
-    }>({ offset: 0, width: 0 });
+  const [containerPosition, setContainerPosition] = React.useState<{
+    offset: number;
+    width: number;
+  }>({ offset: 0, width: 0 });
 
-    useIsomorphicLayoutEffect(() => {
-      if (!containerRef.current) return;
+  useIsomorphicLayoutEffect(() => {
+    if (!containerRef.current) return;
 
-      let offset = 0;
-      let container = containerRef.current;
+    let offset = 0;
+    let container = containerRef.current;
 
-      do {
-        offset += container.offsetTop ?? 0;
-        container = container.offsetParent as RootElement;
-      } while (container);
+    do {
+      offset += container.offsetTop ?? 0;
+      container = container.offsetParent as RootElement;
+    } while (container);
 
-      if (
-        offset !== containerPosition.offset ||
-        containerRef.current.offsetWidth !== containerPosition.width
-      ) {
-        setContainerPosition({
-          offset,
-          width: containerRef.current.offsetWidth,
-        });
+    if (
+      offset !== containerPosition.offset ||
+      containerRef.current.offsetWidth !== containerPosition.width
+    ) {
+      setContainerPosition({
+        offset,
+        width: containerRef.current.offsetWidth,
+      });
+    }
+  }, [containerPosition, size]);
+
+  const positioner = usePositioner({
+    width: containerPosition.width ?? size.width,
+    columnWidth,
+    columnGap,
+    rowGap,
+    columnCount,
+    maxColumnCount,
+    linear,
+  });
+  const resizeObserver = useResizeObserver(positioner);
+  const { scrollTop, isScrolling } = useScroller({
+    offset: containerPosition.offset,
+    fps: scrollFps,
+  });
+
+  const itemMap = React.useRef(new WeakMap<ItemElement, number>()).current;
+
+  const onItemRegister = React.useCallback(
+    (index: number) => (node: ItemElement | null) => {
+      if (!node) return;
+
+      itemMap.set(node, index);
+      if (resizeObserver) {
+        resizeObserver.observe(node);
       }
-    }, [containerPosition, size]);
+      if (positioner.get(index) === void 0) {
+        positioner.set(index, node.offsetHeight);
+      }
+    },
+    [itemMap, positioner, resizeObserver]
+  );
 
-    const positioner = usePositioner({
-      width: containerPosition.width ?? size.width,
-      columnWidth,
-      columnGap,
-      rowGap,
-      columnCount,
-      maxColumnCount,
-      linear,
-    });
-    const resizeObserver = useResizeObserver(positioner);
-    const { scrollTop, isScrolling } = useScroller({
-      offset: containerPosition.offset,
-      fps: scrollFps,
-    });
+  const contextValue = React.useMemo<MasonryContextValue>(
+    () => ({
+      positioner,
+      resizeObserver,
+      columnWidth: positioner.columnWidth,
+      onItemRegister,
+      scrollTop,
+      windowHeight: size.height,
+      itemHeight,
+      overscan,
+      fallback,
+      isScrolling,
+    }),
+    [
+      positioner,
+      resizeObserver,
+      onItemRegister,
+      scrollTop,
+      size.height,
+      itemHeight,
+      overscan,
+      fallback,
+      isScrolling,
+    ]
+  );
 
-    const itemMap = React.useRef(new WeakMap<ItemElement, number>()).current;
+  const RootPrimitive = asChild ? Slot : "div";
 
-    const onItemRegister = React.useCallback(
-      (index: number) => (node: ItemElement | null) => {
-        if (!node) return;
-
-        itemMap.set(node, index);
-        if (resizeObserver) {
-          resizeObserver.observe(node);
-        }
-        if (positioner.get(index) === void 0) {
-          positioner.set(index, node.offsetHeight);
-        }
-      },
-      [itemMap, positioner, resizeObserver]
-    );
-
-    const contextValue = React.useMemo<MasonryContextValue>(
-      () => ({
-        positioner,
-        resizeObserver,
-        columnWidth: positioner.columnWidth,
-        onItemRegister,
-        scrollTop,
-        windowHeight: size.height,
-        itemHeight,
-        overscan,
-        fallback,
-        isScrolling,
-      }),
-      [
-        positioner,
-        resizeObserver,
-        onItemRegister,
-        scrollTop,
-        size.height,
-        itemHeight,
-        overscan,
-        fallback,
-        isScrolling,
-      ]
-    );
-
-    const RootPrimitive = asChild ? Slot : "div";
-
-    return (
-      <MasonryContext.Provider value={contextValue}>
-        <RootPrimitive
-          {...rootProps}
-          data-slot="masonry"
-          ref={composedRef}
-          style={{
-            position: "relative",
-            width: "100%",
-            height: "100%",
-            ...style,
-          }}
-        >
-          <MasonryViewport>{children}</MasonryViewport>
-        </RootPrimitive>
-      </MasonryContext.Provider>
-    );
-  }
-);
+  return (
+    <MasonryContext value={contextValue}>
+      <RootPrimitive
+        {...rootProps}
+        data-slot="masonry"
+        ref={composedRef}
+        style={{
+          position: "relative",
+          width: "100%",
+          height: "100%",
+          ...style,
+        }}
+      >
+        <MasonryViewport>{children}</MasonryViewport>
+      </RootPrimitive>
+    </MasonryContext>
+  );
+};
 
 MasonryRoot.displayName = ROOT_NAME;
 
@@ -1348,69 +1350,111 @@ interface MasonryItemPropsWithRef extends MasonryItemProps {
   ref: React.Ref<ItemElement | null>;
 }
 
-const MasonryViewport = React.forwardRef<HTMLDivElement, DivProps>(
-  (props, forwardedRef) => {
-    const { children, style, ...viewportProps } = props;
-    const context = useMasonryContext(VIEWPORT_NAME);
-    const [layoutVersion, setLayoutVersion] = React.useState(0);
-    const rafId = React.useRef<number | null>(null);
-    const [mounted, setMounted] = React.useState(false);
+const MasonryViewport = ({
+  ref: forwardedRef,
+  ...props
+}: DivProps & { ref?: React.RefObject<HTMLDivElement | null> }) => {
+  const { children, style, ...viewportProps } = props;
+  const context = useMasonryContext(VIEWPORT_NAME);
+  const [layoutVersion, setLayoutVersion] = React.useState(0);
+  const rafId = React.useRef<number | null>(null);
+  const [mounted, setMounted] = React.useState(false);
 
-    useIsomorphicLayoutEffect(() => {
-      setMounted(true);
-    }, []);
+  useIsomorphicLayoutEffect(() => {
+    setMounted(true);
+  }, []);
 
-    let startIndex = 0;
-    let stopIndex: number | undefined;
+  let startIndex = 0;
+  let stopIndex: number | undefined;
 
-    const validChildren = React.Children.toArray(children).filter(
-      (child): child is React.ReactElement<MasonryItemPropsWithRef> =>
-        React.isValidElement(child) &&
-        (child.type === MasonryItem || child.type === Item)
+  const validChildren = React.Children.toArray(children).filter(
+    (child): child is React.ReactElement<MasonryItemPropsWithRef> =>
+      React.isValidElement(child) &&
+      (child.type === MasonryItem || child.type === Item)
+  );
+  const itemCount = validChildren.length;
+
+  const shortestColumnSize = context.positioner.shortestColumn();
+  const measuredCount = context.positioner.size();
+  const overscanPixels = context.windowHeight * context.overscan;
+  const rangeStart = Math.max(0, context.scrollTop - overscanPixels / 2);
+  const rangeEnd = context.scrollTop + overscanPixels;
+  const layoutOutdated =
+    shortestColumnSize < rangeEnd && measuredCount < itemCount;
+
+  const positionedChildren: React.ReactElement[] = [];
+
+  const visibleItemStyle = React.useMemo(
+    (): React.CSSProperties => ({
+      position: "absolute",
+      writingMode: "horizontal-tb",
+      visibility: "visible",
+      width: context.columnWidth,
+      transform: context.isScrolling ? "translateZ(0)" : undefined,
+      willChange: context.isScrolling ? "transform" : undefined,
+    }),
+    [context.columnWidth, context.isScrolling]
+  );
+
+  const hiddenItemStyle = React.useMemo(
+    (): React.CSSProperties => ({
+      position: "absolute",
+      writingMode: "horizontal-tb",
+      visibility: "hidden",
+      width: context.columnWidth,
+      zIndex: -1000,
+    }),
+    [context.columnWidth]
+  );
+
+  context.positioner.range(rangeStart, rangeEnd, (index, left, top) => {
+    const child = validChildren[index];
+    if (!child) return;
+
+    const itemStyle = {
+      ...visibleItemStyle,
+      top,
+      left,
+      ...child.props.style,
+    };
+
+    positionedChildren.push(
+      React.cloneElement(child, {
+        key: child.key ?? index,
+        ref: context.onItemRegister(index),
+        style: itemStyle,
+      })
     );
-    const itemCount = validChildren.length;
 
-    const shortestColumnSize = context.positioner.shortestColumn();
-    const measuredCount = context.positioner.size();
-    const overscanPixels = context.windowHeight * context.overscan;
-    const rangeStart = Math.max(0, context.scrollTop - overscanPixels / 2);
-    const rangeEnd = context.scrollTop + overscanPixels;
-    const layoutOutdated =
-      shortestColumnSize < rangeEnd && measuredCount < itemCount;
+    if (stopIndex === undefined) {
+      startIndex = index;
+      stopIndex = index;
+    } else {
+      startIndex = Math.min(startIndex, index);
+      stopIndex = Math.max(stopIndex, index);
+    }
+  });
 
-    const positionedChildren: React.ReactElement[] = [];
-
-    const visibleItemStyle = React.useMemo(
-      (): React.CSSProperties => ({
-        position: "absolute",
-        writingMode: "horizontal-tb",
-        visibility: "visible",
-        width: context.columnWidth,
-        transform: context.isScrolling ? "translateZ(0)" : undefined,
-        willChange: context.isScrolling ? "transform" : undefined,
-      }),
-      [context.columnWidth, context.isScrolling]
+  if (layoutOutdated && mounted) {
+    const batchSize = Math.min(
+      itemCount - measuredCount,
+      Math.ceil(
+        ((context.scrollTop + overscanPixels - shortestColumnSize) /
+          context.itemHeight) *
+          context.positioner.columnCount
+      )
     );
 
-    const hiddenItemStyle = React.useMemo(
-      (): React.CSSProperties => ({
-        position: "absolute",
-        writingMode: "horizontal-tb",
-        visibility: "hidden",
-        width: context.columnWidth,
-        zIndex: -1000,
-      }),
-      [context.columnWidth]
-    );
-
-    context.positioner.range(rangeStart, rangeEnd, (index, left, top) => {
+    for (
+      let index = measuredCount;
+      index < measuredCount + batchSize;
+      index++
+    ) {
       const child = validChildren[index];
-      if (!child) return;
+      if (!child) continue;
 
       const itemStyle = {
-        ...visibleItemStyle,
-        top,
-        left,
+        ...hiddenItemStyle,
         ...child.props.style,
       };
 
@@ -1421,110 +1465,69 @@ const MasonryViewport = React.forwardRef<HTMLDivElement, DivProps>(
           style: itemStyle,
         })
       );
-
-      if (stopIndex === undefined) {
-        startIndex = index;
-        stopIndex = index;
-      } else {
-        startIndex = Math.min(startIndex, index);
-        stopIndex = Math.max(stopIndex, index);
-      }
-    });
-
-    if (layoutOutdated && mounted) {
-      const batchSize = Math.min(
-        itemCount - measuredCount,
-        Math.ceil(
-          ((context.scrollTop + overscanPixels - shortestColumnSize) /
-            context.itemHeight) *
-            context.positioner.columnCount
-        )
-      );
-
-      for (
-        let index = measuredCount;
-        index < measuredCount + batchSize;
-        index++
-      ) {
-        const child = validChildren[index];
-        if (!child) continue;
-
-        const itemStyle = {
-          ...hiddenItemStyle,
-          ...child.props.style,
-        };
-
-        positionedChildren.push(
-          React.cloneElement(child, {
-            key: child.key ?? index,
-            ref: context.onItemRegister(index),
-            style: itemStyle,
-          })
-        );
-      }
     }
-
-    React.useEffect(() => {
-      if (layoutOutdated && mounted) {
-        if (rafId.current) {
-          cancelAnimationFrame(rafId.current);
-        }
-        rafId.current = requestAnimationFrame(() => {
-          setLayoutVersion((v) => v + 1);
-        });
-      }
-      return () => {
-        if (rafId.current) {
-          cancelAnimationFrame(rafId.current);
-        }
-      };
-    }, [layoutOutdated, mounted]);
-
-    const estimatedHeight = React.useMemo(() => {
-      const measuredHeight = context.positioner.estimateHeight(
-        measuredCount,
-        context.itemHeight
-      );
-      if (measuredCount === itemCount) {
-        return measuredHeight;
-      }
-      const remainingItems = itemCount - measuredCount;
-      const estimatedRemainingHeight = Math.ceil(
-        (remainingItems / context.positioner.columnCount) * context.itemHeight
-      );
-      return measuredHeight + estimatedRemainingHeight;
-    }, [context.positioner, context.itemHeight, measuredCount, itemCount]);
-
-    const containerStyle = React.useMemo(
-      () => ({
-        position: "relative" as const,
-        width: "100%",
-        maxWidth: "100%",
-        height: Math.ceil(estimatedHeight),
-        maxHeight: Math.ceil(estimatedHeight),
-        willChange: context.isScrolling ? "contents" : undefined,
-        pointerEvents: context.isScrolling ? ("none" as const) : undefined,
-        ...style,
-      }),
-      [context.isScrolling, estimatedHeight, style]
-    );
-
-    if (!mounted && context.fallback) {
-      return context.fallback;
-    }
-
-    return (
-      <div
-        {...viewportProps}
-        ref={forwardedRef}
-        style={containerStyle}
-        data-version={mounted ? layoutVersion : undefined}
-      >
-        {positionedChildren}
-      </div>
-    );
   }
-);
+
+  React.useEffect(() => {
+    if (layoutOutdated && mounted) {
+      if (rafId.current) {
+        cancelAnimationFrame(rafId.current);
+      }
+      rafId.current = requestAnimationFrame(() => {
+        setLayoutVersion((v) => v + 1);
+      });
+    }
+    return () => {
+      if (rafId.current) {
+        cancelAnimationFrame(rafId.current);
+      }
+    };
+  }, [layoutOutdated, mounted]);
+
+  const estimatedHeight = React.useMemo(() => {
+    const measuredHeight = context.positioner.estimateHeight(
+      measuredCount,
+      context.itemHeight
+    );
+    if (measuredCount === itemCount) {
+      return measuredHeight;
+    }
+    const remainingItems = itemCount - measuredCount;
+    const estimatedRemainingHeight = Math.ceil(
+      (remainingItems / context.positioner.columnCount) * context.itemHeight
+    );
+    return measuredHeight + estimatedRemainingHeight;
+  }, [context.positioner, context.itemHeight, measuredCount, itemCount]);
+
+  const containerStyle = React.useMemo(
+    () => ({
+      position: "relative" as const,
+      width: "100%",
+      maxWidth: "100%",
+      height: Math.ceil(estimatedHeight),
+      maxHeight: Math.ceil(estimatedHeight),
+      willChange: context.isScrolling ? "contents" : undefined,
+      pointerEvents: context.isScrolling ? ("none" as const) : undefined,
+      ...style,
+    }),
+    [context.isScrolling, estimatedHeight, style]
+  );
+
+  if (!mounted && context.fallback) {
+    return context.fallback;
+  }
+
+  return (
+    <div
+      {...viewportProps}
+      ref={forwardedRef}
+      style={containerStyle}
+      data-version={mounted ? layoutVersion : undefined}
+    >
+      {positionedChildren}
+    </div>
+  );
+};
 
 MasonryViewport.displayName = VIEWPORT_NAME;
 
@@ -1532,21 +1535,18 @@ interface MasonryItemProps extends DivProps {
   asChild?: boolean;
 }
 
-const MasonryItem = React.forwardRef<HTMLDivElement, MasonryItemProps>(
-  (props, forwardedRef) => {
-    const { asChild, ...itemProps } = props;
+const MasonryItem = ({
+  ref: forwardedRef,
+  ...props
+}: MasonryItemProps & { ref?: React.RefObject<HTMLDivElement | null> }) => {
+  const { asChild, ...itemProps } = props;
 
-    const ItemPrimitive = asChild ? Slot : "div";
+  const ItemPrimitive = asChild ? Slot : "div";
 
-    return (
-      <ItemPrimitive
-        data-slot="masonry-item"
-        {...itemProps}
-        ref={forwardedRef}
-      />
-    );
-  }
-);
+  return (
+    <ItemPrimitive data-slot="masonry-item" {...itemProps} ref={forwardedRef} />
+  );
+};
 
 MasonryItem.displayName = ITEM_NAME;
 
