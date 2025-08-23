@@ -2,9 +2,9 @@
   "name": "@rap/types",
   "type": "module",
   "exports": {
-    ".": {
-      "types": "./src/index.ts",
-      "default": "./src/index.ts"
+    "./type-utils": {
+      "types": "./src/type-utils.ts",
+      "default": "./src/type-utils.ts"
     }
   },
   "devDependencies": {

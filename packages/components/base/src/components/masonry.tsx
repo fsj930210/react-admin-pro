@@ -1,5 +1,5 @@
 import { Slot } from "@radix-ui/react-slot";
-import { useComposedRefs } from "@rap/lib";
+import { useComposedRefs } from "@rap/lib/compose-refs";
 import * as React from "react";
 
 const NODE_COLOR = {
@@ -1024,7 +1024,7 @@ function useScroller({
   const [scrollY, setScrollY] = useThrottle(
     typeof globalThis.window === "undefined"
       ? 0
-      : (globalThis.window.scrollY ?? document.documentElement.scrollTop ?? 0),
+      : globalThis.window.scrollY ?? document.documentElement.scrollTop ?? 0,
     { fps, leading: true }
   );
 
@@ -1062,13 +1062,10 @@ function useScroller({
       return handle;
     }
 
-    const timeout = requestTimeout(
-      () => {
-        if (didUnsubscribe) return;
-        setIsScrolling(false);
-      },
-      40 + 1000 / fps
-    );
+    const timeout = requestTimeout(() => {
+      if (didUnsubscribe) return;
+      setIsScrolling(false);
+    }, 40 + 1000 / fps);
     hasMountedRef.current = 1;
     return () => {
       didUnsubscribe = true;

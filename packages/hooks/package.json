@@ -3,9 +3,9 @@
   "private": true,
   "type": "module",
   "exports": {
-    ".": {
-      "types": "./src/index.ts",
-      "default": "./src/index.ts"
+    "./use-mobile": {
+      "types": "./src/use-mobile.ts",
+      "default": "./src/use-mobile.ts"
     }
   },
   "dependencies": {

@@ -8,9 +8,9 @@
     "tailwind-merge": "catalog:"
   },
   "exports": {
-    ".": {
-      "types": "./src/index.ts",
-      "default": "./src/index.ts"
+    "./compose-refs": {
+      "types": "./src/compose-refs.ts",
+      "default": "./src/compose-refs.ts"
     }
   },
   "devDependencies": {

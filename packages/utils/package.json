@@ -8,8 +8,8 @@
   },
   "exports": {
     ".": {
-      "types": "./src/index.ts",
-      "default": "./src/index.ts"
+      "types": "./src/utils.ts",
+      "default": "./src/utils.ts"
     }
   },
   "devDependencies": {

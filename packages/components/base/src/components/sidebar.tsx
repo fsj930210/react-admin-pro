@@ -10,7 +10,7 @@ import {
   SheetTitle,
 } from "@rap/components-base/components/sheet";
 import { Skeleton } from "@rap/components-base/components/skeleton";
-import { useIsMobile } from "@rap/hooks";
+import { useIsMobile } from "@rap/hooks/use-mobile";
 import { cn } from "@rap/utils";
 import { cva, type VariantProps } from "class-variance-authority";
 import { PanelLeftIcon } from "lucide-react";
