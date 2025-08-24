@@ -18,6 +18,7 @@
 	"dependencies": {
 		"@hookform/resolvers": "catalog:",
 		"@rap/components-base": "workspace:*",
+		"@rap/components-ui": "workspace:*",
 		"@rap/styles": "workspace:*",
 		"@rap/utils": "workspace:*",
 		"@tanstack/react-query": "catalog:",

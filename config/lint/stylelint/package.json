@@ -1,15 +1,16 @@
 {
-	"name": "@rap/stylelint-config",
-	"version": "0.0.1",
-	"devDependencies": {
-		"@stylistic/stylelint-plugin": "catalog:",
-		"stylelint": "catalog:",
-		"stylelint-config-recess-order": "catalog:",
-		"stylelint-order": "catalog:"
-	},
-	"exports": {
-		".": {
-			"default": "./index.mjs"
-		}
-	}
+  "name": "@rap/stylelint-config",
+  "version": "0.0.1",
+  "type": "module",
+  "devDependencies": {
+    "@stylistic/stylelint-plugin": "catalog:",
+    "stylelint": "catalog:",
+    "stylelint-config-recess-order": "catalog:",
+    "stylelint-order": "catalog:"
+  },
+  "exports": {
+    ".": {
+      "default": "./index.mjs"
+    }
+  }
 }

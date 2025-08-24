@@ -1,26 +1,28 @@
 {
-	"name": "@rap/components-ui",
-	"dependencies": {
-		"@radix-ui/react-slot": "catalog:",
-		"@rap/utils": "workspace:*",
-		"class-variance-authority": "catalog:",
-		"react": "catalog:",
-		"react-dom": "catalog:"
-	},
-	"devDependencies": {
-		"@biomejs/biome": "catalog:",
-		"@rap/biome-config": "workspace:*",
-		"@rap/eslint-config": "workspace:*",
-		"@rap/tailwindcss-config": "workspace:*",
-		"@rap/tsconfig": "workspace:^",
-		"@types/node": "catalog:",
-		"@types/react": "catalog:",
-		"@types/react-dom": "catalog:",
-		"eslint": "catalog:",
-		"eslint-config-biome": "catalog:",
-		"typescript": "catalog:"
-	},
-	"exports": {
-		"./*": "./src/components/*.tsx"
-	}
+  "name": "@rap/components-ui",
+  "dependencies": {
+    "@radix-ui/react-slot": "catalog:",
+    "@rap/components-base": "workspace:*",
+    "@rap/utils": "workspace:*",
+    "class-variance-authority": "catalog:",
+    "lucide-react": "catalog:",
+    "react": "catalog:",
+    "react-dom": "catalog:"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "catalog:",
+    "@rap/biome-config": "workspace:*",
+    "@rap/eslint-config": "workspace:*",
+    "@rap/tailwindcss-config": "workspace:*",
+    "@rap/tsconfig": "workspace:^",
+    "@types/node": "catalog:",
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
+    "eslint": "catalog:",
+    "eslint-config-biome": "catalog:",
+    "typescript": "catalog:"
+  },
+  "exports": {
+    "./layout": "./src/components/layout/index.tsx"
+  }
 }

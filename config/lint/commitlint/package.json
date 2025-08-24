@@ -1,14 +1,15 @@
 {
-	"name": "@rap/commitlint-config",
-	"version": "0.0.1",
-	"devDependencies": {
-		"@commitlint/config-conventional": "catalog:",
-		"@commitlint/types": "catalog:"
-	},
-	"exports": {
-		".": {
-			"default": "./src/index.ts",
-			"types": "./src/index.ts"
-		}
-	}
+  "name": "@rap/commitlint-config",
+  "version": "0.0.1",
+  "type": "module",
+  "devDependencies": {
+    "@commitlint/config-conventional": "catalog:",
+    "@commitlint/types": "catalog:"
+  },
+  "exports": {
+    ".": {
+      "default": "./src/index.ts",
+      "types": "./src/index.ts"
+    }
+  }
 }
