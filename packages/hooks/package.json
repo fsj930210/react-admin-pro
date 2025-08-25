@@ -1,5 +1,6 @@
 {
   "name": "@rap/hooks",
+  "version": "0.0.1",
   "private": true,
   "type": "module",
   "exports": {
@@ -9,14 +10,14 @@
     }
   },
   "dependencies": {
-    "react": "^19.1.1"
+    "react": "catalog:"
   },
   "devDependencies": {
     "@biomejs/biome": "catalog:",
     "@rap/biome-config": "workspace:*",
     "@rap/eslint-config": "workspace:*",
     "@rap/tsconfig": "workspace:*",
-    "@types/react": "^19.1.10",
+    "@types/react": "catalog:",
     "eslint": "catalog:",
     "eslint-config-biome": "catalog:",
     "typescript": "catalog:"

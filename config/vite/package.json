@@ -23,7 +23,7 @@
 		"vite-plugin-svgr": "catalog:"
 	},
 	"dependencies": {
-		"react": "^19.1.1",
-		"react-dom": "^19.1.1"
+		"react": "catalog:",
+		"react-dom": "catalog:"
 	}
 }

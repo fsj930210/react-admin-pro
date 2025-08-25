@@ -1,5 +1,6 @@
 {
   "name": "@rap/components-ui",
+  "version": "0.0.1",
   "dependencies": {
     "@radix-ui/react-slot": "catalog:",
     "@rap/components-base": "workspace:*",

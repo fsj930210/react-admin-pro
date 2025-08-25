@@ -1,5 +1,6 @@
 {
 	"name": "@rap/styles",
+	"version": "0.0.1",
 	"devDependencies": {
 		"tailwindcss": "catalog:",
 		"tw-animate-css": "catalog:"

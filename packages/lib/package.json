@@ -1,5 +1,6 @@
 {
   "name": "@rap/lib",
+  "version": "0.0.1",
   "private": true,
   "type": "module",
   "dependencies": {
@@ -18,7 +19,7 @@
     "@rap/biome-config": "workspace:*",
     "@rap/eslint-config": "workspace:*",
     "@rap/tsconfig": "workspace:*",
-    "@types/react": "^19.1.10",
+    "@types/react": "catalog:",
     "eslint": "catalog:",
     "eslint-config-biome": "catalog:",
     "typescript": "catalog:"
