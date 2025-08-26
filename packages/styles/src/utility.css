@@ -5,9 +5,7 @@
 @utility size-full {
   @apply w-full h-full;
 }
-@utility text-overflow-ellipsis {
-  @apply overflow-hidden text-ellipsis whitespace-nowrap;
-}
+
 @utility flex-center {
   @apply flex justify-center items-center;
 }

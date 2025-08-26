@@ -5,6 +5,7 @@
     "@radix-ui/react-slot": "catalog:",
     "@rap/components-base": "workspace:*",
     "@rap/utils": "workspace:*",
+    "ahooks": "catalog:",
     "class-variance-authority": "catalog:",
     "lucide-react": "catalog:",
     "react": "catalog:",
@@ -24,6 +25,7 @@
     "typescript": "catalog:"
   },
   "exports": {
-    "./layout": "./src/components/layout/index.tsx"
+    "./layouts": "./src/components/layouts/index.tsx",
+    "./loading": "./src/components/loading/index.tsx"
   }
 }
