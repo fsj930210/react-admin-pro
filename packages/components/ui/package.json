@@ -4,6 +4,7 @@
   "dependencies": {
     "@radix-ui/react-slot": "catalog:",
     "@rap/components-base": "workspace:*",
+    "@rap/hooks": "workspace:*",
     "@rap/utils": "workspace:*",
     "ahooks": "catalog:",
     "class-variance-authority": "catalog:",
@@ -26,6 +27,7 @@
   },
   "exports": {
     "./layouts": "./src/components/layouts/index.tsx",
+    "./tabs": "./src/components/tabs/index.tsx",
     "./loading": "./src/components/loading/index.tsx"
   }
 }

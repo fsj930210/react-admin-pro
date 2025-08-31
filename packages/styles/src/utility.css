@@ -2,10 +2,6 @@
 
 @import "tailwindcss";
 
-@utility size-full {
-  @apply w-full h-full;
-}
-
 @utility flex-center {
   @apply flex justify-center items-center;
 }
