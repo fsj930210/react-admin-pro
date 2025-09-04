@@ -1,5 +1,4 @@
-import { ChromeLikeTabItem } from "./chrome-like-tabs";
-
+import { ChromeLikeTabItem } from "./components/chrome-like-tabs";
 export type LayoutTabItem = {
   label: string;
   value: string;
@@ -81,10 +80,10 @@ const data: LayoutTabItem[] = [
 
 export function LayoutTabs() {
   return (
-    <div className="flex-items-center h-9 bg-layout-tabs">
+    <ol className="flex-items-center h-9 overflow-x-auto no-scrollbar bg-layout-tabs">
       {data.map((item) => (
         <ChromeLikeTabItem key={item.value} tab={item} />
       ))}
-    </div>
+    </ol>
   );
 }

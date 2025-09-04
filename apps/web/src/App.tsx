@@ -16,7 +16,7 @@ declare module "@tanstack/react-router" {
 }
 const App = () => {
 	return (
-		<div className="size-full">
+		<div className="size-full overflow-x-hidden">
 			<RouterProvider router={router} />
 		</div>
 	);

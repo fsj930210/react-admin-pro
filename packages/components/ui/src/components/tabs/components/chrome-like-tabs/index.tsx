@@ -2,7 +2,8 @@
 
 import { cn } from "@rap/utils";
 import { X } from "lucide-react";
-import type { LayoutTabItemProps } from ".";
+import type { LayoutTabItemProps } from "../..";
+import './index.css'
 
 function ChromeTabBackground() {
   return (
@@ -49,21 +50,27 @@ export function ChromeLikeTabItem({ tab }: LayoutTabItemProps) {
   return (
     <div
       key={tab.value}
-      className={cn("group peer relative size-full px-2 py-1", {
+      className={cn("group relative size-full min-w-30 max-w-38 py-1", {
         active: tab.value === "settings",
+        'chrome-tab-item': true
       })}
     >
-      <div className="absolute top-1/2 left-0 w-[1px] h-3.5 -translate-y-1/2 bg-layout-tabs-border group-[.active]:opacity-0 group-first:opacity-0" />
-      <div className="absolute top-1 left-0 bottom-0 w-full group-[.active]:text-layout-tabs-primary text-layout-tabs opacity-0 group-[.active]:opacity-100 overflow-hidden pointer-events-none transition-opacity duration-20">
+      <div className={cn("absolute top-1/2 left-0 w-[1px] h-3.5 -translate-y-1/2 bg-layout-tabs-border group-[.active]:opacity-0 group-first:opacity-0", {
+        'chrome-tab-item-divider': true
+      })} />
+      <div className="absolute top-1 -left-2.5 -right-2.5 bottom-0 group-[.active]:text-layout-tabs-primary text-layout-tabs opacity-0 group-[.active]:opacity-100 overflow-hidden pointer-events-none transition-opacity duration-20">
         <ChromeTabBackground />
       </div>
-      <div className="relative h-full flex-items-center gap-2 text-layout-tabs-foreground  hover:text-layout-tabs-primary-foreground hover:bg-layout-tabs-accent group-[.active]:text-layout-tabs-primary-foreground group-[.active]:hover:text-layout-tabs-primary-foreground group-[.active]:hover:bg-layout-tabs-primary leading-none overflow-hidden rounded-md">
-        <span className="flex-1 truncate text-sm" title={tab.label || ""}>
-          {tab.label}
-        </span>
-        <div className="absolute top-1/2 right-0 -translate-y-1/2 flex-center size-4 hover:bg-layout-tabs-close-accent rounded-full cursor-pointer transition-all duration-20">
-          <X className="size-3.5" />
+      <div className="absolute top-0 bottom-0 left-0 right-0 p-1">
+        <div className="flex-items-center h-full px-1 text-layout-tabs-foreground hover:text-layout-tabs-primary-foreground hover:bg-layout-tabs-accent group-[.active]:text-layout-tabs-primary-foreground group-[.active]:hover:text-layout-tabs-primary-foreground group-[.active]:hover:bg-layout-tabs-primary leading-none overflow-hidden rounded-md">
+          <span className="flex-1 truncate text-sm" title={tab.label || ""}>
+            {tab.label}
+          </span>
+          <div className="flex-center size-4 hover:bg-layout-tabs-close-accent rounded-full cursor-pointer transition-all duration-20">
+            <X className="size-3.5" />
+          </div>
         </div>
+
       </div>
     </div>
   );
