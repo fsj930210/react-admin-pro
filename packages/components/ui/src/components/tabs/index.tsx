@@ -1,4 +1,6 @@
-import { ChromeLikeTabItem } from "./components/chrome-like-tabs";
+// import { ChromeLikeTabItem } from "./components/chrome-like-tabs";
+import { VscodeLikeTabs } from "./components/vscode-like-tabs";
+// import { TrapezoidTabs } from "./components/trapezoid-tabs";
 export type LayoutTabItem = {
   label: string;
   value: string;
@@ -80,9 +82,9 @@ const data: LayoutTabItem[] = [
 
 export function LayoutTabs() {
   return (
-    <ol className="flex-items-center h-9 overflow-x-auto no-scrollbar bg-layout-tabs">
+    <ol className="flex-items-center h-10 pt-[1px] overflow-x-auto no-scrollbar bg-layout-tabs">
       {data.map((item) => (
-        <ChromeLikeTabItem key={item.value} tab={item} />
+        <VscodeLikeTabs key={item.value} tab={item} />
       ))}
     </ol>
   );

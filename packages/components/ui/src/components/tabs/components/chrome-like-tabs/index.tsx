@@ -48,9 +48,9 @@ function ChromeTabBackground() {
 }
 export function ChromeLikeTabItem({ tab }: LayoutTabItemProps) {
   return (
-    <div
+    <li
       key={tab.value}
-      className={cn("group relative size-full min-w-30 max-w-38 py-1", {
+      className={cn("group relative size-full min-w-30 max-w-38 py-1 cursor-pointer", {
         active: tab.value === "settings",
         'chrome-tab-item': true
       })}
@@ -72,6 +72,6 @@ export function ChromeLikeTabItem({ tab }: LayoutTabItemProps) {
         </div>
 
       </div>
-    </div>
+    </li>
   );
 }
