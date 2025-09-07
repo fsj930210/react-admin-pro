@@ -16,6 +16,7 @@
 		"@tanstack/router-plugin": "catalog:",
 		"@vitejs/plugin-react-swc": "catalog:",
 		"browserslist": "catalog:",
+		"code-inspector-plugin": "catalog:",
 		"lightningcss": "catalog:",
 		"rollup-plugin-visualizer": "catalog:",
 		"vite": "catalog:",

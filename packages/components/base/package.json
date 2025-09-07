@@ -10,7 +10,6 @@
 		"@dnd-kit/modifiers": "^9.0.0",
 		"@dnd-kit/sortable": "^10.0.0",
 		"@dnd-kit/utilities": "^3.2.2",
-		"@hookform/resolvers": "catalog:",
 		"@radix-ui/react-accordion": "catalog:",
 		"@radix-ui/react-alert-dialog": "catalog:",
 		"@radix-ui/react-aspect-ratio": "catalog:",
@@ -60,6 +59,7 @@
 	},
 	"devDependencies": {
 		"@biomejs/biome": "catalog:",
+		"@hookform/resolvers": "catalog:",
 		"@rap/biome-config": "workspace:*",
 		"@rap/eslint-config": "workspace:*",
 		"@rap/tailwindcss-config": "workspace:*",

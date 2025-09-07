@@ -5,17 +5,17 @@
 		"lint": {
 			"dependsOn": ["^lint"]
 		},
-		"build:rsbuild": {
-			"dependsOn": ["^build:rsbuild"],
+		"build": {
+			"dependsOn": ["^build"],
 			"inputs": ["$TURBO_DEFAULT$", ".env*"],
 			"outputs": ["dist/**"]
 		},
-		"dev:rsbuild": {
+		"dev": {
 			"cache": false,
 			"persistent": true
 		},
-		"preview:rsbuild": {
-			"dependsOn": ["^preview:rsbuild"],
+		"preview": {
+			"dependsOn": ["^preview"],
 			"inputs": ["$TURBO_DEFAULT$", ".env*"],
 			"outputs": ["dist/**"]
 		},

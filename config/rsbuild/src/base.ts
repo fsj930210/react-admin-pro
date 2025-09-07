@@ -7,6 +7,7 @@ import { pluginReact } from "@rsbuild/plugin-react";
 import { pluginSvgr } from "@rsbuild/plugin-svgr";
 import { pluginTypeCheck } from "@rsbuild/plugin-type-check";
 import { tanstackRouter } from "@tanstack/router-plugin/rspack";
+import { codeInspectorPlugin } from 'code-inspector-plugin';
 
 export function defineRsbuildBaseConfig(options: RsbuildConfig) {
 	const root = process.cwd();
@@ -43,6 +44,9 @@ export function defineRsbuildBaseConfig(options: RsbuildConfig) {
 						routeFileIgnorePrefix: "-",
 						quoteStyle: "double",
 						semicolons: true,
+					}),
+					codeInspectorPlugin({
+						bundler: 'rspack',
 					}),
 				],
 			},

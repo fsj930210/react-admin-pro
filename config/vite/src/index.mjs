@@ -8,6 +8,7 @@ import { visualizer } from "rollup-plugin-visualizer";
 import { defineConfig } from "vite";
 import viteCompression from "vite-plugin-compression";
 import svgr from "vite-plugin-svgr";
+import { codeInspectorPlugin } from 'code-inspector-plugin';
 
 export function defineViteConfig(config) {
   const root = process.cwd();
@@ -32,6 +33,9 @@ export function defineViteConfig(config) {
       // 分析生成包的大小
       visualizer({
         open: true,
+      }),
+      codeInspectorPlugin({
+        bundler: 'vite',
       }),
       ...(config.plugins || []),
     ],

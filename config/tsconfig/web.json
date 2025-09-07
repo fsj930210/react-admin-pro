@@ -3,9 +3,9 @@
 	"display": "Web",
 	"extends": "./base.json",
 	"compilerOptions": {
-		"jsx": "react-jsx",
+		"jsx": "preserve",
 		"lib": ["ES2020", "DOM", "DOM.Iterable"],
 		"moduleResolution": "bundler"
 	},
-	"include": ["src"]
+	"include": ["src", "app"]
 }

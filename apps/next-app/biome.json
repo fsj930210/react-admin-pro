@@ -1,0 +1,14 @@
+{
+	"extends": ["@rap/biome-config/biome.json"],
+	"files": {
+		"ignoreUnknown": true,
+		"includes": ["**", "!node_modules", "!.next", "!dist", "!build"]
+	},
+	"linter": {
+		"rules": {
+			"suspicious": {
+				"noConsole": "error"
+			}
+		}
+	}
+}

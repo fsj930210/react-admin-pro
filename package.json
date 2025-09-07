@@ -4,9 +4,9 @@
   "version": "1.0.0",
   "description": "",
   "scripts": {
-    "build:rsbuild": "turbo run build:rsbuild",
-    "dev:rsbuild": "turbo run dev:rsbuild",
-    "preview:rsbuild": "turbo run preview:rsbuild",
+    "build": "turbo run build",
+    "dev": "turbo run dev",
+    "preview": "turbo run preview",
     "dev:vite": "turbo run dev:vite",
     "build:vite": "turbo run build:vite",
     "preview:vite": "turbo run preview:vite",
