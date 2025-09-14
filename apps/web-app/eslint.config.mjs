@@ -6,10 +6,7 @@ export default defineConfig([
 	globalIgnores(["src/routeTree.gen.ts"]),
 	{
 		files: ["src/**/*.{ts,tsx}"],
-		extends: [rapEslintConfig.configs.recommended],
-		rules: {
-			...rapEslintConfig.rules
-		},
+		extends: [rapEslintConfig],
 	},
 	biome,
 ]);

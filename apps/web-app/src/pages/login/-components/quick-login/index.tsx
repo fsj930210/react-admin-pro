@@ -3,9 +3,9 @@ import { cn } from "@rap/utils";
 import Github from "@/assets/icons/github.svg?react";
 import Google from "@/assets/icons/google.svg?react";
 
-type QuickLogFormProps = {
+interface QuickLogFormProps {
 	block?: boolean;
-};
+}
 export function QuickLogForm({ block }: QuickLogFormProps) {
 	return (
 		<div className="flex flex-col gap-6">

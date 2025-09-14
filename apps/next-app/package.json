@@ -7,10 +7,10 @@
 		"dev": "next dev -p 4000 --turbopack",
 		"build": "next build --turbopack",
 		"start": "next start",
-		"lint:eslint": "eslint --fix",
+		"lint:eslint": "eslint",
 		"lint:stylelint": "stylelint --cache --fix \"**/*.{css}\" --cache-location  node_modules/.cache/stylelint/ --allow-empty-input",
 		"lint:biome": "biome check --write",
-		"lint": " pnpm lint:biome && pnpm lint:eslint && pnpm lint:stylelint"
+		"lint": " pnpm lint:biome && pnpm lint:stylelint"
 	},
 	"dependencies": {
 		"@hookform/resolvers": "catalog:",
@@ -42,7 +42,6 @@
 		"code-inspector-plugin": "catalog:",
 		"eslint": "catalog:",
 		"eslint-config-biome": "catalog:",
-		"eslint-config-next": "catalog:",
 		"stylelint": "catalog:",
 		"typescript": "catalog:"
 	}

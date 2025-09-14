@@ -7,41 +7,35 @@ import reactRefresh from "eslint-plugin-react-refresh";
 import globals from "globals";
 import tsEslint from "typescript-eslint";
 
-export default {
-  meta: {
-    name: "@rap/eslint-config",
-    version: "0.0.1",
-  },
-  configs: {
-    recommended: tsEslint.config({
-      files: ["src/**/*.{ts,tsx}", "app/**/*.{ts,tsx}"],
-      extends: [
-        js.configs.recommended,
-        tsEslint.configs.recommended,
-        eslintReact.configs["recommended-typescript"],
-        reactHooks.configs["recommended-latest"],
-        reactRefresh.configs.vite,
-        pluginQuery.configs["flat/recommended"],
-        pluginRouter.configs["flat/recommended"],
+export default [
+  reactRefresh.configs.vite,
+  reactHooks.configs["recommended-latest"],
+  eslintReact.configs["recommended-typescript"],
+  tsEslint.configs.strict,
+  tsEslint.configs.stylistic,
+  js.configs.recommended,
+  tsEslint.configs.recommended,
+  pluginQuery.configs["flat/recommended"],
+  pluginRouter.configs["flat/recommended"],
+  {
+    files: ["src/**/*.{ts,tsx}", "app/**/*.{ts,tsx}"],
+    languageOptions: {
+      parser: tsEslint.parser,
+      ecmaVersion: 2020,
+      globals: globals.browser,
+    },
+    settings: { react: { version: "detect" } },
+    rules: {
+      "no-unused-vars": "error",
+      "no-tabs": [2, { allowIndentationTabs: true }],
+      indent: [2, "tab", { SwitchCase: 1 }],
+      quotes: [2, "double", { avoidEscape: true }],
+      semi: [2, "always"],
+      "react-refresh/only-export-components": [
+        "off",
+        { allowConstantExport: true },
       ],
-      languageOptions: {
-        parser: tsEslint.parser,
-        ecmaVersion: 2020,
-        globals: globals.browser,
-      },
-      settings: { react: { version: "detect" } },
-    }),
-  },
-  rules: {
-    "no-unused-vars": "error",
-    "no-tabs": [2, { allowIndentationTabs: true }],
-    indent: [2, "tab", { SwitchCase: 1 }],
-    quotes: [2, "double", { avoidEscape: true }],
-    semi: [2, "always"],
-    "react-refresh/only-export-components": [
-      "off",
-      { allowConstantExport: true },
-    ],
-    "no-console": "error",
-  },
-};
+      "no-console": "error",
+    },
+  }
+]

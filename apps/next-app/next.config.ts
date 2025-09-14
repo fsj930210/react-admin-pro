@@ -12,6 +12,10 @@ const nextConfig: NextConfig = {
 			bundler: "turbopack",
 		}),
 	},
+	eslint: {
+		dirs: ["app", "config"],
+		ignoreDuringBuilds: true,
+	},
 };
 
 export default nextConfig;

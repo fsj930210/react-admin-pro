@@ -1,4 +1,5 @@
 import { cn } from "@rap/utils";
+import Image from "next/image";
 import type React from "react";
 import loginImage from "@/app/assets/login-image.svg";
 import { LoginForm } from "../login-form";
@@ -13,7 +14,7 @@ export function ClassicLogin({ className, ...props }: React.ComponentPropsWithou
 				</div>
 			</div>
 			<div className="bg-muted relative hidden lg:flex-center">
-				<img src={loginImage.src} alt="login" />
+				<Image src={loginImage} alt="login" fill />
 			</div>
 		</div>
 	);
