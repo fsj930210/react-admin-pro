@@ -1,8 +1,4 @@
 import { Loading } from "@rap/components-ui/loading";
-import { createFileRoute } from "@tanstack/react-router";
-export const Route = createFileRoute("/_layouts/dashboard/")({
-	component: DashboardPage,
-});
 
 function DashboardPage() {
 	return (
@@ -12,3 +8,5 @@ function DashboardPage() {
 		</div>
 	);
 }
+
+export default DashboardPage;

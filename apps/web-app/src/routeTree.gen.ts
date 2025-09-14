@@ -9,12 +9,12 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from "./pages/__root";
-import { Route as LayoutsRouteRouteImport } from "./pages/_layouts/route";
+import { Route as layoutsRouteRouteImport } from "./pages/(layouts)/route";
 import { Route as LoginIndexRouteImport } from "./pages/login/index";
-import { Route as LayoutsDashboardIndexRouteImport } from "./pages/_layouts/dashboard/index";
+import { Route as layoutsDashboardIndexRouteImport } from "./pages/(layouts)/dashboard/index";
 
-const LayoutsRouteRoute = LayoutsRouteRouteImport.update({
-  id: "/_layouts",
+const layoutsRouteRoute = layoutsRouteRouteImport.update({
+  id: "/(layouts)",
   getParentRoute: () => rootRouteImport,
 } as any);
 const LoginIndexRoute = LoginIndexRouteImport.update({
@@ -22,46 +22,48 @@ const LoginIndexRoute = LoginIndexRouteImport.update({
   path: "/login/",
   getParentRoute: () => rootRouteImport,
 } as any);
-const LayoutsDashboardIndexRoute = LayoutsDashboardIndexRouteImport.update({
+const layoutsDashboardIndexRoute = layoutsDashboardIndexRouteImport.update({
   id: "/dashboard/",
   path: "/dashboard/",
-  getParentRoute: () => LayoutsRouteRoute,
+  getParentRoute: () => layoutsRouteRoute,
 } as any);
 
 export interface FileRoutesByFullPath {
+  "/": typeof layoutsRouteRouteWithChildren;
   "/login": typeof LoginIndexRoute;
-  "/dashboard": typeof LayoutsDashboardIndexRoute;
+  "/dashboard": typeof layoutsDashboardIndexRoute;
 }
 export interface FileRoutesByTo {
+  "/": typeof layoutsRouteRouteWithChildren;
   "/login": typeof LoginIndexRoute;
-  "/dashboard": typeof LayoutsDashboardIndexRoute;
+  "/dashboard": typeof layoutsDashboardIndexRoute;
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport;
-  "/_layouts": typeof LayoutsRouteRouteWithChildren;
+  "/(layouts)": typeof layoutsRouteRouteWithChildren;
   "/login/": typeof LoginIndexRoute;
-  "/_layouts/dashboard/": typeof LayoutsDashboardIndexRoute;
+  "/(layouts)/dashboard/": typeof layoutsDashboardIndexRoute;
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath;
-  fullPaths: "/login" | "/dashboard";
+  fullPaths: "/" | "/login" | "/dashboard";
   fileRoutesByTo: FileRoutesByTo;
-  to: "/login" | "/dashboard";
-  id: "__root__" | "/_layouts" | "/login/" | "/_layouts/dashboard/";
+  to: "/" | "/login" | "/dashboard";
+  id: "__root__" | "/(layouts)" | "/login/" | "/(layouts)/dashboard/";
   fileRoutesById: FileRoutesById;
 }
 export interface RootRouteChildren {
-  LayoutsRouteRoute: typeof LayoutsRouteRouteWithChildren;
+  layoutsRouteRoute: typeof layoutsRouteRouteWithChildren;
   LoginIndexRoute: typeof LoginIndexRoute;
 }
 
 declare module "@tanstack/react-router" {
   interface FileRoutesByPath {
-    "/_layouts": {
-      id: "/_layouts";
-      path: "";
-      fullPath: "";
-      preLoaderRoute: typeof LayoutsRouteRouteImport;
+    "/(layouts)": {
+      id: "/(layouts)";
+      path: "/";
+      fullPath: "/";
+      preLoaderRoute: typeof layoutsRouteRouteImport;
       parentRoute: typeof rootRouteImport;
     };
     "/login/": {
@@ -71,30 +73,30 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof LoginIndexRouteImport;
       parentRoute: typeof rootRouteImport;
     };
-    "/_layouts/dashboard/": {
-      id: "/_layouts/dashboard/";
+    "/(layouts)/dashboard/": {
+      id: "/(layouts)/dashboard/";
       path: "/dashboard";
       fullPath: "/dashboard";
-      preLoaderRoute: typeof LayoutsDashboardIndexRouteImport;
-      parentRoute: typeof LayoutsRouteRoute;
+      preLoaderRoute: typeof layoutsDashboardIndexRouteImport;
+      parentRoute: typeof layoutsRouteRoute;
     };
   }
 }
 
-interface LayoutsRouteRouteChildren {
-  LayoutsDashboardIndexRoute: typeof LayoutsDashboardIndexRoute;
+interface layoutsRouteRouteChildren {
+  layoutsDashboardIndexRoute: typeof layoutsDashboardIndexRoute;
 }
 
-const LayoutsRouteRouteChildren: LayoutsRouteRouteChildren = {
-  LayoutsDashboardIndexRoute: LayoutsDashboardIndexRoute,
+const layoutsRouteRouteChildren: layoutsRouteRouteChildren = {
+  layoutsDashboardIndexRoute: layoutsDashboardIndexRoute,
 };
 
-const LayoutsRouteRouteWithChildren = LayoutsRouteRoute._addFileChildren(
-  LayoutsRouteRouteChildren,
+const layoutsRouteRouteWithChildren = layoutsRouteRoute._addFileChildren(
+  layoutsRouteRouteChildren,
 );
 
 const rootRouteChildren: RootRouteChildren = {
-  LayoutsRouteRoute: LayoutsRouteRouteWithChildren,
+  layoutsRouteRoute: layoutsRouteRouteWithChildren,
   LoginIndexRoute: LoginIndexRoute,
 };
 export const routeTree = rootRouteImport

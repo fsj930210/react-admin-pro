@@ -31,7 +31,7 @@ const data = {
   user: {
     name: "shadcn",
     email: "m@example.com",
-    avatar: "/rap-web/shadcn.jpg",
+    avatar: "/rap-web-app/shadcn.jpg",
   },
   teams: [
     {
@@ -156,13 +156,16 @@ const data = {
   ],
 };
 
+export type SidebarProps = React.ComponentProps<typeof BaseSidebar> & {
+  logo?: string;
+};
 export function Sidebar({
   ...props
-}: React.ComponentProps<typeof BaseSidebar>) {
+}: SidebarProps) {
   return (
     <BaseSidebar collapsible="icon" {...props}>
       <SidebarHeader>
-        <Logo />
+        <Logo url={props.logo} />
       </SidebarHeader>
       <SidebarContent>
         <SidebarMain items={data.navMain} />

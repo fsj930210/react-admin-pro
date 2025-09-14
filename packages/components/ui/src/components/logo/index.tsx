@@ -1,7 +1,6 @@
 import { cn } from "@rap/utils";
-import defaultLogo from "./default-logo.svg";
 
-type LogoProps = {
+export type LogoProps = {
   animate?: boolean;
   className?: string;
   title?: string;
@@ -21,7 +20,7 @@ const Logo = ({
     // biome-ignore lint:a11y/noStaticElementInteractions
     <div className={cn("flex-items-center gap-2", className)} onClick={onClick}>
       <img
-        src={url ?? defaultLogo}
+        src={url ?? '/logo.svg'}
         alt="logo"
         className={`object-contain ${animate ? "animate-rotate" : ""}`}
       />

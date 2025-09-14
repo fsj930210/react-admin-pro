@@ -1,3 +1,4 @@
+"use client";
 import { Slot } from "@radix-ui/react-slot";
 import { useIsMobile } from "@rap/hooks/use-mobile";
 import { cn } from "@rap/utils";
