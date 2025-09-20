@@ -1,5 +1,5 @@
 import { X } from "lucide-react";
-import type { LayoutTabItemProps } from "../..";
+import type { LayoutTabItemProps } from "./types";
 import { cn } from "@rap/utils";
 
 export function VscodeLikeTabs({ tab }: LayoutTabItemProps) {

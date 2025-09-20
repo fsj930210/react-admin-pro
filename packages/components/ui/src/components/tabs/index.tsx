@@ -1,14 +1,8 @@
-// import { ChromeLikeTabItem } from "./components/chrome-like-tabs";
-import { VscodeLikeTabs } from "./components/vscode-like-tabs";
-// import { TrapezoidTabs } from "./components/trapezoid-tabs";
-export type LayoutTabItem = {
-  label: string;
-  value: string;
-};
+// import { ChromeLikeTabItem } from "./chrome-like-tabs";
+import type { LayoutTabItem } from "./types";
+import { VscodeLikeTabs } from "./vscode-like-tabs";
+// import { TrapezoidTabs } from "./trapezoid-tabs";
 
-export type LayoutTabItemProps = {
-  tab: LayoutTabItem;
-};
 const data: LayoutTabItem[] = [
   {
     label: "概览",

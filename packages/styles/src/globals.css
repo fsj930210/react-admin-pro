@@ -53,6 +53,9 @@
   --layout-tabs-border: oklch(0.89 0 0);
   --layout-tabs-accent: oklch(0.92 0.0017 247.84);
   --layout-tabs-close-accent: oklch(0.9364 0.0046 258.33);
+  --layout-breadcrumb: oklch(0.97 0 0);
+  --layout-breadcrumb-accent: oklch(0.92 0.0017 247.84);
+  --layout-breadcrumb-border: oklch(0.89 0 0);
 }
 
 .dark {
@@ -142,6 +145,9 @@
   --color-layout-tabs-border: var(--layout-tabs-border);
   --color-layout-tabs-accent: var(--layout-tabs-accent);
   --color-layout-tabs-close-accent: var(--layout-tabs-close-accent);
+  --color-layout-breadcrumb: var(--layout-breadcrumb);
+  --color-layout-breadcrumb-border: var(--layout-breadcrumb-border);
+  --color-layout-breadcrumb-accent: var(--layout-breadcrumb-accent);
 }
 
 @layer base {

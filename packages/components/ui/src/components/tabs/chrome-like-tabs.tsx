@@ -2,8 +2,8 @@
 
 import { cn } from "@rap/utils";
 import { X } from "lucide-react";
-import type { LayoutTabItemProps } from "../..";
-import './index.css'
+import type { LayoutTabItemProps } from "./types";
+import './chrome-like-tabs.css'
 
 function ChromeTabBackground() {
   return (

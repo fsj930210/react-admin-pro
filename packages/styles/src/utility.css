@@ -34,3 +34,32 @@
 @utility inline-flex-center {
   @apply inline-flex items-center justify-center;
 }
+
+@utility ribbon-breadcrumb {
+  clip-path: polygon(
+    0 0,
+    calc(100% - 10px) 0,
+    100% 50%,
+    calc(100% - 10px) 100%,
+    0 100%,
+   10px 50%
+  );
+}
+@utility ribbon-breadcrumb-first {
+  clip-path: polygon(0 0, calc(100% - 10px) 0,  100% 50%, calc(100% - 10px) 100%, 0 100%);
+}
+@utility ribbon-breadcrumb-last {
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%, 10px 50%);
+}
+
+@utility parallelogram-breadcrumb {
+  clip-path: polygon(8px 0, 100% 0, calc(100% - 8px) 100%, 0 100%);
+}
+@utility capsule-breadcrumb {
+  mask: radial-gradient(
+            circle 0.5lh at 0 50%,
+            #0000 calc(0.5lh + 0.11em),
+            #000 0
+          )
+          0 0;
+}
