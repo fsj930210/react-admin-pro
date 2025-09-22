@@ -1,6 +1,17 @@
 {
   "name": "@rap/components-ui",
   "version": "0.0.1",
+  "description": "High-level UI components for React Admin Pro built on top of base components",
+  "keywords": [
+    "react",
+    "ui-components",
+    "admin-ui",
+    "business-components",
+    "layouts",
+    "dashboard",
+    "tailwindcss"
+  ],
+  "type": "module",
   "dependencies": {
     "@radix-ui/react-slot": "catalog:",
     "@rap/components-base": "workspace:*",

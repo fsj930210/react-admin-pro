@@ -1,6 +1,14 @@
 {
   "name": "@rap/hooks",
   "version": "0.0.1",
+  "description": "Reusable React hooks for React Admin Pro",
+  "keywords": [
+    "react",
+    "hooks",
+    "custom-hooks",
+    "react-hooks",
+    "utility-hooks"
+  ],
   "private": true,
   "type": "module",
   "exports": {
@@ -10,13 +18,17 @@
     }
   },
   "dependencies": {
-    "react": "catalog:"
+    "immer": "catalog:",
+    "lodash-es": "catalog:",
+    "react": "catalog:",
+    "zustand": "catalog:"
   },
   "devDependencies": {
     "@biomejs/biome": "catalog:",
     "@rap/biome-config": "workspace:*",
     "@rap/eslint-config": "workspace:*",
     "@rap/tsconfig": "workspace:*",
+    "@types/lodash-es": "catalog:",
     "@types/react": "catalog:",
     "eslint": "catalog:",
     "eslint-config-biome": "catalog:",

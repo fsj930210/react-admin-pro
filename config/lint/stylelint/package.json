@@ -1,6 +1,14 @@
 {
   "name": "@rap/stylelint-config",
   "version": "0.0.1",
+  "description": "共享的Stylelint配置，用于React Admin Pro项目的CSS代码规范",
+  "keywords": [
+    "stylelint",
+    "config",
+    "css",
+    "linting",
+    "code-quality"
+  ],
   "type": "module",
   "devDependencies": {
     "@stylistic/stylelint-plugin": "catalog:",

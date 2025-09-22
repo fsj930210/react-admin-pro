@@ -1,24 +1,33 @@
 {
-	"name": "@rap/eslint-config",
-	"version": "0.0.1",
-	"main": "./src/index.mjs",
-	"type": "module",
-	"exports": {
-		".": {
-			"import": "./src/index.mjs",
-			"default": "./src/index.mjs"
-		}
-	},
-	"devDependencies": {
-		"@eslint-react/eslint-plugin": "catalog:",
-		"@eslint/js": "catalog:",
-		"@tanstack/eslint-plugin-query": "catalog:",
-		"@tanstack/eslint-plugin-router": "catalog:",
-		"@typescript-eslint/eslint-plugin": "catalog:",
-		"eslint": "catalog:",
-		"eslint-plugin-react-hooks": "catalog:",
-		"eslint-plugin-react-refresh": "catalog:",
-		"globals": "catalog:",
-		"typescript-eslint": "catalog:"
-	}
+  "name": "@rap/eslint-config",
+  "version": "0.0.1",
+  "description": "共享的ESLint配置，用于React Admin Pro项目的代码规范",
+  "keywords": [
+    "eslint",
+    "config",
+    "linting",
+    "code-quality",
+    "react",
+    "typescript"
+  ],
+  "main": "./src/index.mjs",
+  "type": "module",
+  "exports": {
+    ".": {
+      "import": "./src/index.mjs",
+      "default": "./src/index.mjs"
+    }
+  },
+  "devDependencies": {
+    "@eslint-react/eslint-plugin": "catalog:",
+    "@eslint/js": "catalog:",
+    "@tanstack/eslint-plugin-query": "catalog:",
+    "@tanstack/eslint-plugin-router": "catalog:",
+    "@typescript-eslint/eslint-plugin": "catalog:",
+    "eslint": "catalog:",
+    "eslint-plugin-react-hooks": "catalog:",
+    "eslint-plugin-react-refresh": "catalog:",
+    "globals": "catalog:",
+    "typescript-eslint": "catalog:"
+  }
 }

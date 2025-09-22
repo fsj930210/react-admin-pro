@@ -1,6 +1,14 @@
 {
   "name": "@rap/utils",
   "version": "0.0.1",
+  "description": "Utility functions for React Admin Pro",
+  "keywords": [
+    "utils",
+    "helpers",
+    "utility-functions",
+    "tailwind-merge",
+    "classnames"
+  ],
   "private": true,
   "type": "module",
   "dependencies": {

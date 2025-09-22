@@ -1,11 +1,20 @@
 {
-	"name": "@rap/biome-config",
-	"version": "0.0.1",
-	"type": "module",
-	"files": [
-		"biome.json"
-	],
-	"devDependencies": {
-		"@biomejs/biome": "catalog:"
-	}
+  "name": "@rap/biome-config",
+  "version": "0.0.1",
+  "description": "共享的Biome配置，用于React Admin Pro项目的代码格式化和检查",
+  "keywords": [
+    "biome",
+    "formatter",
+    "linter",
+    "code-quality",
+    "javascript",
+    "typescript"
+  ],
+  "type": "module",
+  "files": [
+    "biome.json"
+  ],
+  "devDependencies": {
+    "@biomejs/biome": "catalog:"
+  }
 }
