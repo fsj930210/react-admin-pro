@@ -1,5 +1,5 @@
 import { SidebarInset, SidebarProvider } from "@rap/components-base/sidebar";
-import { Footer, Sidebar, Breadcrumb } from "@rap/components-ui/layouts";
+import { Breadcrumb, Footer, Sidebar } from "@rap/components-ui/layouts";
 import { LayoutTabs } from "@rap/components-ui/tabs";
 import { createFileRoute, Outlet } from "@tanstack/react-router";
 import { APP_BASE_PATH } from "@/config";

@@ -30,6 +30,7 @@
     "@hookform/resolvers": "catalog:",
     "@rap/components-base": "workspace:*",
     "@rap/components-ui": "workspace:*",
+    "@rap/hooks": "workspace:*",
     "@rap/styles": "workspace:*",
     "@rap/utils": "workspace:*",
     "@tanstack/react-query": "catalog:",
@@ -40,7 +41,8 @@
     "react-dom": "catalog:",
     "react-hook-form": "catalog:",
     "sonner": "catalog:",
-    "zod": "catalog:"
+    "zod": "catalog:",
+    "zustand": "catalog:"
   },
   "devDependencies": {
     "@biomejs/biome": "catalog:",

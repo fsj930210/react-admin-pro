@@ -15,6 +15,10 @@
     "./use-mobile": {
       "types": "./src/use-mobile.ts",
       "default": "./src/use-mobile.ts"
+    },
+    "./use-zustand": {
+      "types": "./src/use-zustand.ts",
+      "default": "./src/use-zustand.ts"
     }
   },
   "dependencies": {

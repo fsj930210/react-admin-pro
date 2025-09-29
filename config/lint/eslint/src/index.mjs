@@ -35,7 +35,6 @@ export default [
         "off",
         { allowConstantExport: true },
       ],
-      "no-console": "error",
     },
-  }
-]
+  },
+];

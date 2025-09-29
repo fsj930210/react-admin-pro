@@ -1,189 +1,112 @@
-// /** biome-ignore-all lint:suspicious/noExplicitAny */
-// import { produce } from "immer";
-// import get from "lodash-es/get";
-// import isEqual from "lodash-es/isEqual";
-// import set from "lodash-es/set";
-// import type { StoreApi } from "zustand";
-// import { useStoreWithEqualityFn } from "zustand/traditional";
+/** biome-ignore-all lint:suspicious/noExplicitAny> */
+import isEqual from "lodash-es/isEqual";
+import type { StateCreator } from "zustand";
+import { devtools } from "zustand/middleware";
+import { immer } from "zustand/middleware/immer";
+import {
+  createWithEqualityFn,
+  useStoreWithEqualityFn,
+} from "zustand/traditional";
 
-// type Key = string;
-// type Path = string | string[];
-// type KeyOrPath = Key | Path | Key[] | Path[];
+/**
+ * 自动包裹 immer、devtools、精细比较
+ * @param initializer - (set, get) => state
+ * @param options - 可选，如 devtools 的 name
+ */
+export function createStore<T>(
+  initializer: StateCreator<T, [["zustand/immer", never]], []>,
+  options?: { name?: string }
+) {
+  // 包裹 immer、devtools
+  const store = createWithEqualityFn<T>()(
+    devtools(immer(initializer), { name: options?.name }),
+    isEqual
+  );
+  /**
+   * 状态选择器函数
+   * @template K - 选择器的类型（可以是 key、key数组或函数）
+   * @param selector - 选择器参数
+   * @returns 根据选择器类型返回相应的状态值
+   * - 如果是函数，返回函数的返回值类型
+   * - 如果是数组，返回选中的多个状态的对象类型
+   * - 如果是单个 key，返回该状态的类型
+   */
+  function selector<K extends keyof T | (keyof T)[] | ((state: T) => any)>(
+    selector: K
+  ): K extends (state: T) => infer R
+    ? R
+    : K extends Array<keyof T> | ReadonlyArray<keyof T>
+    ? Pick<T, K[number]>
+    : K extends keyof T
+    ? Pick<T, K>
+    : never {
+    return useStoreWithEqualityFn(
+      store,
+      (state: T) => {
+        if (typeof selector === "function") {
+          return (selector as (state: T) => any)(state);
+        }
+        const keys = Array.isArray(selector) ? selector : [selector];
+        const picked: Partial<T> = {};
+        keys.forEach((k) => {
+          picked[k as keyof T] = state[k as keyof T];
+        });
+        return picked;
+      },
+      isEqual
+    );
+  }
 
-// // 批量对象 {'a.b.c': val, 'x.y': val2}
-// type BatchObject = Record<string, any>;
-// // 批量数组 [{path: 'a.b.c', value: val}, ...]
-// type BatchArray = Array<{ path: string | string[]; value: any }>;
+  return { store, selector };
+}
 
-// interface UseSmartStoreOptions {
-//   equalityFn?: (a: any, b: any) => boolean;
-// }
+// 通用的 setter 类型，支持函数式更新
+// 支持两种函数签名：
+// 1. (state: T) => void - 适用于简单对象
+// 2. (state: T, fieldValue: T[K]) => void - 适用于嵌套对象
+// 3. (state: T, fieldValue: T[K]) => T[K] - 适用于返回新值的情况
+export type SetterFunction<T, K extends keyof T> = (
+  nextValue: T[K] | ((state: T, fieldValue: T[K]) => void)
+) => void;
 
-// function isPathLike(input: any): boolean {
-//   if (Array.isArray(input))
-//     return input.length > 0 && typeof input[0] === "string";
-//   if (typeof input === "string" && input.includes(".")) return true;
-//   return false;
-// }
-// function pathToArray(path: string | string[]): string[] {
-//   return Array.isArray(path) ? path : path.split(".");
-// }
-
-// // 1. 基础层 hooks：注入store
-// export function useSmartStore<T extends object>(
-//   store: StoreApi<T>,
-//   options?: UseSmartStoreOptions
-// ) {
-//   const equalityFn = options?.equalityFn ?? isEqual;
-//   const state = useStoreWithEqualityFn(store, (s) => s, equalityFn);
-
-//   function setState(
-//     keyOrPath: KeyOrPath | BatchObject | BatchArray,
-//     value?: any
-//   ) {
-//     const isBatchArray =
-//       Array.isArray(keyOrPath) &&
-//       (keyOrPath as any[]).every(
-//         (v) => v && typeof v === "object" && "path" in v
-//       );
-//     const isBatchObject =
-//       typeof keyOrPath === "object" &&
-//       !Array.isArray(keyOrPath) &&
-//       keyOrPath !== null &&
-//       Object.keys(keyOrPath).some((k) => k.includes("."));
-
-//     store.setState((prev: T) => {
-//       return produce(prev, (draft: any) => {
-//         // 批量 path [{path, value}]
-//         if (isBatchArray) {
-//           (keyOrPath as BatchArray).forEach(({ path, value }) => {
-//             set(draft, pathToArray(path), value);
-//           });
-//         }
-//         // 批量 path {'a.b.c': v, ...}
-//         else if (isBatchObject) {
-//           Object.entries(keyOrPath as BatchObject).forEach(([path, val]) => {
-//             set(draft, pathToArray(path), val);
-//           });
-//         }
-//         // keys/path数组批量
-//         else if (Array.isArray(keyOrPath)) {
-//           (keyOrPath as (Key | Path)[]).forEach((k, i) => {
-//             if (isPathLike(k)) {
-//               set(
-//                 draft,
-//                 pathToArray(k),
-//                 Array.isArray(value) ? value[i] : value[k]
-//               );
-//             } else {
-//               draft[k] = Array.isArray(value) ? value[i] : value[k];
-//             }
-//           });
-//         }
-//         // path 单项
-//         else if (isPathLike(keyOrPath)) {
-//           set(draft, pathToArray(keyOrPath as Path), value);
-//         }
-//         // 单 key
-//         else {
-//           draft[keyOrPath as Key] = value;
-//         }
-//       });
-//     });
-//   }
-
-//   return { state, setState };
-// }
-
-// // 2. 通用业务 hooks：传key/path/数组/批量，自动推断类型
-// export function useSmartState<T extends object, K extends KeyOrPath>(
-//   store: StoreApi<T>,
-//   keyOrPath: K,
-//   options?: UseSmartStoreOptions
-// ): {
-//   value: K extends keyof T
-//     ? T[K]
-//     : K extends (keyof T)[]
-//     ? { [P in K[number]]: T[P] }
-//     : any;
-//   setValue: (
-//     value:
-//       | (K extends keyof T ? T[K] | ((prev: T[K]) => T[K]) : any)
-//       | BatchObject
-//       | BatchArray
-//   ) => void;
-// } {
-//   const equalityFn = options?.equalityFn ?? isEqual;
-
-//   // 自动推断类型
-//   const selector = (state: T) => {
-//     if (Array.isArray(keyOrPath)) {
-//       // keys/path数组
-//       const picked = {} as any;
-//       keyOrPath.forEach((k) =>
-//         isPathLike(k) ? (picked[k] = get(state, k)) : (picked[k] = state[k])
-//       );
-//       return picked;
-//     }
-//     if (isPathLike(keyOrPath)) {
-//       return get(state, keyOrPath);
-//     }
-//     return state[keyOrPath as keyof T];
-//   };
-//   const value = useStoreWithEqualityFn(store, selector, equalityFn);
-
-//   // 更新
-//   function setValue(valueArg: any) {
-//     const isBatchArray =
-//       Array.isArray(valueArg) &&
-//       (valueArg as any[]).every(
-//         (v) => v && typeof v === "object" && "path" in v
-//       );
-//     const isBatchObject =
-//       typeof valueArg === "object" &&
-//       !Array.isArray(valueArg) &&
-//       valueArg !== null &&
-//       Object.keys(valueArg).some((k) => k.includes("."));
-
-//     store.setState((prev: T) => {
-//       return produce(prev, (draft: any) => {
-//         // 批量 path [{path, value}]
-//         if (isBatchArray) {
-//           (valueArg as BatchArray).forEach(({ path, value }) => {
-//             set(draft, pathToArray(path), value);
-//           });
-//         }
-//         // 批量 path {'a.b.c': v, ...}
-//         else if (isBatchObject) {
-//           Object.entries(valueArg as BatchObject).forEach(([path, val]) => {
-//             set(draft, pathToArray(path), val);
-//           });
-//         }
-//         // keys/path数组批量
-//         else if (Array.isArray(keyOrPath)) {
-//           keyOrPath.forEach((k, i) => {
-//             if (isPathLike(k)) {
-//               set(
-//                 draft,
-//                 pathToArray(k),
-//                 Array.isArray(valueArg) ? valueArg[i] : valueArg[k]
-//               );
-//             } else {
-//               draft[k] = Array.isArray(valueArg) ? valueArg[i] : valueArg[k];
-//             }
-//           });
-//         }
-//         // path 单项
-//         else if (isPathLike(keyOrPath)) {
-//           set(draft, pathToArray(keyOrPath as Path), valueArg);
-//         }
-//         // 单 key
-//         else {
-//           draft[keyOrPath as Key] = valueArg;
-//         }
-//       });
-//     });
-//   }
-
-//   return { value, setValue };
-// }
+/**
+ * 创建一个通用的 setter 函数，用于处理 immer 状态更新
+ *
+ * @template S - 状态对象的类型
+ * @template K - 状态对象中的键名，必须是 S 的有效键
+ * @param {(fn: (state: S) => void) => void} set - zustand 的 set 函数
+ * @param {K} key - 要更新的状态字段名
+ * @returns {SetterFunction<S[K]>} 返回一个 setter 函数，可以接受新值或更新函数
+ *
+ * @example
+ * // 基础用法
+ * const setCount = createSetter(set, 'count');
+ *
+ * // 直接设置新值
+ * setCount(10);
+ *
+ * // 使用函数更新简单类型
+ * setCount((state) => state.count = state.count + 1);
+ *
+ * // 使用函数更新嵌套对象
+ * setConfig((state, config) => config.theme = 'dark');
+ */
+export function createSetter<S, K extends keyof S>(
+  set: (fn: (state: S) => void) => void,
+  key: K
+): SetterFunction<S, K> {
+  return (nextValue) =>
+    set((state) => {
+      // 当 nextValue 是函数时，调用它
+      // 由于 immer 的特性，我们不需要显式返回新状态
+      if (typeof nextValue === "function") {
+        // 传递整个 state 和 state[key] 作为参数
+        // 这样既支持 (state) => state.a = 4 的形式
+        // 也支持 (state, fieldValue) => fieldValue.cc = 5 的形式
+        const result = (nextValue as Function)(state, state[key]);
+        state[key] = result ?? state[key];
+      } else {
+        state[key] = nextValue;
+      }
+    });
+}
