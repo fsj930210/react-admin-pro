@@ -3,14 +3,14 @@ import { DashboardPage } from "../dashboard";
 import { OverviewPage } from "../overview";
 
 export const Route = createFileRoute("/(layouts)/test/")({
-  component: RouteComponent,
+	component: RouteComponent,
 });
 
 function RouteComponent() {
-  return (
-    <div>
-      <OverviewPage />
-      <DashboardPage />
-    </div>
-  );
+	return (
+		<div>
+			<OverviewPage />
+			<DashboardPage />
+		</div>
+	);
 }
