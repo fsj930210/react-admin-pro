@@ -21,8 +21,8 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({
   id,
   storageKey: propStorageKey, // 允许父组件传递存储键
   themes = ["light", "dark"],
-  enableSystem = false,
-  enableColorScheme = false,
+  enableSystem: propEnableSystem = false,
+  enableColorScheme: propEnableColorScheme = false,
   inheritTheme = false,
   attribute = "data-theme",
   defaultTheme = "light",
@@ -58,7 +58,12 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({
 
   const shouldInherit = inheritTheme && !!parentContext && !forcedTheme;
   const isForced = !!forcedTheme && themes.includes(forcedTheme);
-
+  const enableSystem = shouldInherit
+    ? parentContext?.enableSystem || propEnableSystem
+    : propEnableSystem;
+  const enableColorScheme = shouldInherit
+    ? parentContext?.enableColorScheme || propEnableColorScheme
+    : propEnableColorScheme;
   // 系统主题状态
   const [systemTheme, setSystemTheme] = useState<"light" | "dark">("light");
 
@@ -265,7 +270,6 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({
   // 准备上下文值（暴露storageKey供子组件继承）
   const contextValue: ThemeContextValue = {
     theme,
-    setTheme,
     themes,
     systemTheme,
     enableSystem,
@@ -276,6 +280,7 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({
     cacheClearRecovery,
     defaultTheme: defaultThemeRef.current,
     storageKey,
+    setTheme,
     setFollowSystemTheme,
     clearTheme,
     clearAllThemes,
@@ -298,7 +303,12 @@ export const useTheme = () => {
   if (context === undefined) {
     throw new Error("useTheme must be used within a ThemeProvider");
   }
-  return context;
+  const { theme, themes, setTheme } = context;
+  return {
+    theme,
+    themes,
+    setTheme,
+  };
 };
 
 export const ThemeScript = ({
