@@ -32,6 +32,8 @@
   "type": "module",
   "packageManager": "pnpm@10.17.1",
   "devDependencies": {
+    "@biomejs/biome": "catalog:",
+    "@rap/biome-config": "workspace:*",
     "@rap/commitlint-config": "workspace:*",
     "commitlint": "catalog:",
     "husky": "catalog:",

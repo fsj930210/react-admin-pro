@@ -46,7 +46,6 @@
 	},
 	"devDependencies": {
 		"@biomejs/biome": "catalog:",
-		"@rap/biome-config": "workspace:*",
 		"@rap/eslint-config": "workspace:*",
 		"@rap/rsbuild-config": "workspace:*",
 		"@rap/stylelint-config": "workspace:*",

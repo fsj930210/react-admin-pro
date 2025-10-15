@@ -1,0 +1,10 @@
+{
+	"extends": ["@rap/biome-config/biome.json"],
+	"linter": {
+		"rules": {
+			"suspicious": {
+				"noConsole": "error"
+			}
+		}
+	}
+}
