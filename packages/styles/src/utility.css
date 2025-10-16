@@ -2,6 +2,10 @@
 
 @import "tailwindcss";
 
+@utility dot-badge {
+  @apply aspect-square rounded-md align-middle bg-center bg-no-repeat w-2 h-2 shadow-sm inline-block;
+  background-image: radial-gradient(circle at 35% 30%, oklch(1 0 0/calc(var(--depth)*.5)), #0000);
+}
 @utility flex-center {
   @apply flex justify-center items-center;
 }

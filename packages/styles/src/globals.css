@@ -56,6 +56,7 @@
   --layout-breadcrumb: oklch(0.97 0 0);
   --layout-breadcrumb-accent: oklch(0.92 0.0017 247.84);
   --layout-breadcrumb-border: oklch(0.89 0 0);
+  --depth: 1;
 }
 
 .dark {
@@ -188,5 +189,34 @@
   a:active,
   button:active {
     @apply opacity-60 md:opacity-100;
+  }
+}
+
+/* styles.css */
+.CollapsibleContent {
+  overflow: hidden;
+}
+.CollapsibleContent[data-state='open'] {
+  animation: collapsibleSlideDown 300ms ease-out;
+}
+.CollapsibleContent[data-state='closed'] {
+  animation: collapsibleSlideUp 300ms ease-out;
+}
+
+@keyframes collapsibleSlideDown {
+  from {
+    height: 0;
+  }
+  to {
+    height: var(--radix-collapsible-content-height);
+  }
+}
+
+@keyframes collapsibleSlideUp {
+  from {
+    height: var(--radix-collapsible-content-height);
+  }
+  to {
+    height: 0;
   }
 }
