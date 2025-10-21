@@ -882,6 +882,9 @@ importers:
       '@rap/utils':
         specifier: workspace:*
         version: link:../../utils
+      '@tanstack/react-router':
+        specifier: 'catalog:'
+        version: 1.131.7(react-dom@19.1.1(react@19.1.1))(react@19.1.1)
       ahooks:
         specifier: 'catalog:'
         version: 3.9.4(react-dom@19.1.1(react@19.1.1))(react@19.1.1)
