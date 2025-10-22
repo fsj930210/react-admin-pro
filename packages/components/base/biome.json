@@ -1,13 +1,6 @@
 {
-  "extends": ["@rap/biome-config/biome.json"],
-  "files": {
-    "includes": ["src/**"]
-  },
-  "linter": {
-    "rules": {
-      "suspicious": {
-        "noConsole": "error"
-      }
-    }
-  }
+	"extends": ["@rap/biome-config/biome.json"],
+	"files": {
+		"includes": ["src/**"]
+	}
 }

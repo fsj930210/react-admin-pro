@@ -8,12 +8,13 @@ export const Route = createFileRoute("/(layouts)/dashboard/")({
 });
 
 export function DashboardPage() {
-	const { layoutConfig, setLayoutConfig, count, setCount } = useAppConfigSelector([
-		"layoutConfig",
-		"setLayoutConfig",
-		"count",
-		"setCount",
-	]);
+	const { layoutConfig, setLayoutConfig, count, setCount } =
+		useAppConfigSelector([
+			"layoutConfig",
+			"setLayoutConfig",
+			"count",
+			"setCount",
+		]);
 
 	return (
 		<div className="size-full">

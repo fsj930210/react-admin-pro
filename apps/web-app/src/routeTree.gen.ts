@@ -11,9 +11,10 @@
 import { Route as rootRouteImport } from "./pages/__root";
 import { Route as layoutsRouteRouteImport } from "./pages/(layouts)/route";
 import { Route as LoginIndexRouteImport } from "./pages/login/index";
-import { Route as layoutsTestIndexRouteImport } from "./pages/(layouts)/test/index";
 import { Route as layoutsOverviewIndexRouteImport } from "./pages/(layouts)/overview/index";
 import { Route as layoutsDashboardIndexRouteImport } from "./pages/(layouts)/dashboard/index";
+import { Route as layoutsComponentsIndexRouteImport } from "./pages/(layouts)/components/index";
+import { Route as layoutsComponentsTreeIndexRouteImport } from "./pages/(layouts)/components/tree/index";
 
 const layoutsRouteRoute = layoutsRouteRouteImport.update({
   id: "/(layouts)",
@@ -23,11 +24,6 @@ const LoginIndexRoute = LoginIndexRouteImport.update({
   id: "/login/",
   path: "/login/",
   getParentRoute: () => rootRouteImport,
-} as any);
-const layoutsTestIndexRoute = layoutsTestIndexRouteImport.update({
-  id: "/test/",
-  path: "/test/",
-  getParentRoute: () => layoutsRouteRoute,
 } as any);
 const layoutsOverviewIndexRoute = layoutsOverviewIndexRouteImport.update({
   id: "/overview/",
@@ -39,41 +35,68 @@ const layoutsDashboardIndexRoute = layoutsDashboardIndexRouteImport.update({
   path: "/dashboard/",
   getParentRoute: () => layoutsRouteRoute,
 } as any);
+const layoutsComponentsIndexRoute = layoutsComponentsIndexRouteImport.update({
+  id: "/components/",
+  path: "/components/",
+  getParentRoute: () => layoutsRouteRoute,
+} as any);
+const layoutsComponentsTreeIndexRoute =
+  layoutsComponentsTreeIndexRouteImport.update({
+    id: "/components/tree/",
+    path: "/components/tree/",
+    getParentRoute: () => layoutsRouteRoute,
+  } as any);
 
 export interface FileRoutesByFullPath {
   "/": typeof layoutsRouteRouteWithChildren;
   "/login": typeof LoginIndexRoute;
+  "/components": typeof layoutsComponentsIndexRoute;
   "/dashboard": typeof layoutsDashboardIndexRoute;
   "/overview": typeof layoutsOverviewIndexRoute;
-  "/test": typeof layoutsTestIndexRoute;
+  "/components/tree": typeof layoutsComponentsTreeIndexRoute;
 }
 export interface FileRoutesByTo {
   "/": typeof layoutsRouteRouteWithChildren;
   "/login": typeof LoginIndexRoute;
+  "/components": typeof layoutsComponentsIndexRoute;
   "/dashboard": typeof layoutsDashboardIndexRoute;
   "/overview": typeof layoutsOverviewIndexRoute;
-  "/test": typeof layoutsTestIndexRoute;
+  "/components/tree": typeof layoutsComponentsTreeIndexRoute;
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport;
   "/(layouts)": typeof layoutsRouteRouteWithChildren;
   "/login/": typeof LoginIndexRoute;
+  "/(layouts)/components/": typeof layoutsComponentsIndexRoute;
   "/(layouts)/dashboard/": typeof layoutsDashboardIndexRoute;
   "/(layouts)/overview/": typeof layoutsOverviewIndexRoute;
-  "/(layouts)/test/": typeof layoutsTestIndexRoute;
+  "/(layouts)/components/tree/": typeof layoutsComponentsTreeIndexRoute;
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath;
-  fullPaths: "/" | "/login" | "/dashboard" | "/overview" | "/test";
+  fullPaths:
+    | "/"
+    | "/login"
+    | "/components"
+    | "/dashboard"
+    | "/overview"
+    | "/components/tree";
   fileRoutesByTo: FileRoutesByTo;
-  to: "/" | "/login" | "/dashboard" | "/overview" | "/test";
+  to:
+    | "/"
+    | "/login"
+    | "/components"
+    | "/dashboard"
+    | "/overview"
+    | "/components/tree";
   id:
     | "__root__"
     | "/(layouts)"
     | "/login/"
+    | "/(layouts)/components/"
     | "/(layouts)/dashboard/"
     | "/(layouts)/overview/"
-    | "/(layouts)/test/";
+    | "/(layouts)/components/tree/";
   fileRoutesById: FileRoutesById;
 }
 export interface RootRouteChildren {
@@ -97,13 +120,6 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof LoginIndexRouteImport;
       parentRoute: typeof rootRouteImport;
     };
-    "/(layouts)/test/": {
-      id: "/(layouts)/test/";
-      path: "/test";
-      fullPath: "/test";
-      preLoaderRoute: typeof layoutsTestIndexRouteImport;
-      parentRoute: typeof layoutsRouteRoute;
-    };
     "/(layouts)/overview/": {
       id: "/(layouts)/overview/";
       path: "/overview";
@@ -118,19 +134,35 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof layoutsDashboardIndexRouteImport;
       parentRoute: typeof layoutsRouteRoute;
     };
+    "/(layouts)/components/": {
+      id: "/(layouts)/components/";
+      path: "/components";
+      fullPath: "/components";
+      preLoaderRoute: typeof layoutsComponentsIndexRouteImport;
+      parentRoute: typeof layoutsRouteRoute;
+    };
+    "/(layouts)/components/tree/": {
+      id: "/(layouts)/components/tree/";
+      path: "/components/tree";
+      fullPath: "/components/tree";
+      preLoaderRoute: typeof layoutsComponentsTreeIndexRouteImport;
+      parentRoute: typeof layoutsRouteRoute;
+    };
   }
 }
 
 interface layoutsRouteRouteChildren {
+  layoutsComponentsIndexRoute: typeof layoutsComponentsIndexRoute;
   layoutsDashboardIndexRoute: typeof layoutsDashboardIndexRoute;
   layoutsOverviewIndexRoute: typeof layoutsOverviewIndexRoute;
-  layoutsTestIndexRoute: typeof layoutsTestIndexRoute;
+  layoutsComponentsTreeIndexRoute: typeof layoutsComponentsTreeIndexRoute;
 }
 
 const layoutsRouteRouteChildren: layoutsRouteRouteChildren = {
+  layoutsComponentsIndexRoute: layoutsComponentsIndexRoute,
   layoutsDashboardIndexRoute: layoutsDashboardIndexRoute,
   layoutsOverviewIndexRoute: layoutsOverviewIndexRoute,
-  layoutsTestIndexRoute: layoutsTestIndexRoute,
+  layoutsComponentsTreeIndexRoute: layoutsComponentsTreeIndexRoute,
 };
 
 const layoutsRouteRouteWithChildren = layoutsRouteRoute._addFileChildren(
