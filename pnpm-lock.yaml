@@ -308,6 +308,9 @@ importers:
 
   .:
     devDependencies:
+      '@biomejs/biome':
+        specifier: 'catalog:'
+        version: 2.2.3
       '@rap/commitlint-config':
         specifier: workspace:*
         version: link:config/lint/commitlint
