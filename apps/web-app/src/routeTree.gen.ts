@@ -48,7 +48,6 @@ const layoutsComponentsTreeIndexRoute =
   } as any);
 
 export interface FileRoutesByFullPath {
-  "/": typeof layoutsRouteRouteWithChildren;
   "/login": typeof LoginIndexRoute;
   "/components": typeof layoutsComponentsIndexRoute;
   "/dashboard": typeof layoutsDashboardIndexRoute;
@@ -56,7 +55,6 @@ export interface FileRoutesByFullPath {
   "/components/tree": typeof layoutsComponentsTreeIndexRoute;
 }
 export interface FileRoutesByTo {
-  "/": typeof layoutsRouteRouteWithChildren;
   "/login": typeof LoginIndexRoute;
   "/components": typeof layoutsComponentsIndexRoute;
   "/dashboard": typeof layoutsDashboardIndexRoute;
@@ -75,7 +73,6 @@ export interface FileRoutesById {
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath;
   fullPaths:
-    | "/"
     | "/login"
     | "/components"
     | "/dashboard"
@@ -83,7 +80,6 @@ export interface FileRouteTypes {
     | "/components/tree";
   fileRoutesByTo: FileRoutesByTo;
   to:
-    | "/"
     | "/login"
     | "/components"
     | "/dashboard"
@@ -108,8 +104,8 @@ declare module "@tanstack/react-router" {
   interface FileRoutesByPath {
     "/(layouts)": {
       id: "/(layouts)";
-      path: "/";
-      fullPath: "/";
+      path: "";
+      fullPath: "";
       preLoaderRoute: typeof layoutsRouteRouteImport;
       parentRoute: typeof rootRouteImport;
     };
