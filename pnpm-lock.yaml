@@ -176,6 +176,9 @@ importers:
 
   .:
     devDependencies:
+      '@biomejs/biome':
+        specifier: 'catalog:'
+        version: 2.2.3
       '@rap/commitlint-config':
         specifier: workspace:*
         version: link:config/lint/commitlint
@@ -744,6 +747,9 @@ importers:
       '@rap/utils':
         specifier: workspace:*
         version: link:../../utils
+      '@tanstack/react-router':
+        specifier: 'catalog:'
+        version: 1.131.7(react-dom@19.1.1(react@19.1.1))(react@19.1.1)
       ahooks:
         specifier: 'catalog:'
         version: 3.9.5(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
