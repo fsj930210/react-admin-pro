@@ -31,7 +31,7 @@ const FormSchema = z.object({
 });
 
 export function LoginForm({ className, quickLoginStyle = "inline" }: LoginFormProps) {
-	const form = useForm<z.infer<typeof FormSchema>>({
+	const form = useForm({
 		resolver: zodResolver(FormSchema),
 		defaultValues: {
 			username: "",

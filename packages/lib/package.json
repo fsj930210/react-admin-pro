@@ -1,27 +1,27 @@
 {
-  "name": "@rap/lib",
-  "version": "0.0.1",
-  "private": true,
-  "type": "module",
-  "dependencies": {
-    "clsx": "catalog:",
-    "react": "catalog:",
-    "tailwind-merge": "catalog:"
-  },
-  "exports": {
-    "./compose-refs": {
-      "types": "./src/compose-refs.ts",
-      "default": "./src/compose-refs.ts"
-    }
-  },
-  "devDependencies": {
-    "@biomejs/biome": "catalog:",
-    "@rap/biome-config": "workspace:*",
-    "@rap/eslint-config": "workspace:*",
-    "@rap/tsconfig": "workspace:*",
-    "@types/react": "catalog:",
-    "eslint": "catalog:",
-    "eslint-config-biome": "catalog:",
-    "typescript": "catalog:"
-  }
+	"name": "@rap/lib",
+	"version": "0.0.1",
+	"private": true,
+	"type": "module",
+	"dependencies": {
+		"clsx": "catalog:",
+		"react": "catalog:",
+		"tailwind-merge": "catalog:"
+	},
+	"exports": {
+		"./compose-refs": {
+			"types": "./src/compose-refs.ts",
+			"default": "./src/compose-refs.ts"
+		}
+	},
+	"devDependencies": {
+		"@biomejs/biome": "catalog:",
+		"@rap/biome-config": "workspace:*",
+		"@rap/eslint-config": "workspace:*",
+		"@rap/tsconfig": "workspace:*",
+		"@types/react": "catalog:",
+		"eslint": "catalog:",
+		"eslint-config-biome": "catalog:",
+		"typescript": "catalog:"
+	}
 }

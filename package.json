@@ -1,40 +1,40 @@
 {
-  "name": "react-admin-pro",
-  "private": true,
-  "version": "1.0.0",
-  "description": "A modern React admin dashboard monorepo with multiple app targets, shared components, and best practices",
-  "scripts": {
-    "build": "turbo run build",
-    "dev": "turbo run dev",
-    "preview": "turbo run preview",
-    "dev:vite": "turbo run dev:vite",
-    "build:vite": "turbo run build:vite",
-    "preview:vite": "turbo run preview:vite",
-    "lint": "turbo run lint",
-    "catalog": "pnpx codemod pnpm/catalog",
-    "prepare": "husky"
-  },
-  "keywords": [
-    "react",
-    "admin",
-    "dashboard",
-    "monorepo",
-    "pnpm",
-    "typescript",
-    "tailwindcss",
-    "vite",
-    "next.js",
-    "rsbuild",
-    "tanstack"
-  ],
-  "author": "",
-  "license": "ISC",
-  "type": "module",
-  "packageManager": "pnpm@10.19.0",
-  "devDependencies": {
-    "@rap/commitlint-config": "workspace:*",
-    "commitlint": "catalog:",
-    "husky": "catalog:",
-    "turbo": "catalog:"
-  }
+	"name": "react-admin-pro",
+	"private": true,
+	"version": "1.0.0",
+	"description": "A modern React admin dashboard monorepo with multiple app targets, shared components, and best practices",
+	"scripts": {
+		"build": "turbo run build",
+		"dev": "turbo run dev",
+		"preview": "turbo run preview",
+		"dev:vite": "turbo run dev:vite",
+		"build:vite": "turbo run build:vite",
+		"preview:vite": "turbo run preview:vite",
+		"lint": "turbo run lint",
+		"catalog": "pnpx codemod pnpm/catalog",
+		"prepare": "husky"
+	},
+	"keywords": [
+		"react",
+		"admin",
+		"dashboard",
+		"monorepo",
+		"pnpm",
+		"typescript",
+		"tailwindcss",
+		"vite",
+		"next.js",
+		"rsbuild",
+		"tanstack"
+	],
+	"author": "",
+	"license": "ISC",
+	"type": "module",
+	"packageManager": "pnpm@10.19.0",
+	"devDependencies": {
+		"@rap/commitlint-config": "workspace:*",
+		"commitlint": "catalog:",
+		"husky": "catalog:",
+		"turbo": "catalog:"
+	}
 }

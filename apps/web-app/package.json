@@ -26,24 +26,6 @@
 		"lint:biome": "biome check --write",
 		"lint": " pnpm lint:biome && pnpm lint:eslint && pnpm lint:stylelint"
 	},
-	"dependencies": {
-		"@hookform/resolvers": "catalog:",
-		"@rap/components-base": "workspace:*",
-		"@rap/components-ui": "workspace:*",
-		"@rap/hooks": "workspace:*",
-		"@rap/styles": "workspace:*",
-		"@rap/utils": "workspace:*",
-		"@tanstack/react-query": "catalog:",
-		"@tanstack/react-query-devtools": "catalog:",
-		"@tanstack/react-router": "catalog:",
-		"lucide-react": "catalog:",
-		"react": "catalog:",
-		"react-dom": "catalog:",
-		"react-hook-form": "catalog:",
-		"sonner": "catalog:",
-		"zod": "catalog:",
-		"zustand": "catalog:"
-	},
 	"devDependencies": {
 		"@biomejs/biome": "catalog:",
 		"@rap/biome-config": "workspace:*",
@@ -63,5 +45,22 @@
 		"stylelint": "catalog:",
 		"typescript": "catalog:",
 		"vite": "catalog:"
+	},
+	"dependencies": {
+		"@hookform/resolvers": "catalog:",
+		"@rap/components-base": "workspace:*",
+		"@rap/components-ui": "workspace:*",
+		"@rap/hooks": "workspace:*",
+		"@rap/styles": "workspace:*",
+		"@rap/utils": "workspace:*",
+		"@tanstack/react-query": "catalog:",
+		"@tanstack/react-query-devtools": "catalog:",
+		"@tanstack/react-router": "catalog:",
+		"lucide-react": "catalog:",
+		"react": "catalog:",
+		"react-dom": "catalog:",
+		"react-hook-form": "catalog:",
+		"sonner": "catalog:",
+		"zod": "catalog:"
 	}
 }

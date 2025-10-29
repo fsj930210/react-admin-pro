@@ -1,23 +1,23 @@
 {
-  "name": "@rap/commitlint-config",
-  "version": "0.0.1",
-  "description": "共享的Commitlint配置，用于React Admin Pro项目的Git提交信息规范",
-  "keywords": [
-    "commitlint",
-    "git",
-    "commit-message",
-    "conventional-commits",
-    "code-quality"
-  ],
-  "type": "module",
-  "devDependencies": {
-    "@commitlint/config-conventional": "catalog:",
-    "@commitlint/types": "catalog:"
-  },
-  "exports": {
-    ".": {
-      "default": "./src/index.ts",
-      "types": "./src/index.ts"
-    }
-  }
+	"name": "@rap/commitlint-config",
+	"version": "0.0.1",
+	"description": "共享的Commitlint配置，用于React Admin Pro项目的Git提交信息规范",
+	"keywords": [
+		"commitlint",
+		"git",
+		"commit-message",
+		"conventional-commits",
+		"code-quality"
+	],
+	"type": "module",
+	"devDependencies": {
+		"@commitlint/config-conventional": "catalog:",
+		"@commitlint/types": "catalog:"
+	},
+	"exports": {
+		".": {
+			"default": "./src/index.ts",
+			"types": "./src/index.ts"
+		}
+	}
 }

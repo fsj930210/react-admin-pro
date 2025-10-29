@@ -14,6 +14,26 @@
 	"type": "module",
 	"private": true,
 	"scripts": {},
+	"devDependencies": {
+		"@biomejs/biome": "catalog:",
+		"@rap/biome-config": "workspace:*",
+		"@rap/eslint-config": "workspace:*",
+		"@rap/tailwindcss-config": "workspace:*",
+		"@rap/tsconfig": "workspace:*",
+		"@types/node": "catalog:",
+		"@types/react": "catalog:",
+		"@types/react-dom": "catalog:",
+		"eslint": "catalog:",
+		"eslint-config-biome": "catalog:",
+		"typescript": "catalog:"
+	},
+	"exports": {
+		"./*": "./src/components/*.tsx",
+		"./tree": "./src/components/tree/index.tsx",
+		"./tree/*": "./src/components/tree/*",
+		"./tree/features": "./src/components/tree/features/index.ts",
+		"./tree/types": "./src/components/tree/types.ts"
+	},
 	"dependencies": {
 		"@diceui/listbox": "catalog:",
 		"@dnd-kit/core": "catalog:",
@@ -46,9 +66,9 @@
 		"@radix-ui/react-toggle": "catalog:",
 		"@radix-ui/react-toggle-group": "catalog:",
 		"@radix-ui/react-tooltip": "catalog:",
-		"@rap/hooks": "workspace:^",
-		"@rap/lib": "workspace:^",
-		"@rap/styles": "workspace:^",
+		"@rap/hooks": "workspace:*",
+		"@rap/lib": "workspace:*",
+		"@rap/styles": "workspace:*",
 		"@rap/utils": "workspace:*",
 		"@tanstack/react-table": "catalog:",
 		"class-variance-authority": "catalog:",
@@ -65,27 +85,5 @@
 		"sonner": "catalog:",
 		"vaul": "catalog:",
 		"zod": "catalog:"
-	},
-	"devDependencies": {
-		"@biomejs/biome": "catalog:",
-		"@hookform/resolvers": "catalog:",
-		"@rap/biome-config": "workspace:*",
-		"@rap/eslint-config": "workspace:*",
-		"@rap/tailwindcss-config": "workspace:*",
-		"@rap/tsconfig": "workspace:^",
-		"@turbo/gen": "catalog:",
-		"@types/node": "catalog:",
-		"@types/react": "catalog:",
-		"@types/react-dom": "catalog:",
-		"eslint": "catalog:",
-		"eslint-config-biome": "catalog:",
-		"typescript": "catalog:"
-	},
-	"exports": {
-		"./*": "./src/components/*.tsx",
-		"./tree": "./src/components/tree/index.tsx",
-		"./tree/*": "./src/components/tree/*",
-		"./tree/features": "./src/components/tree/features/index.ts",
-		"./tree/types": "./src/components/tree/types.ts"
 	}
 }

@@ -1,26 +1,26 @@
 {
-  "name": "@rap/tailwindcss-config",
-  "version": "0.0.1",
-  "description": "Shared Tailwind CSS configuration for React Admin Pro",
-  "keywords": [
-    "tailwindcss",
-    "config",
-    "theming",
-    "design-system",
-    "css"
-  ],
-  "type": "module",
-  "devDependencies": {
-    "@tailwindcss/postcss": "catalog:",
-    "tailwindcss": "catalog:",
-    "tw-animate-css": "catalog:"
-  },
-  "files": [
-    "./src/tailwindcss.css"
-  ],
-  "exports": {
-    "./postcss": {
-      "default": "./src/postcss.config.ts"
-    }
-  }
+	"name": "@rap/tailwindcss-config",
+	"version": "0.0.1",
+	"description": "Shared Tailwind CSS configuration for React Admin Pro",
+	"keywords": [
+		"tailwindcss",
+		"config",
+		"theming",
+		"design-system",
+		"css"
+	],
+	"type": "module",
+	"devDependencies": {
+		"@tailwindcss/postcss": "catalog:",
+		"tailwindcss": "catalog:",
+		"tw-animate-css": "catalog:"
+	},
+	"files": [
+		"./src/tailwindcss.css"
+	],
+	"exports": {
+		"./postcss": {
+			"default": "./src/postcss.config.ts"
+		}
+	}
 }

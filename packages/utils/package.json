@@ -1,33 +1,33 @@
 {
-  "name": "@rap/utils",
-  "version": "0.0.1",
-  "description": "Utility functions for React Admin Pro",
-  "keywords": [
-    "utils",
-    "helpers",
-    "utility-functions",
-    "tailwind-merge",
-    "classnames"
-  ],
-  "private": true,
-  "type": "module",
-  "dependencies": {
-    "clsx": "catalog:",
-    "tailwind-merge": "catalog:"
-  },
-  "exports": {
-    ".": {
-      "types": "./src/utils.ts",
-      "default": "./src/utils.ts"
-    }
-  },
-  "devDependencies": {
-    "@biomejs/biome": "catalog:",
-    "@rap/biome-config": "workspace:*",
-    "@rap/eslint-config": "workspace:*",
-    "@rap/tsconfig": "workspace:*",
-    "eslint": "catalog:",
-    "eslint-config-biome": "catalog:",
-    "typescript": "catalog:"
-  }
+	"name": "@rap/utils",
+	"version": "0.0.1",
+	"description": "Utility functions for React Admin Pro",
+	"keywords": [
+		"utils",
+		"helpers",
+		"utility-functions",
+		"tailwind-merge",
+		"classnames"
+	],
+	"private": true,
+	"type": "module",
+	"dependencies": {
+		"clsx": "catalog:",
+		"tailwind-merge": "catalog:"
+	},
+	"exports": {
+		".": {
+			"types": "./src/utils.ts",
+			"default": "./src/utils.ts"
+		}
+	},
+	"devDependencies": {
+		"@biomejs/biome": "catalog:",
+		"@rap/biome-config": "workspace:*",
+		"@rap/eslint-config": "workspace:*",
+		"@rap/tsconfig": "workspace:*",
+		"eslint": "catalog:",
+		"eslint-config-biome": "catalog:",
+		"typescript": "catalog:"
+	}
 }

@@ -1,41 +1,37 @@
 {
-  "name": "@rap/rsbuild-config",
-  "version": "0.0.1",
-  "description": "共享的Rsbuild配置，用于React Admin Pro项目的构建优化",
-  "keywords": [
-    "rsbuild",
-    "bundler",
-    "build-tool",
-    "optimization",
-    "react",
-    "typescript"
-  ],
-  "devDependencies": {
-    "@rap/tsconfig": "workspace:*",
-    "@rsbuild/core": "catalog:",
-    "@rsbuild/plugin-react": "catalog:",
-    "@rsbuild/plugin-svgr": "catalog:",
-    "@rsbuild/plugin-type-check": "catalog:",
-    "@tanstack/router-plugin": "catalog:",
-    "code-inspector-plugin": "catalog:"
-  },
-  "type": "module",
-  "exports": {
-    "./base": {
-      "types": "./src/base.ts",
-      "default": "./src/base.ts"
-    },
-    "./development": {
-      "types": "./src/development.ts",
-      "default": "./src/development.ts"
-    },
-    "./production": {
-      "types": "./src/production.ts",
-      "default": "./src/production.ts"
-    }
-  },
-  "dependencies": {
-    "react": "catalog:",
-    "react-dom": "catalog:"
-  }
+	"name": "@rap/rsbuild-config",
+	"version": "0.0.1",
+	"description": "共享的Rsbuild配置，用于React Admin Pro项目的构建优化",
+	"keywords": [
+		"rsbuild",
+		"bundler",
+		"build-tool",
+		"optimization",
+		"react",
+		"typescript"
+	],
+	"devDependencies": {
+		"@rap/tsconfig": "workspace:*",
+		"@rsbuild/core": "catalog:",
+		"@rsbuild/plugin-react": "catalog:",
+		"@rsbuild/plugin-svgr": "catalog:",
+		"@rsbuild/plugin-type-check": "catalog:",
+		"@tanstack/router-plugin": "catalog:",
+		"code-inspector-plugin": "catalog:"
+	},
+	"type": "module",
+	"exports": {
+		"./base": {
+			"types": "./src/base.ts",
+			"default": "./src/base.ts"
+		},
+		"./development": {
+			"types": "./src/development.ts",
+			"default": "./src/development.ts"
+		},
+		"./production": {
+			"types": "./src/production.ts",
+			"default": "./src/production.ts"
+		}
+	}
 }

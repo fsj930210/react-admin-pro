@@ -1,41 +1,41 @@
 {
-  "name": "@rap/hooks",
-  "version": "0.0.1",
-  "description": "Reusable React hooks for React Admin Pro",
-  "keywords": [
-    "react",
-    "hooks",
-    "custom-hooks",
-    "react-hooks",
-    "utility-hooks"
-  ],
-  "private": true,
-  "type": "module",
-  "exports": {
-    "./use-mobile": {
-      "types": "./src/use-mobile.ts",
-      "default": "./src/use-mobile.ts"
-    },
-    "./use-zustand": {
-      "types": "./src/use-zustand.ts",
-      "default": "./src/use-zustand.ts"
-    }
-  },
-  "dependencies": {
-    "immer": "catalog:",
-    "lodash-es": "catalog:",
-    "react": "catalog:",
-    "zustand": "catalog:"
-  },
-  "devDependencies": {
-    "@biomejs/biome": "catalog:",
-    "@rap/biome-config": "workspace:*",
-    "@rap/eslint-config": "workspace:*",
-    "@rap/tsconfig": "workspace:*",
-    "@types/lodash-es": "catalog:",
-    "@types/react": "catalog:",
-    "eslint": "catalog:",
-    "eslint-config-biome": "catalog:",
-    "typescript": "catalog:"
-  }
+	"name": "@rap/hooks",
+	"version": "0.0.1",
+	"description": "Reusable React hooks for React Admin Pro",
+	"keywords": [
+		"react",
+		"hooks",
+		"custom-hooks",
+		"react-hooks",
+		"utility-hooks"
+	],
+	"private": true,
+	"type": "module",
+	"exports": {
+		"./use-mobile": {
+			"types": "./src/use-mobile.ts",
+			"default": "./src/use-mobile.ts"
+		},
+		"./use-zustand": {
+			"types": "./src/use-zustand.ts",
+			"default": "./src/use-zustand.ts"
+		}
+	},
+	"devDependencies": {
+		"@biomejs/biome": "catalog:",
+		"@rap/biome-config": "workspace:*",
+		"@rap/eslint-config": "workspace:*",
+		"@rap/tsconfig": "workspace:*",
+		"@types/lodash-es": "catalog:",
+		"@types/react": "catalog:",
+		"eslint": "catalog:",
+		"eslint-config-biome": "catalog:",
+		"typescript": "catalog:"
+	},
+	"dependencies": {
+		"immer": "catalog:",
+		"lodash-es": "catalog:",
+		"react": "catalog:",
+		"zustand": "catalog:"
+	}
 }

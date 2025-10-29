@@ -1,21 +1,21 @@
 {
-  "name": "@rap/styles",
-  "version": "0.0.1",
-  "description": "Shared styles and CSS utilities for React Admin Pro",
-  "keywords": [
-    "tailwindcss",
-    "css",
-    "styles",
-    "utility-classes",
-    "animations"
-  ],
-  "devDependencies": {
-    "tailwindcss": "catalog:",
-    "tw-animate-css": "catalog:"
-  },
-  "type": "module",
-  "exports": {
-    "./globals.css": "./src/globals.css",
-    "./utility.css": "./src/utility.css"
-  }
+	"name": "@rap/styles",
+	"version": "0.0.1",
+	"description": "Shared styles and CSS utilities for React Admin Pro",
+	"keywords": [
+		"tailwindcss",
+		"css",
+		"styles",
+		"utility-classes",
+		"animations"
+	],
+	"devDependencies": {
+		"tailwindcss": "catalog:",
+		"tw-animate-css": "catalog:"
+	},
+	"type": "module",
+	"exports": {
+		"./globals.css": "./src/globals.css",
+		"./utility.css": "./src/utility.css"
+	}
 }

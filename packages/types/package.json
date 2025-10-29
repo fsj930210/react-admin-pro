@@ -1,20 +1,20 @@
 {
-  "name": "@rap/types",
-  "version": "0.0.1",
-  "type": "module",
-  "exports": {
-    "./type-utils": {
-      "types": "./src/type-utils.ts",
-      "default": "./src/type-utils.ts"
-    }
-  },
-  "devDependencies": {
-    "@biomejs/biome": "catalog:",
-    "@rap/biome-config": "workspace:*",
-    "@rap/eslint-config": "workspace:*",
-    "@rap/tsconfig": "workspace:*",
-    "eslint": "catalog:",
-    "eslint-config-biome": "catalog:",
-    "typescript": "catalog:"
-  }
+	"name": "@rap/types",
+	"version": "0.0.1",
+	"type": "module",
+	"exports": {
+		"./type-utils": {
+			"types": "./src/type-utils.ts",
+			"default": "./src/type-utils.ts"
+		}
+	},
+	"devDependencies": {
+		"@biomejs/biome": "catalog:",
+		"@rap/biome-config": "workspace:*",
+		"@rap/eslint-config": "workspace:*",
+		"@rap/tsconfig": "workspace:*",
+		"eslint": "catalog:",
+		"eslint-config-biome": "catalog:",
+		"typescript": "catalog:"
+	}
 }
