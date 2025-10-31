@@ -11,6 +11,7 @@ export default ({ mode }) => {
 		server: {
 			port: Number(envConfig.RAP_WEB_APP_PORT) || 3000,
 			open: true,
+			allowedHosts: true,
 		},
 		build: {
 			rollupOptions: {

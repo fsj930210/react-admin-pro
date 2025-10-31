@@ -174,7 +174,7 @@ function Tree({ indent = 20, tree, className, ...props }: TreeProps) {
 }
 
 function DropIndicator({ info }: { info?: DropInfo }) {
-  const { indent } = useTreeContext();
+  const { indent  } = useTreeContext();
   if (!info) return null;
   const { rect, dropPosition, dropLevelOffset } = info;
   const left = rect.left + (dropLevelOffset || 0) * indent;

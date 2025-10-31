@@ -1,4 +1,5 @@
 import {
+	DropIndicator,
 	TreeCheckbox,
 	TreeExpandIcon,
 	TreeItem,
@@ -75,16 +76,19 @@ function TreeComponentPage() {
 		setTimeout(() => {
 			if (ghost.parentNode) ghost.parentNode.removeChild(ghost);
 		}, 0);
-
 		item.dragStart?.(e, item);
 		setDropInfo(null);
 	};
 
-	const handleDragOver = (e: React.DragEvent<HTMLElement>, item: TreeItemInstance) => {
+	const handleDragOver = (
+		e: React.DragEvent<HTMLElement>,
+		item: TreeItemInstance,
+		indent: number,
+	) => {
 		e.preventDefault();
 		e.stopPropagation();
 		if (!containerRef.current) return;
-		const res = item.dragOver?.(e, containerRef.current);
+		const res = item.dragOver?.(e, containerRef.current, null, indent);
 		setDropInfo(res as DropInfo | null);
 	};
 	const handleDrop = (
@@ -113,9 +117,9 @@ function TreeComponentPage() {
 		setDropInfo(null);
 	};
 	return (
-		<div ref={containerRef}>
+		<div ref={containerRef} className="relative">
 			<TreeRoot
-				nodes={treeNodes}
+				nodes={treeData}
 				features={[
 					expandableFeature({
 						defaultExpandedKeys: ["root"],
@@ -125,22 +129,25 @@ function TreeComponentPage() {
 					dndFeature({}),
 				]}
 			>
-				{({ tree }) => (
+				{({ tree, indent }) => (
 					<>
 						{tree.getVisibleItems().map((item) => (
-							<TreeItem
-								key={item.key}
-								item={item}
-								onDragStart={(e) => handleDragStart(e, item)}
-								onDragOver={(e) => handleDragOver(e, item)}
-								onDrop={(e) => handleDrop(e, item, tree)}
-								onDragEnd={(e) => handleDragEnd(e, item)}
-							>
-								<TreeExpandIcon item={item} />
-								<TreeCheckbox item={item} />
-								<TreeLabel item={item} />
+							<TreeItem key={item.key} item={item}>
+								<div
+									className="inline-flex items-center"
+									onDragStart={(e) => handleDragStart(e, item)}
+									onDragOver={(e) => handleDragOver(e, item, indent)}
+									onDrop={(e) => handleDrop(e, item, tree)}
+									onDragEnd={(e) => handleDragEnd(e, item)}
+									draggable
+								>
+									<TreeExpandIcon item={item} />
+									<TreeCheckbox item={item} />
+									<TreeLabel item={item} />
+								</div>
 							</TreeItem>
 						))}
+						<DropIndicator info={dropInfo as DropInfo} />
 					</>
 				)}
 			</TreeRoot>

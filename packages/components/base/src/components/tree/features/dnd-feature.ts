@@ -26,7 +26,8 @@ declare module "../types.ts" {
     dragOver?: (
       event: React.DragEvent<HTMLElement>,
       treeContainerEl: HTMLElement | null,
-      targetEl?: HTMLElement | null
+      targetEl?: HTMLElement | null,
+      indent?: number
     ) => DropInfo | null;
   }
 }
@@ -86,14 +87,15 @@ export function dndFeature({
         event: React.DragEvent<HTMLElement>,
         item: TreeItemInstance,
         treeContainerEl: HTMLElement | null,
-        targetEl?: HTMLElement | null
+        targetEl?: HTMLElement | null,
+        indent: number = 20
       ) => {
         const target =
           targetEl ||
           (document.querySelector(
             `[data-key="${item.key}"]`
           ) as HTMLElement | null);
-        dropInfo = updateDragPosition(event, target, treeContainerEl);
+        dropInfo = updateDragPosition(event, target, treeContainerEl, indent);
         onDragOver?.(event, item, dropInfo as DropInfo);
         return dropInfo;
       };
@@ -123,12 +125,10 @@ export function dndFeature({
       ) => {
         if (!startMouse || !draggingKey) return null;
         if (!targetEl || !treeContainerEl) return null;
-
         const targetRect = targetEl.getBoundingClientRect();
         const treeRect = treeContainerEl.getBoundingClientRect();
-
         // 水平层级偏移：基于 startMouse.x 与 indent（rc-tree 做法）
-        const rawLevel = (event.clientX - startMouse.x) / (indent || 0);
+        const rawLevel = (event.clientX - startMouse.x) / (indent || 1);
         const dropLevelOffset = Math.round(rawLevel);
 
         // 垂直位置判断：使用目标高度的 25% 作为前/inner/后 边界（rc-tree）
@@ -160,6 +160,7 @@ export function dndFeature({
           height: rectHeight,
         };
 
+
         return {
           dropPosition,
           dropLevelOffset,
@@ -182,8 +183,9 @@ export function dndFeature({
           item.dragOver = (
             e: React.DragEvent<HTMLElement>,
             treeContainerEl: HTMLElement | null,
-            targetEl?: HTMLElement | null
-          ) => handleDragOver(e, item, treeContainerEl, targetEl);
+            targetEl?: HTMLElement | null,
+            indent: number = 20
+          ) => handleDragOver(e, item, treeContainerEl, targetEl, indent);
           item.drop = (e: React.DragEvent<HTMLElement>) => handleDrop(e, item);
         });
       }

@@ -6,6 +6,7 @@ export function useTree(
 	defaultNodes: TreeNode[] = [],
 	options: CreateTreeOptions,
 ) {
+	// console.log(defaultNodes)
 	const treeRef = useRef<TreeInstance | null>(null);
 	if (!treeRef.current) {
 		treeRef.current = createTree(defaultNodes, options);

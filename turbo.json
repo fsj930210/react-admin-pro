@@ -11,9 +11,17 @@
 			"outputs": ["dist/**"]
 		},
 		"dev": {
-			"cache": false,
-			"persistent": true
-		},
+			"cache": false, 
+			"persistent": true, 
+
+		"inputs": [
+			"src/**/*", 
+			"rsbuild.config.ts", 
+			"next.config.ts",
+			"vite.config.ts",
+			"package.json"
+		]
+    },
 		"preview": {
 			"dependsOn": ["^preview"],
 			"inputs": ["$TURBO_DEFAULT$", ".env*"],

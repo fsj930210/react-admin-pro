@@ -4,16 +4,24 @@
 	"version": "1.0.0",
 	"description": "A modern React admin dashboard monorepo with multiple app targets, shared components, and best practices",
 	"scripts": {
-		"build": "turbo run build",
 		"dev": "turbo run dev",
+		"dev:web": "turbo run dev  --filter=@rap/web-app" ,
+		"dev:next": "turbo run dev  --filter=@rap/next-app" ,
+		"dev:web-vite": "turbo run dev:vite",
 		"preview": "turbo run preview",
-		"dev:vite": "turbo run dev:vite",
-		"build:vite": "turbo run build:vite",
-		"preview:vite": "turbo run preview:vite",
+		"preview:web": "turbo run dev --filter=@rap/web-app" ,
+		"preview:next": "turbo run dev --filter=@rap/next-app" ,
+		"preview:web-vite": "turbo run preview:vite",
+		"build": "turbo run build",
+		"build:web": "turbo run dev --filter=@rap/web-app" ,
+		"build:next": "turbo run dev --filter=@rap/next-app" ,
+		"build:web-vite": "turbo run build:vite",
 		"lint": "turbo run lint",
-		"catalog": "pnpx codemod pnpm/catalog",
 		"prepare": "husky"
 	},
+	"workspaces": [
+		"apps/*" 
+	  ],
 	"keywords": [
 		"react",
 		"admin",

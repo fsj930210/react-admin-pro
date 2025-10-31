@@ -129,7 +129,6 @@ export function moveNode(
   treeData: TreeNode[]
 ): TreeNode[] {
   if (dragKey === dropKey) return treeData;
-
   // Prevent dropping into own descendant
   if (isDescendant(dragKey, dropKey, treeData)) {
     return treeData;

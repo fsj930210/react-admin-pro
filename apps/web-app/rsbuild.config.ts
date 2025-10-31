@@ -23,6 +23,15 @@ const devConfig = defineRsbuildDevConfig({
 		open: true,
 		base: parsed.RAP_WEB_APP_BASE_URL,
 	},
+	tools: {
+		rspack: {
+			watchOptions: {
+				ignored: ["/node_modules/", "**/.turbo", "**/dist", "**/build"],
+				aggregateTimeout: 200,
+				poll: 100,
+			},
+		},
+	},
 });
 const prodConfig = defineRsbuildProdConfig({});
 export default mergeRsbuildConfig(baseConfig, devConfig, prodConfig);

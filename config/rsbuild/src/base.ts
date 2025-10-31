@@ -40,7 +40,10 @@ export function defineRsbuildBaseConfig(options: RsbuildConfig) {
 						target: "react",
 						autoCodeSplitting: true,
 						routesDirectory: path.resolve(srcDir, "pages"),
-						generatedRouteTree: path.resolve(srcDir, "routeTree.gen.ts"),
+						generatedRouteTree: path.resolve(
+							srcDir,
+							'routeTree.gen.ts'
+						  ),
 						routeFileIgnorePrefix: "-",
 						quoteStyle: "double",
 						semicolons: true,
