@@ -59,6 +59,7 @@ catalog:
   '@tanstack/react-router': ^1.133.36
   '@tanstack/react-router-devtools': ^1.133.36
   '@tanstack/react-table': ^8.21.3
+  '@tanstack/react-virtual': ^3.13.12
   '@tanstack/router-plugin': 1.133.32
   '@types/lodash-es': ^4.17.12
   '@types/node': 24.9.1

@@ -5,23 +5,23 @@
 	"description": "A modern React admin dashboard monorepo with multiple app targets, shared components, and best practices",
 	"scripts": {
 		"dev": "turbo run dev",
-		"dev:web": "turbo run dev  --filter=@rap/web-app" ,
-		"dev:next": "turbo run dev  --filter=@rap/next-app" ,
+		"dev:web": "turbo run dev  --filter=@rap/web-app",
+		"dev:next": "turbo run dev  --filter=@rap/next-app",
 		"dev:web-vite": "turbo run dev:vite",
 		"preview": "turbo run preview",
-		"preview:web": "turbo run dev --filter=@rap/web-app" ,
-		"preview:next": "turbo run dev --filter=@rap/next-app" ,
+		"preview:web": "turbo run dev --filter=@rap/web-app",
+		"preview:next": "turbo run dev --filter=@rap/next-app",
 		"preview:web-vite": "turbo run preview:vite",
 		"build": "turbo run build",
-		"build:web": "turbo run dev --filter=@rap/web-app" ,
-		"build:next": "turbo run dev --filter=@rap/next-app" ,
+		"build:web": "turbo run dev --filter=@rap/web-app",
+		"build:next": "turbo run dev --filter=@rap/next-app",
 		"build:web-vite": "turbo run build:vite",
 		"lint": "turbo run lint",
 		"prepare": "husky"
 	},
 	"workspaces": [
-		"apps/*" 
-	  ],
+		"apps/*"
+	],
 	"keywords": [
 		"react",
 		"admin",
@@ -38,7 +38,7 @@
 	"author": "",
 	"license": "ISC",
 	"type": "module",
-	"packageManager": "pnpm@10.19.0",
+	"packageManager": "pnpm@10.20.0",
 	"devDependencies": {
 		"@rap/commitlint-config": "workspace:*",
 		"commitlint": "catalog:",

@@ -1,15 +1,15 @@
 import { createContext, useContext } from "react";
-import type { TreeInstance, TreeItemInstance } from "./types";
+import type { TreeInstance } from "./types";
 
 interface TreeContextValue {
 	indent: number;
-	currentItem?: TreeItemInstance;
 	tree?: TreeInstance;
+	rowHeight?: number;
 }
 export const TreeContext = createContext<TreeContextValue>({
-	indent: 20,
-	currentItem: undefined,
+	indent: 24,
 	tree: undefined,
+	rowHeight: 24,
 });
 
 export function useTreeContext() {

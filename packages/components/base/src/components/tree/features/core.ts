@@ -98,7 +98,6 @@ export function createTree(nodes: TreeNode[], options: CreateTreeOptions) {
 				}
 			}
 			walk(tree.nodes);
-			console.log(result);
 			return result;
 		},
 		subscribe(cb: () => void) {

@@ -71,6 +71,7 @@
 		"@rap/styles": "workspace:*",
 		"@rap/utils": "workspace:*",
 		"@tanstack/react-table": "catalog:",
+		"@tanstack/react-virtual": "catalog:",
 		"class-variance-authority": "catalog:",
 		"cmdk": "catalog:",
 		"date-fns": "catalog:",

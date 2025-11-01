@@ -1,7 +1,7 @@
 import { Slot } from "@radix-ui/react-slot";
 import { cn } from "@rap/utils";
 import { ChevronDownIcon } from "lucide-react";
-import type { ReactNode } from "react";
+import { useRef, type ReactNode } from "react";
 import { Checkbox } from "../checkbox";
 import { TreeContext, useTreeContext } from "./tree-context";
 import type {
@@ -12,31 +12,7 @@ import type {
   TreeNode,
 } from "./types";
 import { useTree } from "./useTree";
-
-interface TreeRootProps {
-  nodes: TreeNode[];
-  features?: TreeFeature[];
-  children: ({
-    tree,
-    treeData,
-    indent,
-  }: {
-    tree: TreeInstance;
-    indent: number;
-    treeData: TreeNode[];
-  }) => ReactNode;
-  indent?: number;
-}
-function TreeRoot({ nodes, features, children, indent = 20 }: TreeRootProps) {
-  const tree = useTree(nodes, {
-    features: [...(features || [])],
-  });
-  return (
-    <TreeContext value={{ indent, tree }}>
-      {children({ tree, indent, treeData: nodes })}
-    </TreeContext>
-  );
-}
+import { useVirtualizer } from "@tanstack/react-virtual";
 
 interface TreeLabelProps
   extends Omit<React.HTMLAttributes<HTMLSpanElement>, "children"> {
@@ -49,7 +25,7 @@ function TreeLabel({ children, item, className, ...props }: TreeLabelProps) {
     <span
       data-slot="tree-item-label"
       className={cn(
-        "flex items-center gap-1 rounded-sm bg-background px-2 py-1.5 text-sm transition-colors data-[leaf=true]:ps-7 hover:bg-accent in-focus-visible:ring-[3px] in-focus-visible:ring-ring/50 in-data-[drag-target=true]:bg-accent in-data-[search-match=true]:bg-blue-400/20! in-data-[selected=true]:bg-accent in-data-[selected=true]:text-accent-foreground [&_svg]:pointer-events-none [&_svg]:shrink-0",
+        "flex items-center gap-1 rounded-sm  px-2  text-sm transition-colors data-[leaf=true]:ps-7 hover:bg-accent in-focus-visible:ring-[3px] in-focus-visible:ring-ring/50 in-data-[drag-target=true]:bg-accent in-data-[search-match=true]:bg-blue-400/20! in-data-[selected=true]:bg-accent in-data-[selected=true]:text-accent-foreground [&_svg]:pointer-events-none [&_svg]:shrink-0",
         className
       )}
       {...props}
@@ -84,11 +60,11 @@ function TreeExpandIcon({ children, item, className }: TreeExpandIconProps) {
     )
   );
 }
-interface TreeCheckIconProps extends React.HTMLAttributes<HTMLDivElement> {
+interface TreeCheckProps extends React.HTMLAttributes<HTMLDivElement> {
   item: TreeItemInstance;
   className?: string;
 }
-function TreeCheckbox({ item, className }: TreeCheckIconProps) {
+function TreeCheckbox({ item, className }: TreeCheckProps) {
   return (
     <Checkbox
       className={cn("size-4", className)}
@@ -116,7 +92,7 @@ function TreeItem({
   children,
   ...props
 }: Omit<TreeItemProps, "indent">) {
-  const { indent } = useTreeContext();
+  const { indent, rowHeight } = useTreeContext();
 
   const mergedProps = { ...props };
 
@@ -124,6 +100,7 @@ function TreeItem({
 
   const mergedStyle = {
     ...propStyle,
+    height: rowHeight,
     "--tree-padding": `${item.depth * indent}px`,
   } as React.CSSProperties;
 
@@ -135,10 +112,10 @@ function TreeItem({
       data-key={item.key}
       style={mergedStyle}
       className={cn(
-        "flex-items-center z-10 ps-(--tree-padding) outline-hidden select-none not-last:pb-0.5 focus:z-20 data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
+        "flex-items-center z-10 ps-(--tree-padding) outline-hidden select-none not-last:pb-0.5 focus:z-20 data-disabled:pointer-events-none data-disabled:opacity-50",
         className
       )}
-      data-leaf={!item.isLeaf || false}
+      data-leaf={item.isLeaf || false}
       data-selected={item.selected || false}
       aria-expanded={item.expanded}
       {...otherProps}
@@ -148,14 +125,107 @@ function TreeItem({
   );
 }
 
-interface TreeProps extends React.HTMLAttributes<HTMLDivElement> {
+interface TreeProps
+  extends Omit<React.HTMLAttributes<HTMLDivElement>, "children"> {
   indent?: number;
-  tree?: TreeInstance;
+  rowHeight?: number;
+  treeData: TreeNode[];
+  features?: TreeFeature[];
+  height: number;
+  overscan?: number;
+  children: (props: {
+    item: TreeItemInstance;
+    rowHeight: number;
+    indent: number;
+    tree: TreeInstance;
+  }) => ReactNode;
 }
 
-function Tree({ indent = 20, tree, className, ...props }: TreeProps) {
+function VirtualizedTree({
+  indent = 24,
+  treeData,
+  features,
+  className,
+  rowHeight = 24,
+  height,
+  overscan = 5,
+  children,
+  ...props
+}: TreeProps) {
   const mergedProps = { ...props };
+  const tree = useTree(treeData, {
+    features: [...(features || [])],
+  });
+  const parentRef = useRef<HTMLDivElement>(null);
+  const visibleNodes = tree.getVisibleItems() || [];
+  const rowVirtualizer = useVirtualizer({
+    count: visibleNodes.length,
+    getScrollElement: () => parentRef.current,
+    estimateSize: () => rowHeight,
+    overscan,
+  });
+  const { style: propStyle, ...otherProps } = mergedProps;
 
+  const mergedStyle = {
+    ...propStyle,
+    height: height,
+    overflow: "auto",
+    "--tree-indent": `${indent}px`,
+  } as React.CSSProperties;
+
+  return (
+    <TreeContext value={{ indent, tree, rowHeight }}>
+      <div
+        ref={parentRef}
+        data-slot="tree"
+        style={mergedStyle}
+        className={cn("overflow-auto", className)}
+        {...otherProps}
+      >
+        <div
+          style={{
+            position: "relative",
+            width: "100%",
+            height: `${rowVirtualizer.getTotalSize()}px`,
+          }}
+        >
+          {rowVirtualizer.getVirtualItems().map((virtualItem) => {
+            const item = visibleNodes[virtualItem.index];
+            return (
+              <div
+                key={item.key}
+                style={{
+                  position: "absolute",
+                  top: 0,
+                  left: 0,
+                  width: "100%",
+                  height: `${rowHeight}px`,
+                  transform: `translateY(${virtualItem.start}px)`,
+                }}
+              >
+                {children?.({ item, rowHeight, indent, tree })}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </TreeContext>
+  );
+}
+function Tree({
+  indent = 24,
+  treeData,
+  features,
+  className,
+  rowHeight = 24,
+  children,
+  ...props
+}: TreeProps) {
+  const mergedProps = { ...props };
+  const tree = useTree(treeData, {
+    features: [...(features || [])],
+  });
+  const parentRef = useRef<HTMLDivElement>(null);
   const { style: propStyle, ...otherProps } = mergedProps;
 
   const mergedStyle = {
@@ -164,17 +234,25 @@ function Tree({ indent = 20, tree, className, ...props }: TreeProps) {
   } as React.CSSProperties;
 
   return (
-    <div
-      data-slot="tree"
-      style={mergedStyle}
-      className={cn("flex flex-col", className)}
-      {...otherProps}
-    />
+    <TreeContext value={{ indent, tree, rowHeight }}>
+      <div
+        ref={parentRef}
+        data-slot="tree"
+        style={mergedStyle}
+        className={cn("flex flex-col overflow-auto", className)}
+        {...otherProps}
+      >
+        <div>
+          {tree.getVisibleItems().map((item) => {
+            return children?.({ item, rowHeight, indent, tree });
+          })}
+        </div>
+      </div>
+    </TreeContext>
   );
 }
-
 function DropIndicator({ info }: { info?: DropInfo }) {
-  const { indent  } = useTreeContext();
+  const { indent } = useTreeContext();
   if (!info) return null;
   const { rect, dropPosition, dropLevelOffset } = info;
   const left = rect.left + (dropLevelOffset || 0) * indent;
@@ -219,9 +297,9 @@ function DropIndicator({ info }: { info?: DropInfo }) {
 
 export {
   Tree,
+  VirtualizedTree,
   TreeItem,
   TreeLabel,
-  TreeRoot,
   TreeExpandIcon,
   TreeCheckbox,
   DropIndicator,
