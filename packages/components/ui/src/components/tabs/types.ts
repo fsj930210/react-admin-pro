@@ -5,4 +5,6 @@ export type LayoutTabItem = {
 
 export type LayoutTabItemProps = {
   tab: LayoutTabItem;
+  onClick: (value: string) => void;
+  active: boolean;
 };

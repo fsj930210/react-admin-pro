@@ -1,6 +1,9 @@
-// import { ChromeLikeTabItem } from "./chrome-like-tabs";
+import { ChromeLikeTabItem } from "./chrome-like-tabs";
+import { useState } from "react";
 import type { LayoutTabItem } from "./types";
-import { VscodeLikeTabs } from "./vscode-like-tabs";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useTabsScroll } from "./use-tabs-scroll";
+// import { VscodeLikeTabs } from "./vscode-like-tabs";
 // import { TrapezoidTabs } from "./trapezoid-tabs";
 
 const data: LayoutTabItem[] = [
@@ -75,11 +78,83 @@ const data: LayoutTabItem[] = [
 ];
 
 export function LayoutTabs() {
+  const [selectedTab, setSelectedTab] = useState<string>(data[0]?.value || '');
+  
+  // 使用组件内部的自定义hook处理滚动逻辑
+  const { 
+    containerRef,
+    tabsRef,
+    canScrollLeft,
+    canScrollRight,
+    handleWheel,
+    handleScroll,
+    handleTouchStart,
+    handleTouchMove,
+    scrollToLeft,
+    scrollRight,
+    scrollToTab
+  } = useTabsScroll();
+  
+  // 处理tab点击
+  const handleTabClick = (tabValue: string) => {
+    setSelectedTab(tabValue);
+    scrollToTab(tabValue);
+  };
+  
+  // 处理触摸结束事件
+  const handleTouchEnd = () => {
+    // 触摸结束时不需要特殊处理
+  };
+  
+
+
   return (
-    <ol className="flex-items-center h-10 pt-[1px] overflow-x-auto no-scrollbar bg-layout-tabs">
-      {data.map((item) => (
-        <VscodeLikeTabs key={item.value} tab={item} />
-      ))}
-    </ol>
+    <div className="relative h-9 bg-layout-tabs">
+      {/* 向前滚动按钮 */}
+      {canScrollLeft && (
+        <button
+          onClick={scrollToLeft}
+          className="absolute left-0 top-0 h-full px-2 flex-center bg-layout-tabs/90 hover:bg-layout-tabs z-10 transition-all duration-200 shadow-md hover:shadow-lg animate-pulse"
+          aria-label="滚动到左侧"
+        >
+          <ChevronLeft size={16} />
+        </button>
+      )}
+      
+      {/* 向后滚动按钮 */}
+      {canScrollRight && (
+        <button
+          onClick={scrollRight}
+          className="absolute right-0 top-0 h-full px-2 flex-center bg-layout-tabs/90 hover:bg-layout-tabs z-10 transition-all duration-200 shadow-md hover:shadow-lg animate-pulse"
+          aria-label="滚动到右侧"
+        >
+          <ChevronRight size={16} />
+        </button>
+      )}
+      
+      {/* 可滚动的容器 */}
+      <div
+          ref={containerRef}
+          className="h-full overflow-x-auto whitespace-nowrap no-scrollbar touch-action-pan-x"
+          style={{ touchAction: 'pan-x' }}
+          onWheel={handleWheel}
+          onScroll={handleScroll}
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
+        >
+        <ol ref={tabsRef} className="h-full flex items-center">
+          {data.map((item) => (
+            <ChromeLikeTabItem 
+              key={item.value}
+              tab={item} 
+              onClick={() => handleTabClick(item.value)}
+              active={selectedTab === item.value}
+              data-tab-value={item.value}
+            />
+          ))}
+        </ol>
+      </div>
+    </div>
   );
 }

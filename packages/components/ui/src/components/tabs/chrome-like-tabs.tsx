@@ -46,12 +46,14 @@ function ChromeTabBackground() {
     </svg>
   );
 }
-export function ChromeLikeTabItem({ tab }: LayoutTabItemProps) {
+export function ChromeLikeTabItem({ tab, onClick,active }: LayoutTabItemProps) {
   return (
     <li
       key={tab.value}
+      data-tab-value={tab.value}
+      onClick={() => onClick(tab.value)}
       className={cn("group relative size-full min-w-30 max-w-38 py-1 cursor-pointer", {
-        active: tab.value === "settings",
+        'active': active,
         'chrome-tab-item': true
       })}
     >

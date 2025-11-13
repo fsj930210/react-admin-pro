@@ -12,6 +12,17 @@
 
 }
 @theme {
+  --animate-pulse: pulse 2s infinite;
+  @keyframes pulse {
+    0%, 100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.7;
+    }
+  }
+}
+@theme {
   --dots-loader-size: calc(var(--spacing) * 1.5);
   --dots-shadow-size-1: calc(var(--dots-loader-size) * 2 - 2px);
   --dots-shadow-size-2: calc((var(--dots-loader-size) * 2 - 2px) * -1);
