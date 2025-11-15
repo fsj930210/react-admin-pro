@@ -8,6 +8,7 @@ packages:
 
 catalog:
   '@biomejs/biome': 2.3.1
+  '@biomejs/monorepo': git+https://github.com/biomejs/biome.git
   '@commitlint/config-conventional': ^20.0.0
   '@commitlint/types': ^20.0.0
   '@diceui/listbox': ^0.2.0

@@ -40,3 +40,13 @@
     }
   }
 }
+
+/* Drag and drop styles */
+.sortable-item[data-dragging] {
+  opacity: 0.5;
+}
+
+.sortable-item[data-disabled] {
+  cursor: default;
+  pointer-events: none;
+}

@@ -2,8 +2,8 @@
 
 import { cn } from "@rap/utils";
 import { X } from "lucide-react";
-import type { LayoutTabItemProps } from "./types";
-import './chrome-like-tabs.css'
+import type { LayoutTabItemProps } from "../../types";
+import './chrome-like-tab-item.css'
 
 function ChromeTabBackground() {
   return (
@@ -46,9 +46,9 @@ function ChromeTabBackground() {
     </svg>
   );
 }
-export function ChromeLikeTabItem({ tab, onClick,active }: LayoutTabItemProps) {
+export function ChromeLikeTabItem({ tab, onClick, active, onClose, ...props }: LayoutTabItemProps & React.HTMLAttributes<HTMLDivElement>) {
   return (
-    <li
+    <div
       key={tab.value}
       data-tab-value={tab.value}
       onClick={() => onClick(tab.value)}
@@ -56,6 +56,7 @@ export function ChromeLikeTabItem({ tab, onClick,active }: LayoutTabItemProps) {
         'active': active,
         'chrome-tab-item': true
       })}
+      {...props}
     >
       <div className={cn("absolute top-1/2 left-0 w-[1px] h-3.5 -translate-y-1/2 bg-layout-tabs-border group-[.active]:opacity-0 group-first:opacity-0", {
         'chrome-tab-item-divider': true
@@ -68,12 +69,19 @@ export function ChromeLikeTabItem({ tab, onClick,active }: LayoutTabItemProps) {
           <span className="flex-1 truncate text-sm" title={tab.label || ""}>
             {tab.label}
           </span>
-          <div className="flex-center size-4 hover:bg-layout-tabs-close-accent rounded-full cursor-pointer transition-all duration-20">
-            <X className="size-3.5" />
-          </div>
+          {onClose && (
+            <div 
+              className="flex-center size-4 hover:bg-layout-tabs-close-accent rounded-full cursor-pointer transition-all duration-20"
+              onClick={(e) => {
+                e.stopPropagation();
+                onClose(tab.value);
+              }}
+            >
+              <X className="size-3.5" />
+            </div>
+          )}
         </div>
-
       </div>
-    </li>
+    </div>
   );
 }

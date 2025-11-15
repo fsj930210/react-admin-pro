@@ -6,7 +6,7 @@ export interface UseTabsScrollOptions {
 
 export function useTabsScroll(options: UseTabsScrollOptions = {}) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const tabsRef = useRef<HTMLOListElement>(null);
+  const tabsRef = useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
   const SCROLL_STEP = options.scrollStep ?? 200;

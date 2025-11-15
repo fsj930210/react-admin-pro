@@ -9,6 +9,9 @@ catalogs:
     '@biomejs/biome':
       specifier: 2.3.1
       version: 2.3.1
+    '@biomejs/monorepo':
+      specifier: git+https://github.com/biomejs/biome.git
+      version: 0.0.0
     '@commitlint/config-conventional':
       specifier: ^20.0.0
       version: 20.0.0
@@ -317,6 +320,9 @@ importers:
 
   .:
     devDependencies:
+      '@biomejs/monorepo':
+        specifier: 'catalog:'
+        version: git+https://github.com/biomejs/biome.git#1fdcaf0336a92cde9becbf8cba502ac0091b2b1d
       '@rap/commitlint-config':
         specifier: workspace:*
         version: link:config/lint/commitlint
@@ -1250,6 +1256,11 @@ packages:
     engines: {node: '>=14.21.3'}
     cpu: [x64]
     os: [win32]
+
+  '@biomejs/monorepo@git+https://github.com/biomejs/biome.git#1fdcaf0336a92cde9becbf8cba502ac0091b2b1d':
+    resolution: {commit: 1fdcaf0336a92cde9becbf8cba502ac0091b2b1d, repo: https://github.com/biomejs/biome.git, type: git}
+    version: 0.0.0
+    engines: {pnpm: 10.19.0}
 
   '@cacheable/memoize@2.0.3':
     resolution: {integrity: sha512-hl9wfQgpiydhQEIv7fkjEzTGE+tcosCXLKFDO707wYJ/78FVOlowb36djex5GdbSyeHnG62pomYLMuV/OT8Pbw==}
@@ -5277,6 +5288,8 @@ snapshots:
 
   '@biomejs/cli-win32-x64@2.3.1':
     optional: true
+
+  '@biomejs/monorepo@git+https://github.com/biomejs/biome.git#1fdcaf0336a92cde9becbf8cba502ac0091b2b1d': {}
 
   '@cacheable/memoize@2.0.3':
     dependencies:

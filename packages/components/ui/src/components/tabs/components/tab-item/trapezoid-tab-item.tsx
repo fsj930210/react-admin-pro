@@ -1,10 +1,10 @@
 import { X } from "lucide-react";
-import type { LayoutTabItemProps } from "./types";
+import type { LayoutTabItemProps } from "../../types";
 import { cn } from "@rap/utils";
 
-export function TrapezoidTabs({ tab, onClick, active }: LayoutTabItemProps) {
+export function TrapezoidTabItem({ tab, onClick, active }: LayoutTabItemProps) {
   return (
-    <li 
+    <div
       key={tab.value} 
       className="h-full pt-1"
       data-tab-value={tab.value}
@@ -22,6 +22,6 @@ export function TrapezoidTabs({ tab, onClick, active }: LayoutTabItemProps) {
           <X className="size-3.5" />
         </div>
       </div>
-    </li>
+    </div>
   );
 }

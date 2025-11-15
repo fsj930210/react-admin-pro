@@ -1,10 +1,10 @@
 import { X } from "lucide-react";
-import type { LayoutTabItemProps } from "./types";
+import type { LayoutTabItemProps } from "../../types";
 import { cn } from "@rap/utils";
 
-export function VscodeLikeTabs({ tab , onClick, active}: LayoutTabItemProps) {
+export function VscodeLikeTabItem({ tab, onClick, active }: LayoutTabItemProps) {
   return (
-    <li 
+    <div
       key={tab.value}
       data-tab-value={tab.value}
       onClick={() => onClick(tab.value)}
@@ -19,6 +19,6 @@ export function VscodeLikeTabs({ tab , onClick, active}: LayoutTabItemProps) {
       <div className="flex-center size-5 opacity-0 hover:bg-layout-tabs-close-accent rounded-xs cursor-pointer transition-all duration-200 ease-in-out group-[.active]:opacity-100 group-hover:opacity-100">
         <X className="size-4" />
       </div>
-    </li>
+    </div>
   );
 }
