@@ -155,13 +155,12 @@ const data = {
     },
   ],
 };
-
+export interface Menu {}
+const menu = [];
 export type SidebarProps = React.ComponentProps<typeof BaseSidebar> & {
   logo?: string;
 };
-export function Sidebar({
-  ...props
-}: SidebarProps) {
+export function Sidebar({ ...props }: SidebarProps) {
   return (
     <BaseSidebar collapsible="icon" {...props}>
       <SidebarHeader>
