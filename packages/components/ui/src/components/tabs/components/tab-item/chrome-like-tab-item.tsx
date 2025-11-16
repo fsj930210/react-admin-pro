@@ -3,7 +3,7 @@
 import { cn } from "@rap/utils";
 import { X } from "lucide-react";
 import type { LayoutTabItemProps } from "../../types";
-import './chrome-like-tab-item.css'
+import "./chrome-like-tab-item.css";
 
 function ChromeTabBackground() {
   return (
@@ -46,39 +46,44 @@ function ChromeTabBackground() {
     </svg>
   );
 }
-export function ChromeLikeTabItem({ tab, onClick, active, onClose, ...props }: LayoutTabItemProps & React.HTMLAttributes<HTMLDivElement>) {
+export function ChromeLikeTabItem({
+  tab,
+  active,
+  onClose,
+  ...props
+}: LayoutTabItemProps & React.HTMLAttributes<HTMLDivElement>) {
   return (
     <div
-      key={tab.value}
-      data-tab-value={tab.value}
-      onClick={() => onClick(tab.value)}
-      className={cn("group relative size-full min-w-30 max-w-38 py-1 cursor-pointer", {
-        'active': active,
-        'chrome-tab-item': true
-      })}
+      className={cn("relative size-full min-w-30 max-w-38 py-1 cursor-pointer")}
       {...props}
     >
-      <div className={cn("absolute top-1/2 left-0 w-[1px] h-3.5 -translate-y-1/2 bg-layout-tabs-border group-[.active]:opacity-0 group-first:opacity-0", {
-        'chrome-tab-item-divider': true
-      })} />
+      <div
+        className={cn(
+          "absolute top-1/2 left-0 w-px h-3.5 -translate-y-1/2 bg-layout-tabs-border group-[.active]:opacity-0 group-first:opacity-0",
+          {
+            "layout-tabs-chrome-tab-item-divider": true,
+          }
+        )}
+      />
       <div className="absolute top-1 -left-2.5 -right-2.5 bottom-0 group-[.active]:text-layout-tabs-primary text-layout-tabs opacity-0 group-[.active]:opacity-100 overflow-hidden pointer-events-none transition-opacity duration-20">
         <ChromeTabBackground />
       </div>
       <div className="absolute top-0 bottom-0 left-0 right-0 p-1">
         <div className="flex-items-center h-full px-1 text-layout-tabs-foreground hover:text-layout-tabs-primary-foreground hover:bg-layout-tabs-accent group-[.active]:text-layout-tabs-primary-foreground group-[.active]:hover:text-layout-tabs-primary-foreground group-[.active]:hover:bg-layout-tabs-primary leading-none overflow-hidden rounded-md">
-          <span className="flex-1 truncate text-sm" title={tab.label || ""}>
-            {tab.label}
+          <span className="flex-1 truncate text-sm" title={tab.title || ""}>
+            {tab.title}
           </span>
           {onClose && (
-            <div 
+            <button
               className="flex-center size-4 hover:bg-layout-tabs-close-accent rounded-full cursor-pointer transition-all duration-20"
               onClick={(e) => {
                 e.stopPropagation();
-                onClose(tab.value);
+                onClose(tab.key);
               }}
+              type="button"
             >
               <X className="size-3.5" />
-            </div>
+            </button>
           )}
         </div>
       </div>

@@ -155,8 +155,8 @@ const data = {
     },
   ],
 };
-export interface Menu {}
-const menu = [];
+// export interface Menu {}
+// const menu = [];
 export type SidebarProps = React.ComponentProps<typeof BaseSidebar> & {
   logo?: string;
 };

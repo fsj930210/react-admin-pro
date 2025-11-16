@@ -1,12 +1,12 @@
-.chrome-tab-item.active + .chrome-tab-item{
-  .chrome-tab-item-divider {
+.layout-tabs-chrome-tab-item.active + .layout-tabs-chrome-tab-item {
+  .layout-tabs-chrome-tab-item-divider {
     opacity: 0;
   }
 }
-.chrome-tab-item {
-  &:last-child{
-    &::after{
-      content: '';
+.layout-tabs-chrome-tab-item {
+  &:last-child {
+    &::after {
+      content: "";
       position: absolute;
       top: 50%;
       transform: translateY(-50%);
@@ -20,33 +20,23 @@
   }
 }
 @media (hover: hover) {
-  .chrome-tab-item:not(.active) {
+  .layout-tabs-chrome-tab-item:not(.active) {
     &:hover {
-      .chrome-tab-item-divider {
+      .layout-tabs-chrome-tab-item-divider {
         opacity: 0;
       }
-      &:last-child{
-        &:hover{
-          &::after{
+      &:last-child {
+        &:hover {
+          &::after {
             background-color: transparent;
           }
         }
       }
-      & + .chrome-tab-item {
-        .chrome-tab-item-divider {
+      & + .layout-tabs-chrome-tab-item {
+        .layout-tabs-chrome-tab-item-divider {
           opacity: 0;
         }
       }
     }
   }
-}
-
-/* Drag and drop styles */
-.sortable-item[data-dragging] {
-  opacity: 0.5;
-}
-
-.sortable-item[data-disabled] {
-  cursor: default;
-  pointer-events: none;
 }

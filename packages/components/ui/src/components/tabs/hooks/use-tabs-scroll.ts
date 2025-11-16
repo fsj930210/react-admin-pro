@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback, useEffect } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 export interface UseTabsScrollOptions {
   scrollStep?: number;
@@ -19,7 +19,10 @@ export function useTabsScroll(options: UseTabsScrollOptions = {}) {
     const { scrollLeft, scrollWidth, clientWidth } = container;
     const hasScrollbar = scrollWidth > clientWidth;
     setCanScrollLeft(hasScrollbar && scrollLeft > 0);
-    setCanScrollRight(hasScrollbar && scrollLeft < scrollWidth - clientWidth - 1);
+    // 修复：增加容错值，确保可以滚动到最右边界
+    setCanScrollRight(
+      hasScrollbar && scrollLeft < scrollWidth - clientWidth - 20
+    );
   }, []);
 
   // 处理鼠标滚轮事件
@@ -29,7 +32,7 @@ export function useTabsScroll(options: UseTabsScrollOptions = {}) {
 
     container.scrollTo({
       left: container.scrollLeft + event.deltaY,
-      behavior: 'smooth'
+      behavior: "smooth",
     });
   }, []);
 
@@ -38,23 +41,29 @@ export function useTabsScroll(options: UseTabsScrollOptions = {}) {
   const [scrollLeft, setScrollLeft] = useState(0);
 
   // 处理触摸事件
-  const handleTouchStart = useCallback((event: React.TouchEvent<HTMLDivElement>) => {
-    const container = containerRef.current;
-    if (!container) return;
-    
-    setStartX(event.touches[0].pageX - container.offsetLeft);
-    setScrollLeft(container.scrollLeft);
-  }, []);
+  const handleTouchStart = useCallback(
+    (event: React.TouchEvent<HTMLDivElement>) => {
+      const container = containerRef.current;
+      if (!container) return;
 
-  const handleTouchMove = useCallback((event: React.TouchEvent<HTMLDivElement>) => {
-    const container = containerRef.current;
-    if (!container) return;
-    
-    const x = event.touches[0].pageX - container.offsetLeft;
-    const walk = (x - startX) * 2;
-    
-    container.scrollLeft = scrollLeft - walk;
-  }, [startX, scrollLeft]);
+      setStartX(event.touches[0].pageX - container.offsetLeft);
+      setScrollLeft(container.scrollLeft);
+    },
+    []
+  );
+
+  const handleTouchMove = useCallback(
+    (event: React.TouchEvent<HTMLDivElement>) => {
+      const container = containerRef.current;
+      if (!container) return;
+
+      const x = event.touches[0].pageX - container.offsetLeft;
+      const walk = (x - startX) * 2;
+
+      container.scrollLeft = scrollLeft - walk;
+    },
+    [startX, scrollLeft]
+  );
 
   // 向前滚动
   const scrollToLeft = useCallback(() => {
@@ -63,7 +72,7 @@ export function useTabsScroll(options: UseTabsScrollOptions = {}) {
 
     container.scrollTo({
       left: container.scrollLeft - SCROLL_STEP,
-      behavior: 'smooth'
+      behavior: "smooth",
     });
   }, [SCROLL_STEP]);
 
@@ -74,59 +83,64 @@ export function useTabsScroll(options: UseTabsScrollOptions = {}) {
 
     container.scrollTo({
       left: container.scrollLeft + SCROLL_STEP,
-      behavior: 'smooth'
+      behavior: "smooth",
     });
   }, [SCROLL_STEP]);
 
   // 滚动到指定的tab
-  const scrollToTab = useCallback((tabValue: string) => {
-    const tabElement = document.querySelector(`[data-tab-value="${tabValue}"]`);
-    const container = containerRef.current;
-    
-    if (!tabElement || !container) return;
+  const scrollToTab = useCallback(
+    (tabKey: string) => {
+      const tabElement = document.querySelector(`[data-tab-key="${tabKey}"]`);
+      const container = containerRef.current;
 
-    const containerRect = container.getBoundingClientRect();
-    const tabRect = tabElement.getBoundingClientRect();
+      if (!tabElement || !container) return;
 
-    // 判断tab是否完全在可视区域内
-    const isFullyVisible = tabRect.left >= containerRect.left && 
-                         tabRect.right <= containerRect.right;
+      const containerRect = container.getBoundingClientRect();
+      const tabRect = tabElement.getBoundingClientRect();
 
-    // 判断tab是否部分在可视区域内
-    const isPartiallyVisible = tabRect.left < containerRect.right && 
-                            tabRect.right > containerRect.left;
+      // 判断tab是否完全在可视区域内
+      const isFullyVisible =
+        tabRect.left >= containerRect.left &&
+        tabRect.right <= containerRect.right;
 
-    if (isFullyVisible) {
-      // 如果完全可见，不滚动
-      return;
-    } else if (isPartiallyVisible) {
-      // 如果部分可见，滚动到让它完全可见
-      if (tabRect.left < containerRect.left) {
-        // tab左侧超出容器，向左滚动
-        container.scrollTo({
-          left: container.scrollLeft + (tabRect.left - containerRect.left),
-          behavior: 'smooth'
-        });
+      // 判断tab是否部分在可视区域内
+      const isPartiallyVisible =
+        tabRect.left < containerRect.right &&
+        tabRect.right > containerRect.left;
+
+      if (isFullyVisible) {
+        // 如果完全可见，不滚动
+        return;
+      } else if (isPartiallyVisible) {
+        // 如果部分可见，滚动到让它完全可见
+        if (tabRect.left < containerRect.left) {
+          // tab左侧超出容器，向左滚动
+          container.scrollTo({
+            left: container.scrollLeft + (tabRect.left - containerRect.left),
+            behavior: "smooth",
+          });
+        } else {
+          // tab右侧超出容器，向右滚动
+          container.scrollTo({
+            left: container.scrollLeft + (tabRect.right - containerRect.right),
+            behavior: "smooth",
+          });
+        }
       } else {
-        // tab右侧超出容器，向右滚动
-        container.scrollTo({
-          left: container.scrollLeft + (tabRect.right - containerRect.right),
-          behavior: 'smooth'
+        // 如果完全不可见，滚动到中间
+        tabElement.scrollIntoView({
+          behavior: "smooth",
+          block: "nearest",
+          inline: "center",
         });
       }
-    } else {
-      // 如果完全不可见，滚动到中间
-      tabElement.scrollIntoView({ 
-        behavior: 'smooth', 
-        block: 'nearest', 
-        inline: 'center' 
+
+      requestAnimationFrame(() => {
+        checkScrollability();
       });
-    }
-    
-    requestAnimationFrame(() => {
-      checkScrollability();
-    });
-  }, [checkScrollability]);
+    },
+    [checkScrollability]
+  );
 
   // 监听滚动事件
   const handleScroll = useCallback(() => {
@@ -162,6 +176,6 @@ export function useTabsScroll(options: UseTabsScrollOptions = {}) {
     handleTouchMove,
     scrollToLeft,
     scrollRight,
-    scrollToTab
+    scrollToTab,
   };
 }

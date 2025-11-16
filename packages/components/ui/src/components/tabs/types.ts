@@ -1,24 +1,20 @@
+import type { RefAttributes } from "react";
+export type TabType = "chrome" | "vscode" | "classic" | "card" | "trapezoid";
 export type LayoutTabItem = {
-  label: string;
-  value: string;
-  fixed?: boolean;
-  reloadable?: boolean;
-  openInNewTab?: boolean;
-  maximizable?: boolean;
-  url?: string;
+  title: string;
+  key: string;
+  pinned?: boolean;
+  closable?: boolean;
+  disabled?: boolean;
+  icon?: string;
 };
 
-import type { RefAttributes } from 'react';
-
-export type LayoutTabsProps = {
-  /** 是否启用标签页拖拽排序 */
-  sortable?: boolean;
-};
-
+export type UpdateTabsFunc = (
+  fn: (oldTabs: LayoutTabItem[]) => LayoutTabItem[]
+) => void;
 export type LayoutTabItemProps = {
   tab: LayoutTabItem;
   active: boolean;
-  onClick: (value: string) => void;
   onClose?: (value: string) => void;
   onPin?: (value: string) => void;
   onReload?: (value: string) => void;
@@ -27,11 +23,11 @@ export type LayoutTabItemProps = {
 } & RefAttributes<HTMLDivElement>;
 
 export type TabsContextMenuAction =
-  | 'close'
-  | 'pin'
-  | 'closeLeft'
-  | 'closeRight'
-  | 'closeOthers'
-  | 'reload'
-  | 'openInNewTab'
-  | 'maximize';
+  | "close"
+  | "pin"
+  | "closeLeft"
+  | "closeRight"
+  | "closeOthers"
+  | "reload"
+  | "openInNewTab"
+  | "maximize";

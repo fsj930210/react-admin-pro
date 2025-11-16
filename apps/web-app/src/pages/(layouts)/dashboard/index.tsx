@@ -3,7 +3,6 @@
 import { Button } from "@rap/components-base/button";
 import { createFileRoute } from "@tanstack/react-router";
 import { useAppConfigSelector } from "@/store/app-config";
-import { SortableDemo } from "@rap/components-ui/tabs";
 export const Route = createFileRoute("/(layouts)/dashboard/")({
 	component: DashboardPage,
 });
@@ -50,7 +49,6 @@ export function DashboardPage() {
 					{count} -
 				</Button>
 			</div>
-			<SortableDemo />
 		</div>
 	);
 }

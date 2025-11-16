@@ -42,11 +42,17 @@
     100% 50%,
     calc(100% - 10px) 100%,
     0 100%,
-   10px 50%
+    10px 50%
   );
 }
 @utility ribbon-breadcrumb-first {
-  clip-path: polygon(0 0, calc(100% - 10px) 0,  100% 50%, calc(100% - 10px) 100%, 0 100%);
+  clip-path: polygon(
+    0 0,
+    calc(100% - 10px) 0,
+    100% 50%,
+    calc(100% - 10px) 100%,
+    0 100%
+  );
 }
 @utility ribbon-breadcrumb-last {
   clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%, 10px 50%);
@@ -57,9 +63,36 @@
 }
 @utility capsule-breadcrumb {
   mask: radial-gradient(
-            circle 0.5lh at 0 50%,
-            #0000 calc(0.5lh + 0.11em),
-            #000 0
-          )
-          0 0;
+      circle 0.5lh at 0 50%,
+      #0000 calc(0.5lh + 0.11em),
+      #000 0
+    )
+    0 0;
+}
+
+@utility animate-arrow-left {
+  animation: slideArrowLeft 1s ease-in-out infinite;
+}
+@utility animate-arrow-right {
+  animation: slideArrowRight 1s ease-in-out infinite;
+}
+
+@keyframes slideArrowLeft {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  50% {
+    transform: translateX(-2px);
+  }
+}
+
+@keyframes slideArrowRight {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  50% {
+    transform: translateX(2px);
+  }
 }
