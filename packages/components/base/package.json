@@ -32,7 +32,8 @@
 		"./tree": "./src/components/tree/index.tsx",
 		"./tree/*": "./src/components/tree/*",
 		"./tree/features": "./src/components/tree/features/index.ts",
-		"./tree/types": "./src/components/tree/types.ts"
+		"./tree/types": "./src/components/tree/types.ts",
+		"./resizable-sidebar": "./src/components/resizable-sidebar/index.tsx"
 	},
 	"dependencies": {
 		"@diceui/listbox": "catalog:",
