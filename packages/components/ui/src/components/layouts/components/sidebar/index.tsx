@@ -6,7 +6,7 @@ import {
   SidebarFooter,
   SidebarHeader,
   SidebarRail,
-} from "@rap/components-base/sidebar";
+} from "@rap/components-base/resizable-sidebar";
 import {
   AudioWaveform,
   BookOpen,

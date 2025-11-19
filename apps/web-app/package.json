@@ -42,6 +42,7 @@
 		"@types/react-dom": "catalog:",
 		"eslint": "catalog:",
 		"eslint-config-biome": "catalog:",
+		"msw": "catalog:",
 		"stylelint": "catalog:",
 		"typescript": "catalog:",
 		"vite": "catalog:"
