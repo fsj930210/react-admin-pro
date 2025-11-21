@@ -29,7 +29,7 @@ const TabItemStrategies = {
 };
 
 export function LayoutTabs({
-  sortable = false,
+  sortable = true,
   tabType = "card",
   defaultActiveTab,
 }: LayoutTabsProps) {
@@ -77,7 +77,11 @@ export function LayoutTabs({
     TabItemStrategies[tabType] || TabItemStrategies.chrome;
 
   return (
-    <div className="relative flex h-9 bg-layout-tabs">
+    <div
+      className={cn("relative flex h-9 bg-layout-tabs", {
+        'border-b-layout-tabs-border border-b': tabType === 'card' || tabType === 'classic',
+      })}
+    >
       <ScrollButton
         canScroll={canScrollLeft}
         direction="left"
@@ -177,3 +181,4 @@ export function LayoutTabs({
 export type { useTabs as UseTabsReturn } from "./hooks/use-tabs";
 // 导出额外的功能供外部使用
 export { useTabs } from "./hooks/use-tabs";
+

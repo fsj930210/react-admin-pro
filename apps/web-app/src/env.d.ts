@@ -14,6 +14,7 @@ interface ImportMetaEnv {
 	readonly RAP_WEB_APP_HOME_PATH: string;
 	readonly RAP_WEB_APP_PORT: string;
 	readonly RAP_WEB_BASE_API_PREFIX: string;
+	readonly RAP_WEB_APP_ENABLE_MOCK: string;
 }
 
 interface ImportMeta {

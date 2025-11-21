@@ -1,4 +1,4 @@
-import { SidebarMenu, SidebarMenuItem } from "@rap/components-base/sidebar";
+import { SidebarMenu, SidebarMenuItem } from "@rap/components-base/resizable-sidebar";
 import { User } from "../user";
 
 export function SidebarUser({

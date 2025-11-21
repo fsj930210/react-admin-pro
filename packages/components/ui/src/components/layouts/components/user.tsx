@@ -12,7 +12,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@rap/components-base/dropdown-menu";
-import { SidebarMenuButton } from "@rap/components-base/sidebar";
+import { SidebarMenuButton } from "@rap/components-base/resizable-sidebar";
 import { useIsMobile } from "@rap/hooks/use-mobile";
 import { cn } from "@rap/utils";
 import {

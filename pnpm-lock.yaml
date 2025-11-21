@@ -247,7 +247,7 @@ catalogs:
       specifier: 0.554.0
       version: 0.554.0
     msw:
-      specifier: ^2.12.2
+      specifier: 2.12.2
       version: 2.12.2
     next:
       specifier: ^16.0.3
@@ -447,6 +447,9 @@ importers:
       '@rap/hooks':
         specifier: workspace:*
         version: link:../../packages/hooks
+      '@rap/mock-config':
+        specifier: workspace:*
+        version: link:../../config/mock
       '@rap/styles':
         specifier: workspace:*
         version: link:../../packages/styles
@@ -598,6 +601,15 @@ importers:
       stylelint-order:
         specifier: 'catalog:'
         version: 7.0.0(stylelint@16.25.0(typescript@5.9.3))
+
+  config/mock:
+    devDependencies:
+      '@rap/tsconfig':
+        specifier: workspace:*
+        version: link:../tsconfig
+      msw:
+        specifier: 'catalog:'
+        version: 2.12.2(@types/node@24.10.1)(typescript@5.9.3)
 
   config/rsbuild:
     devDependencies:

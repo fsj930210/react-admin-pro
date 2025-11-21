@@ -173,7 +173,7 @@ const SidebarProvider = React.forwardRef<
     );
 
     return (
-      <SidebarContext.Provider value={contextValue}>
+      <SidebarContext value={contextValue}>
         <TooltipProvider delayDuration={0}>
           <div
             style={
@@ -194,7 +194,7 @@ const SidebarProvider = React.forwardRef<
             {children}
           </div>
         </TooltipProvider>
-      </SidebarContext.Provider>
+      </SidebarContext>
     );
   },
 );
@@ -284,7 +284,7 @@ const Sidebar = React.forwardRef<
               ? "group-data-[collapsible=icon]:w-[calc(var(--sidebar-width-icon)+(--spacing(4)))]"
               : "group-data-[collapsible=icon]:w-(--sidebar-width-icon)",
             //* set duration to 0 for all elements when dragging
-            "group-data-[dragging=true]:duration-0! group-data-[dragging=true]_*:!duration-0",
+            "group-data-[dragging=true]:duration-0! group-data-[dragging=true]_*:duration-0!",
           )}
         />
         <div
@@ -298,7 +298,7 @@ const Sidebar = React.forwardRef<
               ? "p-2 group-data-[collapsible=icon]:w-[calc(var(--sidebar-width-icon)+(--spacing(4))+2px)]"
               : "group-data-[collapsible=icon]:w-(--sidebar-width-icon) group-data-[side=left]:border-r group-data-[side=right]:border-l",
             //* set duration to 0 for all elements when dragging
-            "group-data-[dragging=true]:duration-0! group-data-[dragging=true]_*:!duration-0",
+            "group-data-[dragging=true]:duration-0! group-data-[dragging=true]_*:duration-0!",
             className,
           )}
           {...props}
@@ -387,7 +387,7 @@ const SidebarRail = React.forwardRef<
       onMouseDown={handleMouseDown}
       title="Toggle Sidebar"
       className={cn(
-        "absolute inset-y-0 z-20 hidden w-4 -translate-x-1/2 transition-all ease-linear after:absolute after:inset-y-0 after:left-1/2 after:w-[2px] hover:after:bg-sidebar-border group-data-[side=left]:-right-4 group-data-[side=right]:left-0 sm:flex",
+        "absolute inset-y-0 z-20 hidden w-4 -translate-x-1/2 transition-all ease-linear after:absolute after:inset-y-0 after:left-1/2 after:w-0.5 hover:after:bg-sidebar-border group-data-[side=left]:-right-4 group-data-[side=right]:left-0 sm:flex",
         "in-data-[side=left]:cursor-w-resize in-data-[side=right]:cursor-e-resize",
         "[[data-side=left][data-state=collapsed]_&]:cursor-e-resize [[data-side=right][data-state=collapsed]_&]:cursor-w-resize",
         "group-data-[collapsible=offcanvas]:translate-x-0 group-data-[collapsible=offcanvas]:after:left-full hover:group-data-[collapsible=offcanvas]:bg-sidebar",

@@ -12,7 +12,7 @@ import {
   SidebarMenuSub,
   SidebarMenuSubButton,
   SidebarMenuSubItem,
-} from "@rap/components-base/sidebar";
+} from "@rap/components-base/resizable-sidebar";
 import { ChevronRight, type LucideIcon } from "lucide-react";
 
 export function SidebarMain({

@@ -70,29 +70,3 @@
     0 0;
 }
 
-@utility animate-arrow-left {
-  animation: slideArrowLeft 1s ease-in-out infinite;
-}
-@utility animate-arrow-right {
-  animation: slideArrowRight 1s ease-in-out infinite;
-}
-
-@keyframes slideArrowLeft {
-  0%,
-  100% {
-    transform: translateX(0);
-  }
-  50% {
-    transform: translateX(-2px);
-  }
-}
-
-@keyframes slideArrowRight {
-  0%,
-  100% {
-    transform: translateX(0);
-  }
-  50% {
-    transform: translateX(2px);
-  }
-}

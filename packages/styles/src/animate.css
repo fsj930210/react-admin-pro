@@ -32,7 +32,7 @@
   --dots-loader-color-3: #6d7;
   --dots-loader-color-4: #4ae; */
   --dots-loader-color-1: var(--color-primary);
-  --dots-loader-color-2: var(--color-primary);  
+  --dots-loader-color-2: var(--color-primary);
   --dots-loader-color-3: var(--color-primary);
   --dots-loader-color-4: var(--color-primary);
   --shadow-dots-loader: var(--dots-loader-color-1) var(--dots-shadow-size-2) var(--dots-shadow-size-2) 0 var(--dots-shadow-size-3), var(--dots-loader-color-2) var(--dots-shadow-size-1) var(--dots-shadow-size-2) 0 var(--dots-shadow-size-3), var(--dots-loader-color-3) var(--dots-shadow-size-1) var(--dots-shadow-size-1) 0 var(--dots-shadow-size-3), var(--dots-loader-color-4) var(--dots-shadow-size-2) var(--dots-shadow-size-1) 0 var(--dots-shadow-size-3);
@@ -76,6 +76,32 @@
     }
     100% {
       box-shadow: var(--dots-loader-color-1) var(--dots-shadow-size-2) var(--dots-shadow-size-2) 0 var(--dots-shadow-size-3), var(--dots-loader-color-2) var(--dots-shadow-size-1) var(--dots-shadow-size-2) 0 var(--dots-shadow-size-3), var(--dots-loader-color-3) var(--dots-shadow-size-1) var(--dots-shadow-size-1) 0 var(--dots-shadow-size-3), var(--dots-loader-color-4) var(--dots-shadow-size-2) var(--dots-shadow-size-1) 0 var(--dots-shadow-size-3);
+    }
+  }
+}
+
+
+@theme {
+  --animate-arrow-left: arrow-left 1s ease-in-out infinite;
+  @keyframes arrow-left {
+    0%,
+    100% {
+      transform: translateX(0);
+    }
+    50% {
+      transform: translateX(-2px);
+    }
+  }
+}
+@theme {
+  --animate-arrow-right: arrow-right 1s ease-in-out infinite;
+  @keyframes arrow-right {
+    0%,
+    100% {
+      transform: translateX(0);
+    }
+    50% {
+      transform: translateX(2px);
     }
   }
 }
