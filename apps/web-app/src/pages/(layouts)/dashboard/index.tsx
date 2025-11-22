@@ -17,7 +17,7 @@ export function DashboardPage() {
 
 	return (
 		<div className="size-full">
-			showTabs: {layoutConfig?.showTabs + ""}
+			showTabs: {`${layoutConfig?.showTabs}`}
 			<div>
 				<Button
 					onClick={() =>

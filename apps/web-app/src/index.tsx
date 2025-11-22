@@ -1,5 +1,5 @@
-import { APP_BASE_PATH } from '@/config';
 import { initMock } from "@rap/mock-config";
+import { APP_BASE_PATH } from "@/config";
 import "@rap/styles/globals.css";
 import React from "react";
 import ReactDOM from "react-dom/client";
@@ -12,11 +12,11 @@ if (rootEl) {
 	initMock(mockHandlers, {
 		startOptions: {
 			serviceWorker: {
-				url: `${APP_BASE_PATH}/mockServiceWorker.js`
-			}
+				url: `${APP_BASE_PATH}/mockServiceWorker.js`,
+			},
 		},
-		enableMock: import.meta.env.RAP_WEB_APP_ENABLE_MOCK || '',
-		currentEnvironment: import.meta.env.MODE || 'development'
+		enableMock: import.meta.env.RAP_WEB_APP_ENABLE_MOCK || "",
+		currentEnvironment: import.meta.env.MODE || "development",
 	}).then(() => {
 		root.render(
 			<React.StrictMode>
@@ -24,5 +24,4 @@ if (rootEl) {
 			</React.StrictMode>,
 		);
 	});
-
 }

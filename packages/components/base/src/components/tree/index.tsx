@@ -1,7 +1,8 @@
 import { Slot } from "@radix-ui/react-slot";
 import { cn } from "@rap/utils";
+import { useVirtualizer } from "@tanstack/react-virtual";
 import { ChevronDownIcon } from "lucide-react";
-import { useRef, type ReactNode } from "react";
+import { type ReactNode, useRef } from "react";
 import { Checkbox } from "../checkbox";
 import { TreeContext, useTreeContext } from "./tree-context";
 import type {
@@ -12,7 +13,6 @@ import type {
   TreeNode,
 } from "./types";
 import { useTree } from "./useTree";
-import { useVirtualizer } from "@tanstack/react-virtual";
 
 interface TreeLabelProps
   extends Omit<React.HTMLAttributes<HTMLSpanElement>, "children"> {

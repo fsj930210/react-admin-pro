@@ -1,8 +1,8 @@
-import { APP_BASE_PATH } from "@/config";
 import { SidebarInset, SidebarProvider } from "@rap/components-base/resizable-sidebar";
 import { Breadcrumb, Footer, Sidebar } from "@rap/components-ui/layouts";
 import { LayoutTabs } from "@rap/components-ui/tabs";
 import { createFileRoute, Outlet } from "@tanstack/react-router";
+import { APP_BASE_PATH } from "@/config";
 
 export const Route = createFileRoute("/(layouts)")({
 	component: Layout,
@@ -10,7 +10,7 @@ export const Route = createFileRoute("/(layouts)")({
 
 function Layout() {
 	return (
-		<SidebarProvider defaultOpen >
+		<SidebarProvider defaultOpen>
 			<Sidebar logo={`${APP_BASE_PATH}/logo.svg`} />
 			<SidebarInset className="overflow-x-hidden min-w-0">
 				<LayoutTabs />
