@@ -325,7 +325,7 @@ importers:
     devDependencies:
       '@biomejs/monorepo':
         specifier: 'catalog:'
-        version: https://codeload.github.com/biomejs/biome/tar.gz/182ecdc2736a54073fe79b4d3e1eaf793b73afa6
+        version: git+https://github.com/biomejs/biome.git#182ecdc2736a54073fe79b4d3e1eaf793b73afa6
       '@rap/commitlint-config':
         specifier: workspace:*
         version: link:config/lint/commitlint
@@ -1275,8 +1275,8 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  '@biomejs/monorepo@https://codeload.github.com/biomejs/biome/tar.gz/182ecdc2736a54073fe79b4d3e1eaf793b73afa6':
-    resolution: {tarball: https://codeload.github.com/biomejs/biome/tar.gz/182ecdc2736a54073fe79b4d3e1eaf793b73afa6}
+  '@biomejs/monorepo@git+https://github.com/biomejs/biome.git#182ecdc2736a54073fe79b4d3e1eaf793b73afa6':
+    resolution: {commit: 182ecdc2736a54073fe79b4d3e1eaf793b73afa6, repo: https://github.com/biomejs/biome.git, type: git}
     version: 0.0.0
     engines: {pnpm: 10.19.0}
 
@@ -5473,7 +5473,7 @@ snapshots:
   '@biomejs/cli-win32-x64@2.3.7':
     optional: true
 
-  '@biomejs/monorepo@https://codeload.github.com/biomejs/biome/tar.gz/182ecdc2736a54073fe79b4d3e1eaf793b73afa6': {}
+  '@biomejs/monorepo@git+https://github.com/biomejs/biome.git#182ecdc2736a54073fe79b4d3e1eaf793b73afa6': {}
 
   '@cacheable/memory@2.0.5':
     dependencies:

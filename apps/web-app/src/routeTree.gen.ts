@@ -12,8 +12,10 @@ import { Route as rootRouteImport } from "./pages/__root";
 import { Route as layoutsRouteRouteImport } from "./pages/(layouts)/route";
 import { Route as LoginIndexRouteImport } from "./pages/login/index";
 import { Route as layoutsOverviewIndexRouteImport } from "./pages/(layouts)/overview/index";
+import { Route as layoutsFeaturesIndexRouteImport } from "./pages/(layouts)/features/index";
 import { Route as layoutsDashboardIndexRouteImport } from "./pages/(layouts)/dashboard/index";
 import { Route as layoutsComponentsIndexRouteImport } from "./pages/(layouts)/components/index";
+import { Route as layoutsFeaturesMoveIndexRouteImport } from "./pages/(layouts)/features/move/index";
 import { Route as layoutsComponentsTreeIndexRouteImport } from "./pages/(layouts)/components/tree/index";
 
 const layoutsRouteRoute = layoutsRouteRouteImport.update({
@@ -30,6 +32,11 @@ const layoutsOverviewIndexRoute = layoutsOverviewIndexRouteImport.update({
   path: "/overview/",
   getParentRoute: () => layoutsRouteRoute,
 } as any);
+const layoutsFeaturesIndexRoute = layoutsFeaturesIndexRouteImport.update({
+  id: "/features/",
+  path: "/features/",
+  getParentRoute: () => layoutsRouteRoute,
+} as any);
 const layoutsDashboardIndexRoute = layoutsDashboardIndexRouteImport.update({
   id: "/dashboard/",
   path: "/dashboard/",
@@ -40,6 +47,12 @@ const layoutsComponentsIndexRoute = layoutsComponentsIndexRouteImport.update({
   path: "/components/",
   getParentRoute: () => layoutsRouteRoute,
 } as any);
+const layoutsFeaturesMoveIndexRoute =
+  layoutsFeaturesMoveIndexRouteImport.update({
+    id: "/features/move/",
+    path: "/features/move/",
+    getParentRoute: () => layoutsRouteRoute,
+  } as any);
 const layoutsComponentsTreeIndexRoute =
   layoutsComponentsTreeIndexRouteImport.update({
     id: "/components/tree/",
@@ -51,15 +64,19 @@ export interface FileRoutesByFullPath {
   "/login": typeof LoginIndexRoute;
   "/components": typeof layoutsComponentsIndexRoute;
   "/dashboard": typeof layoutsDashboardIndexRoute;
+  "/features": typeof layoutsFeaturesIndexRoute;
   "/overview": typeof layoutsOverviewIndexRoute;
   "/components/tree": typeof layoutsComponentsTreeIndexRoute;
+  "/features/move": typeof layoutsFeaturesMoveIndexRoute;
 }
 export interface FileRoutesByTo {
   "/login": typeof LoginIndexRoute;
   "/components": typeof layoutsComponentsIndexRoute;
   "/dashboard": typeof layoutsDashboardIndexRoute;
+  "/features": typeof layoutsFeaturesIndexRoute;
   "/overview": typeof layoutsOverviewIndexRoute;
   "/components/tree": typeof layoutsComponentsTreeIndexRoute;
+  "/features/move": typeof layoutsFeaturesMoveIndexRoute;
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport;
@@ -67,8 +84,10 @@ export interface FileRoutesById {
   "/login/": typeof LoginIndexRoute;
   "/(layouts)/components/": typeof layoutsComponentsIndexRoute;
   "/(layouts)/dashboard/": typeof layoutsDashboardIndexRoute;
+  "/(layouts)/features/": typeof layoutsFeaturesIndexRoute;
   "/(layouts)/overview/": typeof layoutsOverviewIndexRoute;
   "/(layouts)/components/tree/": typeof layoutsComponentsTreeIndexRoute;
+  "/(layouts)/features/move/": typeof layoutsFeaturesMoveIndexRoute;
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath;
@@ -76,23 +95,29 @@ export interface FileRouteTypes {
     | "/login"
     | "/components"
     | "/dashboard"
+    | "/features"
     | "/overview"
-    | "/components/tree";
+    | "/components/tree"
+    | "/features/move";
   fileRoutesByTo: FileRoutesByTo;
   to:
     | "/login"
     | "/components"
     | "/dashboard"
+    | "/features"
     | "/overview"
-    | "/components/tree";
+    | "/components/tree"
+    | "/features/move";
   id:
     | "__root__"
     | "/(layouts)"
     | "/login/"
     | "/(layouts)/components/"
     | "/(layouts)/dashboard/"
+    | "/(layouts)/features/"
     | "/(layouts)/overview/"
-    | "/(layouts)/components/tree/";
+    | "/(layouts)/components/tree/"
+    | "/(layouts)/features/move/";
   fileRoutesById: FileRoutesById;
 }
 export interface RootRouteChildren {
@@ -123,6 +148,13 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof layoutsOverviewIndexRouteImport;
       parentRoute: typeof layoutsRouteRoute;
     };
+    "/(layouts)/features/": {
+      id: "/(layouts)/features/";
+      path: "/features";
+      fullPath: "/features";
+      preLoaderRoute: typeof layoutsFeaturesIndexRouteImport;
+      parentRoute: typeof layoutsRouteRoute;
+    };
     "/(layouts)/dashboard/": {
       id: "/(layouts)/dashboard/";
       path: "/dashboard";
@@ -135,6 +167,13 @@ declare module "@tanstack/react-router" {
       path: "/components";
       fullPath: "/components";
       preLoaderRoute: typeof layoutsComponentsIndexRouteImport;
+      parentRoute: typeof layoutsRouteRoute;
+    };
+    "/(layouts)/features/move/": {
+      id: "/(layouts)/features/move/";
+      path: "/features/move";
+      fullPath: "/features/move";
+      preLoaderRoute: typeof layoutsFeaturesMoveIndexRouteImport;
       parentRoute: typeof layoutsRouteRoute;
     };
     "/(layouts)/components/tree/": {
@@ -150,15 +189,19 @@ declare module "@tanstack/react-router" {
 interface layoutsRouteRouteChildren {
   layoutsComponentsIndexRoute: typeof layoutsComponentsIndexRoute;
   layoutsDashboardIndexRoute: typeof layoutsDashboardIndexRoute;
+  layoutsFeaturesIndexRoute: typeof layoutsFeaturesIndexRoute;
   layoutsOverviewIndexRoute: typeof layoutsOverviewIndexRoute;
   layoutsComponentsTreeIndexRoute: typeof layoutsComponentsTreeIndexRoute;
+  layoutsFeaturesMoveIndexRoute: typeof layoutsFeaturesMoveIndexRoute;
 }
 
 const layoutsRouteRouteChildren: layoutsRouteRouteChildren = {
   layoutsComponentsIndexRoute: layoutsComponentsIndexRoute,
   layoutsDashboardIndexRoute: layoutsDashboardIndexRoute,
+  layoutsFeaturesIndexRoute: layoutsFeaturesIndexRoute,
   layoutsOverviewIndexRoute: layoutsOverviewIndexRoute,
   layoutsComponentsTreeIndexRoute: layoutsComponentsTreeIndexRoute,
+  layoutsFeaturesMoveIndexRoute: layoutsFeaturesMoveIndexRoute,
 };
 
 const layoutsRouteRouteWithChildren = layoutsRouteRoute._addFileChildren(
