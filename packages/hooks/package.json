@@ -20,9 +20,9 @@
       "types": "./src/use-zustand.ts",
       "default": "./src/use-zustand.ts"
     },
-    "./use-movable": {
-      "types": "./src/use-movable.ts",
-      "default": "./src/use-movable.ts"
+    "./use-move": {
+      "types": "./src/use-move.ts",
+      "default": "./src/use-move.ts"
     }
   },
   "devDependencies": {
