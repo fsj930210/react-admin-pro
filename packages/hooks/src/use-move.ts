@@ -45,11 +45,11 @@ export interface UseMovableOptions<T extends HTMLElement, C extends HTMLElement 
 
 // ====== 工具函数 ======
 const getClientCoord = (e: MouseEvent | TouchEvent): { x: number; y: number } => {
-  if ('touches' in e && e.touches.length > 0) {
-    const touch = e.touches[0];
-    return { x: touch.clientX, y: touch.clientY };
+  if (e instanceof MouseEvent) {
+    return { x: e.clientX, y: e.clientY };
   }
-  return { x: (e as MouseEvent).clientX, y: (e as MouseEvent).clientY };
+  const touch = e.touches[0] || e.changedTouches[0];
+  return touch ? { x: touch.clientX, y: touch.clientY } : { x: 0, y: 0 };
 };
 
 // ====== 主 Hook ======
@@ -62,23 +62,29 @@ export function useMove<T extends HTMLElement, C extends HTMLElement = T>(
 
   // refs & state
   const moveRef = useRef<T>(null);
-  const [translate, setTranslate] = useState<Position>({ x: 0, y: 0 });
-  const [topLeft, setTopLeft] = useState({ left: 0, top: 0 });
+ // --- State ---
+  const [translate, _setTranslate] = useState({ x: 0, y: 0 });
+  const [topLeft, _setTopLeft] = useState({ left: 0, top: 0 });
   const [isMoving, setIsMoving] = useState(false);
 
+  // --- Refs (always in sync with state via setters) ---
   const latestTranslateRef = useRef(translate);
-  useEffect(() => {
-    latestTranslateRef.current = translate;
-  }, [translate]);
-
   const latestTopLeftRef = useRef(topLeft);
-  useEffect(() => {
-    latestTopLeftRef.current = topLeft;
-  }, [topLeft]);
+
+  const setTranslate = (value: { x: number; y: number }) => {
+    latestTranslateRef.current = value;
+    _setTranslate(value);
+  };
+
+  const setTopLeft = (value: { left: number; top: number }) => {
+    latestTopLeftRef.current = value;
+    _setTopLeft(value);
+  };
+
 
   // 拖拽状态
   const translateState = useRef({
-    isDragging: false,
+    isMoving: false,
     startX: 0,
     startY: 0,
     startTranslateX: 0,
@@ -86,7 +92,7 @@ export function useMove<T extends HTMLElement, C extends HTMLElement = T>(
   });
 
   const topLeftState = useRef({
-    isDragging: false,
+    isMoving: false,
     startX: 0,
     startY: 0,
     initialElRect: {} as Rect,
@@ -147,7 +153,7 @@ export function useMove<T extends HTMLElement, C extends HTMLElement = T>(
     const current = latestTranslateRef.current;
 
     translateState.current = {
-      isDragging: true,
+      isMoving: true,
       startX: x,
       startY: y,
       startTranslateX: current.x,
@@ -158,7 +164,7 @@ export function useMove<T extends HTMLElement, C extends HTMLElement = T>(
   };
 
   const handleTranslateMove = (e: MouseEvent | TouchEvent) => {
-    if (!translateState.current.isDragging) return;
+    if (!translateState.current.isMoving) return;
 
     const { axis } = optionsRef.current;
     const { x, y } = getClientCoord(e);
@@ -180,8 +186,8 @@ export function useMove<T extends HTMLElement, C extends HTMLElement = T>(
   };
 
   const handleTranslateEnd = (e: MouseEvent | TouchEvent) => {
-    if (!translateState.current.isDragging) return;
-    translateState.current.isDragging = false;
+    if (!translateState.current.isMoving) return;
+    translateState.current.isMoving = false;
     setIsMoving(false);
     optionsRef.current.onMoveEnd?.(e);
   };
@@ -191,20 +197,34 @@ export function useMove<T extends HTMLElement, C extends HTMLElement = T>(
     if (!moveRef.current) return;
 
     const { x, y } = getClientCoord(e);
-    const domRect = moveRef.current.getBoundingClientRect();
+    const containerRect = computeContainerBoundary();
+    const { offsetWidth, offsetHeight, style } = moveRef.current;
+    const elLeft = parseInt(style.left || '0') + containerRect.left;
+    const elTop = parseInt(style.top || '0') + containerRect.top;
+    const elRight = offsetWidth + elLeft;
+    const elBottom = offsetHeight + elTop;
+    // getBoundingClientRect  会受到transform的影响，比如scale
+    // const domRect = moveRef.current.getBoundingClientRect();
+    // const elRect: Rect = {
+    //   top: domRect.top,
+    //   left: domRect.left,
+    //   right: domRect.right,
+    //   bottom: domRect.bottom,
+    //   width: moveRef.current.offsetWidth,
+    //   height: moveRef.current.offsetHeight
+    // };
     const elRect: Rect = {
-      top: domRect.top,
-      left: domRect.left,
-      right: domRect.right,
-      bottom: domRect.bottom,
-      width: domRect.width,
-      height: domRect.height,
+      top: elTop,
+      left: elLeft,
+      right: elRight,
+      bottom: elBottom,
+      width: offsetWidth,
+      height: offsetHeight
     };
 
-    const containerRect = computeContainerBoundary();
 
     topLeftState.current = {
-      isDragging: true,
+      isMoving: true,
       startX: x,
       startY: y,
       initialElRect: elRect,
@@ -215,7 +235,7 @@ export function useMove<T extends HTMLElement, C extends HTMLElement = T>(
   };
 
   const handleTopLeftMove = (e: MouseEvent | TouchEvent) => {
-    if (!topLeftState.current.isDragging) return;
+    if (!topLeftState.current.isMoving) return;
 
     const { axis, topLeft: topLeftOpts } = optionsRef.current;
     const {  snapToBoundary = false, snapThreshold = 10 } = topLeftOpts || {};
@@ -264,8 +284,8 @@ export function useMove<T extends HTMLElement, C extends HTMLElement = T>(
   };
 
   const handleTopLeftEnd = (e: MouseEvent | TouchEvent) => {
-    if (!topLeftState.current.isDragging) return;
-    topLeftState.current.isDragging = false;
+    if (!topLeftState.current.isMoving) return;
+    topLeftState.current.isMoving = false;
     setIsMoving(false);
     optionsRef.current.onMoveEnd?.(e);
   };
