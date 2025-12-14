@@ -26,12 +26,9 @@ export const Route = createFileRoute("/(layouts)/features/move/")({
 // 容器模式示例
 function ContainerExample() {
   const containerRef = useRef<HTMLDivElement>(null);
-  const { moveRef, topLeft } = useMove<HTMLDivElement>({
-    
-    topLeft: {
-      containerRef,
-    },
-    mode: 'topLeft'
+  const { moveRef, position } = useMove<HTMLDivElement>({
+    containerRef,
+    useTopLeft: true,
   });
 
   return (
@@ -45,16 +42,16 @@ function ContainerExample() {
           ref={moveRef}
           // onMouseDown={onStart}
           style={{
-            // transform: `translate(${translate.x}px, ${translate.y}px)`,
-            top: topLeft.top,
-            left: topLeft.left,
-            // willChange: 'transform'
+            // transform: `translate(${position.x}px, ${position.y}px)`,
+            top: position.y,
+            left: position.x,
+            // willChange: "transform",
           }}
           className="absolute w-32 h-32 bg-blue-600 text-white rounded-lg shadow-lg flex flex-col items-center justify-center p-4"
         >
           <div className="font-semibold mb-2">容器内移动</div>
           <div className="text-xs text-center">
-            位置: ({Math.round(topLeft.left)}, {Math.round(topLeft.top)})
+            位置: ({Math.round(position.x)}, {Math.round(position.y)})
           </div>
         </div>
       </div>
@@ -64,7 +61,7 @@ function ContainerExample() {
 
 // 屏幕模式示例
 function ScreenExample() {
-  const { moveRef, translate, } = useMove<HTMLDivElement>({});
+  const { moveRef, position } = useMove<HTMLDivElement>({});
 
   return (
     <div className="mb-8">
@@ -72,13 +69,13 @@ function ScreenExample() {
         ref={moveRef}
         // onMouseDown={onStart}
         style={{
-          transform: `translate(${translate.x}, ${translate.y})`
+          transform: `translate(${position.x}px, ${position.y}px)`,
         }}
         className="fixed top-[100px] left-[100px] z-10 w-32 h-32 bg-purple-600 text-white rounded-lg shadow-lg flex flex-col items-center justify-center p-4"
       >
         <div className="font-semibold mb-2">屏幕内移动</div>
         <div className="text-xs text-center">
-          位置: ({Math.round(translate.x)}, {Math.round(translate.y)})
+          位置: ({Math.round(position.x)}, {Math.round(position.y)})
         </div>
       </div>
     </div>
