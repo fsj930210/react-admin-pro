@@ -1,20 +1,20 @@
 /** biome-ignore-all lint/a11y/noStaticElementInteractions: <explanation> */
-// import { Button } from "@rap/components-base/button";
-// import {
-//   Card,
-//   CardContent,
-//   CardDescription,
-//   CardHeader,
-//   CardTitle,
-// } from "@rap/components-base/card";
-// import {
-//   Dialog,
-//   DialogContent,
-//   DialogDescription,
-//   DialogHeader,
-//   DialogTitle,
-//   DialogTrigger,
-// } from "@rap/components-base/dialog";
+import { Button } from "@rap/components-base/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@rap/components-base/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@rap/components-base/dialog";
 import { useMove } from "@rap/hooks/use-move";
 import { createFileRoute } from "@tanstack/react-router";
 import { useRef } from "react";
@@ -29,6 +29,7 @@ function ContainerExample() {
   const { moveRef, position } = useMove<HTMLDivElement>({
     containerRef,
     useTopLeft: true,
+    boundary: true
   });
 
   return (
@@ -36,22 +37,22 @@ function ContainerExample() {
       <h3 className="text-lg font-semibold mb-3">容器模式限制</h3>
       <div
         ref={containerRef}
-        className="relative w-[600px] h-[600px] border-2 border-blue-500 overflow-hidden bg-blue-50 rounded-lg"
+        className="relative w-[300px] h-[300px] border-2 border-blue-500 overflow-hidden bg-blue-50 rounded-lg"
       >
         <div
           ref={moveRef}
           // onMouseDown={onStart}
-          style={{
+          style={position ? {
             // transform: `translate(${position.x}px, ${position.y}px)`,
             top: position.y,
             left: position.x,
             // willChange: "transform",
-          }}
-          className="absolute w-32 h-32 bg-blue-600 text-white rounded-lg shadow-lg flex flex-col items-center justify-center p-4"
+          } : undefined}
+          className="absolute top-10 left-[60px] w-32 h-32 bg-blue-600 text-white rounded-lg shadow-lg flex flex-col items-center justify-center p-4"
         >
           <div className="font-semibold mb-2">容器内移动</div>
           <div className="text-xs text-center">
-            位置: ({Math.round(position.x)}, {Math.round(position.y)})
+            位置: ({position?.x}, {position?.y})
           </div>
         </div>
       </div>
@@ -61,21 +62,26 @@ function ContainerExample() {
 
 // 屏幕模式示例
 function ScreenExample() {
-  const { moveRef, position } = useMove<HTMLDivElement>({});
+  const { moveRef, position } = useMove<HTMLDivElement>({
+    useTopLeft: false,
+    boundary: true
+  });
 
   return (
     <div className="mb-8">
       <div
         ref={moveRef}
         // onMouseDown={onStart}
-        style={{
+        style={position ? {
           transform: `translate(${position.x}px, ${position.y}px)`,
-        }}
+          // top: position.y,
+          // left: position.x
+        }: undefined}
         className="fixed top-[100px] left-[100px] z-10 w-32 h-32 bg-purple-600 text-white rounded-lg shadow-lg flex flex-col items-center justify-center p-4"
       >
         <div className="font-semibold mb-2">屏幕内移动</div>
         <div className="text-xs text-center">
-          位置: ({Math.round(position.x)}, {Math.round(position.y)})
+          位置: {position?.x}, {position?.y}
         </div>
       </div>
     </div>
@@ -184,91 +190,71 @@ function ScreenExample() {
 //   );
 // }
 
-// // 可拖拽的Card组件
-// function DraggableCard() {
-//   const headerRef = useRef<HTMLDivElement>(null);
-//   const { position, isMoving, onStart } = useMove<HTMLDivElement>({});
+// 可拖拽的Card组件
+function DraggableCard() {
+  const { position, isMoving, moveRef } = useMove<HTMLDivElement>({});
 
-//   // 只有header可以被拖拽，动态位置需要内联样式
-//   const cardStyle = {
-//     left: `${position.x}px`,
-//     top: `${position.y}px`,
-//   };
 
-//   return (
-//     <Card
-//       style={cardStyle}
-//       className={`absolute w-[300px] shadow-xl ${
-//         isMoving ? "cursor-grabbing" : "cursor-default"
-//       }`}
-//     >
-//       <CardHeader
-//         ref={headerRef}
-//         onMouseDown={onStart}
-//         className={`select-none bg-gradient-to-r from-blue-600 to-blue-700 text-white ${
-//           isMoving ? "cursor-grabbing" : "cursor-grab"
-//         }`}
-//       >
-//         <CardTitle>可拖拽的卡片</CardTitle>
-//         <CardDescription className="text-blue-100">
-//           拖拽标题栏来移动卡片
-//         </CardDescription>
-//       </CardHeader>
-//       <CardContent className="pt-4">
-//         <p className="mb-2">这是一个可以拖拽的卡片组件。</p>
-//         <p className="mb-2">只有标题栏可以被拖拽，内容区域不会响应拖拽事件。</p>
-//         <p className="font-semibold text-blue-600">
-//           当前位置: ({Math.round(position.x)}, {Math.round(position.y)})
-//         </p>
-//       </CardContent>
-//     </Card>
-//   );
-// }
+  return (
+    <Card
+      style={position ? {
+        transform: `translate(${position.x}px, ${position.y}px)`,
+        willChange: 'transfrom'
+      }: undefined}
+      className={`absolute w-[300px] shadow-xl`}
+    >
+      <CardHeader
+        ref={moveRef}
+        className={`select-none ${
+          isMoving ? "cursor-move" : "cursor-default"
+        }`}
+      >
+        <CardTitle>可拖拽的卡片</CardTitle>
+        <CardDescription>
+          拖拽标题栏来移动卡片
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="pt-4">
+        <p className="mb-2">这是一个可以拖拽的卡片组件。</p>
+        <p className="mb-2">只有标题栏可以被拖拽，内容区域不会响应拖拽事件。</p>
+      </CardContent>
+    </Card>
+  );
+}
 
-// // 可拖拽的Dialog组件
-// function DraggableDialog() {
-//   const headerRef = useRef<HTMLDivElement>(null);
-//   const { position, isMoving, reset, onStart } = useMove<HTMLDivElement>({});
-
-//   // 动态位置需要内联样式
-//   const dialogStyle = {
-//     left: `${position.x}px`,
-//     top: `${position.y}px`,
-//   };
-
-//   return (
-//     <Dialog>
-//       <DialogTrigger asChild>
-//         <Button variant="outline">打开可拖拽对话框</Button>
-//       </DialogTrigger>
-//       <DialogContent
-//         style={dialogStyle}
-//         className="absolute w-[400px] shadow-2xl"
-//       >
-//         <DialogHeader
-//           ref={headerRef}
-//           onMouseDown={onStart}
-//           className={`select-none ${
-//             isMoving ? "cursor-grabbing" : "cursor-grab"
-//           }`}
-//         >
-//           <DialogTitle>可拖拽的对话框</DialogTitle>
-//           <DialogDescription>拖拽标题栏来移动对话框</DialogDescription>
-//         </DialogHeader>
-//         <div className="py-4">
-//           <p className="mb-2">这是一个可以拖拽的对话框组件。</p>
-//           <p className="mb-2">只有标题栏可以被拖拽。</p>
-//           <p className="font-semibold text-purple-600">
-//             当前位置: ({Math.round(position.x)}, {Math.round(position.y)})
-//           </p>
-//           <Button onClick={reset} className="mt-4">
-//             重置位置
-//           </Button>
-//         </div>
-//       </DialogContent>
-//     </Dialog>
-//   );
-// }
+// 可拖拽的Dialog组件
+function DraggableDialog() {
+  const { position, isMoving, moveRef } = useMove<HTMLDivElement>({});
+  console.log(position)
+  return (
+    <Dialog>
+      <DialogTrigger asChild>
+        <Button variant="outline">打开可拖拽对话框</Button>
+      </DialogTrigger>
+      <DialogContent
+        style={position ? {
+          transform: `translate(${position.x}px, ${position.y}px)`,
+          willChange: 'transfrom'
+        } : undefined}
+        className="absolute w-[400px] shadow-2xl"
+      >
+        <DialogHeader
+          ref={moveRef}
+          className={`select-none ${
+            isMoving ? "cursor-move" : "cursor-move"
+          }`}
+        >
+          <DialogTitle>可拖拽的对话框</DialogTitle>
+          <DialogDescription>拖拽标题栏来移动对话框</DialogDescription>
+        </DialogHeader>
+        <div className="py-4">
+          <p className="mb-2">这是一个可以拖拽的对话框组件。</p>
+          <p className="mb-2">只有标题栏可以被拖拽。</p>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
 
 function MoveFeaturePage() {
   return (
@@ -281,19 +267,12 @@ function MoveFeaturePage() {
       <div className="space-y-8">
         <ContainerExample />
         <ScreenExample />
+        <DraggableCard />
+        <DraggableDialog />
         {/* <OffsetExample />
         <AxisExample />
-        <SnapExample />
-
-        <div className="mb-8">
-          <h3 className="text-lg font-semibold mb-3">特殊组件示例</h3>
-          <div className="relative w-full h-[500px] bg-indigo-50 rounded-lg">
-            <DraggableCard />
-            <div className="absolute bottom-4 left-4">
-              <DraggableDialog />
-            </div>
-          </div>
-        </div> */}
+        <SnapExample /> 
+        */}
       </div>
     </div>
   );
