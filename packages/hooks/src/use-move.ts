@@ -112,8 +112,8 @@ export function useMove<T extends HTMLElement, C extends HTMLElement = T>(
       left: baseRect.left + offset.left,
       right: baseRect.right - offset.right,
       bottom: baseRect.bottom - offset.bottom,
-      width: baseRect.width,
-      height: baseRect.height,
+      width: baseRect.width - offset.left - offset.right,
+      height: baseRect.height - offset.top - offset.bottom,
     };
   };
 
@@ -231,7 +231,6 @@ export function useMove<T extends HTMLElement, C extends HTMLElement = T>(
   };
 
   const handleTranslateStart = (e: MouseEvent | TouchEvent) => {
-    console.log(moveRef)
     if (!moveRef.current) return;
     const elDOMRect = moveRef.current.getBoundingClientRect();
     const elRect: Rect = {
@@ -288,7 +287,6 @@ export function useMove<T extends HTMLElement, C extends HTMLElement = T>(
   }
 
   const handleStart = (e: MouseEvent | TouchEvent) => {
-    console.log(e)
     if (e.cancelable) e.preventDefault();
     const { disabled = false, useTopLeft = false } = optionsRef.current;
     if (disabled) return;
@@ -342,35 +340,40 @@ export function useMove<T extends HTMLElement, C extends HTMLElement = T>(
 
     optionsRef.current.onMoveEnd?.(e);
   };
-
+const bindEvent = () => {
+  const el = moveRef.current;
+  if (!el) return;
+  el.addEventListener("mousedown", handleStart);
+  document.addEventListener("mousemove", handleMove);
+  document.addEventListener("mouseup", handleEnd);
+  el.addEventListener("touchstart", handleStart, { passive: false });
+  document.addEventListener("touchmove", handleMove, { passive: false });
+  document.addEventListener("touchend", handleEnd);
+  document.addEventListener("touchcancel", handleEnd);
+}
+const removeEvent = () => {
+  const el = moveRef.current;
+    if (!el) return;
+    cancelRaf();
+    el.removeEventListener("mousedown", handleStart);
+    document.removeEventListener("mousemove", handleMove);
+    document.removeEventListener("mouseup", handleEnd);
+    el.removeEventListener("touchstart", handleStart);
+    document.removeEventListener("touchmove", handleMove);
+    document.removeEventListener("touchend", handleEnd);
+    document.removeEventListener("touchcancel", handleEnd);
+}
 
   useEffect(() => {
-    console.log(moveRef.current)
-    const el = moveRef.current;
-    if (!el) return;
-    el.addEventListener("mousedown", handleStart);
-    document.addEventListener("mousemove", handleMove);
-    document.addEventListener("mouseup", handleEnd);
-    el.addEventListener("touchstart", handleStart, { passive: false });
-    document.addEventListener("touchmove", handleMove, { passive: false });
-    document.addEventListener("touchend", handleEnd);
-    document.addEventListener("touchcancel", handleEnd);
-
-    return () => {
-      cancelRaf();
-      el.removeEventListener("mousedown", handleStart);
-      document.removeEventListener("mousemove", handleMove);
-      document.removeEventListener("mouseup", handleEnd);
-      el.removeEventListener("touchstart", handleStart);
-      document.removeEventListener("touchmove", handleMove);
-      document.removeEventListener("touchend", handleEnd);
-      document.removeEventListener("touchcancel", handleEnd);
-    };
+    bindEvent();
+    return removeEvent
   }, []);
 
   return {
     moveRef,
     position,
     isMoving,
+    bindEvent,
+    removeEvent
   };
 }

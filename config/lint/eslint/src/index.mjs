@@ -36,6 +36,9 @@ export default defineConfig(
         indent: [2, "tab", { SwitchCase: 1 }],
         quotes: [2, "double", { avoidEscape: true }],
         semi: [2, "always"],
+        "@typescript-eslint/no-unsafe-return": "off",
+        "@typescript-eslint/no-unsafe-call": "off",
+        "@typescript-eslint/no-unsafe-assignment": "off",
         "react-refresh/only-export-components": [
           "off",
           { allowConstantExport: true },

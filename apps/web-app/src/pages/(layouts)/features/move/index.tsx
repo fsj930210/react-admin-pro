@@ -17,7 +17,7 @@ import {
 } from "@rap/components-base/dialog";
 import { useMove } from "@rap/hooks/use-move";
 import { createFileRoute } from "@tanstack/react-router";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 
 export const Route = createFileRoute("/(layouts)/features/move/")({
   component: MoveFeaturePage,
@@ -29,31 +29,29 @@ function ContainerExample() {
   const { moveRef, position } = useMove<HTMLDivElement>({
     containerRef,
     useTopLeft: true,
-    boundary: true
+    boundary: true,
+    snapThreshold: 30,
+    snapToBoundary: true
   });
 
   return (
     <div className="mb-8">
-      <h3 className="text-lg font-semibold mb-3">容器模式限制</h3>
+      <h3 className="text-lg font-semibold mb-3">容器模式，带边界，吸附，使用TopLeft</h3>
       <div
         ref={containerRef}
         className="relative w-[300px] h-[300px] border-2 border-blue-500 overflow-hidden bg-blue-50 rounded-lg"
       >
         <div
           ref={moveRef}
-          // onMouseDown={onStart}
           style={position ? {
             // transform: `translate(${position.x}px, ${position.y}px)`,
+            // willChange: "transform",
             top: position.y,
             left: position.x,
-            // willChange: "transform",
           } : undefined}
           className="absolute top-10 left-[60px] w-32 h-32 bg-blue-600 text-white rounded-lg shadow-lg flex flex-col items-center justify-center p-4"
         >
-          <div className="font-semibold mb-2">容器内移动</div>
-          <div className="text-xs text-center">
-            位置: ({position?.x}, {position?.y})
-          </div>
+          <div className="font-semibold mb-2">容器内移动, 当移动到距离边界小于30px时，松开鼠标会自动吸附到边界</div>
         </div>
       </div>
     </div>
@@ -71,7 +69,6 @@ function ScreenExample() {
     <div className="mb-8">
       <div
         ref={moveRef}
-        // onMouseDown={onStart}
         style={position ? {
           transform: `translate(${position.x}px, ${position.y}px)`,
           // top: position.y,
@@ -79,121 +76,99 @@ function ScreenExample() {
         }: undefined}
         className="fixed top-[100px] left-[100px] z-10 w-32 h-32 bg-purple-600 text-white rounded-lg shadow-lg flex flex-col items-center justify-center p-4"
       >
-        <div className="font-semibold mb-2">屏幕内移动</div>
-        <div className="text-xs text-center">
-          位置: {position?.x}, {position?.y}
-        </div>
+        <div className="font-semibold mb-2">屏幕内移动，使用translate</div>
       </div>
     </div>
   );
 }
 
 // 偏移示例
-// function OffsetExample() {
-//   const { moveRef, position, style, onStart } = useMove<HTMLDivElement>({
-//     offset: { top: 20, left: 20, right: 20, bottom: 20 }, // 20px的偏移
-//   });
+function OffsetExample() {
+  const containerRef = useRef<HTMLDivElement>(null)
+  const { moveRef, position, } = useMove<HTMLDivElement>({
+    offset: { top: 20, left: 20, right: 20, bottom: 20 }, // 20px的偏移
+    containerRef,
+    boundary: true
+  });
 
-//   return (
-//     <div className="mb-8">
-//       <h3 className="text-lg font-semibold mb-3">边界偏移示例 (20px偏移)</h3>
-//       <div className="relative w-full h-[300px] bg-orange-50 rounded-lg">
-//         <div
-//           ref={moveRef}
-//           onMouseDown={onStart}
-//           style={style}
-//           className="w-32 h-32 bg-orange-600 text-white rounded-lg shadow-lg flex flex-col items-center justify-center p-4"
-//         >
-//           <div className="font-semibold mb-2">偏移移动</div>
-//           <div className="text-xs text-center">
-//             位置: ({Math.round(position.x)}, {Math.round(position.y)})
-//           </div>
-//         </div>
-//       </div>
-//     </div>
-//   );
-// }
+  return (
+    <div className="mb-8">
+      <h3 className="text-lg font-semibold mb-3">边界偏移示例 (20px偏移)</h3>
+      <div
+        ref={containerRef}
+        className="relative w-[300px] h-[300px] border-2 border-blue-500 overflow-hidden bg-blue-50 rounded-lg"
+      >
+        <div
+          ref={moveRef}
+          style={position ? {
+            transform: `translate(${position.x}px, ${position.y}px)`,
+            willChange: "transform",
+            // top: position.y,
+            // left: position.x,
+            
+          } : undefined}
+          className="absolute top-10 left-[60px] w-32 h-32 bg-blue-600 text-white rounded-lg shadow-lg flex flex-col items-center justify-center p-4"
+        >
+          <div className="font-semibold mb-2 text-xs">容器内移动，不能贴边，有20px的偏移，使用translate</div>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 // // 轴向限制示例
-// function AxisExample() {
-//   const {
-//     moveRef: xMoveRef,
-//     style: xStyle,
-//     position: xPosition,
-//     onStart: onXStart,
-//   } = useMove<HTMLDivElement>({
-//     axis: "x",
-//   });
+function AxisExample() {
+  const {
+    moveRef: xMoveRef,
+    position: xPosition,
+  } = useMove<HTMLDivElement>({
+    axis: "x",
+  });
 
-//   const {
-//     moveRef: yMoveRef,
-//     style: yStyle,
-//     position: yPosition,
-//     onStart: onYStart,
-//   } = useMove<HTMLDivElement>({
-//     axis: "y",
-//   });
+  const {
+    moveRef: yMoveRef,
+    position: yPosition,
+  } = useMove<HTMLDivElement>({
+    axis: "y",
+  });
 
-//   return (
-//     <div className="mb-8">
-//       <h3 className="text-lg font-semibold mb-3">轴向限制示例</h3>
-//       <div className="relative w-full h-[300px] border-2 border-green-500 bg-green-50 rounded-lg">
-//         <div
-//           ref={xMoveRef}
-//           onMouseDown={onXStart}
-//           style={xStyle}
-//           className="w-32 h-20 bg-green-600 text-white rounded-lg shadow-lg flex flex-col items-center justify-center p-4"
-//         >
-//           <div className="font-semibold mb-1">X轴移动 →</div>
-//           <div className="text-xs">X: {Math.round(xPosition.x)}</div>
-//         </div>
-//         <div
-//           ref={yMoveRef}
-//           onMouseDown={onYStart}
-//           style={yStyle}
-//           className="w-20 h-32 bg-teal-600 text-white rounded-lg shadow-lg flex flex-col items-center justify-center p-4"
-//         >
-//           <div className="font-semibold mb-1 text-center">Y轴移动 ↓</div>
-//           <div className="text-xs">Y: {Math.round(yPosition.y)}</div>
-//         </div>
-//       </div>
-//     </div>
-//   );
-// }
+  return (
+    <div className="mb-8">
+      <h3 className="text-lg font-semibold mb-3">轴向限制示例</h3>
+      <div className="relative w-full h-[300px] border-2 border-green-500 bg-green-50 rounded-lg">
+        <div
+          ref={xMoveRef}
+          style={xPosition ? {
+            transform: `translateX(${xPosition.x}px)`,
+            willChange: 'transfrom'
+          } : undefined}
+          className="w-32 h-20 bg-green-600 text-white rounded-lg shadow-lg flex flex-col items-center justify-center p-4"
+        >
+          <div className="font-semibold mb-1">X轴移动 →</div>
+        </div>
+        <div
+          ref={yMoveRef}
+          style={yPosition ? {
+            transform: `translateY(${yPosition.y}px)`,
+            willChange: 'transfrom'
+          } : undefined}
+          className="w-20 h-32 bg-teal-600 text-white rounded-lg shadow-lg flex flex-col items-center justify-center p-4"
+        >
+          <div className="font-semibold mb-1 text-center">Y轴移动 ↓</div>
+        </div>
+      </div>
+    </div>
+  );
+}
 
-// // 吸附示例
-// function SnapExample() {
-//   const { moveRef, position, style, onStart } = useMove<HTMLDivElement>({
-//     snapToBoundary: true,
-//     snapThreshold: 30, // 30px吸附距离
-//   });
-
-//   return (
-//     <div className="mb-8">
-//       <h3 className="text-lg font-semibold mb-3">
-//         边界吸附示例 (30px吸附距离)
-//       </h3>
-//       <div className="relative w-full h-[300px] bg-pink-50 rounded-lg">
-//         <div
-//           ref={moveRef}
-//           onMouseDown={onStart}
-//           style={style}
-//           className="w-32 h-32 bg-pink-600 text-white rounded-lg shadow-lg flex flex-col items-center justify-center p-4"
-//         >
-//           <div className="font-semibold mb-2">吸附移动</div>
-//           <div className="text-xs text-center">
-//             位置: ({Math.round(position.x)}, {Math.round(position.y)})
-//           </div>
-//         </div>
-//       </div>
-//     </div>
-//   );
-// }
 
 // 可拖拽的Card组件
 function DraggableCard() {
-  const { position, isMoving, moveRef } = useMove<HTMLDivElement>({});
-
+  const [draggable, setDraggable] = useState(true)
+  const { position, isMoving, moveRef } = useMove<HTMLDivElement>({
+    disabled: !draggable
+  });
+  
 
   return (
     <Card
@@ -217,6 +192,7 @@ function DraggableCard() {
       <CardContent className="pt-4">
         <p className="mb-2">这是一个可以拖拽的卡片组件。</p>
         <p className="mb-2">只有标题栏可以被拖拽，内容区域不会响应拖拽事件。</p>
+        <Button onClick={() => setDraggable(prev => !prev)}>{draggable ? '禁用' : '启用'}拖拽</Button>
       </CardContent>
     </Card>
   );
@@ -224,10 +200,20 @@ function DraggableCard() {
 
 // 可拖拽的Dialog组件
 function DraggableDialog() {
-  const { position, isMoving, moveRef } = useMove<HTMLDivElement>({});
-  console.log(position)
+  const { position, isMoving, moveRef, bindEvent, removeEvent } = useMove<HTMLDivElement>({});
+  const rafId = useRef(-1)
+  const handleOpenChange = (open: boolean) => {
+    if (open) {
+      rafId.current = requestAnimationFrame(() => {
+        bindEvent()
+      })
+    } else {
+      removeEvent()
+      cancelAnimationFrame(rafId.current);
+    }
+  }
   return (
-    <Dialog>
+    <Dialog onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
         <Button variant="outline">打开可拖拽对话框</Button>
       </DialogTrigger>
@@ -267,12 +253,10 @@ function MoveFeaturePage() {
       <div className="space-y-8">
         <ContainerExample />
         <ScreenExample />
+        <OffsetExample />
+        <AxisExample />
         <DraggableCard />
         <DraggableDialog />
-        {/* <OffsetExample />
-        <AxisExample />
-        <SnapExample /> 
-        */}
       </div>
     </div>
   );
