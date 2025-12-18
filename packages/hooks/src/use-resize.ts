@@ -1,128 +1,227 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useState, useRef, useEffect } from "react";
 
 // 定义方向类型
-export type Direction = 'n' | 's' | 'w' | 'e' | 'nw' | 'ne' | 'sw' | 'se';
+export type ResizeDirection = 'n' | 's' | 'w' | 'e' | 'nw' | 'ne' | 'sw' | 'se';
 
-// 定义缩放Hook的返回类型
-interface ResizableHook {
-  ref: React.RefObject<HTMLDivElement | null>;
-  handleResize: (direction: Direction) => (e: React.MouseEvent) => void;
-  isResizing: boolean;
+export const Direction = {
+  N: 'n' as const,
+  S: 's' as const,
+  W: 'w' as const,
+  E: 'e' as const,
+  NW: 'nw' as const,
+  NE: 'ne' as const,
+  SW: 'sw' as const,
+  SE: 'se' as const
+};
+
+type Size = {
+  width: number;
+  height: number;
+};
+
+type Position = {
+  x: number;
+  y: number;
+};
+
+export interface ResizeOptions {
+  minSize?: Partial<Size>;
+  maxSize?: Partial<Size>;
+  directions?: ResizeDirection[];
+  onResize?: (size: Size, position: Position) => void;
 }
 
 // 缩放Hook
-export function useReSize(
-  size: { width: number; height: number },
-  setSize: React.Dispatch<React.SetStateAction<{ width: number; height: number }>>,
-  position: { x: number; y: number },
-  setPosition: React.Dispatch<React.SetStateAction<{ x: number; y: number }>>,
-  minSize: { width: number; height: number },
-  maxSize: { width: number; height: number },
-  resizableDirections: Direction[]
-): ResizableHook {
-  const ref = useRef<HTMLDivElement>(null);
-  const [isResizing, setIsResizing] = useState(false);
-  const resizeStartPos = useRef({ x: 0, y: 0 });
-  const elementStartSize = useRef({ width: 0, height: 0 });
-  const elementStartPos = useRef({ x: 0, y: 0 });
-  const resizeDirection = useRef<Direction | null>(null);
+function useResize<T extends HTMLElement>(options?: ResizeOptions) {
+  const ref = useRef<T>(null);
+  const [isResizing, _setIsResizing] = useState<boolean>(false);
+  const [size, setSize] = useState<Size | null>(null);
+  const [position, setPosition] = useState<Position | null>(null);
 
-  // 检查方向是否允许缩放
-  const isDirectionAllowed = useCallback((dir: Direction) => {
-    return resizableDirections.includes(dir);
-  }, [resizableDirections]);
+  const optionsRef = useRef<ResizeOptions>({});
+  optionsRef.current = options || {};
+	const isResizingRef = useRef(false);
+  const resizeStartPos = useRef<Position | null>(null);
+  const elStartSize = useRef<Size | null>(null);
+  const elStartPos = useRef<Position | null>(null);
+  const resizeDirection = useRef<ResizeDirection | null>(null);
+  const rafIdRef = useRef<number | null>(null);
 
-  // 处理缩放开始
-  const startResize = useCallback((e: React.MouseEvent, direction: Direction) => {
+	const setIsResizing =(resizing: boolean) => {
+		_setIsResizing(resizing);
+		isResizingRef.current = resizing;
+	}
+  const initResize = () => {
+    if (ref.current) {
+      const rect = ref.current.getBoundingClientRect();
+      const containerRect = ref.current.parentElement?.getBoundingClientRect() || { left: 0, top: 0 };
+      const relativeX = rect.left - containerRect.left;
+      const relativeY = rect.top - containerRect.top;
+
+      const initialSize: Size = {
+        width: rect.width,
+        height: rect.height
+      };
+
+      const initialPosition: Position = {
+        x: relativeX,
+        y: relativeY
+      };
+
+      setSize(initialSize);
+      setPosition(initialPosition);
+
+      elStartSize.current = initialSize;
+      elStartPos.current = initialPosition;
+    }
+  };
+
+  const isDirectionAllowed = (dir: ResizeDirection): boolean => {
+    const { directions } = optionsRef.current;
+    if (!directions) return true;
+    return directions.includes(dir);
+  };
+
+	  // 处理缩放开始
+  const handleMouseStart = (e: React.MouseEvent, direction: ResizeDirection) => {
+    if (!ref.current) return;
     if (!isDirectionAllowed(direction)) return;
-    
+
     e.preventDefault();
     e.stopPropagation();
-    
+
     resizeStartPos.current = { x: e.clientX, y: e.clientY };
-    elementStartSize.current = { ...size };
-    elementStartPos.current = { ...position };
+    elStartSize.current = size ? {...size} : null;
+    elStartPos.current = position ? {...position} : null;
     resizeDirection.current = direction;
-    
+
     setIsResizing(true);
-  }, [isDirectionAllowed, size, position]);
+  };
 
-  // 为每个方向创建处理函数
-  const handleResize = useCallback((direction: Direction) => {
-    return (e: React.MouseEvent) => startResize(e, direction);
-  }, [startResize]);
+  const handleMouseMove = (e: MouseEvent) => {
+		console.log(isResizingRef.current)
+		if (!isResizingRef.current) return;
+		
+    if (rafIdRef.current) {
+      cancelAnimationFrame(rafIdRef.current);
+    }
 
-  // 处理鼠标移动事件，更新组件尺寸和位置
-  useEffect(() => {
-    if (!isResizing || !resizeDirection.current || !ref.current) return;
-
-    const handleMouseMove = (e: MouseEvent) => {
+    rafIdRef.current = requestAnimationFrame(() => {
+      if (!resizeStartPos.current || !resizeDirection.current || !elStartSize.current) return;
+      
       const dx = e.clientX - resizeStartPos.current.x;
       const dy = e.clientY - resizeStartPos.current.y;
+
+      const { maxSize, minSize, onResize } = optionsRef.current;
       
-      let newWidth = elementStartSize.current.width;
-      let newHeight = elementStartSize.current.height;
-      let newX = elementStartPos.current.x;
-      let newY = elementStartPos.current.y;
+      let newWidth = elStartSize.current.width;
+      let newHeight = elStartSize.current.height;
+      let newX = elStartPos.current?.x || 0;
+      let newY = elStartPos.current?.y || 0;
+
+      const direction = resizeDirection.current;
       
-      const direction = resizeDirection.current!;
-      
-      // 根据方向调整尺寸和位置
+      // 设置默认最小值和最大值
+      const minWidth = minSize?.width ?? 50;
+      const minHeight = minSize?.height ?? 50;
+      const maxWidth = maxSize?.width ?? Infinity;
+      const maxHeight = maxSize?.height ?? Infinity;
+
       switch (direction) {
         case 'e':
-          newWidth = Math.min(maxSize.width, Math.max(minSize.width, elementStartSize.current.width + dx));
+          newWidth = Math.min(maxWidth, Math.max(minWidth, elStartSize.current.width + dx));
           break;
         case 'w':
-          newWidth = Math.min(maxSize.width, Math.max(minSize.width, elementStartSize.current.width - dx));
-          newX = elementStartPos.current.x + dx;
+          newWidth = Math.min(maxWidth, Math.max(minWidth, elStartSize.current.width - dx));
+          newX = (elStartPos.current?.x || 0) + dx;
           break;
         case 'n':
-          newHeight = Math.min(maxSize.height, Math.max(minSize.height, elementStartSize.current.height - dy));
-          newY = elementStartPos.current.y + dy;
+          newHeight = Math.min(maxHeight, Math.max(minHeight, elStartSize.current.height - dy));
+          newY = (elStartPos.current?.y || 0) + dy;
           break;
         case 's':
-          newHeight = Math.min(maxSize.height, Math.max(minSize.height, elementStartSize.current.height + dy));
+          newHeight = Math.min(maxHeight, Math.max(minHeight, elStartSize.current.height + dy));
           break;
         case 'nw':
-          newWidth = Math.min(maxSize.width, Math.max(minSize.width, elementStartSize.current.width - dx));
-          newHeight = Math.min(maxSize.height, Math.max(minSize.height, elementStartSize.current.height - dy));
-          newX = elementStartPos.current.x + dx;
-          newY = elementStartPos.current.y + dy;
+          newWidth = Math.min(maxWidth, Math.max(minWidth, elStartSize.current.width - dx));
+          newHeight = Math.min(maxHeight, Math.max(minHeight, elStartSize.current.height - dy));
+          newX = (elStartPos.current?.x || 0) + dx;
+          newY = (elStartPos.current?.y || 0) + dy;
           break;
         case 'ne':
-          newWidth = Math.min(maxSize.width, Math.max(minSize.width, elementStartSize.current.width + dx));
-          newHeight = Math.min(maxSize.height, Math.max(minSize.height, elementStartSize.current.height - dy));
-          newY = elementStartPos.current.y + dy;
+          newWidth = Math.min(maxWidth, Math.max(minWidth, elStartSize.current.width + dx));
+          newHeight = Math.min(maxHeight, Math.max(minHeight, elStartSize.current.height - dy));
+          newY = (elStartPos.current?.y || 0) + dy;
           break;
         case 'sw':
-          newWidth = Math.min(maxSize.width, Math.max(minSize.width, elementStartSize.current.width - dx));
-          newHeight = Math.min(maxSize.height, Math.max(minSize.height, elementStartSize.current.height + dy));
-          newX = elementStartPos.current.x + dx;
+          newWidth = Math.min(maxWidth, Math.max(minWidth, elStartSize.current.width - dx));
+          newHeight = Math.min(maxHeight, Math.max(minHeight, elStartSize.current.height + dy));
+          newX = (elStartPos.current?.x || 0) + dx;
           break;
         case 'se':
-          newWidth = Math.min(maxSize.width, Math.max(minSize.width, elementStartSize.current.width + dx));
-          newHeight = Math.min(maxSize.height, Math.max(minSize.height, elementStartSize.current.height + dy));
+          newWidth = Math.min(maxWidth, Math.max(minWidth, elStartSize.current.width + dx));
+          newHeight = Math.min(maxHeight, Math.max(minHeight, elStartSize.current.height + dy));
           break;
       }
+
+      // 更新本地状态
+      const newSize = { width: newWidth, height: newHeight };
+      const newPosition = { x: newX, y: newY };
       
-      // 更新尺寸和位置
-      setSize({ width: newWidth, height: newHeight });
-      setPosition({ x: newX, y: newY });
-    };
+      setSize(newSize);
+      setPosition(newPosition);
 
-    const handleMouseUp = () => {
-      setIsResizing(false);
-      resizeDirection.current = null;
-    };
+      // 如果提供了回调，则执行回调
+      if (onResize) {
+        onResize(newSize, newPosition);
+      }
+    });
+  };
 
-    // 添加全局事件监听器
-    window.addEventListener('mousemove', handleMouseMove);
-    window.addEventListener('mouseup', handleMouseUp, { once: true });
+	const handleMouseUp = () => {
+		setIsResizing(false);
+		resizeDirection.current = null;
+		if (rafIdRef.current) {
+			cancelAnimationFrame(rafIdRef.current);
+			rafIdRef.current = null;
+		}
+	};
 
+	const handleResize = (direction: ResizeDirection) => {
+    return (e: React.MouseEvent) => handleMouseStart(e, direction);
+  };
+	useEffect(() => {
+		initResize();
+	}, [])
+  useEffect(() => {
+		if (isResizing) {
+			document.addEventListener('mousemove', handleMouseMove);
+			document.addEventListener('mouseup', handleMouseUp);
+		} else {
+			document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+			if (rafIdRef.current) {
+        cancelAnimationFrame(rafIdRef.current);
+        rafIdRef.current = null;
+      }
+		}
     return () => {
-      window.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+      if (rafIdRef.current) {
+        cancelAnimationFrame(rafIdRef.current);
+        rafIdRef.current = null;
+      }
     };
-  }, [isResizing, minSize, maxSize, setSize, setPosition]);
+  }, [isResizing]);
 
-  return { ref, handleResize, isResizing };
+  return {
+    ref,
+    handleResize,
+    isResizing,
+    size,
+    position
+  };
 }
+
+export { useResize };

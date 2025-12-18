@@ -16,7 +16,7 @@ export interface Rect {
 
 export type Offset = Pick<Rect, "top" | "left" | "right" | "bottom">;
 
-export interface UseMovableOptions<
+export interface MoveOptions<
   T extends HTMLElement,
   C extends HTMLElement = T
 > {
@@ -46,10 +46,10 @@ const getClientCoord = (
 };
 
 export function useMove<T extends HTMLElement, C extends HTMLElement = T>(
-  options: UseMovableOptions<T, C>
+  options?: MoveOptions<T, C>
 ) {
-  const optionsRef = useRef(options);
-  optionsRef.current = options;
+  const optionsRef = useRef(options || {} as MoveOptions<T, C>);
+  optionsRef.current = options || {} as MoveOptions<T, C>;
   const moveRef = useRef<T>(null);
   const [position, _setPosition] = useState<Position | null>(null);
   const [isMoving, setIsMoving] = useState(false);
