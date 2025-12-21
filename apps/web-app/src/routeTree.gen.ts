@@ -16,8 +16,8 @@ import { Route as layoutsFeaturesIndexRouteImport } from "./pages/(layouts)/feat
 import { Route as layoutsDashboardIndexRouteImport } from "./pages/(layouts)/dashboard/index";
 import { Route as layoutsComponentsIndexRouteImport } from "./pages/(layouts)/components/index";
 import { Route as layoutsFeaturesResizeIndexRouteImport } from "./pages/(layouts)/features/resize/index";
+import { Route as layoutsFeaturesPanelControlsIndexRouteImport } from "./pages/(layouts)/features/panel-controls/index";
 import { Route as layoutsFeaturesMoveIndexRouteImport } from "./pages/(layouts)/features/move/index";
-import { Route as layoutsFeaturesMinMaxIndexRouteImport } from "./pages/(layouts)/features/minMax/index";
 import { Route as layoutsComponentsTreeIndexRouteImport } from "./pages/(layouts)/components/tree/index";
 
 const layoutsRouteRoute = layoutsRouteRouteImport.update({
@@ -55,16 +55,16 @@ const layoutsFeaturesResizeIndexRoute =
     path: "/features/resize/",
     getParentRoute: () => layoutsRouteRoute,
   } as any);
+const layoutsFeaturesPanelControlsIndexRoute =
+  layoutsFeaturesPanelControlsIndexRouteImport.update({
+    id: "/features/panel-controls/",
+    path: "/features/panel-controls/",
+    getParentRoute: () => layoutsRouteRoute,
+  } as any);
 const layoutsFeaturesMoveIndexRoute =
   layoutsFeaturesMoveIndexRouteImport.update({
     id: "/features/move/",
     path: "/features/move/",
-    getParentRoute: () => layoutsRouteRoute,
-  } as any);
-const layoutsFeaturesMinMaxIndexRoute =
-  layoutsFeaturesMinMaxIndexRouteImport.update({
-    id: "/features/minMax/",
-    path: "/features/minMax/",
     getParentRoute: () => layoutsRouteRoute,
   } as any);
 const layoutsComponentsTreeIndexRoute =
@@ -81,8 +81,8 @@ export interface FileRoutesByFullPath {
   "/features": typeof layoutsFeaturesIndexRoute;
   "/overview": typeof layoutsOverviewIndexRoute;
   "/components/tree": typeof layoutsComponentsTreeIndexRoute;
-  "/features/minMax": typeof layoutsFeaturesMinMaxIndexRoute;
   "/features/move": typeof layoutsFeaturesMoveIndexRoute;
+  "/features/panel-controls": typeof layoutsFeaturesPanelControlsIndexRoute;
   "/features/resize": typeof layoutsFeaturesResizeIndexRoute;
 }
 export interface FileRoutesByTo {
@@ -92,8 +92,8 @@ export interface FileRoutesByTo {
   "/features": typeof layoutsFeaturesIndexRoute;
   "/overview": typeof layoutsOverviewIndexRoute;
   "/components/tree": typeof layoutsComponentsTreeIndexRoute;
-  "/features/minMax": typeof layoutsFeaturesMinMaxIndexRoute;
   "/features/move": typeof layoutsFeaturesMoveIndexRoute;
+  "/features/panel-controls": typeof layoutsFeaturesPanelControlsIndexRoute;
   "/features/resize": typeof layoutsFeaturesResizeIndexRoute;
 }
 export interface FileRoutesById {
@@ -105,8 +105,8 @@ export interface FileRoutesById {
   "/(layouts)/features/": typeof layoutsFeaturesIndexRoute;
   "/(layouts)/overview/": typeof layoutsOverviewIndexRoute;
   "/(layouts)/components/tree/": typeof layoutsComponentsTreeIndexRoute;
-  "/(layouts)/features/minMax/": typeof layoutsFeaturesMinMaxIndexRoute;
   "/(layouts)/features/move/": typeof layoutsFeaturesMoveIndexRoute;
+  "/(layouts)/features/panel-controls/": typeof layoutsFeaturesPanelControlsIndexRoute;
   "/(layouts)/features/resize/": typeof layoutsFeaturesResizeIndexRoute;
 }
 export interface FileRouteTypes {
@@ -118,8 +118,8 @@ export interface FileRouteTypes {
     | "/features"
     | "/overview"
     | "/components/tree"
-    | "/features/minMax"
     | "/features/move"
+    | "/features/panel-controls"
     | "/features/resize";
   fileRoutesByTo: FileRoutesByTo;
   to:
@@ -129,8 +129,8 @@ export interface FileRouteTypes {
     | "/features"
     | "/overview"
     | "/components/tree"
-    | "/features/minMax"
     | "/features/move"
+    | "/features/panel-controls"
     | "/features/resize";
   id:
     | "__root__"
@@ -141,8 +141,8 @@ export interface FileRouteTypes {
     | "/(layouts)/features/"
     | "/(layouts)/overview/"
     | "/(layouts)/components/tree/"
-    | "/(layouts)/features/minMax/"
     | "/(layouts)/features/move/"
+    | "/(layouts)/features/panel-controls/"
     | "/(layouts)/features/resize/";
   fileRoutesById: FileRoutesById;
 }
@@ -202,18 +202,18 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof layoutsFeaturesResizeIndexRouteImport;
       parentRoute: typeof layoutsRouteRoute;
     };
+    "/(layouts)/features/panel-controls/": {
+      id: "/(layouts)/features/panel-controls/";
+      path: "/features/panel-controls";
+      fullPath: "/features/panel-controls";
+      preLoaderRoute: typeof layoutsFeaturesPanelControlsIndexRouteImport;
+      parentRoute: typeof layoutsRouteRoute;
+    };
     "/(layouts)/features/move/": {
       id: "/(layouts)/features/move/";
       path: "/features/move";
       fullPath: "/features/move";
       preLoaderRoute: typeof layoutsFeaturesMoveIndexRouteImport;
-      parentRoute: typeof layoutsRouteRoute;
-    };
-    "/(layouts)/features/minMax/": {
-      id: "/(layouts)/features/minMax/";
-      path: "/features/minMax";
-      fullPath: "/features/minMax";
-      preLoaderRoute: typeof layoutsFeaturesMinMaxIndexRouteImport;
       parentRoute: typeof layoutsRouteRoute;
     };
     "/(layouts)/components/tree/": {
@@ -232,8 +232,8 @@ interface layoutsRouteRouteChildren {
   layoutsFeaturesIndexRoute: typeof layoutsFeaturesIndexRoute;
   layoutsOverviewIndexRoute: typeof layoutsOverviewIndexRoute;
   layoutsComponentsTreeIndexRoute: typeof layoutsComponentsTreeIndexRoute;
-  layoutsFeaturesMinMaxIndexRoute: typeof layoutsFeaturesMinMaxIndexRoute;
   layoutsFeaturesMoveIndexRoute: typeof layoutsFeaturesMoveIndexRoute;
+  layoutsFeaturesPanelControlsIndexRoute: typeof layoutsFeaturesPanelControlsIndexRoute;
   layoutsFeaturesResizeIndexRoute: typeof layoutsFeaturesResizeIndexRoute;
 }
 
@@ -243,8 +243,9 @@ const layoutsRouteRouteChildren: layoutsRouteRouteChildren = {
   layoutsFeaturesIndexRoute: layoutsFeaturesIndexRoute,
   layoutsOverviewIndexRoute: layoutsOverviewIndexRoute,
   layoutsComponentsTreeIndexRoute: layoutsComponentsTreeIndexRoute,
-  layoutsFeaturesMinMaxIndexRoute: layoutsFeaturesMinMaxIndexRoute,
   layoutsFeaturesMoveIndexRoute: layoutsFeaturesMoveIndexRoute,
+  layoutsFeaturesPanelControlsIndexRoute:
+    layoutsFeaturesPanelControlsIndexRoute,
   layoutsFeaturesResizeIndexRoute: layoutsFeaturesResizeIndexRoute,
 };
 

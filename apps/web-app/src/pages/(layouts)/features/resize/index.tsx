@@ -1,4 +1,3 @@
-import { type ResizeDirection, useResize } from "@rap/hooks/use-resize";
 import { Button } from "@rap/components-base/button";
 import {
 	Card,
@@ -15,8 +14,9 @@ import {
 	DialogTitle,
 	DialogTrigger,
 } from "@rap/components-base/dialog";
+import { type ResizeDirection, useResize } from "@rap/hooks/use-resize";
 import { createFileRoute } from "@tanstack/react-router";
-import { useState, useRef } from "react";
+import { useRef, useState } from "react";
 
 export const Route = createFileRoute("/(layouts)/features/resize/")({
 	component: ResizeFeaturePage,
@@ -26,17 +26,19 @@ export const Route = createFileRoute("/(layouts)/features/resize/")({
 function ResizableCard() {
 	const [resizable, setResizable] = useState(true);
 	const [enableEdgeResize, setEnableEdgeResize] = useState(true);
-	const { resizeRef, handleResize, isResizing, size, position, cursor } = useResize<HTMLDivElement>({
-		minSize: { width: 200, height: 150 },
-		maxSize: { width: 500, height: 400 },
-		positionMode: 'translate',
-		disabled: !resizable,
-		enableEdgeResize: enableEdgeResize,
-		edgeSize: 8,
-		onResize: (newSize, newPosition) => {
-			console.log('Card resized:', newSize, newPosition);
+	const { resizeRef, handleResize, isResizing, size, position, cursor } = useResize<HTMLDivElement>(
+		{
+			minSize: { width: 200, height: 150 },
+			maxSize: { width: 500, height: 400 },
+			positionMode: "translate",
+			disabled: !resizable,
+			enableEdgeResize: enableEdgeResize,
+			edgeSize: 8,
+			onResize: (newSize, newPosition) => {
+				console.log("Card resized:", newSize, newPosition);
+			},
 		},
-	});
+	);
 
 	const renderResizeHandles = () => (
 		<>
@@ -61,9 +63,9 @@ function ResizableCard() {
 							height: `${size.height}px`,
 							transform: `translate(${position.x}px, ${position.y}px)`,
 							willChange: "transform",
-							cursor: enableEdgeResize ? cursor : (isResizing ? "grabbing" : "default"),
+							cursor: enableEdgeResize ? cursor : isResizing ? "grabbing" : "default",
 						}
-					: { width: '300px', cursor: enableEdgeResize ? cursor : "default" }
+					: { width: "300px", cursor: enableEdgeResize ? cursor : "default" }
 			}
 			className={`absolute shadow-xl ${isResizing ? "shadow-2xl" : ""}`}
 		>
@@ -76,21 +78,13 @@ function ResizableCard() {
 			<CardContent className="pt-4 relative">
 				<p className="mb-2">这是一个可以调整大小的卡片组件。</p>
 				<p className="mb-2 text-sm text-gray-600">
-					当前尺寸: {size ? `${Math.round(size.width)} × ${Math.round(size.height)}` : '300 × 150'}
+					当前尺寸: {size ? `${Math.round(size.width)} × ${Math.round(size.height)}` : "300 × 150"}
 				</p>
 				<div className="flex gap-2 mb-2">
-					<Button 
-						onClick={() => setResizable((prev) => !prev)}
-						variant="outline"
-						size="sm"
-					>
+					<Button onClick={() => setResizable((prev) => !prev)} variant="outline" size="sm">
 						{resizable ? "禁用" : "启用"}调整大小
 					</Button>
-					<Button 
-						onClick={() => setEnableEdgeResize((prev) => !prev)}
-						variant="outline"
-						size="sm"
-					>
+					<Button onClick={() => setEnableEdgeResize((prev) => !prev)} variant="outline" size="sm">
 						{enableEdgeResize ? "禁用" : "启用"}边和角resize
 					</Button>
 				</div>
@@ -102,60 +96,56 @@ function ResizableCard() {
 
 // 可调整大小的Dialog组件
 function ResizableDialog() {
+	const rafIdRef = useRef<number | null>(null);
 	const [enableEdgeResize, setEnableEdgeResize] = useState(true);
-	const { resizeRef, handleResize, size, position, cursor, bindEvent, removeEvent } = useResize<HTMLDivElement>({
-		minSize: { width: 300, height: 200 },
-		maxSize: { width: 800, height: 600 },
-		positionMode: 'translate',
-		enableEdgeResize: enableEdgeResize,
-		edgeSize: 8,
-		onResize: (newSize, newPosition) => {
-			console.log('Dialog resized:', newSize, newPosition);
-		},
-	});
+	const { resizeRef, handleResize, isResizing, size, position, cursor, bindEvent, removeEvent } =
+		useResize<HTMLDivElement>({
+			minSize: { width: 300, height: 200 },
+			maxSize: { width: 800, height: 600 },
+			positionMode: "translate",
+			enableEdgeResize: enableEdgeResize,
+			edgeSize: 8,
+			onResize: (newSize, newPosition) => {
+				console.log("Dialog resized:", newSize, newPosition);
+			},
+		});
 
-	const rafId = useRef(-1);
-	const handleOpenChange = (open: boolean) => {
-		if (open) {
-
-			rafId.current = requestAnimationFrame(() => {
-				bindEvent?.();
-			});
-		} else {
-			removeEvent?.();
-			if (rafId.current !== -1) {
-				cancelAnimationFrame(rafId.current);
-				rafId.current = -1;
-			}
-		}
+	const style: React.CSSProperties = {
+		cursor: enableEdgeResize ? cursor : size ? (isResizing ? "grabbing" : "default") : "",
+		willChange: "transform",
+		maxWidth: "none",
+		width: "auto",
 	};
 
-	let style: any = {};
-	if (size) {
-		if (size.width > 0 || size.height > 0) {
-			style.width = size.width;
-			style.height = size.height;
-			style.cursor = cursor;
-			style.maxWidth = 'none';
-			style.maxHeight = 'none';
-		}
-		
+	if (size && position) {
+		style.width = `${size.width}px`;
+		style.height = `${size.height}px`;
+		style.transform = `translate(${position.x}px, ${position.y}px)`;
 	}
-	if (position) {
-		if (position.x > 0 || position.y > 0) {
-			style.transform = `translate(${position.x}px, ${position.y}px)`
+
+	// 阻止点击外部关闭Dialog
+	const handleInteractOutside = (e: any) => {
+		e.preventDefault();
+	};
+	const handleOpenChange = (open: boolean) => {
+		if (open) {
+			rafIdRef.current = requestAnimationFrame(() => {
+				bindEvent();
+			});
+		} else {
+			if (rafIdRef.current !== null) {
+				cancelAnimationFrame(rafIdRef.current);
+				rafIdRef.current = null;
+			}
+			removeEvent();
 		}
-	}
+	};
 	return (
 		<Dialog onOpenChange={handleOpenChange}>
 			<DialogTrigger asChild>
 				<Button variant="outline">打开可调整大小对话框</Button>
 			</DialogTrigger>
-			<DialogContent
-				ref={resizeRef}
-				style={style}
-				className="shadow-2xl"
-			>
+			<DialogContent ref={resizeRef} style={style} onInteractOutside={handleInteractOutside}>
 				<DialogHeader className="select-none">
 					<DialogTitle>可调整大小的对话框</DialogTitle>
 					<DialogDescription>
@@ -165,14 +155,12 @@ function ResizableDialog() {
 				<div className="py-4 relative">
 					<p className="mb-2">这是一个可以调整大小的对话框组件。</p>
 					<p className="mb-2 text-sm text-gray-600">
-						当前尺寸: {size ? `${Math.round(size.width)} × ${Math.round(size.height)}` : '默认尺寸'}
+						当前尺寸: {size ? `${Math.round(size.width)} × ${Math.round(size.height)}` : "默认尺寸"}
 					</p>
-					<p className="text-sm text-gray-500">
-						最小尺寸: 300 × 200，最大尺寸: 800 × 600
-					</p>
-					
+					<p className="text-sm text-gray-500">最小尺寸: 300 × 200，最大尺寸: 800 × 600</p>
+
 					<div className="mt-4">
-						<Button 
+						<Button
 							onClick={() => setEnableEdgeResize((prev) => !prev)}
 							variant="outline"
 							size="sm"
@@ -180,7 +168,7 @@ function ResizableDialog() {
 							{enableEdgeResize ? "禁用" : "启用"}边和角resize
 						</Button>
 					</div>
-					
+
 					{!enableEdgeResize && (
 						<div
 							className="absolute bottom-4 right-4 w-4 h-4 bg-blue-500 border-2 border-white rounded-full cursor-se-resize hover:bg-blue-600 transition-colors"
@@ -197,7 +185,7 @@ function ResizableDialog() {
 
 function ResizeFeaturePage() {
 	// 位置模式状态
-	const [positionMode, setPositionMode] = useState<'translate' | 'topLeft'>('translate');
+	const [positionMode, setPositionMode] = useState<"translate" | "topLeft">("translate");
 
 	// 最小和最大尺寸限制
 	const minSize = { width: 100, height: 100 };
@@ -228,37 +216,38 @@ function ResizeFeaturePage() {
 				{/* 控制面板 */}
 				<div className="bg-white rounded-lg shadow-md p-6 mb-8">
 					<h2 className="text-xl font-semibold mb-4">控制面板</h2>
-					
+
 					{/* 位置模式选择器 */}
 					<div className="mb-6">
 						<label className="block text-sm font-medium text-gray-700 mb-2">位置模式</label>
 						<div className="flex space-x-4">
 							<button
-								onClick={() => setPositionMode('translate')}
+								type="button"
+								onClick={() => setPositionMode("translate")}
 								className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-									positionMode === 'translate'
-										? 'bg-blue-500 text-white'
-										: 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+									positionMode === "translate"
+										? "bg-blue-500 text-white"
+										: "bg-gray-200 text-gray-700 hover:bg-gray-300"
 								}`}
 							>
 								Translate 模式
 							</button>
 							<button
-								onClick={() => setPositionMode('topLeft')}
+								type="button"
+								onClick={() => setPositionMode("topLeft")}
 								className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-									positionMode === 'topLeft'
-										? 'bg-blue-500 text-white'
-										: 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+									positionMode === "topLeft"
+										? "bg-blue-500 text-white"
+										: "bg-gray-200 text-gray-700 hover:bg-gray-300"
 								}`}
 							>
 								TopLeft 模式
 							</button>
 						</div>
 						<p className="mt-2 text-sm text-gray-600">
-							{positionMode === 'translate' 
-								? 'Translate 模式：使用 transform 属性进行位置变换，适合高性能动画'
-								: 'TopLeft 模式：使用 top/left 属性进行定位，适合传统布局组件'
-							}
+							{positionMode === "translate"
+								? "Translate 模式：使用 transform 属性进行位置变换，适合高性能动画"
+								: "TopLeft 模式：使用 top/left 属性进行定位，适合传统布局组件"}
 						</p>
 					</div>
 
@@ -336,19 +325,21 @@ function ResizeFeaturePage() {
 						}`}
 						style={
 							size && position
-								? positionMode === 'translate' ?{
-										width: `${size.width}px`,
-										height: `${size.height}px`,
-										transform: `translate(${position.x}px, ${position.y}px)`,
-										willChange: "transform",
-										cursor: isResizing ? "grabbing" : "default",
-									} : {
-										width: `${size.width}px`,
-										height: `${size.height}px`,
-										top: `${position.y}px`,
-										left: `${position.x}px`,
-										cursor: isResizing ? "grabbing" : "default",
-									}
+								? positionMode === "translate"
+									? {
+											width: `${size.width}px`,
+											height: `${size.height}px`,
+											transform: `translate(${position.x}px, ${position.y}px)`,
+											willChange: "transform",
+											cursor: isResizing ? "grabbing" : "default",
+										}
+									: {
+											width: `${size.width}px`,
+											height: `${size.height}px`,
+											top: `${position.y}px`,
+											left: `${position.x}px`,
+											cursor: isResizing ? "grabbing" : "default",
+										}
 								: undefined
 						}
 					>
@@ -435,7 +426,7 @@ function ResizeFeaturePage() {
 					<p className="text-sm text-gray-600 mb-6">
 						以下示例展示了如何在真实的 UI 组件中使用 useResize hook
 					</p>
-					
+
 					<div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
 						{/* Card 示例 */}
 						<div className="space-y-4">
@@ -447,7 +438,7 @@ function ResizeFeaturePage() {
 								<ResizableCard />
 							</div>
 						</div>
-						
+
 						{/* Dialog 示例 */}
 						<div className="space-y-4">
 							<h4 className="text-md font-medium text-gray-800">可调整大小的对话框</h4>
@@ -464,7 +455,10 @@ function ResizeFeaturePage() {
 					<ul className="space-y-2 text-sm text-gray-700">
 						<li className="flex items-start">
 							<span className="mr-2">•</span>
-							<span><strong>边和角resize：</strong>启用后可以直接拖拽元素的边框和角落来调整大小，就像Windows文件夹一样</span>
+							<span>
+								<strong>边和角resize：</strong>
+								启用后可以直接拖拽元素的边框和角落来调整大小，就像Windows文件夹一样
+							</span>
 						</li>
 						<li className="flex items-start">
 							<span className="mr-2">•</span>
@@ -515,13 +509,15 @@ function ResizeFeaturePage() {
 						<li className="flex items-start">
 							<span className="mr-2">•</span>
 							<span>
-								<strong>智能光标：</strong>当鼠标移动到可调整区域时，光标会自动变为相应的resize样式
+								<strong>智能光标：</strong>
+								当鼠标移动到可调整区域时，光标会自动变为相应的resize样式
 							</span>
 						</li>
 						<li className="flex items-start">
 							<span className="mr-2">•</span>
 							<span>
-								<strong>Dialog支持：</strong>修复了Dialog组件的resize问题，支持动态DOM挂载
+								<strong>Dialog支持：</strong>
+								修复了Dialog组件的resize问题，支持动态DOM挂载
 							</span>
 						</li>
 					</ul>
