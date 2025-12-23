@@ -18,7 +18,8 @@ export type Offset = Pick<Rect, "top" | "left" | "right" | "bottom">;
 
 export interface MoveOptions<
   T extends HTMLElement,
-  C extends HTMLElement = T
+  C extends HTMLElement = T,
+	S extends HTMLElement = T
 > {
   disabled?: boolean;
   axis?: "x" | "y" | "both";
@@ -26,6 +27,7 @@ export interface MoveOptions<
   onMove?: (event: MouseEvent | TouchEvent, position: Position) => void;
   onMoveEnd?: (event: MouseEvent | TouchEvent) => void;
   useTopLeft?: boolean;
+	styleRef?: RefObject<S | null>;
   containerRef?: RefObject<C | null>;
   snapToBoundary?: boolean;
   snapThreshold?: number;
@@ -193,6 +195,7 @@ export function useMove<T extends HTMLElement, C extends HTMLElement = T>(
     if (!el) return lastestPostionRef.current;
     const { startX, startY, elRect, containerRect, lastX, lastY } =
       moveStateRef.current;
+			console.log(moveStateRef.current)
     const {
       width: elWidth,
       height: elHeight,
@@ -246,9 +249,11 @@ export function useMove<T extends HTMLElement, C extends HTMLElement = T>(
 
   const handleTopLeftStart = (e: MouseEvent | TouchEvent) => {
     if (!moveRef.current) return;
+		const { styleRef } = optionsRef.current;
     const containerRect = computeBoundary();
-    const { offsetWidth, offsetHeight } = moveRef.current;
-    const computedStyle = window.getComputedStyle(moveRef.current);
+		const el = styleRef?.current ?? moveRef.current
+    const { offsetWidth, offsetHeight } = el;
+    const computedStyle = window.getComputedStyle(el);
     const styleLeft = parseInt(computedStyle.left || "0", 10);
     const styleTop = parseInt(computedStyle.top || "0", 10);
     const elLeft = styleLeft + containerRect.left;

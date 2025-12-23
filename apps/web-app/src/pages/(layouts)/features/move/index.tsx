@@ -217,7 +217,11 @@ function DraggableCard() {
 
 // 可拖拽的Dialog组件
 function DraggableDialog() {
-	const { position, isMoving, moveRef, bindEvent, removeEvent } = useMove<HTMLDivElement>({});
+	const dialogRef = useRef<HTMLDivElement | null>(null)
+	const { position, isMoving, moveRef, bindEvent, removeEvent } = useMove<HTMLDivElement>({
+		useTopLeft: true,
+		styleRef: dialogRef
+	});
 	const rafId = useRef(-1);
 	const handleOpenChange = (open: boolean) => {
 		if (open) {
@@ -229,6 +233,7 @@ function DraggableDialog() {
 			cancelAnimationFrame(rafId.current);
 		}
 	};
+	console.log(position)
 	return (
 		<Dialog onOpenChange={handleOpenChange}>
 			<DialogTrigger asChild>
@@ -238,12 +243,16 @@ function DraggableDialog() {
 				style={
 					position
 						? {
-								transform: `translate(${position.x}px, ${position.y}px)`,
-								willChange: "transfrom",
+								// transform: `translate(${position.x}px, ${position.y}px)`,
+								// willChange: "transfrom",
+								top: position.y,
+								left: position.x
 							}
 						: undefined
 				}
-				className="absolute w-[400px] shadow-2xl"
+				// className="absolute w-[400px] shadow-2xl"
+				onInteractOutside={(e) => {e.preventDefault()}}
+				ref={dialogRef}
 			>
 				<DialogHeader
 					ref={moveRef}

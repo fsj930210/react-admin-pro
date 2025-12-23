@@ -127,7 +127,8 @@ const calculateResizeWithBoundary = (
   startSize: Size,
   startPosition: Position,
   minSize: Partial<Size>,
-  maxSize: Partial<Size>
+  maxSize: Partial<Size>,
+  positionMode?: "translate" | "topLeft"
 ): { size: Size; position: Position } => {
   const minWidth = minSize.width ?? 50;
   const minHeight = minSize.height ?? 50;
@@ -143,37 +144,55 @@ const calculateResizeWithBoundary = (
   switch (direction) {
     case "e":
       newWidth = startSize.width + dx;
+      // topLeft 模式下，东边调整时位置不变
       break;
     case "w":
       newWidth = startSize.width - dx;
-      newX = startPosition.x + dx;
+      // topLeft 模式下，西边调整时需要更新 x 位置以保持右边不动
+      if (positionMode === 'topLeft') {
+        newX = startPosition.x + dx;
+      }
       break;
     case "n":
       newHeight = startSize.height - dy;
-      newY = startPosition.y + dy;
+      // topLeft 模式下，北边调整时需要更新 y 位置以保持下边不动
+      if (positionMode === 'topLeft') {
+        newY = startPosition.y + dy;
+      }
       break;
     case "s":
       newHeight = startSize.height + dy;
+      // topLeft 模式下，南边调整时位置不变
       break;
     case "nw":
       newWidth = startSize.width - dx;
       newHeight = startSize.height - dy;
-      newX = startPosition.x + dx;
-      newY = startPosition.y + dy;
+      // topLeft 模式下，西北角调整时需要更新 x, y 位置以保持右下角不动
+      if (positionMode === 'topLeft') {
+        newX = startPosition.x + dx;
+        newY = startPosition.y + dy;
+      }
       break;
     case "ne":
       newWidth = startSize.width + dx;
       newHeight = startSize.height - dy;
-      newY = startPosition.y + dy;
+      // topLeft 模式下，东北角调整时需要更新 y 位置以保持下边不动
+      if (positionMode === 'topLeft') {
+        newY = startPosition.y + dy;
+      }
       break;
     case "sw":
       newWidth = startSize.width - dx;
       newHeight = startSize.height + dy;
-      newX = startPosition.x + dx;
+      // topLeft 模式下，西南角调整时需要更新 x 位置以保持右边不动
+      if (positionMode === 'topLeft') {
+        newX = startPosition.x + dx;
+      }
       break;
     case "se":
       newWidth = startSize.width + dx;
       newHeight = startSize.height + dy;
+      // topLeft 模式下，东南角调整时位置不变
       break;
   }
 
@@ -187,12 +206,16 @@ const calculateResizeWithBoundary = (
   if (newWidth < minWidth) {
     finalWidth = minWidth;
     if (direction.includes("w")) {
-      finalX = startPosition.x + (startSize.width - minWidth);
+      if (positionMode === 'topLeft') {
+        finalX = startPosition.x + (startSize.width - minWidth);
+      }
     }
   } else if (newWidth > maxWidth) {
     finalWidth = maxWidth;
     if (direction.includes("w")) {
-      finalX = startPosition.x + (startSize.width - maxWidth);
+      if (positionMode === 'topLeft') {
+        finalX = startPosition.x + (startSize.width - maxWidth);
+      }
     } else if (direction.includes("e")) {
       // 向右拖动达到最大宽度时，保持位置不变
       finalX = startPosition.x;
@@ -203,12 +226,16 @@ const calculateResizeWithBoundary = (
   if (newHeight < minHeight) {
     finalHeight = minHeight;
     if (direction.includes("n")) {
-      finalY = startPosition.y + (startSize.height - minHeight);
+      if (positionMode === 'topLeft') {
+        finalY = startPosition.y + (startSize.height - minHeight);
+      }
     }
   } else if (newHeight > maxHeight) {
     finalHeight = maxHeight;
     if (direction.includes("n")) {
-      finalY = startPosition.y + (startSize.height - maxHeight);
+      if (positionMode === 'topLeft') {
+        finalY = startPosition.y + (startSize.height - maxHeight);
+      }
     } else if (direction.includes("s")) {
       // 向下拖动达到最大高度时，保持位置不变
       finalY = startPosition.y;
@@ -284,10 +311,13 @@ function useResize<T extends HTMLElement>(options?: ResizeOptions) {
 
     if (!resizeDirection || !isDirectionAllowed(resizeDirection, directions))
       return;
-
+		const {positionMode} = optionsRef.current
     const rect = resizeRef.current.getBoundingClientRect();
     const currentSize = { width: rect.width, height: rect.height };
-    const currentPosition = latestPositionRef.current || { x: 0, y: 0 };
+		const computedStyle = window.getComputedStyle(resizeRef.current);
+    const styleLeft = parseInt(computedStyle.left || "0", 10);
+    const styleTop = parseInt(computedStyle.top || "0", 10);
+    const currentPosition = latestPositionRef.current ||  positionMode === 'topLeft' ? { x: styleLeft, y: styleTop }: { x: 0, y: 0};
 
     const coord = getClientCoord(e);
 
