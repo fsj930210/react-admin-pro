@@ -1,7 +1,7 @@
 import { createRouter, RouterProvider } from "@tanstack/react-router";
 // Import the generated route tree
 import { routeTree } from "./routeTree.gen";
-
+import { Toaster } from '@rap/components-base/sonner'
 // Create a new router instance
 const router = createRouter({
 	routeTree,
@@ -18,6 +18,7 @@ const App = () => {
 	return (
 		<div className="size-full overflow-x-hidden">
 			<RouterProvider router={router} />
+			<Toaster />
 		</div>
 	);
 };

@@ -38,7 +38,7 @@
 	"author": "",
 	"license": "ISC",
 	"type": "module",
-	"packageManager": "pnpm@10.25.0",
+	"packageManager": "pnpm@10.26.2",
 	"devDependencies": {
 		"@biomejs/monorepo": "catalog:",
 		"@rap/commitlint-config": "workspace:*",

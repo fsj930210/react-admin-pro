@@ -13,12 +13,18 @@
 	"type": "module",
 	"dependencies": {
 		"clsx": "catalog:",
+		"ky": "catalog:",
+		"sonner": "catalog:",
 		"tailwind-merge": "catalog:"
 	},
 	"exports": {
 		".": {
 			"types": "./src/utils.ts",
 			"default": "./src/utils.ts"
+		},
+		"./fetch": {
+			"types": "./src/fetch.ts",
+			"default": "./src/fetch.ts"
 		}
 	},
 	"devDependencies": {
