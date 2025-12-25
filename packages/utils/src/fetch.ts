@@ -48,7 +48,7 @@ export type DownloadProgressCallback = (progress: {
 /**
  * 错误提示处理函数类型
  */
-export type ErrorHandler = (message: string) => void;
+export type ErrorHandler = (error: string | Error | { message: string; code?: string; data?: any }) => void;
 
 /**
  * 请求结果包装类型
@@ -57,12 +57,12 @@ export interface RequestResult<T> {
   /**
    * 请求唯一 ID
    */
-  id: string;
+  requestId: string;
   
   /**
    * 请求 Promise
    */
-  data: Promise<T>;
+  promise: Promise<T | ApiResponse<T> | Response>;
   
   /**
    * 中止当前请求的函数
@@ -103,9 +103,11 @@ export interface FetchOptions extends Omit<KyOptions, 'searchParams' | 'json' | 
   showError?: boolean;
   
   /**
-   * 请求分组 ID（用于批量取消）
+   * 是否移除 Content-Type 头部
+   * @description 用于 multipart/form-data 等场景，让浏览器或库自动设置正确的 Content-Type
+   * @default false
    */
-  groupId?: string;
+  removeContentType?: boolean;
   
   /**
    * 上传进度回调
@@ -140,99 +142,44 @@ function generateRequestId(): string {
 }
 
 /**
- * 请求分组管理器
+ * 请求管理器
  */
-class RequestGroupManager {
-  private groups = new Map<string, Set<AbortController>>();
-  private requests = new Map<string, AbortController>(); // ID -> Controller
+class RequestManager {
+  private static requests = new Map<string, () => void>();
   
   /**
    * 添加请求
    */
-  addRequest(id: string, controller: AbortController, groupId?: string): void {
-    // 按 ID 存储
-    this.requests.set(id, controller);
-    
-    // 如果有 groupId，添加到分组
-    if (groupId) {
-      if (!this.groups.has(groupId)) {
-        this.groups.set(groupId, new Set());
-      }
-      this.groups.get(groupId)!.add(controller);
-    }
+  static add(id: string, abort: () => void): void {
+    this.requests.set(id, abort);
   }
   
   /**
    * 移除请求
    */
-  removeRequest(id: string, groupId?: string): void {
-    const controller = this.requests.get(id);
-    if (controller) {
-      this.requests.delete(id);
-      
-      // 从分组中移除
-      if (groupId) {
-        const group = this.groups.get(groupId);
-        if (group) {
-          group.delete(controller);
-          if (group.size === 0) {
-            this.groups.delete(groupId);
-          }
-        }
-      }
-    }
+  static remove(id: string): void {
+    this.requests.delete(id);
   }
   
   /**
-   * 按 ID 取消请求（支持数组）
+   * 批量取消请求
    */
-  abortById(ids: string | string[]): void {
-    const idArray = Array.isArray(ids) ? ids : [ids];
-    
-    idArray.forEach(id => {
-      const controller = this.requests.get(id);
-      if (controller) {
-        controller.abort();
+  static abortByIds(ids: string[]): void {
+    ids.forEach(id => {
+      const abort = this.requests.get(id);
+      if (abort) {
+        abort();
         this.requests.delete(id);
       }
     });
   }
   
   /**
-   * 取消整个分组的请求
-   */
-  abortGroup(groupId: string): void {
-    const group = this.groups.get(groupId);
-    if (group) {
-      group.forEach(controller => controller.abort());
-      this.groups.delete(groupId);
-    }
-  }
-  
-  /**
    * 取消所有请求
    */
-  abortAll(): void {
-    this.requests.forEach(controller => controller.abort());
+  static abortAll(): void {
+    this.requests.forEach(abort => abort());
     this.requests.clear();
-    this.groups.clear();
-  }
-  
-  /**
-   * 获取分组信息
-   */
-  getGroupInfo(): { groupId: string; count: number }[] {
-    return Array.from(this.groups.entries()).map(([groupId, group]) => ({
-      groupId,
-      count: group.size,
-    }));
-  }
-  
-  /**
-   * 获取所有请求 ID
-   */
-  getAllRequestIds(): string[] {
-    return Array.from(this.requests.keys());
   }
 }
 
@@ -248,12 +195,22 @@ function getToken(): string | null {
  * 默认错误处理函数（使用 sonner toast）
  * 注意：需要在应用中引入 Toaster 组件
  */
-let defaultErrorHandler: ErrorHandler = (message: string): void => {
+let defaultErrorHandler: ErrorHandler = (error: string | Error | { message: string; code?: string; data?: any }): void => {
   // 动态导入 sonner 以避免 SSR 问题
+  let errorMessage = '请求失败';
+  
+  if (typeof error === 'string') {
+    errorMessage = error;
+  } else if (error instanceof Error) {
+    errorMessage = error.message;
+  } else if (typeof error === 'object' && error !== null) {
+    errorMessage = error.message || '请求失败';
+  }
+  
   if (typeof window !== 'undefined') {
-		toast.error(message);
+		toast.error(errorMessage);
   } else {
-    console.error(`[HttpClient Error]: ${message}`);
+    console.error(`[HttpClient Error]: ${errorMessage}`);
   }
 };
 
@@ -271,7 +228,6 @@ export class HttpClient {
   private client: KyInstance;
   private defaultOptions: FetchOptions;
   private errorHandler: ErrorHandler;
-  private requestGroupManager: RequestGroupManager;
 
   constructor(options: FetchOptions = {}) {
     this.defaultOptions = {
@@ -282,10 +238,19 @@ export class HttpClient {
     };
     
     this.errorHandler = options.onError || defaultErrorHandler;
-    this.requestGroupManager = new RequestGroupManager();
 
     // 提取自定义选项
-    const { params, body, rawResponse, responseType, showError, onError, onUploadProgress, onDownloadProgress, ...kyOptions } = options;
+    const { 
+			params, 
+			body, 
+			rawResponse, 
+			responseType, 
+			showError, 
+			onError, 
+			onUploadProgress, 
+			onDownloadProgress, 
+			...kyOptions 
+		} = options;
 
     this.client = ky.create({
       ...kyOptions,
@@ -340,7 +305,7 @@ export class HttpClient {
       rawResponse,
       responseType = 'json',
       showError,
-      groupId,
+      removeContentType,
       onError,
       onUploadProgress,
       onDownloadProgress,
@@ -352,8 +317,10 @@ export class HttpClient {
     const requestId = generateRequestId();
     kyOptions.signal = controller.signal;
     
+    const abort = () => controller.abort();
+    
     // 添加到请求管理器
-    this.requestGroupManager.addRequest(requestId, controller, groupId);
+    RequestManager.add(requestId, abort);
 
     // 处理 GET 请求参数
     if (params) {
@@ -367,6 +334,13 @@ export class HttpClient {
       } else {
         (kyOptions as KyOptions).json = body;
       }
+    }
+    
+    // 移除 Content-Type（用于 FormData 等场景）
+    if (removeContentType && kyOptions.headers) {
+      const headers = kyOptions.headers as Record<string, string>;
+      delete headers['Content-Type'];
+      delete headers['content-type'];
     }
 
     const dataPromise = (async () => {
@@ -398,19 +372,20 @@ export class HttpClient {
         // 默认 JSON 处理
         const data = await response.json<ApiResponse<T>>();
 
-        // 处理业务逻辑
-        if (data.code === SUCCESS_CODE) {
-          return data.data as T;
-        }
-
-        // 业务错误
-        const errorMessage = data.message || '请求失败';
-        if (showError) {
+        // 无论成功或失败，都返回完整的响应结构
+        // 业务错误 - 返回完整数据，让调用方处理不同错误码
+        if (data.code !== SUCCESS_CODE && showError) {
           const customHandler = onError || this.errorHandler;
-          customHandler(errorMessage);
+          // 构建错误对象，包含完整的错误信息
+          const errorObj = {
+            message: data.message || '请求失败',
+            code: data.code,
+            data: data,
+          };
+          customHandler(errorObj);
         }
         
-        throw new Error(errorMessage);
+        return data as ApiResponse<T>;
       } catch (error) {
         // 处理中止错误
         if (error instanceof Error && error.name === 'AbortError') {
@@ -420,20 +395,26 @@ export class HttpClient {
         // 显示错误提示
         if (showError && error instanceof Error) {
           const customHandler = onError || this.errorHandler;
-          customHandler(error.message);
+          // 构建错误对象，包含完整的错误信息
+          const errorObj = {
+            message: error.message,
+            code: error.name,
+            data: error,
+          };
+          customHandler(errorObj);
         }
 
         throw error;
       } finally {
         // 从管理器中移除
-        this.requestGroupManager.removeRequest(requestId, groupId);
+        RequestManager.remove(requestId);
       }
-    })();
-
+    });
+  
     return {
-      id: requestId,
-      data: dataPromise,
-      abort: () => controller.abort(),
+      requestId,
+      promise: dataPromise as unknown as Promise<T | ApiResponse<T> | Response>,
+      abort,
     };
   }
 
@@ -497,10 +478,12 @@ export class HttpClient {
     // 使用原生 fetch 实现进度监听
     const controller = new AbortController();
     const requestId = generateRequestId();
-    const { params, groupId, ...fetchOptions } = restOptions;
+    const { params, ...fetchOptions } = restOptions;
+    
+    const abort = () => controller.abort();
     
     // 添加到请求管理器
-    this.requestGroupManager.addRequest(requestId, controller, groupId);
+    RequestManager.add(requestId, abort);
 
     const dataPromise = (async () => {
       try {
@@ -562,19 +545,25 @@ export class HttpClient {
       } catch (error) {
         if (restOptions.showError && error instanceof Error) {
           const customHandler = restOptions.onError || this.errorHandler;
-          customHandler(error.message);
+          // 构建错误对象，包含完整的错误信息
+          const errorObj = {
+            message: error.message,
+            code: error.name,
+            data: error,
+          };
+          customHandler(errorObj);
         }
         throw error;
       } finally {
         // 从管理器中移除
-        this.requestGroupManager.removeRequest(requestId, groupId);
+        RequestManager.remove(requestId);
       }
     })();
 
     return {
-      id: requestId,
-      data: dataPromise,
-      abort: () => controller.abort(),
+      requestId,
+      promise: dataPromise as Promise<Blob>,
+      abort,
     };
   }
 
@@ -609,21 +598,20 @@ export class HttpClient {
         ...restOptions,
         method: 'post',
         body: formData,
-        headers: {
-          ...restOptions?.headers,
-          // FormData 会自动设置 Content-Type
-        },
+        removeContentType: true, // FormData 需要移除 Content-Type 让浏览器自动设置
       }) as RequestResult<T | ApiResponse<T>>;
     }
 
     // 使用 XMLHttpRequest 实现进度监听
-    const { showError = true, onError, groupId } = restOptions;
+    const { showError = true, onError } = restOptions;
     let xhrInstance: XMLHttpRequest | null = null;
     const controller = new AbortController();
     const requestId = generateRequestId();
     
+    const abort = () => xhrInstance?.abort();
+    
     // 添加到请求管理器
-    this.requestGroupManager.addRequest(requestId, controller, groupId);
+    RequestManager.add(requestId, abort);
 
     const dataPromise = new Promise<T | ApiResponse<T>>((resolve, reject) => {
       const xhr = new XMLHttpRequest();
@@ -651,30 +639,35 @@ export class HttpClient {
           if (xhr.status >= 200 && xhr.status < 300) {
             const data = JSON.parse(xhr.responseText) as ApiResponse<T>;
             
-            // 处理业务逻辑
-            if (data.code === SUCCESS_CODE) {
-              resolve(data.data as T);
-            } else {
-              const errorMessage = data.message || '请求失败';
-              if (showError) {
-                const customHandler = onError || this.errorHandler;
-                customHandler(errorMessage);
-              }
-              reject(new Error(errorMessage));
+            // 无论成功还是失败，都返回完整的响应结构
+            if (data.code !== SUCCESS_CODE && showError) {
+              const customHandler = onError || this.errorHandler;
+              // 构建错误对象，包含完整的错误信息
+              const errorObj = {
+                message: data.message || '请求失败',
+                code: data.code,
+                data: data,
+              };
+              customHandler(errorObj);
             }
+            resolve(data); // 返回完整数据，让调用方处理不同错误码
           } else {
-            const errorMessage = `HTTP error! status: ${xhr.status}`;
+            const errorObj = {
+              message: `HTTP error! status: ${xhr.status}`,
+              code: xhr.status.toString(),
+              data: null,
+            };
             if (showError) {
               const customHandler = onError || this.errorHandler;
-              customHandler(errorMessage);
+              customHandler(errorObj);
             }
-            reject(new Error(errorMessage));
+            reject(new Error(errorObj.message));
           }
         } catch (error) {
           reject(error);
         } finally {
           // 从管理器中移除
-          this.requestGroupManager.removeRequest(requestId, groupId);
+          RequestManager.remove(requestId);
         }
       });
 
@@ -688,7 +681,7 @@ export class HttpClient {
         reject(new Error(errorMessage));
         
         // 从管理器中移除
-        this.requestGroupManager.removeRequest(requestId, groupId);
+        RequestManager.remove(requestId);
       });
 
       // 中止监听
@@ -696,7 +689,7 @@ export class HttpClient {
         reject(new Error('Upload aborted'));
         
         // 从管理器中移除
-        this.requestGroupManager.removeRequest(requestId, groupId);
+        RequestManager.remove(requestId);
       });
 
       // 打开连接
@@ -722,9 +715,9 @@ export class HttpClient {
     });
 
     return {
-      id: requestId,
-      data: dataPromise,
-      abort: () => xhrInstance?.abort(),
+      requestId,
+      promise: dataPromise as unknown as Promise<T | ApiResponse<T>>,
+      abort,
     };
   }
 
@@ -818,38 +811,17 @@ export class HttpClient {
   }
 
   /**
-   * 按 ID 批量取消请求（支持单个或数组）
+   * 批量取消请求
    */
-  abort(ids: string | string[]): void {
-    this.requestGroupManager.abortById(ids);
-  }
-
-  /**
-   * 取消指定分组的所有请求
-   */
-  abortGroup(groupId: string): void {
-    this.requestGroupManager.abortGroup(groupId);
+  static abortByIds(ids: string[]): void {
+    RequestManager.abortByIds(ids);
   }
 
   /**
    * 取消所有请求
    */
-  abortAll(): void {
-    this.requestGroupManager.abortAll();
-  }
-
-  /**
-   * 获取当前所有分组的信息
-   */
-  getGroupInfo(): { groupId: string; count: number }[] {
-    return this.requestGroupManager.getGroupInfo();
-  }
-  
-  /**
-   * 获取所有请求 ID
-   */
-  getAllRequestIds(): string[] {
-    return this.requestGroupManager.getAllRequestIds();
+  static abortAll(): void {
+    RequestManager.abortAll();
   }
 }
 

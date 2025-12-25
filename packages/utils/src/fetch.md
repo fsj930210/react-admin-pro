@@ -37,12 +37,12 @@ const request = httpClient.get('/api/users', {
 });
 
 // 获取数据
-const users = await request.data;
+const users = await request.promise;
 
 // 或者直接 await
 const users2 = await httpClient.get('/api/users', {
   params: { page: 1, limit: 10 }
-}).data;
+}).promise;
 
 // POST 请求（使用 body）
 const result = await httpClient.post('/api/login', {
@@ -50,8 +50,8 @@ const result = await httpClient.post('/api/login', {
     username: 'admin',
     password: '123456',
   },
-}).data;
-```
+}).promise;
+
 
 ### 2. ContentType 常量
 
@@ -98,7 +98,7 @@ const uploadRequest = httpClient.upload('/api/upload', {
 uploadRequest.abort();
 
 // 获取结果
-const result = await uploadRequest.data;
+const result = await uploadRequest.promise;
 ```
 
 ### 4. 文件下载（带进度）
@@ -115,7 +115,7 @@ const downloadRequest = httpClient.download('/api/file/download', {
 downloadRequest.abort();
 
 // 获取 Blob
-const blob = await downloadRequest.data;
+const blob = await downloadRequest.promise;
 
 // 触发浏览器下载
 const url = URL.createObjectURL(blob);
@@ -133,12 +133,12 @@ const blob2 = await httpClient.get('/api/export', {
 
 ### 5. 请求中止（新 API）
 
-所有请求方法都返回包含 `id`、`data` 和 `abort` 的对象：
+所有请求方法都返回包含 `requestId`、`promise` 和 `abort` 的对象：
 
 ```typescript
 // 场景 1: 单个请求中止
 const request = httpClient.get('/api/long-task');
-console.log(request.id); // 'req_1234567890_abc123'
+console.log(request.requestId); // 'req_1234567890_abc123'
 
 // 用户取消操作
 cancelButton.onclick = () => {
@@ -146,7 +146,7 @@ cancelButton.onclick = () => {
 };
 
 try {
-  const data = await request.data;
+  const data = await request.promise;
   console.log(data);
 } catch (error) {
   if (error instanceof Error && error.name === 'AbortError') {
@@ -164,8 +164,8 @@ search2.abort();
 
 // 获取其他请求结果
 const [result1, result3] = await Promise.all([
-  search1.data,
-  search3.data
+  search1.promise,
+  search3.promise
 ]);
 
 // 场景 3: 批量取消（使用 ID 数组）
@@ -174,13 +174,13 @@ const req2 = httpClient.get('/api/orders');
 const req3 = httpClient.get('/api/products');
 
 // 保存 ID
-const ids = [req1.id, req2.id];
+const ids = [req1.requestId, req2.requestId];
 
 // 批量取消多个请求
-httpClient.abort(ids); // 取消 req1 和 req2
+HttpClient.abortByIds(ids); // 取消 req1 和 req2
 
 // 或者取消单个
-httpClient.abort(req3.id); // 只取消 req3
+HttpClient.abortByIds([req3.requestId]); // 只取消 req3
 
 // 场景 4: 搜索防抖（取消上一次搜索）
 let currentSearch: ReturnType<typeof httpClient.get> | null = null;
@@ -194,7 +194,7 @@ function handleSearch(keyword: string) {
     params: { q: keyword }
   });
   
-  return currentSearch.data;
+  return currentSearch.promise;
 }
 
 // 场景 5: 组件卸载时中止请求
@@ -204,7 +204,7 @@ function UserList() {
   useEffect(() => {
     const request = httpClient.get('/api/users');
     
-    request.data.then(users => {
+    request.promise.then(users => {
       console.log(users);
     });
     
@@ -213,44 +213,31 @@ function UserList() {
   }, []);
 }
 
-// 场景 6: 按分组批量取消
-// 一个功能模块包含多个请求
-const req1 = httpClient.get('/api/users', { groupId: 'user-module' });
-const req2 = httpClient.get('/api/roles', { groupId: 'user-module' });
-const req3 = httpClient.get('/api/permissions', { groupId: 'user-module' });
-
-// 批量取消整个模块的请求
-httpClient.abortGroup('user-module');
-
-// 场景 7: 全局取消所有请求
+// 场景 6: 全局取消所有请求
 // 用户退出登录时取消所有请求
 function logout() {
-  httpClient.abortAll();
+  HttpClient.abortAll();
   // ... 其他退出逻辑
 }
 
-// 场景 8: 嵌套功能的请求管理
-// 主功能包含多个子功能，每个子功能有多个请求
-const mainGroupId = 'dashboard';
+// 场景 7: 搜索请求管理示例
+let currentSearch: ReturnType<typeof httpClient.get> | null = null;
 
-// 子功能1
-const statsReq1 = httpClient.get('/api/stats/users', { groupId: mainGroupId });
-const statsReq2 = httpClient.get('/api/stats/orders', { groupId: mainGroupId });
+function performSearch(keyword: string) {
+  // 取消当前搜索
+  currentSearch?.abort();
+  
+  // 发起新搜索
+  currentSearch = httpClient.get('/api/search', {
+    params: { q: keyword }
+  });
+  
+  return currentSearch.promise;
+}
 
-// 子功能2
-const chartReq1 = httpClient.get('/api/charts/sales', { groupId: mainGroupId });
-const chartReq2 = httpClient.get('/api/charts/traffic', { groupId: mainGroupId });
-
-// 取消整个主功能的所有请求
-httpClient.abortGroup(mainGroupId);
-
-// 查看当前所有分组信息
-const groups = httpClient.getGroupInfo();
-console.log(groups); // [{ groupId: 'user-module', count: 3 }, ...]
-
-// 查看所有请求 ID
-const allIds = httpClient.getAllRequestIds();
-console.log(allIds); // ['req_1234...', 'req_5678...', ...]
+// 使用示例
+const searchResult = await performSearch('react');
+console.log(searchResult);
 ```
 
 ### 6. SSE 流式请求
@@ -310,19 +297,44 @@ const request = apiClient.post('/upload', {
 
 ```ts
 // 默认会显示 toast 错误提示（集成 sonner）
-const data = await httpClient.get('/api/data').data;
+const data = await httpClient.get('/api/data').promise;
 
 // 不显示错误提示
 const data2 = await httpClient.get('/api/data', {
   showError: false,
-}).data;
+}).promise;
+
+// 无论成功还是失败，都会返回完整的响应结构 { code, message, data }
+// 这样可以让你根据不同的业务状态码处理不同的逻辑
+const response = await httpClient.get('/api/data').promise;
+if (response.code === '0000000000') {
+  // 处理成功逻辑
+  console.log('Success:', response.data);
+} else {
+  // 根据不同错误码处理不同逻辑
+  switch(response.code) {
+    case 'A0001':
+      // 处理特定错误
+      break;
+    case 'B0002':
+      // 处理其他错误
+      break;
+    default:
+      // 默认错误处理
+  }
+}
 
 // 自定义错误处理
 await httpClient.get('/api/data', {
-  onError: (message) => {
-    alert(`错误: ${message}`);
+  onError: (error) => {
+    // error 可能是 string | Error | { message: string; code?: string; data?: any }
+    if (typeof error === 'object' && error !== null && 'code' in error) {
+      alert(`错误: ${error.message} (code: ${error.code})`);
+    } else {
+      alert(`错误: ${error}`);
+    }
   },
-}).data;
+}).promise;
 ```
 
 ## 🎯 完整示例
@@ -347,10 +359,10 @@ function DashboardPage() {
       
       // 等待所有请求完成
       const [users, orders, stats, charts] = await Promise.all([
-        req1.data,
-        req2.data,
-        req3.data,
-        req4.data,
+        req1.promise,
+        req2.promise,
+        req3.promise,
+        req4.promise,
       ]);
       
       setData({ users, orders, stats, charts });
@@ -360,11 +372,8 @@ function DashboardPage() {
     
     // 组件卸载时取消整个组的请求
     return () => {
-      // 方式1: 按组取消
-      httpClient.abortGroup(groupId);
-      
-      // 方式2: 按 ID 批量取消
-      // httpClient.abort(requestIds);
+      // 按 ID 批量取消
+      HttpClient.abortByIds(requestIds);
     };
   }, []);
 }
@@ -386,7 +395,7 @@ function useLogout() {
       localStorage.removeItem('user');
       
       // 3. 调用退出接口
-      await httpClient.post('/api/logout').data;
+      await httpClient.post('/api/logout').promise;
       
       // 4. 跳转到登录页
       navigate('/login');
@@ -418,11 +427,11 @@ function SearchPage() {
     
     // 或者只取消部分请求
     const slowRequests = [bingReq.id, yahooReq.id];
-    httpClient.abort(slowRequests); // 只取消这两个
+    HttpClient.abortByIds(slowRequests); // 只取消这两个
     
     // 获取结果
     try {
-      const googleResults = await googleReq.data;
+      const googleResults = await googleReq.promise;
       setResults(googleResults);
     } catch (error) {
       console.error(error);
@@ -465,7 +474,7 @@ function FileUploader() {
     setUploadRequest(request);
 
     try {
-      const result = await request.data;
+      const result = await request.promise;
       toast.success('上传成功');
       console.log(result);
     } catch (error) {
@@ -523,7 +532,7 @@ function UserList() {
       const request = httpClient.get<User[]>('/api/users');
       
       try {
-        const data = await request.data;
+        const data = await request.promise;
         setUsers(data as User[]);
       } finally {
         setLoading(false);
@@ -538,7 +547,7 @@ function UserList() {
       body: user,
     });
     
-    const newUser = await request.data;
+    const newUser = await request.promise;
     setUsers([...users, newUser as User]);
     toast.success('用户创建成功');
   };
@@ -628,7 +637,7 @@ function SearchComponent() {
       
       currentRequestRef.current = request;
       
-      request.data.then(data => {
+      request.promise.then(data => {
         setResults(data as []);
       }).catch(error => {
         if (error.name !== 'AbortError') {
@@ -668,9 +677,9 @@ function SearchComponent() {
 
 ```typescript
 interface RequestResult<T> {
-  id: string;           // 请求唯一 ID
-  data: Promise<T>;     // 请求 Promise
-  abort: () => void;    // 中止当前请求的函数
+  requestId: string;           // 请求唯一 ID
+  promise: Promise<T>;         // 请求 Promise
+  abort: () => void;           // 中止当前请求的函数
 }
 ```
 
@@ -708,20 +717,11 @@ class HttpClient {
   // SSE 流式请求
   sse(url: string, options: SSEOptions): { abort: () => void };
   
-  // 按 ID 批量取消请求（支持单个或数组）
-  abort(ids: string | string[]): void;
+  // 批量取消请求（静态方法）
+  static abortByIds(ids: string[]): void;
   
-  // 取消指定分组的所有请求
-  abortGroup(groupId: string): void;
-  
-  // 取消所有请求
-  abortAll(): void;
-  
-  // 获取当前所有分组的信息
-  getGroupInfo(): { groupId: string; count: number }[];
-  
-  // 获取所有请求 ID
-  getAllRequestIds(): string[];
+  // 取消所有请求（静态方法）
+  static abortAll(): void;
 }
 ```
 
@@ -744,8 +744,9 @@ interface FetchOptions {
   // 是否显示错误提示
   showError?: boolean; // 默认: true
   
-  // 请求分组 ID（用于批量取消）
-  groupId?: string;
+  // 是否移除 Content-Type 头部
+  // 用于 multipart/form-data 等场景，让浏览器或库自动设置正确的 Content-Type
+  removeContentType?: boolean; // 默认: false
   
   // 上传进度回调（upload 方法）
   onUploadProgress?: (progress: { loaded: number; total: number; percentage: number }) => void;
@@ -754,7 +755,7 @@ interface FetchOptions {
   onDownloadProgress?: (progress: { loaded: number; total: number; percentage: number }) => void;
   
   // 自定义错误处理函数
-  onError?: (message: string) => void;
+  onError?: (error: string | Error | { message: string; code?: string; data?: any }) => void;
   
   // ... 所有 ky 的配置选项（timeout, headers, retry 等）
 }
@@ -804,12 +805,12 @@ function DashboardPage() {
       setLoading(true);
       
       try {
-        // 同一个页面的多个请求使用相同的 groupId
+        // 页面的多个请求
         const [users, orders, stats, charts] = await Promise.all([
-          httpClient.get('/api/users', { groupId }).data,
-          httpClient.get('/api/orders', { groupId }).data,
-          httpClient.get('/api/stats', { groupId }).data,
-          httpClient.get('/api/charts', { groupId }).data,
+          httpClient.get('/api/users').promise,
+          httpClient.get('/api/orders').promise,
+          httpClient.get('/api/stats').promise,
+          httpClient.get('/api/charts').promise,
         ]);
         
         setData({ users, orders, stats, charts });
@@ -824,9 +825,9 @@ function DashboardPage() {
     
     loadData();
     
-    // 组件卸载时取消整个组的请求
+    // 组件卸载时取消所有请求
     return () => {
-      httpClient.abortGroup(groupId);
+      HttpClient.abortAll();
     };
   }, []);
   
@@ -860,7 +861,7 @@ function useLogout() {
     
     // 3. 调用退出接口（可选）
     try {
-      await httpClient.post('/api/logout').data;
+      await httpClient.post('/api/logout').promise;
     } catch (error) {
       // 忽略错误
     }
@@ -884,17 +885,18 @@ function useLogout() {
 
 1. **错误处理**：默认使用 sonner toast 显示错误，需要在应用中引入 `<Toaster />` 组件
 2. **请求参数**：GET 请求使用 `params`，POST/PUT/PATCH 使用 `body`，符合 RESTful 规范
-3. **请求中止**：所有请求返回 `{ id, data, abort }` 对象，直接调用 `abort()` 即可中止，无需管理 ID
+3. **请求中止**：所有请求返回 `{ requestId, promise, abort }` 对象，直接调用 `abort()` 即可中止，无需管理 ID
 4. **批量取消**：
-   - 使用 `httpClient.abort(ids)` 按 ID 批量取消，支持单个或数组
-   - 使用 `groupId` 将多个请求分组，通过 `abortGroup(groupId)` 批量取消
-5. **全局取消**：调用 `abortAll()` 取消所有请求（如用户退出登录）
+   - 使用 `HttpClient.abortByIds(ids)` 按 ID 批量取消，只支持数组形式
+   - 移除了分组功能，简化批量取消逻辑
+5. **全局取消**：调用 `HttpClient.abortAll()` 取消所有请求（如用户退出登录）
 6. **文件上传**：`upload` 方法默认使用 `multipart/form-data`，支持进度监听（使用 XMLHttpRequest），文件字段名默认为 `file`，可通过 `fileFieldName` 自定义
 7. **文件下载**：`download` 方法返回 Blob，支持进度监听（使用原生 Fetch + Stream）
 8. **进度支持**：由于 Ky 和 Fetch API 不原生支持进度事件，上传使用 XMLHttpRequest，下载使用 ReadableStream
 9. **SSE 编码**：SSE 流式请求默认使用 UTF-8 编码
 10. **配置覆盖**：单次请求可以覆盖基础配置（headers, timeout, responseType 等）
 11. **TypeScript**：建议为所有请求指定泛型类型以获得更好的类型提示
+12. **Content-Type 处理**：使用 `removeContentType: true` 选项可以在 multipart/form-data 等场景下移除 Content-Type 头部，让浏览器或库自动设置正确的 Content-Type 和 boundary
 
 ## 📄 License
 
