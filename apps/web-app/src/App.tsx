@@ -1,8 +1,15 @@
 import { createRouter, RouterProvider } from "@tanstack/react-router";
-// Import the generated route tree
+
 import { routeTree } from "./routeTree.gen";
 import { Toaster } from '@rap/components-base/sonner'
-// Create a new router instance
+
+import {
+  QueryClient,
+  QueryClientProvider,
+} from '@tanstack/react-query'
+
+const queryClient = new QueryClient()
+
 const router = createRouter({
 	routeTree,
 	basepath: import.meta.env.RAP_WEB_APP_BASE_URL, // Set the base path for the router
@@ -17,7 +24,9 @@ declare module "@tanstack/react-router" {
 const App = () => {
 	return (
 		<div className="size-full overflow-x-hidden">
-			<RouterProvider router={router} />
+			<QueryClientProvider client={queryClient}>
+				<RouterProvider router={router} />
+			</QueryClientProvider>
 			<Toaster />
 		</div>
 	);

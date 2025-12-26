@@ -155,10 +155,10 @@ const data = {
     },
   ],
 };
-// export interface Menu {}
-// const menu = [];
+
 export type SidebarProps = React.ComponentProps<typeof BaseSidebar> & {
   logo?: string;
+	
 };
 export function Sidebar({ ...props }: SidebarProps) {
   return (

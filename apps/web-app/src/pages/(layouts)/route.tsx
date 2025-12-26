@@ -4,14 +4,16 @@ import { LayoutTabs } from "@rap/components-ui/tabs";
 import { createFileRoute, Outlet } from "@tanstack/react-router";
 import { APP_BASE_PATH } from "@/config";
 
+
 export const Route = createFileRoute("/(layouts)")({
 	component: Layout,
 });
 
 function Layout() {
+
 	return (
 		<SidebarProvider defaultOpen>
-			<Sidebar logo={`${APP_BASE_PATH}/logo.svg`} />
+			<Sidebar logo={`${APP_BASE_PATH}/logo.svg`}  />
 			<SidebarInset className="overflow-x-hidden min-w-0">
 				<LayoutTabs />
 				<div className="h-9.5 bg-background">

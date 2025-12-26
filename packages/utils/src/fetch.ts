@@ -53,17 +53,37 @@ export type ErrorHandler = (error: string | Error | { message: string; code?: st
 /**
  * 请求结果包装类型
  */
-export interface RequestResult<T> {
+export interface RequestResult<T = unknown> {
   /**
    * 请求唯一 ID
    */
   requestId: string;
-  
+
   /**
    * 请求 Promise
    */
-  promise: Promise<T | ApiResponse<T> | Response>;
-  
+  promise: Promise<ApiResponse<T>>;
+
+  /**
+   * 中止当前请求的函数
+   */
+  abort: () => void;
+}
+
+/**
+ * 下载结果包装类型（用于返回原始数据如 Blob）
+ */
+export interface DownloadResult {
+  /**
+   * 请求唯一 ID
+   */
+  requestId: string;
+
+  /**
+   * 下载 Promise
+   */
+  promise: Promise<Blob>;
+
   /**
    * 中止当前请求的函数
    */
@@ -293,7 +313,7 @@ export class HttpClient {
   private request<T = unknown>(
     url: string,
     options: FetchOptions = {}
-  ): RequestResult<T | ApiResponse<T> | Response> {
+  ): RequestResult<T> {
     const mergedOptions: FetchOptions = {
       ...this.defaultOptions,
       ...options,
@@ -354,19 +374,19 @@ export class HttpClient {
 
         // 根据响应类型处理
         if (responseType === 'blob') {
-          return (await response.blob()) as T;
+          return await response.blob();
         }
 
         if (responseType === 'text') {
-          return (await response.text()) as T;
+          return await response.text();
         }
 
         if (responseType === 'arrayBuffer') {
-          return (await response.arrayBuffer()) as T;
+          return await response.arrayBuffer();
         }
 
         if (responseType === 'formData') {
-          return (await response.formData()) as T;
+          return await response.formData();
         }
 
         // 默认 JSON 处理
@@ -385,7 +405,7 @@ export class HttpClient {
           customHandler(errorObj);
         }
         
-        return data as ApiResponse<T>;
+        return data;
       } catch (error) {
         // 处理中止错误
         if (error instanceof Error && error.name === 'AbortError') {
@@ -412,44 +432,44 @@ export class HttpClient {
     });
   
     return {
-      requestId,
-      promise: dataPromise as unknown as Promise<T | ApiResponse<T> | Response>,
-      abort,
-    };
+    requestId,
+    promise: dataPromise() as Promise<ApiResponse<T>>,
+    abort,
+  };
   }
 
   /**
    * GET 请求
    */
-  get<T = unknown>(url: string, options?: FetchOptions): RequestResult<T | ApiResponse<T> | Response> {
+  get<T = unknown>(url: string, options?: FetchOptions): RequestResult<T> {
     return this.request<T>(url, { ...options, method: 'get' });
   }
 
   /**
    * POST 请求
    */
-  post<T = unknown>(url: string, options?: FetchOptions): RequestResult<T | ApiResponse<T> | Response> {
+  post<T = unknown>(url: string, options?: FetchOptions): RequestResult<T> {
     return this.request<T>(url, { ...options, method: 'post' });
   }
 
   /**
    * PUT 请求
    */
-  put<T = unknown>(url: string, options?: FetchOptions): RequestResult<T | ApiResponse<T> | Response> {
+  put<T = unknown>(url: string, options?: FetchOptions): RequestResult<T> {
     return this.request<T>(url, { ...options, method: 'put' });
   }
 
   /**
    * PATCH 请求
    */
-  patch<T = unknown>(url: string, options?: FetchOptions): RequestResult<T | ApiResponse<T> | Response> {
+  patch<T = unknown>(url: string, options?: FetchOptions): RequestResult<T> {
     return this.request<T>(url, { ...options, method: 'patch' });
   }
 
   /**
    * DELETE 请求
    */
-  delete<T = unknown>(url: string, options?: FetchOptions): RequestResult<T | ApiResponse<T> | Response> {
+  delete<T = unknown>(url: string, options?: FetchOptions): RequestResult<T> {
     return this.request<T>(url, { ...options, method: 'delete' });
   }
 
@@ -459,12 +479,12 @@ export class HttpClient {
   download(
     url: string,
     options?: FetchOptions & { onDownloadProgress?: DownloadProgressCallback }
-  ): RequestResult<Blob> {
+  ): DownloadResult {
     const { onDownloadProgress, ...restOptions } = options || {};
 
     // 如果没有进度回调，直接使用普通请求
     if (!onDownloadProgress) {
-      return this.request<Blob>(url, {
+      const requestResult = this.request<Blob>(url, {
         ...restOptions,
         method: 'get',
         responseType: 'blob',
@@ -472,7 +492,19 @@ export class HttpClient {
           ...restOptions?.headers,
           'Content-Type': ContentType.download,
         },
-      }) as RequestResult<Blob>;
+      });
+
+      // 将 RequestResult<Blob> 转换为 DownloadResult
+      // 直接返回 Blob 数据（download 方法返回的是原始数据，不是 ApiResponse 包装）
+      const blobPromise = requestResult.promise.then((response) => {
+        return response.data as Blob;
+      });
+
+      return {
+        requestId: requestResult.requestId,
+        promise: blobPromise,
+        abort: requestResult.abort,
+      };
     }
 
     // 使用原生 fetch 实现进度监听
@@ -541,7 +573,7 @@ export class HttpClient {
         }
 
         // 合并所有 chunks
-        return new Blob(chunks);
+        return new Blob(chunks as BlobPart[]);
       } catch (error) {
         if (restOptions.showError && error instanceof Error) {
           const customHandler = restOptions.onError || this.errorHandler;
@@ -578,7 +610,7 @@ export class HttpClient {
       data?: Record<string, unknown>;
       onUploadProgress?: UploadProgressCallback;
     }
-  ): RequestResult<T | ApiResponse<T>> {
+  ): RequestResult<T> {
     const { file, fileFieldName = 'file', data, onUploadProgress, ...restOptions } = options;
 
     // 构建 FormData
@@ -599,7 +631,7 @@ export class HttpClient {
         method: 'post',
         body: formData,
         removeContentType: true, // FormData 需要移除 Content-Type 让浏览器自动设置
-      }) as RequestResult<T | ApiResponse<T>>;
+      });
     }
 
     // 使用 XMLHttpRequest 实现进度监听
@@ -716,7 +748,7 @@ export class HttpClient {
 
     return {
       requestId,
-      promise: dataPromise as unknown as Promise<T | ApiResponse<T>>,
+      promise: dataPromise as Promise<ApiResponse<T>>,
       abort,
     };
   }
@@ -836,8 +868,3 @@ export function createHttpClient(options?: FetchOptions): HttpClient {
  * 默认 HTTP 客户端实例
  */
 export const httpClient = createHttpClient();
-
-/**
- * 便捷导出
- */
-export const { get, post, put, patch, delete: del } = httpClient;

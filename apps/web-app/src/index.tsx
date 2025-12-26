@@ -4,12 +4,13 @@ import "@rap/styles/globals.css";
 import React from "react";
 import ReactDOM from "react-dom/client";
 import App from "./App";
-import { handlers as mockHandlers } from "./mock/menu";
+import { handlers as menuHandlers } from "./mock/menu";
+import { handlers as authHandlers } from "./mock/auth";
 
 const rootEl = document.getElementById("root");
 if (rootEl) {
 	const root = ReactDOM.createRoot(rootEl);
-	initMock(mockHandlers, {
+	initMock([...menuHandlers, ...authHandlers], {
 		startOptions: {
 			serviceWorker: {
 				url: `${APP_BASE_PATH}/mockServiceWorker.js`,

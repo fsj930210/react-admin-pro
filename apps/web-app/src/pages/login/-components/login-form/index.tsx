@@ -15,6 +15,8 @@ import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
 import { QuickLogForm } from "../quick-login";
+import { login } from "@/service/auth";
+import { useRouter } from "@tanstack/react-router";
 
 type LoginFormProps = React.ComponentPropsWithoutRef<"form"> & {
 	className?: string;
@@ -31,6 +33,7 @@ const FormSchema = z.object({
 });
 
 export function LoginForm({ className, quickLoginStyle = "inline" }: LoginFormProps) {
+	const router = useRouter();
 	const form = useForm({
 		resolver: zodResolver(FormSchema),
 		defaultValues: {
@@ -40,14 +43,20 @@ export function LoginForm({ className, quickLoginStyle = "inline" }: LoginFormPr
 		},
 	});
 
-	function onSubmit(data: z.infer<typeof FormSchema>) {
-		toast("You submitted the following values", {
-			description: (
-				<pre className="mt-2 w-[320px] rounded-md bg-neutral-950 p-4">
-					<code className="text-white">{JSON.stringify(data, null, 2)}</code>
-				</pre>
-			),
-		});
+	async function onSubmit(data: z.infer<typeof FormSchema>) {
+		try {
+			const res = login(data);
+			const resData = await res.promise;
+			
+			// 将 token 存储到 localStorage
+			localStorage.setItem('token', resData.data?.token ?? "");
+			
+			toast.success("Login success");
+			router.navigate({ to: "/dashboard", replace: true });
+		} catch (error) {
+			console.error('Login error:', error);
+			toast.error("Login failed");
+		}
 	}
 
 	return (
@@ -68,10 +77,10 @@ export function LoginForm({ className, quickLoginStyle = "inline" }: LoginFormPr
 				<FormField
 					control={form.control}
 					name="password"
-					render={() => (
+					render={({ field }) => (
 						<FormItem>
 							<FormControl>
-								<Input placeholder="password" />
+								<Input type="password" placeholder="password" {...field} />
 							</FormControl>
 							<FormMessage />
 						</FormItem>
@@ -82,7 +91,7 @@ export function LoginForm({ className, quickLoginStyle = "inline" }: LoginFormPr
 						control={form.control}
 						name="remember"
 						render={({ field }) => (
-							<FormItem className="!flex-items-center space-x-1">
+							<FormItem className="flex-items-center! space-x-1">
 								<FormControl>
 									<Checkbox
 										checked={!!field.value}
