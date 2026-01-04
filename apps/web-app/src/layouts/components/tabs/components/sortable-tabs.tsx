@@ -8,13 +8,13 @@ import { cn } from "@rap/utils";
 import type { Dispatch, ReactNode, SetStateAction } from "react";
 import type { LayoutTabItem, TabType } from "../types";
 
-type SortableTabsProps = {
+interface SortableTabsProps {
   tabs: LayoutTabItem[];
   setTabs: Dispatch<SetStateAction<LayoutTabItem[]>>;
   children: (item: LayoutTabItem) => ReactNode;
   activeTab: string;
   tabType: TabType;
-};
+}
 
 export function SortableTabs({
   tabs,

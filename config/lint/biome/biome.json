@@ -22,7 +22,10 @@
         "noSvgWithoutTitle": "off",
         "noStaticElementInteractions": "off",
         "useKeyWithClickEvents": "off"
-      }
+      },
+			"suspicious": {
+				"noShadowRestrictedNames": "off"
+			}
     },
     "domains": {
       "next": "recommended",

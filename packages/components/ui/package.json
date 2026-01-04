@@ -24,9 +24,9 @@
 		"react-dom": "catalog:"
 	},
 	"exports": {
-		"./layouts": "./src/components/layouts/index.tsx",
-		"./tabs": "./src/components/tabs/index.tsx",
-		"./loading": "./src/components/loading/index.tsx"
+		"./loading": "./src/components/loading/index.tsx",
+		"./logo": "./src/components/logo/index.tsx",
+		"./theme-provider": "./src/components/theme-provider/index.tsx"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "catalog:",

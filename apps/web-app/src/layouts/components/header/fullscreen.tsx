@@ -6,7 +6,7 @@ export function Fullscreen() {
   return (
     <span
       onClick={toggleFullscreen}
-      className="cursor-pointer leading-none p-[4] rounded-full bg-transparent hover:bg-[var(--ant-color-bg-layout)] transition-all"
+      className="cursor-pointer leading-none p-[4] rounded-full bg-transparent transition-all"
     >
       {isFullscreen ? (
         <Shrink />

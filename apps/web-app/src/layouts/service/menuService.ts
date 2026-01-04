@@ -1,7 +1,7 @@
 export type MenuOpenMode = 'currentSystemTab' | 'newSystemTab' | 'iframe' | 'newBrowserTab';
 export type MenuType = 'menu' | 'dir' | 'button';
 export type MenuStatus = 'enabled' | 'disabled';
-export type MenuBadge = {
+export interface MenuBadge {
   text: string;
   color: string;
 }
@@ -44,7 +44,7 @@ export class MenuService {
   private flatMenus: FlatMenuItem[] = [];
 
   constructor(initialMenus?: MenuItem[]) {
-    this.menus = initialMenus || [];
+    this.menus = initialMenus ?? [];
     this.updateFlatMenus();
   }
 
@@ -72,7 +72,7 @@ export class MenuService {
   /**
    * 递归铺平菜单树
    */
-  private flattenMenus(menus: MenuItem[], level: number = 0, parentPath: string[] = []): FlatMenuItem[] {
+  private flattenMenus(menus: MenuItem[], level = 0, parentPath: string[] = []): FlatMenuItem[] {
     const result: FlatMenuItem[] = [];
 
     menus.forEach(menu => {
@@ -100,8 +100,8 @@ export class MenuService {
     const newMenu: MenuItem = {
       ...menu,
       id: this.generateId(),
-      parentId: parentId || null,
-      parentCode: parentId ? this.findMenuById(parentId)?.code || null : null
+      parentId: parentId ?? null,
+      parentCode: parentId ? this.findMenuById(parentId)?.code ?? null : null
     };
 
     if (parentId) {
@@ -120,9 +120,7 @@ export class MenuService {
   private addToParent(menu: MenuItem, parentId: string): void {
     const parent = this.findMenuById(parentId);
     if (parent) {
-      if (!parent.children) {
-        parent.children = [];
-      }
+      parent.children ??= [];
       parent.children.push(menu);
       parent.children.sort((a, b) => a.order - b.order);
     }
@@ -205,7 +203,7 @@ export class MenuService {
 
     // 添加到新父菜单
     menu.parentId = newParentId;
-    menu.parentCode = newParentId ? this.findMenuById(newParentId)?.code || null : null;
+    menu.parentCode = newParentId ? this.findMenuById(newParentId)?.code ?? null : null;
 
     if (newParentId) {
       this.addToParent(menu, newParentId);
@@ -239,7 +237,7 @@ export class MenuService {
    */
   findMenuByCode(menuCode: string): MenuItem | null {
     const flatMenu = this.flatMenus.find(menu => menu.code === menuCode);
-    return flatMenu || null;
+    return flatMenu ?? null;
   }
 
   /**
@@ -449,7 +447,7 @@ export class MenuService {
   /**
    * 获取搜索建议（基于输入的前缀）
    */
-  getSearchSuggestions(prefix: string, limit: number = 10): string[] {
+  getSearchSuggestions(prefix: string, limit = 10): string[] {
     if (!prefix.trim()) return [];
 
     const lowerPrefix = prefix.toLowerCase();
@@ -483,7 +481,7 @@ export class MenuService {
    * @param includeHidden 是否包含隐藏的菜单，默认为 false
    * @returns 按分类组织的菜单对象
    */
-  getMenusByCategory(category?: MenuCategory, includeHidden: boolean = false): Record<MenuCategory | 'uncategorized', MenuItem[]> {
+  getMenusByCategory(category?: MenuCategory, includeHidden = false): Record<MenuCategory | 'uncategorized', MenuItem[]> {
     const result: Record<MenuCategory | 'uncategorized', MenuItem[]> = {
       application: [],
       settings: [],
@@ -532,7 +530,7 @@ export class MenuService {
    * @param includeEmpty 是否包含空的分类，默认为 false
    * @returns 分类列表及其菜单数量
    */
-  getMenuCategories(includeEmpty: boolean = false): Array<{ category: MenuCategory | 'uncategorized'; count: number; label: string }> {
+  getMenuCategories(includeEmpty = false): { category: MenuCategory | 'uncategorized'; count: number; label: string }[] {
     const categorizedMenus = this.getMenusByCategory();
     const categories = [
       { category: 'application' as const, count: categorizedMenus.application.length, label: '应用功能' },
@@ -549,7 +547,7 @@ export class MenuService {
    * @param includeHidden 是否包含隐藏的菜单，默认为 false
    * @returns 符合条件的菜单树
    */
-  filterMenusByCategory(category: MenuCategory, includeHidden: boolean = false): MenuItem[] {
+  filterMenusByCategory(category: MenuCategory, includeHidden = false): MenuItem[] {
     const filterMenuTree = (menus: MenuItem[]): MenuItem[] => {
       return menus.filter(menu => {
         // 跳过隐藏菜单（除非明确要求包含）

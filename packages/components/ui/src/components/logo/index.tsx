@@ -17,7 +17,6 @@ const Logo = ({
   onClick,
 }: LogoProps) => {
   return (
-    // biome-ignore lint:a11y/noStaticElementInteractions
     <div className={cn("flex-items-center gap-2", className)} onClick={onClick}>
       <img
         src={url ?? '/logo.svg'}
