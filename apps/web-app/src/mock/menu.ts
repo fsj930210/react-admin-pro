@@ -103,6 +103,166 @@ const allMenus = [
         status: 'enabled' as const
       }
     ]
+  },
+  {
+    id: 'multi-level',
+    code: 'multi-level',
+    title: '多级菜单',
+    url: '/multi-level',
+    type: 'dir' as const,
+    icon: 'layers',
+    parentId: null,
+    parentCode: null,
+    hidden: false,
+    openMode: 'currentSystemTab' as const,
+    permissions: [],
+    order: 4,
+    isActive: true,
+    status: 'enabled' as const,
+    category: 'application' as const,
+    children: [
+      {
+        id: 'level2-1',
+        code: 'level2-1',
+        title: '二级菜单-1',
+        type: 'dir' as const,
+        icon: 'folder',
+        parentId: 'multi-level',
+        parentCode: 'multi-level',
+        hidden: false,
+        order: 1,
+        isActive: true,
+        status: 'enabled' as const,
+        children: [
+          {
+            id: 'level3-1-1',
+            code: 'level3-1-1',
+            title: '三级菜单-1-1',
+            url: '/multi-level/level2-1/level3-1-1',
+            type: 'menu' as const,
+            icon: 'file',
+            parentId: 'level2-1',
+            parentCode: 'level2-1',
+            hidden: false,
+            openMode: 'currentSystemTab' as const,
+            permissions: [],
+            order: 1,
+            isActive: true,
+            status: 'enabled' as const
+          },
+          {
+            id: 'level3-1-2',
+            code: 'level3-1-2',
+            title: '三级菜单-1-2',
+            type: 'dir' as const,
+            icon: 'folder-open',
+            parentId: 'level2-1',
+            parentCode: 'level2-1',
+            hidden: false,
+            order: 2,
+            isActive: true,
+            status: 'enabled' as const,
+            children: [
+              {
+                id: 'level4-1-2-1',
+                code: 'level4-1-2-1',
+                title: '四级菜单-1-2-1',
+                url: '/multi-level/level2-1/level3-1-2/level4-1-2-1',
+                type: 'menu' as const,
+                icon: 'file-text',
+                parentId: 'level3-1-2',
+                parentCode: 'level3-1-2',
+                hidden: false,
+                openMode: 'currentSystemTab' as const,
+                permissions: [],
+                order: 1,
+                isActive: true,
+                status: 'enabled' as const
+              },
+              {
+                id: 'level4-1-2-2',
+                code: 'level4-1-2-2',
+                title: '四级菜单-1-2-2',
+                url: '/multi-level/level2-1/level3-1-2/level4-1-2-2',
+                type: 'menu' as const,
+                icon: 'file-text',
+                parentId: 'level3-1-2',
+                parentCode: 'level3-1-2',
+                hidden: false,
+                openMode: 'currentSystemTab' as const,
+                permissions: [],
+                order: 2,
+                isActive: true,
+                status: 'enabled' as const
+              }
+            ]
+          },
+          {
+            id: 'level3-1-3',
+            code: 'level3-1-3',
+            title: '三级菜单-1-3',
+            url: '/multi-level/level2-1/level3-1-3',
+            type: 'menu' as const,
+            icon: 'file',
+            parentId: 'level2-1',
+            parentCode: 'level2-1',
+            hidden: false,
+            openMode: 'currentSystemTab' as const,
+            permissions: [],
+            order: 3,
+            isActive: true,
+            status: 'enabled' as const
+          }
+        ]
+      },
+      {
+        id: 'level2-2',
+        code: 'level2-2',
+        title: '二级菜单-2',
+        type: 'dir' as const,
+        icon: 'folder',
+        parentId: 'multi-level',
+        parentCode: 'multi-level',
+        hidden: false,
+        order: 2,
+        isActive: true,
+        status: 'enabled' as const,
+        children: [
+          {
+            id: 'level3-2-1',
+            code: 'level3-2-1',
+            title: '三级菜单-2-1',
+            url: '/multi-level/level2-2/level3-2-1',
+            type: 'menu' as const,
+            icon: 'file',
+            parentId: 'level2-2',
+            parentCode: 'level2-2',
+            hidden: false,
+            openMode: 'currentSystemTab' as const,
+            permissions: [],
+            order: 1,
+            isActive: true,
+            status: 'enabled' as const
+          }
+        ]
+      },
+      {
+        id: 'level2-3',
+        code: 'level2-3',
+        title: '二级菜单-3',
+        url: '/multi-level/level2-3',
+        type: 'menu' as const,
+        icon: 'file',
+        parentId: 'multi-level',
+        parentCode: 'multi-level',
+        hidden: false,
+        openMode: 'currentSystemTab' as const,
+        permissions: [],
+        order: 3,
+        isActive: true,
+        status: 'enabled' as const
+      }
+    ]
   }
 ];
 
@@ -145,7 +305,7 @@ const partialMenus = [
 
 
 
-export const handlers = [
+export default [
   http.get("/api/rap/user/menus", ({ request }) => {
 		const token = request.headers.get('authorization') ?? '';
 		if (!token) {
@@ -157,9 +317,5 @@ export const handlers = [
 		} else {
 			return HttpResponse.json({ code: SUCCESS_CODE, message: 'success', data: allMenus });
 		}
-
-
-
-
   }),
 ];

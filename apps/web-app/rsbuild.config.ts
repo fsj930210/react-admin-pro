@@ -20,7 +20,7 @@ const baseConfig = defineRsbuildBaseConfig({
 const devConfig = defineRsbuildDevConfig({
 	server: {
 		port: Number(parsed.RAP_WEB_APP_PORT) || 3000,
-		open: true,
+		open: false,
 		base: parsed.RAP_WEB_APP_BASE_URL,
 	},
 	tools: {

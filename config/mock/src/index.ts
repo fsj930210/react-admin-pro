@@ -19,6 +19,7 @@ export function shouldEnableMock(config: MockConfig): boolean {
   return currentEnvironment === 'development' && !enableMock
 }
 
+
 export async function initMock(
   handlers: any[],
   config: MockConfig,

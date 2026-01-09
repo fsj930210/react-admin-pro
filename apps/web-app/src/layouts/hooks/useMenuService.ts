@@ -43,7 +43,6 @@ export interface FlatMenuItem extends MenuItem {
 
 const MENU_STORAGE_KEY = 'rap-selected-menu';
 
-
 const getStorageSelectedMenu = (): MenuItem | null => {
   try {
     if (typeof window === 'undefined') return null;
@@ -72,6 +71,30 @@ const setStorageSelectedMenu = (menu: MenuItem | null): void => {
   }
 };
 
+// 根据选中的菜单计算初始应该展开的菜单项
+const calcOpenKeys = (selectedMenu: MenuItem | null, menus: MenuItem[]): string[] => {
+  if (!selectedMenu) return [];
+  
+  const openKeys: string[] = [];
+  let current = selectedMenu;
+  
+  // 使用扁平菜单列表来提高查找效率
+  const flatMenusList = flattenMenus(menus);
+  
+  // 向上遍历，找到所有父级菜单
+  while (current && current.parentId) {
+    const parent = flatMenusList.find(menu => menu.id === current.parentId);
+    if (parent) {
+      openKeys.push(parent.id);
+      current = parent;
+    } else {
+      break;
+    }
+  }
+  
+  return openKeys;
+};
+
 const flattenMenus = (menuList: MenuItem[], level = 0, parentPath: string[] = []): FlatMenuItem[] => {
   const result: FlatMenuItem[] = [];
 
@@ -93,31 +116,63 @@ const flattenMenus = (menuList: MenuItem[], level = 0, parentPath: string[] = []
   return result;
 };
 
-export function useMenuService(initialMenus?: MenuItem[]) {
-  const [menus, setMenus] = useState<MenuItem[]>(initialMenus ?? []);
-  const [selectedMenu, _setSelectedMenu] = useState<MenuItem | null>(() => getStorageSelectedMenu());
+interface UseMenuServiceParams {
+  defaultMenus?: MenuItem[];
+  defaultOpenKeys?: string[];
+  defaultSelectedMenu?: MenuItem | null;
+  menuMutex?: boolean; // 控制菜单是否互斥展开
+}
 
-  const setSelectedMenu = (menu: MenuItem | null) => {
-    _setSelectedMenu(menu);
+export function useMenuService(params?: UseMenuServiceParams) {
+  const { defaultMenus, defaultOpenKeys, defaultSelectedMenu, menuMutex = true } = params ?? {};
+  
+  const [menus, setMenus] = useState<MenuItem[]>(defaultMenus ?? []);
+  const [selectedMenu, setSelectedMenu] = useState<MenuItem | null>(() => 
+    defaultSelectedMenu ?? getStorageSelectedMenu()
+  );
+  const [openKeys, setOpenKeys] = useState<string[]>(() => 
+    defaultOpenKeys ?? calcOpenKeys(defaultSelectedMenu ?? getStorageSelectedMenu(), defaultMenus ?? [])
+  );
+
+  const updateSelectedMenu = (menu: MenuItem | null) => {
+    setSelectedMenu(menu);
     setStorageSelectedMenu(menu);
   };
 
-	const findMenus = (keyword: string): MenuItem[] => {
-    if (!keyword.trim()) return [];
-
-    const lowerKeyword = keyword.toLowerCase();
-    
-    return flatMenus.filter(menu => 
-      menu.title.toLowerCase().includes(lowerKeyword) ||
-      menu.code.toLowerCase().includes(lowerKeyword) ||
-      (menu.url && menu.url.toLowerCase().includes(lowerKeyword))
-    );
+  const updateOpenKeysByMenu = (selectedMenu: MenuItem | null) => {
+    const flatMenus = flattenMenus(menus);
+    const openKeys = calcOpenKeys(selectedMenu, flatMenus);
+    setOpenKeys(openKeys);
   };
+  const toggleMenuOpen = (menuId: string) => {
+    setOpenKeys(prevKeys => {
+      if (prevKeys.includes(menuId)) {
+        // 关闭当前菜单
+        return prevKeys.filter(key => key !== menuId);
+      } else {
+        if (menuMutex) {
+          // 菜单互斥：只展开当前菜单的同级菜单，关闭其他同级菜单
+          const menu = findMenuById(menuId);
+          if (menu) {
+            // 找到所有同级菜单（相同parentId的菜单）
+            const siblingMenus = flatMenus.filter(item => item.parentId === menu.parentId);
+            const siblingMenuIds = siblingMenus.map(item => item.id);
+            
+            // 保留非同级菜单的展开状态，只关闭同级菜单并展开当前菜单
+            return [...prevKeys.filter(key => !siblingMenuIds.includes(key)), menuId];
+          }
+        }
+        // 非互斥模式：直接添加当前菜单到展开列表
+        return [...prevKeys, menuId];
+      }
+    });
+  };
+
   const findMenuById = (menuId: string): MenuItem | null => {
     return flatMenus.find(item => item.id === menuId) ?? null;
   };
 
-  const findByUrl = (url: string): MenuItem | null => {
+  const findMenuByUrl = (url: string): MenuItem | null => {
     const normalizeUrl = (url: string) => {
       return url.split('?')[0].split('#')[0].replace(/\/$/, '');
     };
@@ -127,141 +182,47 @@ export function useMenuService(initialMenus?: MenuItem[]) {
     return flatMenus.find(menu => normalizeUrl(menu.url ?? '') === targetUrl) ?? null;
   };
 
-  const findByName = (keyword: string): MenuItem[] => {
-    const lowerKeyword = keyword.toLowerCase();
-    return flatMenus.filter(menu => menu.title.toLowerCase().includes(lowerKeyword));
-  };
 
-  const findSearchSuggestions = (prefix: string, limit = 10): string[] => {
-    if (!prefix.trim()) return [];
+  // const filterByPermissions = (permissions: string[]): MenuItem[] => {
+  //   const filterMenu = (items: MenuItem[]): MenuItem[] => {
+  //     return items
+  //       .filter((menu) => {
+  //         if (menu.status === 'disabled' || menu.hidden) return false;
 
-    const lowerPrefix = prefix.toLowerCase();
-    const suggestions = new Set<string>();
+  //         const hasPermission = (() => {
+  //           if (!menu.permissions || menu.permissions.length === 0) return true;
 
-    flatMenus.forEach(menu => {
-      if (menu.title.toLowerCase().startsWith(lowerPrefix)) {
-        suggestions.add(menu.title);
-      }
-      if (menu.code.toLowerCase().startsWith(lowerPrefix)) {
-        suggestions.add(menu.code);
-      }
-    });
+  //           const menuPermissions = Array.isArray(menu.permissions)
+  //             ? menu.permissions
+  //             : [menu.permissions];
 
-    return Array.from(suggestions).slice(0, limit);
-  };
+  //           return menuPermissions.some((permission) => permissions.includes(permission));
+  //         })();
 
-  const filterByPermissions = (permissions: string[]): MenuItem[] => {
-    const filterMenu = (items: MenuItem[]): MenuItem[] => {
-      return items
-        .filter((menu) => {
-          if (menu.status === 'disabled' || menu.hidden) return false;
+  //         if (!hasPermission) return false;
 
-          const hasPermission = (() => {
-            if (!menu.permissions || menu.permissions.length === 0) return true;
+  //         if (menu.children) {
+  //           menu.children = filterMenu(menu.children);
+  //         }
 
-            const menuPermissions = Array.isArray(menu.permissions)
-              ? menu.permissions
-              : [menu.permissions];
+  //         return true;
+  //       })
+  //       .filter((menu) => {
+  //         if (menu.children && menu.children.length > 0) return true;
+  //         return menu.status !== 'disabled' && !menu.hidden;
+  //       });
+  //   };
 
-            return menuPermissions.some((permission) => permissions.includes(permission));
-          })();
+  //   return filterMenu(menus);
+  // };
 
-          if (!hasPermission) return false;
 
-          if (menu.children) {
-            menu.children = filterMenu(menu.children);
-          }
-
-          return true;
-        })
-        .filter((menu) => {
-          if (menu.children && menu.children.length > 0) return true;
-          return menu.status !== 'disabled' && !menu.hidden;
-        });
-    };
-
-    return filterMenu(menus);
-  };
-
-  const filterByCategory = (category: MenuCategory, includeHidden = false): MenuItem[] => {
-    const filterMenuTree = (items: MenuItem[]): MenuItem[] => {
-      return items
-        .filter((menu) => {
-          if (!includeHidden && menu.hidden) {
-            return false;
-          }
-
-          const currentMenuMatches = menu.category === category;
-
-          if (menu.children) {
-            menu.children = filterMenuTree(menu.children);
-          }
-
-          return currentMenuMatches || (menu.children && menu.children.length > 0);
-        })
-        .filter(Boolean);
-    };
-
-    return filterMenuTree(JSON.parse(JSON.stringify(menus)));
-  };
-
-  const findByCategory = (category?: MenuCategory, includeHidden = false): Record<MenuCategory | 'uncategorized', MenuItem[]> => {
-    const result: Record<MenuCategory | 'uncategorized', MenuItem[]> = {
-      application: [],
-      system: [],
-      uncategorized: [],
-    };
-
-    const collectMenusByCategory = (items: MenuItem[]) => {
-      items.forEach((menu) => {
-        if (!includeHidden && menu.hidden) {
-          return;
-        }
-
-        if (menu.category) {
-          result[menu.category].push(menu);
-        } else {
-          result.uncategorized.push(menu);
-        }
-
-        if (menu.children && menu.children.length > 0) {
-          collectMenusByCategory(menu.children);
-        }
-      });
-    };
-
-    collectMenusByCategory(menus);
-
-    if (category) {
-      const partialResult: Record<MenuCategory | 'uncategorized', MenuItem[]> = {
-        application: [],
-        system: [],
-        uncategorized: [],
-      };
-      partialResult[category] = result[category];
-      return partialResult;
-    }
-
-    return result;
-  };
-
-  const findCategories = (includeEmpty = false): { category: MenuCategory | 'uncategorized'; count: number; label: string }[] => {
-    const categorizedMenus = findByCategory();
-    const categories = [
-      { category: 'application' as const, count: categorizedMenus.application.length, label: '应用功能' },
-      { category: 'system' as const, count: categorizedMenus.system.length, label: '系统设置' },
-      { category: 'uncategorized' as const, count: categorizedMenus.uncategorized.length, label: '未分类' },
-    ];
-
-    return includeEmpty ? categories : categories.filter((cat) => cat.count > 0);
-  };
-
-  const findBreadcrumb = (menuId: string): MenuItem[] => {
-    const breadcrumb: MenuItem[] = [];
+  const findMenuAncestor = (menuId: string): MenuItem[] => {
+    const ancestor: MenuItem[] = [];
     let current = findMenuById(menuId);
 
     while (current) {
-      breadcrumb.unshift(current);
+      ancestor.unshift(current);
       if (current.parentId) {
         current = findMenuById(current.parentId);
       } else {
@@ -269,40 +230,7 @@ export function useMenuService(initialMenus?: MenuItem[]) {
       }
     }
 
-    return breadcrumb;
-  };
-
-  const findChildren = (parentId: string): MenuItem[] => {
-    const parent = findMenuById(parentId);
-    if (!parent || !parent.children) return [];
-
-    const children: MenuItem[] = [];
-    const collectChildren = (items: MenuItem[]) => {
-      items.forEach((menu) => {
-        children.push(menu);
-        if (menu.children) {
-          collectChildren(menu.children);
-        }
-      });
-    };
-
-    collectChildren(parent.children);
-    return children;
-  };
-
-  const sortMenus = () => {
-    const sortMenu = (items: MenuItem[]): MenuItem[] => {
-      return items
-        .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
-        .map((menu) => {
-          if (menu.children) {
-            return { ...menu, children: sortMenu(menu.children) };
-          }
-          return menu;
-        });
-    };
-
-    setMenus(sortMenu(menus));
+    return ancestor;
   };
 
   const flatMenus = flattenMenus(menus);
@@ -311,19 +239,14 @@ export function useMenuService(initialMenus?: MenuItem[]) {
     menus,
     flatMenus,
     selectedMenu,
-    setSelectedMenu,
-    findById: findMenuById,
-    findMenus,
-    findByUrl,
-    findByName,
-    findSearchSuggestions,
-    filterByPermissions,
-    filterByCategory,
-    findByCategory,
-    findCategories,
-    findBreadcrumb,
-    findChildren,
-    sortMenus,
-    setMenus,
+    openKeys,
+    findMenuById,
+    findMenuByUrl,
+		findMenuAncestor,
+    toggleMenuOpen,
+    updateSelectedMenu,
+    updateMenus: setMenus,
+		updateOpenKeysByMenu,
+		updateOpenKeys: setOpenKeys
   };
 }

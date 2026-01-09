@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from "./pages/__root";
 import { Route as layoutsRouteRouteImport } from "./pages/(layouts)/route";
+import { Route as IndexRouteImport } from "./pages/index";
 import { Route as LoginIndexRouteImport } from "./pages/login/index";
 import { Route as layoutsOverviewIndexRouteImport } from "./pages/(layouts)/overview/index";
 import { Route as layoutsFeaturesIndexRouteImport } from "./pages/(layouts)/features/index";
@@ -22,6 +23,11 @@ import { Route as layoutsComponentsTreeIndexRouteImport } from "./pages/(layouts
 
 const layoutsRouteRoute = layoutsRouteRouteImport.update({
   id: "/(layouts)",
+  getParentRoute: () => rootRouteImport,
+} as any);
+const IndexRoute = IndexRouteImport.update({
+  id: "/",
+  path: "/",
   getParentRoute: () => rootRouteImport,
 } as any);
 const LoginIndexRoute = LoginIndexRouteImport.update({
@@ -75,6 +81,7 @@ const layoutsComponentsTreeIndexRoute =
   } as any);
 
 export interface FileRoutesByFullPath {
+  "/": typeof IndexRoute;
   "/login": typeof LoginIndexRoute;
   "/components": typeof layoutsComponentsIndexRoute;
   "/dashboard": typeof layoutsDashboardIndexRoute;
@@ -86,6 +93,7 @@ export interface FileRoutesByFullPath {
   "/features/resize": typeof layoutsFeaturesResizeIndexRoute;
 }
 export interface FileRoutesByTo {
+  "/": typeof IndexRoute;
   "/login": typeof LoginIndexRoute;
   "/components": typeof layoutsComponentsIndexRoute;
   "/dashboard": typeof layoutsDashboardIndexRoute;
@@ -98,6 +106,7 @@ export interface FileRoutesByTo {
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport;
+  "/": typeof IndexRoute;
   "/(layouts)": typeof layoutsRouteRouteWithChildren;
   "/login/": typeof LoginIndexRoute;
   "/(layouts)/components/": typeof layoutsComponentsIndexRoute;
@@ -112,6 +121,7 @@ export interface FileRoutesById {
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath;
   fullPaths:
+    | "/"
     | "/login"
     | "/components"
     | "/dashboard"
@@ -123,6 +133,7 @@ export interface FileRouteTypes {
     | "/features/resize";
   fileRoutesByTo: FileRoutesByTo;
   to:
+    | "/"
     | "/login"
     | "/components"
     | "/dashboard"
@@ -134,6 +145,7 @@ export interface FileRouteTypes {
     | "/features/resize";
   id:
     | "__root__"
+    | "/"
     | "/(layouts)"
     | "/login/"
     | "/(layouts)/components/"
@@ -147,6 +159,7 @@ export interface FileRouteTypes {
   fileRoutesById: FileRoutesById;
 }
 export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute;
   layoutsRouteRoute: typeof layoutsRouteRouteWithChildren;
   LoginIndexRoute: typeof LoginIndexRoute;
 }
@@ -158,6 +171,13 @@ declare module "@tanstack/react-router" {
       path: "";
       fullPath: "";
       preLoaderRoute: typeof layoutsRouteRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
+    "/": {
+      id: "/";
+      path: "/";
+      fullPath: "/";
+      preLoaderRoute: typeof IndexRouteImport;
       parentRoute: typeof rootRouteImport;
     };
     "/login/": {
@@ -254,6 +274,7 @@ const layoutsRouteRouteWithChildren = layoutsRouteRoute._addFileChildren(
 );
 
 const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
   layoutsRouteRoute: layoutsRouteRouteWithChildren,
   LoginIndexRoute: LoginIndexRoute,
 };

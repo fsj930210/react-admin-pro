@@ -13,7 +13,7 @@ function Layout() {
 	const { menus } = useFetchMenus();
 	return (
 		<SidebarProvider defaultOpen>
-			<LayoutSidebarProvider initialMenus={menus}>
+			<LayoutSidebarProvider defaultMenus={menus}>
 				<Sidebar logo={`${APP_BASE_PATH}/logo.svg`}  />
 				<SidebarInset className="overflow-x-hidden min-w-0">
 					<LayoutTabs />

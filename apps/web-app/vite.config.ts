@@ -1,16 +1,16 @@
 import { defineViteConfig } from "@rap/vite-config";
-import { loadEnv } from "vite";
+import { loadEnv, UserConfig } from "vite";
 
-export default ({ mode }) => {
+export default ({ mode }: UserConfig) => {
 	const root = process.cwd();
-	const envConfig = loadEnv(mode, root, ["RAP_WEB_"]);
+	const envConfig = loadEnv(mode || 'development', root, ["RAP_WEB_"]);
 
 	return defineViteConfig({
 		envPrefix: "RAP_WEB_",
 		base: envConfig.RAP_WEB_APP_BASE_URL,
 		server: {
 			port: Number(envConfig.RAP_WEB_APP_PORT) || 3000,
-			open: true,
+			open: false,
 			allowedHosts: true,
 		},
 		build: {

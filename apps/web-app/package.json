@@ -48,6 +48,7 @@
 		"vite": "catalog:"
 	},
 	"dependencies": {
+		"@bprogress/core": "catalog:",
 		"@hookform/resolvers": "catalog:",
 		"@rap/components-base": "workspace:*",
 		"@rap/components-ui": "workspace:*",

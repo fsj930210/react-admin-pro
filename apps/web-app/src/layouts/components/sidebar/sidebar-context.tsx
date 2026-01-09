@@ -1,52 +1,73 @@
-import  { createContext, use, useEffect, type ReactNode } from 'react';
+import { createContext, use, useEffect, type ReactNode } from 'react';
 import { useMenuService, type MenuItem } from '../../hooks/useMenuService';
 
 export interface SidebarContextValue {
-  menus: MenuItem[];
-  flatMenus: MenuItem[];
-  selectedMenu: MenuItem | null;
-  setSelectedMenu: (menu: MenuItem | null) => void;
 
-  setMenus: (menus: MenuItem[]) => void;
+	menus: MenuItem[];
+	flatMenus: MenuItem[];
+	selectedMenu: MenuItem | null;
+	openKeys: string[];
+	toggleMenuOpen: (id: string) => void;
+	findMenuAncestor: (id: string) => MenuItem[];
+	findMenuById: (id: string) => MenuItem | null;
+	findMenuByUrl: (url: string) => MenuItem | null;
+	updateSelectedMenu: (menus: MenuItem | null) => void;
+	updateOpenKeys: (ids: string[]) => void;
+	updateOpenKeysByMenu: (selectedMenu: MenuItem | null) => void;
+	updateMenus: (menus: MenuItem[]) => void;
 }
 
 const SidebarContext = createContext<SidebarContextValue | undefined>(undefined);
 
 export interface SidebarProviderProps {
-  children: ReactNode;
-  initialMenus?: MenuItem[];
+	children: ReactNode;
+	defaultMenus?: MenuItem[];
 }
 
-export function LayoutSidebarProvider({ children, initialMenus = [] }: SidebarProviderProps) {
-  const {
-    menus,
-    flatMenus,
-    selectedMenu,
-    setSelectedMenu,
-    setMenus,
-  } = useMenuService(initialMenus);
-  useEffect(() => {
-    setMenus(initialMenus);
-  }, [initialMenus]);
-  const contextValue: SidebarContextValue = {
-    menus,
-    flatMenus,
-    selectedMenu,
-    setSelectedMenu,
-    setMenus,
-  };
+export function LayoutSidebarProvider({ children, defaultMenus = [] }: SidebarProviderProps) {
+	const {
+		menus,
+		flatMenus,
+		selectedMenu,
+		openKeys,
+		findMenuAncestor,
+		findMenuById,
+		findMenuByUrl,
+		toggleMenuOpen,
+		updateSelectedMenu,
+		updateOpenKeys,
+		updateOpenKeysByMenu,
+		updateMenus,
+	} = useMenuService({ defaultMenus });
+	useEffect(() => {
+		updateMenus(defaultMenus);
+	}, [defaultMenus]);
+	const contextValue: SidebarContextValue = {
+		menus,
+		flatMenus,
+		selectedMenu,
+		openKeys,
+		findMenuAncestor,
+		findMenuById,
+		findMenuByUrl,
+		toggleMenuOpen,
+		updateSelectedMenu,
+		updateMenus,
+		updateOpenKeys,
+		updateOpenKeysByMenu,
+	};
 
-  return (
-    <SidebarContext value={contextValue}>
-      {children}
-    </SidebarContext>
-  );
+	return (
+		<SidebarContext value={contextValue}>
+			{children}
+		</SidebarContext>
+	);
 }
 
 export function useSidebar() {
-  const context = use(SidebarContext);
-  if (context === undefined) {
-    throw new Error('useSidebar must be used within a SidebarProvider');
-  }
-  return context;
+	const context = use(SidebarContext);
+	if (context === undefined) {
+		throw new Error('useSidebar must be used within a SidebarProvider');
+	}
+	return context;
 }

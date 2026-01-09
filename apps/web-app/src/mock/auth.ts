@@ -1,7 +1,7 @@
 import { HttpResponse, http } from "msw";
 
 const SUCCESS_CODE = '0000000000';
-export const handlers = [
+export default [
 	http.post("/api/rap/login", async ({ request }) => {
 		const body = await request.json() as { username: string };
 		const { username } = body;

@@ -6,6 +6,8 @@ import {
   SidebarFooter,
   SidebarHeader,
   SidebarRail,
+	SidebarTrigger,
+	useSidebar as useBaseSidebar,
 } from "@rap/components-base/resizable-sidebar";
 import {
   AudioWaveform,
@@ -21,6 +23,7 @@ import { Logo } from "@rap/components-ui/logo";
 import { SidebarMain } from "./sidebar-main";
 import { SidebarUser } from "./sidebar-user";
 import { LayoutSidebarProvider, useSidebar, type SidebarContextValue } from "./sidebar-context";
+import { cn } from "@rap/utils";
 
 const data = {
   user: {
@@ -69,10 +72,12 @@ export type SidebarProps = React.ComponentProps<typeof BaseSidebar> & {
 };
 
 export function Sidebar({ ...props }: SidebarProps) {
+	const { state } = useBaseSidebar();
   return (
     <BaseSidebar collapsible="icon" {...props}>
-      <SidebarHeader>
-        <Logo url={props.logo} />
+      <SidebarHeader className={cn('overflow-hidden', state === 'expanded' ? 'flex-row flex-items-center justify-between' : 'flex-col')}>
+				<Logo url={props.logo} />
+				<SidebarTrigger />
       </SidebarHeader>
       <SidebarContent>
         <SidebarMain />
