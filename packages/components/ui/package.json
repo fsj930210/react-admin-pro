@@ -26,7 +26,8 @@
 	"exports": {
 		"./loading": "./src/components/loading/index.tsx",
 		"./logo": "./src/components/logo/index.tsx",
-		"./theme-provider": "./src/components/theme-provider/index.tsx"
+		"./theme-provider": "./src/components/theme-provider/index.tsx",
+		"./input-with-clear": "./src/components/input-with-clear/index.tsx"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "catalog:",

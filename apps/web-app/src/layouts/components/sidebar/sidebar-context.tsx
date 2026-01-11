@@ -15,6 +15,8 @@ export interface SidebarContextValue {
 	updateOpenKeys: (ids: string[]) => void;
 	updateOpenKeysByMenu: (selectedMenu: MenuItem | null) => void;
 	updateMenus: (menus: MenuItem[]) => void;
+	searchMenus: (keyword: string) => MenuItem[];
+	searchMenusWithExpand: (keyword: string) => { menus: MenuItem[]; expandKeys: string[] };
 }
 
 const SidebarContext = createContext<SidebarContextValue | undefined>(undefined);
@@ -38,10 +40,12 @@ export function LayoutSidebarProvider({ children, defaultMenus = [] }: SidebarPr
 		updateOpenKeys,
 		updateOpenKeysByMenu,
 		updateMenus,
+		searchMenus,
+		searchMenusWithExpand,
 	} = useMenuService({ defaultMenus });
 	useEffect(() => {
 		updateMenus(defaultMenus);
-	}, [defaultMenus]);
+	}, [defaultMenus, updateMenus]);
 	const contextValue: SidebarContextValue = {
 		menus,
 		flatMenus,
@@ -55,6 +59,8 @@ export function LayoutSidebarProvider({ children, defaultMenus = [] }: SidebarPr
 		updateMenus,
 		updateOpenKeys,
 		updateOpenKeysByMenu,
+		searchMenus,
+		searchMenusWithExpand,
 	};
 
 	return (

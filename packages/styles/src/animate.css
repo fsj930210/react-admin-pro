@@ -105,3 +105,13 @@
     }
   }
 }
+
+@theme {
+  --animate-ping: ping 1s linear infinite;
+  @keyframes ping {
+    75%, 100% {
+      opacity: 0;
+      transform: scale(2);
+    }
+  }
+}

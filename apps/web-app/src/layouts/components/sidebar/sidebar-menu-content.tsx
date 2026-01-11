@@ -4,6 +4,7 @@ import {
 } from "@rap/components-base/resizable-sidebar";
 import { ChevronRight } from "lucide-react";
 import type { MenuItem } from "@/layouts/hooks/useMenuService";
+import { SidebarBadge } from "./sidebar-badge";
 
 interface SidebarMenuContentProps {
   item: MenuItem;
@@ -28,13 +29,14 @@ export function SidebarMenuContent({
     <ButtonComponent
       isActive={isActive}
       tooltip={isSubItem ? undefined : item.title}
-      className="cursor-pointer"
+      className="cursor-pointer flex-items-center whitespace-nowrap"
       onClick={() => onMenuItemClick(item)}
     >
       {item.icon && <item.icon />}
       <span>{item.title}</span>
       
-      {/* 展开/折叠图标 - 只有有子菜单的项才显示 */}
+      <SidebarBadge badge={item.badge} />
+      
       {hasChildren && (
         <ChevronRight 
           className={`ml-auto transition-transform duration-100 ${isOpen ? 'rotate-90' : ''}`} 

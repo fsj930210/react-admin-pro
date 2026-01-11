@@ -3,9 +3,14 @@ import { useState } from 'react';
 export type MenuOpenMode = 'currentSystemTab' | 'newSystemTab' | 'iframe' | 'newBrowserTab';
 export type MenuType = 'menu' | 'dir' | 'button';
 export type MenuStatus = 'enabled' | 'disabled';
+export type MenuBadgeType = 'text' | 'dot' | 'badge';
+export type MenuBadgeColor = 'default' | 'primary' | 'success' | 'warning' | 'destructive' | 'custom';
+
 export interface MenuBadge {
-  text: string;
-  color: string;
+  type?: MenuBadgeType;
+  text?: string;
+  color?: MenuBadgeColor;
+  customColor?: string;
 }
 
 export type MenuCategory = 'application' | 'system';
@@ -233,6 +238,72 @@ export function useMenuService(params?: UseMenuServiceParams) {
     return ancestor;
   };
 
+  const searchMenus = (keyword: string): MenuItem[] => {
+    if (!keyword.trim()) return menus;
+
+    const searchKeyword = keyword.toLowerCase().trim();
+
+    const searchInMenu = (items: MenuItem[]): MenuItem[] => {
+      const result: MenuItem[] = [];
+
+      for (const item of items) {
+        const titleMatch = item.title.toLowerCase().includes(searchKeyword);
+        const codeMatch = item.code.toLowerCase().includes(searchKeyword);
+
+        let matchedChildren: MenuItem[] = [];
+        if (item.children && item.children.length > 0) {
+          matchedChildren = searchInMenu(item.children);
+        }
+
+        if (titleMatch || codeMatch || matchedChildren.length > 0) {
+          result.push({
+            ...item,
+            children: matchedChildren.length > 0 ? matchedChildren : item.children
+          });
+        }
+      }
+
+      return result;
+    };
+
+    return searchInMenu(menus);
+  };
+
+  const searchMenusWithExpand = (keyword: string): { menus: MenuItem[]; expandKeys: string[] } => {
+    if (!keyword.trim()) return { menus, expandKeys: [] };
+
+    const searchKeyword = keyword.toLowerCase().trim();
+    const expandKeys: string[] = [];
+
+    const searchInMenu = (items: MenuItem[]): MenuItem[] => {
+      const result: MenuItem[] = [];
+
+      for (const item of items) {
+        const titleMatch = item.title.toLowerCase().includes(searchKeyword);
+        const codeMatch = item.code.toLowerCase().includes(searchKeyword);
+
+        let matchedChildren: MenuItem[] = [];
+        if (item.children && item.children.length > 0) {
+          matchedChildren = searchInMenu(item.children);
+        }
+
+        if (titleMatch || codeMatch || matchedChildren.length > 0) {
+          if (matchedChildren.length > 0) {
+            expandKeys.push(item.id);
+          }
+          result.push({
+            ...item,
+            children: matchedChildren.length > 0 ? matchedChildren : item.children
+          });
+        }
+      }
+
+      return result;
+    };
+
+    return { menus: searchInMenu(menus), expandKeys };
+  };
+
   const flatMenus = flattenMenus(menus);
 
   return {
@@ -247,6 +318,8 @@ export function useMenuService(params?: UseMenuServiceParams) {
     updateSelectedMenu,
     updateMenus: setMenus,
 		updateOpenKeysByMenu,
-		updateOpenKeys: setOpenKeys
+		updateOpenKeys: setOpenKeys,
+    searchMenus,
+    searchMenusWithExpand
   };
 }

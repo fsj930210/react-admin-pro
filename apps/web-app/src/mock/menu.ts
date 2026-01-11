@@ -19,7 +19,8 @@ const allMenus = [
     permissions: [],
     order: 1,
     isActive: true,
-    status: 'enabled' as const
+    status: 'enabled' as const,
+    badge: { color: 'success', text: '新' }
   },
   {
     id: 'overview',
@@ -35,7 +36,8 @@ const allMenus = [
     permissions: [],
     order: 2,
     isActive: true,
-    status: 'enabled' as const
+    status: 'enabled' as const,
+    badge: { type: 'dot', color: 'success' }
   },
   {
     id: 'features',
@@ -84,7 +86,8 @@ const allMenus = [
         permissions: [],
         order: 2,
         isActive: true,
-        status: 'enabled' as const
+        status: 'enabled' as const,
+        badge: { type: 'text', text: 'HOT', color: 'warning' }
       },
       {
         id: 'features-panel-controls',
@@ -100,7 +103,8 @@ const allMenus = [
         permissions: [],
         order: 3,
         isActive: true,
-        status: 'enabled' as const
+        status: 'enabled' as const,
+        badge: { type: 'badge', color: 'destructive', text: '99+' }
       }
     ]
   },
@@ -193,7 +197,8 @@ const allMenus = [
                 permissions: [],
                 order: 2,
                 isActive: true,
-                status: 'enabled' as const
+                status: 'enabled' as const,
+                badge: { type: 'badge', color: 'default', text: '12' }
               }
             ]
           },
@@ -242,7 +247,8 @@ const allMenus = [
             permissions: [],
             order: 1,
             isActive: true,
-            status: 'enabled' as const
+            status: 'enabled' as const,
+            badge: { type: 'text', text: 'VIP', color: 'custom', customColor: '#8b5cf6' }
           }
         ]
       },
@@ -260,7 +266,8 @@ const allMenus = [
         permissions: [],
         order: 3,
         isActive: true,
-        status: 'enabled' as const
+        status: 'enabled' as const,
+        badge: { color: 'custom', text: 'BETA', customColor: '#ec4899' }
       }
     ]
   }
@@ -283,7 +290,8 @@ const partialMenus = [
     permissions: [],
     order: 1,
     isActive: true,
-    status: 'enabled' as const
+    status: 'enabled' as const,
+    badge: { color: 'success', text: '新' }
   },
   {
     id: 'overview',
@@ -299,7 +307,8 @@ const partialMenus = [
     permissions: [],
     order: 2,
     isActive: true,
-    status: 'enabled' as const
+    status: 'enabled' as const,
+    badge: { type: 'badge', color: 'primary', value: '30'}
   }
 ];
 

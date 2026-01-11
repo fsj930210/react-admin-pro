@@ -4,19 +4,19 @@ import {
   CollapsibleTrigger,
 } from "@rap/components-base/collapsible";
 import {
-	SidebarInput,
   SidebarMenu,
   SidebarMenuItem,
   SidebarMenuSub,
   SidebarMenuSubItem,
 	useSidebar as useBaseSidebar,
 } from "@rap/components-base/resizable-sidebar";
+import { InputWithClear } from "@rap/components-ui/input-with-clear";
 import { SidebarMenuContent } from "./sidebar-menu-content";
 import { useSidebar } from "./sidebar-context";
 import { useNavigate } from "@tanstack/react-router";
 import { type MenuItem } from "@/layouts/hooks/useMenuService";
 import { Search } from "lucide-react";
-import { useRef } from "react";
+import { useRef, useState, useEffect } from "react";
 import { cn } from "@rap/utils";
 
 interface MenuItemComponentProps {
@@ -48,7 +48,6 @@ function MenuItemComponent({
     if (hasChildren && item.type === 'dir') {
       onOpenChange(item.id);
     } else if (item.type === 'menu' && item.url) {
-			updateSelectedMenu?.(item);
 			switch (item.openMode) {
 				case 'currentSystemTab':
 					navigate({ to: item.url });
@@ -66,6 +65,7 @@ function MenuItemComponent({
 					navigate({ to: item.url });
 					break;
 			}
+      updateSelectedMenu?.(item);
 		}
 		onMenuClick?.(item);
   };
@@ -168,33 +168,57 @@ export function SidebarMain({ showSearch = true }: SidebarMainProps) {
 		selectedMenu, 
 		openKeys,
 		toggleMenuOpen ,
-		updateSelectedMenu
+		updateSelectedMenu,
+		searchMenusWithExpand,
+		updateOpenKeys
 	} = useSidebar();
 	const searchRef = useRef<HTMLInputElement>(null);
-	const { state, toggleSidebar } = useBaseSidebar()
+	const { state, toggleSidebar } = useBaseSidebar();
+	const [searchKeyword, setSearchKeyword] = useState('');
+
+	const displayMenus = !searchKeyword.trim() ? menus : searchMenusWithExpand(searchKeyword).menus;
+
+	useEffect(() => {
+		if (!searchKeyword.trim()) {
+			return;
+		}
+		const { expandKeys } = searchMenusWithExpand(searchKeyword);
+		updateOpenKeys(expandKeys);
+	}, [searchKeyword, updateOpenKeys]);
+
+	const handleInputChange = (value: string) => {
+		setSearchKeyword(value);
+	};
+
+	const handleClearSearch = () => {
+		setSearchKeyword('');
+	};
 
   return (
     <SidebarMenu>
 			{
 				showSearch ? (
 					<div className=" flex-center p-2">
-						<SidebarInput 
+						<InputWithClear 
 							placeholder="搜索菜单" 
-							ref={searchRef}
+              ref={searchRef as React.RefObject<HTMLInputElement>}
 							className={cn("w-full", state === 'collapsed' ? 'hidden' : '')}
+							onChange={handleInputChange}
+							value={searchKeyword}
+              onClear={handleClearSearch}
 						/>
-						<Search 
-							className={cn("size-5 cursor-pointer", state === 'expanded' ? 'hidden' : '')} 
-							onClick={() => {
-								toggleSidebar();
-								searchRef.current?.focus?.();
-							}} 
-						/>
+            <Search 
+              className={cn("size-5 cursor-pointer", state === 'expanded' ? 'hidden' : '')} 
+              onClick={() => {
+                toggleSidebar();
+                searchRef.current?.focus?.();
+              }} 
+            />
 					</div>
 				) : null
 			}
 
-      {menus.map((item: MenuItem) => (
+      {displayMenus.map((item: MenuItem) => (
         <MenuItemComponent
           key={item.id}
           item={item}
