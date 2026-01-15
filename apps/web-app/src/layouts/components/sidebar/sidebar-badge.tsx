@@ -1,4 +1,5 @@
 import { cn } from "@rap/utils";
+import { SidebarMenuBadge } from "@rap/components-base/resizable-sidebar";
 import type { MenuBadge, MenuBadgeColor } from "@/layouts/hooks/useMenuService";
 
 
@@ -33,10 +34,10 @@ export function SidebarBadge({ badge, className }: SidebarBadgeProps) {
   if (type === 'dot') {
     const bgColor = customColor ?? (color === 'custom' ? '' : colorMap[color]);
     return (
-      <span className={cn("ml-auto size-1.5 shrink-0 relative rounded-full", className)}>
+      <SidebarMenuBadge className={className}>
         <span
           className={cn(
-            "absolute size-full inline-flex rounded-full animate-ping opacity-75",
+            "absolute size-1.5 inline-flex rounded-full animate-ping opacity-75",
             bgColor
           )}
           style={customColor ? { backgroundColor: customColor } : undefined}
@@ -48,16 +49,16 @@ export function SidebarBadge({ badge, className }: SidebarBadgeProps) {
           )}
           style={customColor ? { backgroundColor: customColor } : undefined}
         />
-      </span>
+      </SidebarMenuBadge>
     );
   }
 
   if (type === 'text') {
     const textColorClass = customColor || color === 'custom' ? '' : textColorMap[color];
     return (
-      <span
+      <SidebarMenuBadge
         className={cn(
-          "ml-auto px-1.5 py-0.5 text-xs font-medium rounded",
+          "px-1.5 py-0.5 rounded",
           textColorClass,
           customColor && "text-white",
           className
@@ -65,21 +66,21 @@ export function SidebarBadge({ badge, className }: SidebarBadgeProps) {
         style={customColor ? { backgroundColor: customColor } : undefined}
       >
         {text}
-      </span>
+      </SidebarMenuBadge>
     );
   }
 
   const bgColor = customColor ?? colorMap[color];
   return (
-    <span
+    <SidebarMenuBadge
       className={cn(
-        "ml-auto px-1.5 py-0.5 text-xs font-medium text-white rounded-full",
+        "px-1.5 py-0.5 text-white rounded-full",
         bgColor,
         className
       )}
       style={customColor ? { backgroundColor: customColor } : undefined}
     >
       {text}
-    </span>
+    </SidebarMenuBadge>
   );
 }

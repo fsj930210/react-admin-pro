@@ -1,21 +1,16 @@
 import { useQuery } from '@tanstack/react-query';
-import { httpClient } from '@rap/utils/fetch';
+import { type ApiResponse } from '@rap/utils/fetch';
 import type { MenuItem } from '../hooks/useMenuService';
-
+import baseFetch from '@/service/fetch';
 export const getMenus = () => {
-	return httpClient.get< MenuItem[]>('/api/rap/user/menus');
+	return baseFetch.get<MenuItem[]>('/api/rap/user/menus') as Promise<ApiResponse<MenuItem[]>>;
 };
 
 
-export const useFetchMenus = (callback?: (menus: MenuItem[]) => void) => {
+export const useFetchMenus = () => {
   const { data, isLoading, error, refetch } = useQuery({
     queryKey: ['menus'],
-    queryFn: async () => {
-      const result =  getMenus();
-      const data = await result.promise;
-			callback?.(data?.data ?? []);
-      return data || [];
-    },
+    queryFn: getMenus,
   });
 
   return {

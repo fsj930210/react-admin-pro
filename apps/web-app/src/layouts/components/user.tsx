@@ -23,13 +23,18 @@ import {
   LogOut,
   Sparkles,
 } from "lucide-react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useRouter } from "@tanstack/react-router";
+import { logout as logoutApi } from "@/service/auth";
+import { toast } from "sonner";
+import { useUserSelector } from "@/store/user";
 
-export type UserProps = {
+export interface UserProps {
   name: string;
   email: string;
   avatar: string;
   dropdownMenuTriggerClassName?: string;
-};
+}
 
 export function User({
   name,
@@ -38,6 +43,46 @@ export function User({
   dropdownMenuTriggerClassName,
 }: UserProps) {
   const isMobile = useIsMobile();
+  const router = useRouter();
+  const queryClient = useQueryClient();
+  const { setUserInfo } = useUserSelector();
+
+  // 登出 mutation
+  const logoutMutation = useMutation({
+    mutationFn: async () => {
+      const res = await logoutApi().promise;
+      return res;
+    },
+    onSuccess: () => {
+      // 清除 localStorage 中的 token
+      localStorage.removeItem('token');
+      // 清空用户信息 store
+      setUserInfo({
+        id: '',
+        username: '',
+        gender: 0,
+        avatar: '',
+        phone: '',
+        email: '',
+      });
+      toast.success('Logout success');
+      // 导航到登录页
+      router.navigate({ to: '/login', replace: true });
+      // 使相关查询失效，触发重新获取
+      queryClient.invalidateQueries({ queryKey: ['user'] });
+      queryClient.invalidateQueries({ queryKey: ['menus'] });
+    },
+    onError: (error: Error) => {
+      console.error('Logout error:', error);
+      toast.error('Logout failed');
+    },
+  });
+
+  const logout = () => {
+    logoutMutation.mutate();
+  };
+
+  const isLogoutLoading = logoutMutation.isPending;
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -100,9 +145,12 @@ export function User({
           </DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
-        <DropdownMenuItem>
+        <DropdownMenuItem
+          onClick={() => logout()}
+          disabled={isLogoutLoading}
+        >
           <LogOut />
-          Log out
+          {isLogoutLoading ? 'Logging out...' : 'Log out'}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

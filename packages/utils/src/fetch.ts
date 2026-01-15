@@ -1,4 +1,4 @@
-import ky, { type KyInstance, type Options as KyOptions } from 'ky';
+import ky, { type KyInstance, type Options as KyOptions, type KyResponse } from 'ky';
 import { toast } from 'sonner';
 /**
  * 成功状态码
@@ -25,7 +25,7 @@ export const ContentType = {
 /**
  * 响应类型
  */
-export type ResponseType = 'json' | 'blob' | 'text' | 'arrayBuffer' | 'formData';
+export type ResponseType = 'json' | 'blob' | 'text' | 'arrayBuffer';
 
 /**
  * 上传进度回调类型
@@ -50,45 +50,7 @@ export type DownloadProgressCallback = (progress: {
  */
 export type ErrorHandler = (error: string | Error | { message: string; code?: string; data?: any }) => void;
 
-/**
- * 请求结果包装类型
- */
-export interface RequestResult<T = unknown> {
-  /**
-   * 请求唯一 ID
-   */
-  requestId: string;
 
-  /**
-   * 请求 Promise
-   */
-  promise: Promise<ApiResponse<T>>;
-
-  /**
-   * 中止当前请求的函数
-   */
-  abort: () => void;
-}
-
-/**
- * 下载结果包装类型（用于返回原始数据如 Blob）
- */
-export interface DownloadResult {
-  /**
-   * 请求唯一 ID
-   */
-  requestId: string;
-
-  /**
-   * 下载 Promise
-   */
-  promise: Promise<Blob>;
-
-  /**
-   * 中止当前请求的函数
-   */
-  abort: () => void;
-}
 
 /**
  * 请求配置选项
@@ -120,7 +82,7 @@ export interface FetchOptions extends Omit<KyOptions, 'searchParams' | 'json' | 
    * 是否显示错误提示
    * @default true
    */
-  showError?: boolean;
+  silent?: boolean;
   
   /**
    * 是否移除 Content-Type 头部
@@ -143,64 +105,12 @@ export interface FetchOptions extends Omit<KyOptions, 'searchParams' | 'json' | 
    * 自定义错误处理函数
    */
   onError?: ErrorHandler;
-}
-
-/**
- * 标准响应结构
- */
-export interface ApiResponse<T = unknown> {
-  code: string;
-  message?: string;
-  data?: T;
-}
-
-/**
- * 生成唯一请求 ID
- */
-function generateRequestId(): string {
-  return `req_${Date.now()}_${Math.random().toString(36).slice(2)}`;
-}
-
-/**
- * 请求管理器
- */
-class RequestManager {
-  private static requests = new Map<string, () => void>();
   
   /**
-   * 添加请求
+   * 获取AbortController的回调函数
+   * @description 如果提供此函数，则会创建AbortController并通过回调返回，用于取消请求
    */
-  static add(id: string, abort: () => void): void {
-    this.requests.set(id, abort);
-  }
-  
-  /**
-   * 移除请求
-   */
-  static remove(id: string): void {
-    this.requests.delete(id);
-  }
-  
-  /**
-   * 批量取消请求
-   */
-  static abortByIds(ids: string[]): void {
-    ids.forEach(id => {
-      const abort = this.requests.get(id);
-      if (abort) {
-        abort();
-        this.requests.delete(id);
-      }
-    });
-  }
-  
-  /**
-   * 取消所有请求
-   */
-  static abortAll(): void {
-    this.requests.forEach(abort => abort());
-    this.requests.clear();
-  }
+  getAbortController?: (controller: AbortController) => void;
 }
 
 /**
@@ -211,35 +121,94 @@ function getToken(): string | null {
   return localStorage.getItem(TOKEN_KEY);
 }
 
-/**
- * 默认错误处理函数（使用 sonner toast）
- * 注意：需要在应用中引入 Toaster 组件
- */
-let defaultErrorHandler: ErrorHandler = (error: string | Error | { message: string; code?: string; data?: any }): void => {
-  // 动态导入 sonner 以避免 SSR 问题
-  let errorMessage = '请求失败';
-  
-  if (typeof error === 'string') {
-    errorMessage = error;
-  } else if (error instanceof Error) {
-    errorMessage = error.message;
-  } else if (typeof error === 'object' && error !== null) {
-    errorMessage = error.message || '请求失败';
-  }
-  
-  if (typeof window !== 'undefined') {
-		toast.error(errorMessage);
-  } else {
-    console.error(`[HttpClient Error]: ${errorMessage}`);
-  }
-};
+
 
 /**
- * 设置全局错误处理函数
+ * 标准响应结构
  */
-export function setGlobalErrorHandler(handler: ErrorHandler): void {
-  defaultErrorHandler = handler;
+export interface ApiResponse<T = unknown> {
+  code: string;
+  message?: string;
+  data?: T;
 }
+
+
+async function readResponseWithProgress(
+  response: Response,
+  onProgress: DownloadProgressCallback
+): Promise<ArrayBuffer> {
+  const reader = response.body?.getReader();
+  if (!reader) {
+    throw new Error('Response body is not readable');
+  }
+
+  const contentLength = Number(response.headers.get('Content-Length')) || 0;
+  let loaded = 0;
+  const chunks: Uint8Array[] = [];
+
+  while (true) {
+    const { done, value } = await reader.read();
+    
+    if (done) break;
+
+    chunks.push(value);
+    loaded += value.length;
+
+    // 触发进度回调
+    onProgress({
+      loaded,
+      total: contentLength,
+      percentage: contentLength ? Math.round((loaded / contentLength) * 100) : 0,
+    });
+  }
+
+  // 合并所有 chunks
+  const totalLength = chunks.reduce((acc, chunk) => acc + chunk.length, 0);
+  const result = new Uint8Array(totalLength);
+  let offset = 0;
+  for (const chunk of chunks) {
+    result.set(chunk, offset);
+    offset += chunk.length;
+  }
+  return result.buffer;
+}
+
+function beforeRequestAuthorization(request: Request) {
+  const token = getToken();
+  if (token) {
+    request.headers.set('Authorization', `Bearer ${token}`);
+  }
+}
+
+const  beforeRequestRemoveContentType = (request: Request) =>{
+  if (request.headers.has('Content-Type')) {
+    request.headers.delete('Content-Type');
+  }
+}
+
+function beforeErrorToast(options: FetchOptions) {
+  return async (error: any) => {
+		if (!options.silent) {
+			const { response } = error;
+			if (response) {
+				try {
+					const body = await response.json();
+					error.message = body.message || error.message;
+				} catch (e: any){
+					error.message = e.message || error.message;
+				}
+				toast.error(error.message || '请求失败');
+			}
+			return error;
+		}
+	}
+}
+function afterResponse204(_request: Request, _options: KyOptions, response: Response) {
+  if (response.status === 204) {
+    return Response.json({ code: SUCCESS_CODE, message: '成功', data: null });
+  }
+}
+
 
 /**
  * HTTP 请求客户端类
@@ -250,22 +219,22 @@ export class HttpClient {
   private errorHandler: ErrorHandler;
 
   constructor(options: FetchOptions = {}) {
+		console.log('options', options);
     this.defaultOptions = {
-      showError: true,
+      silent: true,
       rawResponse: false,
       responseType: 'json',
       ...options,
     };
     
-    this.errorHandler = options.onError || defaultErrorHandler;
+    this.errorHandler = options.onError || ((e: any) => { console.log(e) });
 
-    // 提取自定义选项
     const { 
 			params, 
 			body, 
 			rawResponse, 
 			responseType, 
-			showError, 
+			removeContentType,
 			onError, 
 			onUploadProgress, 
 			onDownloadProgress, 
@@ -278,76 +247,78 @@ export class HttpClient {
         ...kyOptions.hooks,
         beforeRequest: [
           ...(kyOptions.hooks?.beforeRequest || []),
-          (request) => {
-            // 添加 token
-            const token = getToken();
-            if (token) {
-              request.headers.set('Authorization', `Bearer ${token}`);
-            }
-          },
-        ],
+          beforeRequestAuthorization,
+      		...(removeContentType ? [beforeRequestRemoveContentType] : []),
+        ].filter(Boolean),
         beforeError: [
           ...(kyOptions.hooks?.beforeError || []),
-          async (error) => {
-            const { response } = error;
-            
-            if (response) {
-              try {
-                const body = await response.json<ApiResponse>();
-                error.message = body.message || error.message;
-              } catch {
-                // 无法解析响应体，保持原始错误信息
-              }
-            }
-            
-            return error;
-          },
+					beforeErrorToast(options),
         ],
+				afterResponse: [
+					afterResponse204,
+					...(kyOptions.hooks?.afterResponse || []),
+				],
       },
     });
   }
 
-  /**
-   * 发起请求
-   */
-  private request<T = unknown>(
+  private async request<T = unknown>(
+    url: string,
+    options: FetchOptions & { rawResponse: true; responseType?: ResponseType }
+  ): Promise<KyResponse<T>>;
+
+  private async request<T = unknown>(
+    url: string,
+    options: FetchOptions & { rawResponse?: false; responseType: 'blob' }
+  ): Promise<Blob>;
+
+  private async request<T = unknown>(
+    url: string,
+    options: FetchOptions & { rawResponse?: false; responseType: 'text' }
+  ): Promise<string>;
+
+  private async request<T = unknown>(
+    url: string,
+    options: FetchOptions & { rawResponse?: false; responseType: 'arrayBuffer' }
+  ): Promise<ArrayBuffer>;
+
+  private async request<T = unknown>(
+    url: string,
+    options?: FetchOptions
+  ): Promise<ApiResponse<T>>;
+
+  private async request<T = unknown>(
     url: string,
     options: FetchOptions = {}
-  ): RequestResult<T> {
+  ): Promise<KyResponse<T> | Blob | string | ArrayBuffer | ApiResponse<T>> {
     const mergedOptions: FetchOptions = {
       ...this.defaultOptions,
       ...options,
     };
 
-    const {
+    const {	
       params,
       body,
       rawResponse,
       responseType = 'json',
-      showError,
       removeContentType,
+			silent,
       onError,
       onUploadProgress,
       onDownloadProgress,
+      getAbortController,
       ...kyOptions
     } = mergedOptions;
+    if (getAbortController) {
+      const controller = new AbortController();
+      kyOptions.signal = controller.signal;
+      getAbortController(controller);
+    }
 
-    // 创建请求专用的中止控制器
-    const controller = new AbortController();
-    const requestId = generateRequestId();
-    kyOptions.signal = controller.signal;
-    
-    const abort = () => controller.abort();
-    
-    // 添加到请求管理器
-    RequestManager.add(requestId, abort);
-
-    // 处理 GET 请求参数
     if (params) {
       (kyOptions as KyOptions).searchParams = params as Record<string, string>;
     }
 
-    // 处理请求体
     if (body !== undefined) {
       if (body instanceof FormData) {
         (kyOptions as KyOptions).body = body;
@@ -356,262 +327,189 @@ export class HttpClient {
       }
     }
     
-    // 移除 Content-Type（用于 FormData 等场景）
     if (removeContentType && kyOptions.headers) {
       const headers = kyOptions.headers as Record<string, string>;
       delete headers['Content-Type'];
       delete headers['content-type'];
     }
-
-    const dataPromise = (async () => {
-      try {
-        const response = await this.client(url, kyOptions as KyOptions);
-
-        // 返回原始 Response 对象
-        if (rawResponse) {
-          return response;
-        }
-
-        // 根据响应类型处理
-        if (responseType === 'blob') {
-          return await response.blob();
-        }
-
-        if (responseType === 'text') {
-          return await response.text();
-        }
-
-        if (responseType === 'arrayBuffer') {
-          return await response.arrayBuffer();
-        }
-
-        if (responseType === 'formData') {
-          return await response.formData();
-        }
-
-        // 默认 JSON 处理
-        const data = await response.json<ApiResponse<T>>();
-
-        // 无论成功或失败，都返回完整的响应结构
-        // 业务错误 - 返回完整数据，让调用方处理不同错误码
-        if (data.code !== SUCCESS_CODE && showError) {
-          const customHandler = onError || this.errorHandler;
-          // 构建错误对象，包含完整的错误信息
-          const errorObj = {
-            message: data.message || '请求失败',
-            code: data.code,
-            data: data,
-          };
-          customHandler(errorObj);
-        }
-        
-        return data;
-      } catch (error) {
-        // 处理中止错误
-        if (error instanceof Error && error.name === 'AbortError') {
-          throw error;
-        }
-
-        // 显示错误提示
-        if (showError && error instanceof Error) {
-          const customHandler = onError || this.errorHandler;
-          // 构建错误对象，包含完整的错误信息
-          const errorObj = {
-            message: error.message,
-            code: error.name,
-            data: error,
-          };
-          customHandler(errorObj);
-        }
-
-        throw error;
-      } finally {
-        // 从管理器中移除
-        RequestManager.remove(requestId);
+    
+    try {
+      const res = await this.client<T>(url, kyOptions);
+      if (rawResponse) {
+        return res;
       }
-    });
-  
-    return {
-    requestId,
-    promise: dataPromise() as Promise<ApiResponse<T>>,
-    abort,
-  };
+      if (responseType === 'blob') {
+        return await res.blob();
+      }
+      if (responseType === 'text') {
+        return await res.text();
+      }
+      if (responseType === 'arrayBuffer') {
+        return await res.arrayBuffer();
+      }
+      const resJson =  await res.json<ApiResponse<T>>();
+			if (resJson.code !== SUCCESS_CODE) {
+				// const errorData = {
+				// 	message: resJson.message || '请求失败',
+				// 	code: resJson.code,
+				// 	data: resJson.data,
+				// }
+				// this.errorHandler(errorData);
+				// onError?.(errorData);
+				// if (silent) {
+				// 	toast.error(resJson.message || '请求失败');
+				// }
+				throw resJson;
+			}
+			return resJson;
+    } catch (error: any) {
+      console.error(`[HttpClient Error]: `, error instanceof Error, error.message);
+      this.errorHandler(error);
+			onError?.(error);
+      throw error;
+    }
   }
 
-  /**
-   * GET 请求
-   */
-  get<T = unknown>(url: string, options?: FetchOptions): RequestResult<T> {
+  get<T = unknown>(url: string, options?: FetchOptions): Promise<ApiResponse<T>>;
+
+  get<T = unknown>(url: string, options: FetchOptions & { rawResponse: true }): Promise<KyResponse<T>>;
+  get<T = unknown>(url: string, options: FetchOptions & { rawResponse?: false; responseType: 'blob' }): Promise<Blob>;
+  get<T = unknown>(url: string, options: FetchOptions & { rawResponse?: false; responseType: 'text' }): Promise<string>;
+  get<T = unknown>(url: string, options: FetchOptions & { rawResponse?: false; responseType: 'arrayBuffer' }): Promise<ArrayBuffer>;
+  get<T = unknown>(url: string, options?: FetchOptions): Promise<ApiResponse<T> | KyResponse<T> | Blob | string | ArrayBuffer> {
     return this.request<T>(url, { ...options, method: 'get' });
   }
 
-  /**
-   * POST 请求
-   */
-  post<T = unknown>(url: string, options?: FetchOptions): RequestResult<T> {
+  post<T = unknown>(url: string, options?: FetchOptions): Promise<ApiResponse<T>>;
+  post<T = unknown>(url: string, options: FetchOptions & { rawResponse: true }): Promise<KyResponse<T>>;
+  post<T = unknown>(url: string, options: FetchOptions & { rawResponse?: false; responseType: 'blob' }): Promise<Blob>;
+  post<T = unknown>(url: string, options: FetchOptions & { rawResponse?: false; responseType: 'text' }): Promise<string>;
+  post<T = unknown>(url: string, options: FetchOptions & { rawResponse?: false; responseType: 'arrayBuffer' }): Promise<ArrayBuffer>;
+  post<T = unknown>(url: string, options?: FetchOptions): Promise<ApiResponse<T> | KyResponse<T> | Blob | string | ArrayBuffer> {
     return this.request<T>(url, { ...options, method: 'post' });
   }
 
-  /**
-   * PUT 请求
-   */
-  put<T = unknown>(url: string, options?: FetchOptions): RequestResult<T> {
+  put<T = unknown>(url: string, options?: FetchOptions): Promise<ApiResponse<T>>;
+  put<T = unknown>(url: string, options: FetchOptions & { rawResponse: true }): Promise<KyResponse<T>>;
+  put<T = unknown>(url: string, options: FetchOptions & { rawResponse?: false; responseType: 'blob' }): Promise<Blob>;
+  put<T = unknown>(url: string, options: FetchOptions & { rawResponse?: false; responseType: 'text' }): Promise<string>;
+  put<T = unknown>(url: string, options: FetchOptions & { rawResponse?: false; responseType: 'arrayBuffer' }): Promise<ArrayBuffer>;
+  put<T = unknown>(url: string, options?: FetchOptions): Promise<ApiResponse<T> | KyResponse<T> | Blob | string | ArrayBuffer> {
     return this.request<T>(url, { ...options, method: 'put' });
   }
 
-  /**
-   * PATCH 请求
-   */
-  patch<T = unknown>(url: string, options?: FetchOptions): RequestResult<T> {
+  patch<T = unknown>(url: string, options?: FetchOptions): Promise<ApiResponse<T>>;
+  patch<T = unknown>(url: string, options: FetchOptions & { rawResponse: true }): Promise<KyResponse<T>>;
+  patch<T = unknown>(url: string, options: FetchOptions & { rawResponse?: false; responseType: 'blob' }): Promise<Blob>;
+  patch<T = unknown>(url: string, options: FetchOptions & { rawResponse?: false; responseType: 'text' }): Promise<string>;
+  patch<T = unknown>(url: string, options: FetchOptions & { rawResponse?: false; responseType: 'arrayBuffer' }): Promise<ArrayBuffer>;
+  patch<T = unknown>(url: string, options?: FetchOptions): Promise<ApiResponse<T> | KyResponse<T> | Blob | string | ArrayBuffer> {
     return this.request<T>(url, { ...options, method: 'patch' });
   }
 
-  /**
-   * DELETE 请求
-   */
-  delete<T = unknown>(url: string, options?: FetchOptions): RequestResult<T> {
+  delete<T = unknown>(url: string, options?: FetchOptions): Promise<ApiResponse<T>>;
+  delete<T = unknown>(url: string, options: FetchOptions & { rawResponse: true }): Promise<KyResponse<T>>;
+  delete<T = unknown>(url: string, options: FetchOptions & { rawResponse?: false; responseType: 'blob' }): Promise<Blob>;
+  delete<T = unknown>(url: string, options: FetchOptions & { rawResponse?: false; responseType: 'text' }): Promise<string>;
+  delete<T = unknown>(url: string, options: FetchOptions & { rawResponse?: false; responseType: 'arrayBuffer' }): Promise<ArrayBuffer>;
+  delete<T = unknown>(url: string, options?: FetchOptions): Promise<ApiResponse<T> | KyResponse<T> | Blob | string | ArrayBuffer> {
     return this.request<T>(url, { ...options, method: 'delete' });
   }
 
-  /**
-   * 下载文件（返回 Blob，支持进度）
-   */
-  download(
-    url: string,
-    options?: FetchOptions & { onDownloadProgress?: DownloadProgressCallback }
-  ): DownloadResult {
-    const { onDownloadProgress, ...restOptions } = options || {};
-
-    // 如果没有进度回调，直接使用普通请求
-    if (!onDownloadProgress) {
-      const requestResult = this.request<Blob>(url, {
-        ...restOptions,
-        method: 'get',
-        responseType: 'blob',
-        headers: {
-          ...restOptions?.headers,
-          'Content-Type': ContentType.download,
-        },
-      });
-
-      // 将 RequestResult<Blob> 转换为 DownloadResult
-      // 直接返回 Blob 数据（download 方法返回的是原始数据，不是 ApiResponse 包装）
-      const blobPromise = requestResult.promise.then((response) => {
-        return response.data as Blob;
-      });
-
-      return {
-        requestId: requestResult.requestId,
-        promise: blobPromise,
-        abort: requestResult.abort,
-      };
-    }
-
-    // 使用原生 fetch 实现进度监听
-    const controller = new AbortController();
-    const requestId = generateRequestId();
-    const { params, ...fetchOptions } = restOptions;
-    
-    const abort = () => controller.abort();
-    
-    // 添加到请求管理器
-    RequestManager.add(requestId, abort);
-
-    const dataPromise = (async () => {
-      try {
-        // 构建完整 URL
-        let fullUrl = url;
-        if (params) {
-          const searchParams = new URLSearchParams(params as Record<string, string>);
-          fullUrl = `${url}?${searchParams.toString()}`;
-        }
-
-        const token = getToken();
-        const headers: Record<string, string> = {
-          ...(fetchOptions.headers as Record<string, string>),
-          'Content-Type': ContentType.download,
-        };
-        if (token) {
-          headers.Authorization = `Bearer ${token}`;
-        }
-
-        const response = await fetch(fullUrl, {
-          method: 'GET',
-          headers,
-          signal: controller.signal,
-        });
-
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        const reader = response.body?.getReader();
-        if (!reader) {
-          throw new Error('Response body is not readable');
-        }
-
-        const contentLength = Number(response.headers.get('Content-Length')) || 0;
-        let loaded = 0;
-        const chunks: Uint8Array[] = [];
-
-        while (true) {
-          const { done, value } = await reader.read();
-          
-          if (done) break;
-
-          chunks.push(value);
-          loaded += value.length;
-
-          // 触发进度回调
-          if (onDownloadProgress) {
-            onDownloadProgress({
-              loaded,
-              total: contentLength,
-              percentage: contentLength ? Math.round((loaded / contentLength) * 100) : 0,
-            });
-          }
-        }
-
-        // 合并所有 chunks
-        return new Blob(chunks as BlobPart[]);
-      } catch (error) {
-        if (restOptions.showError && error instanceof Error) {
-          const customHandler = restOptions.onError || this.errorHandler;
-          // 构建错误对象，包含完整的错误信息
-          const errorObj = {
-            message: error.message,
-            code: error.name,
-            data: error,
-          };
-          customHandler(errorObj);
-        }
-        throw error;
-      } finally {
-        // 从管理器中移除
-        RequestManager.remove(requestId);
-      }
-    })();
-
-    return {
-      requestId,
-      promise: dataPromise as Promise<Blob>,
-      abort,
-    };
-  }
-
-  /**
-   * 上传文件（支持进度）
-   */
-  upload<T = unknown>(
+  async download(
     url: string,
     options: FetchOptions & {
+      responseType: 'blob';
+      onDownloadProgress?: DownloadProgressCallback;
+    }
+  ): Promise<Blob>;
+
+  async download(
+    url: string,
+    options: FetchOptions & {
+      responseType: 'arrayBuffer';
+      onDownloadProgress?: DownloadProgressCallback;
+    }
+  ): Promise<ArrayBuffer>;
+
+  async download(
+    url: string,
+    options?: FetchOptions & {
+      responseType?: 'blob' | 'arrayBuffer';
+      onDownloadProgress?: DownloadProgressCallback;
+    }
+  ): Promise<Blob | ArrayBuffer> {
+    const { onDownloadProgress, responseType = 'blob', ...restOptions } = options || {};
+
+    const { 
+      params, 
+      silent, 
+      onError, 
+      onUploadProgress, 
+      getAbortController, 
+      body, 
+      ...kyOptions 
+    } = restOptions;
+
+    if (getAbortController) {
+      const controller = new AbortController();
+      kyOptions.signal = controller.signal;
+      getAbortController(controller);
+    }
+
+    if (params) {
+      (kyOptions as KyOptions).searchParams = params as Record<string, string>;
+    }
+
+    const token = getToken();
+    if (token) {
+      const headers = kyOptions.headers as Record<string, string> || {};
+      headers['Authorization'] = `Bearer ${token}`;
+      kyOptions.headers = headers;
+    }
+
+    const response = await this.client(url, {
+      ...kyOptions,
+      method: 'get',
+      headers: {
+        ...kyOptions.headers,
+        'Content-Type': ContentType.download,
+      },
+    });
+
+    if (onDownloadProgress) {
+      const arrayBuffer = await readResponseWithProgress(response, onDownloadProgress);
+      if (responseType === 'blob') {
+        return new Blob([arrayBuffer]);
+      }
+      return arrayBuffer;
+    }
+
+    if (responseType === 'blob') {
+      return await response.blob();
+    }
+    return await response.arrayBuffer();
+  }
+
+  upload<T = unknown>(
+    url: string,
+    options?: FetchOptions & {
       file?: File | Blob;
-      fileFieldName?: string; // 文件字段名，默认 'file'
+      fileFieldName?: string;
+      data?: Record<string, unknown>;
+    }
+  ): Promise<ApiResponse<T>>;
+
+  upload<T = unknown>(
+    url: string,
+    options?: FetchOptions & {
+      file?: File | Blob;
+      fileFieldName?: string;
       data?: Record<string, unknown>;
       onUploadProgress?: UploadProgressCallback;
     }
-  ): RequestResult<T> {
-    const { file, fileFieldName = 'file', data, onUploadProgress, ...restOptions } = options;
+  ): Promise<ApiResponse<T>> {
+    const { file, fileFieldName = 'file', data, onUploadProgress, getAbortController, ...restOptions } = options || {};
 
     // 构建 FormData
     const formData = new FormData();
@@ -634,27 +532,20 @@ export class HttpClient {
       });
     }
 
-    // 使用 XMLHttpRequest 实现进度监听
-    const { showError = true, onError } = restOptions;
-    let xhrInstance: XMLHttpRequest | null = null;
-    const controller = new AbortController();
-    const requestId = generateRequestId();
-    
-    const abort = () => xhrInstance?.abort();
-    
-    // 添加到请求管理器
-    RequestManager.add(requestId, abort);
+    const { silent = true, onError } = restOptions;
 
+  
     const dataPromise = new Promise<T | ApiResponse<T>>((resolve, reject) => {
       const xhr = new XMLHttpRequest();
-      xhrInstance = xhr;
-      
-      // 监听 AbortController
-      controller.signal.addEventListener('abort', () => {
-        xhr.abort();
-      });
+      if (getAbortController) {
+        const controller = new AbortController();
+        controller.signal.addEventListener('abort', () => {
+          xhr.abort();
+        });
+        
+        getAbortController(controller);
+      }
 
-      // 进度监听
       xhr.upload.addEventListener('progress', (event) => {
         if (event.lengthComputable && onUploadProgress) {
           onUploadProgress({
@@ -665,75 +556,65 @@ export class HttpClient {
         }
       });
 
-      // 完成监听
       xhr.addEventListener('load', () => {
         try {
           if (xhr.status >= 200 && xhr.status < 300) {
             const data = JSON.parse(xhr.responseText) as ApiResponse<T>;
             
-            // 无论成功还是失败，都返回完整的响应结构
-            if (data.code !== SUCCESS_CODE && showError) {
-              const customHandler = onError || this.errorHandler;
-              // 构建错误对象，包含完整的错误信息
+            if (data.code !== SUCCESS_CODE) {
+             
               const errorObj = {
                 message: data.message || '请求失败',
                 code: data.code,
                 data: data,
               };
-              customHandler(errorObj);
+              onError?.(errorObj);
+							this.errorHandler(errorObj);
+							if (silent) {
+								toast.error(errorObj.message);
+							}
             }
-            resolve(data); // 返回完整数据，让调用方处理不同错误码
+            resolve(data);
           } else {
             const errorObj = {
               message: `HTTP error! status: ${xhr.status}`,
               code: xhr.status.toString(),
               data: null,
             };
-            if (showError) {
-              const customHandler = onError || this.errorHandler;
-              customHandler(errorObj);
+            if (silent) {
+              toast.error(errorObj.message);
             }
+						onError?.(errorObj);
+						this.errorHandler(errorObj);
             reject(new Error(errorObj.message));
           }
         } catch (error) {
           reject(error);
-        } finally {
-          // 从管理器中移除
-          RequestManager.remove(requestId);
         }
       });
 
       // 错误监听
       xhr.addEventListener('error', () => {
         const errorMessage = '上传失败';
-        if (showError) {
-          const customHandler = onError || this.errorHandler;
-          customHandler(errorMessage);
+        if (silent) {
+          toast.error(errorMessage);
         }
+				onError?.(errorMessage);
+				this.errorHandler(errorMessage);
         reject(new Error(errorMessage));
-        
-        // 从管理器中移除
-        RequestManager.remove(requestId);
       });
 
-      // 中止监听
       xhr.addEventListener('abort', () => {
         reject(new Error('Upload aborted'));
-        
-        // 从管理器中移除
-        RequestManager.remove(requestId);
       });
 
-      // 打开连接
       xhr.open('POST', url);
 
-      // 设置请求头
       const token = getToken();
       if (token) {
         xhr.setRequestHeader('Authorization', `Bearer ${token}`);
       }
       
-      // 自定义请求头
       if (restOptions.headers) {
         Object.entries(restOptions.headers).forEach(([key, value]) => {
           if (key.toLowerCase() !== 'content-type') {
@@ -742,20 +623,11 @@ export class HttpClient {
         });
       }
 
-      // 发送请求
       xhr.send(formData);
     });
-
-    return {
-      requestId,
-      promise: dataPromise as Promise<ApiResponse<T>>,
-      abort,
-    };
+    return dataPromise as Promise<ApiResponse<T>>;
   }
 
-  /**
-   * SSE（Server-Sent Events）流式请求
-   */
   sse(
     url: string,
     options: FetchOptions & {
@@ -768,7 +640,7 @@ export class HttpClient {
     const controller = new AbortController();
 
     // 提取自定义选项
-    const { params, rawResponse, responseType, showError, onUploadProgress, onDownloadProgress, ...kyOptions } = restOptions;
+    const { params, rawResponse, responseType, silent = true, onUploadProgress, onDownloadProgress, ...kyOptions } = restOptions;
 
     const finalOptions: KyOptions = {
       ...kyOptions,
@@ -841,26 +713,13 @@ export class HttpClient {
       abort: () => controller.abort(),
     };
   }
-
-  /**
-   * 批量取消请求
-   */
-  static abortByIds(ids: string[]): void {
-    RequestManager.abortByIds(ids);
-  }
-
-  /**
-   * 取消所有请求
-   */
-  static abortAll(): void {
-    RequestManager.abortAll();
-  }
 }
 
 /**
  * 创建 HTTP 客户端实例
  */
 export function createHttpClient(options?: FetchOptions): HttpClient {
+	console.log('createHttpClient options', options);
   return new HttpClient(options);
 }
 

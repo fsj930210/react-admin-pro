@@ -12,11 +12,10 @@ import {
 import { Input } from "@rap/components-base/input";
 import { cn } from "@rap/utils";
 import { useForm } from "react-hook-form";
-import { toast } from "sonner";
 import { z } from "zod";
 import { QuickLogForm } from "../quick-login";
-import { login } from "@/service/auth";
-import { useRouter } from "@tanstack/react-router";
+import { useAuth } from "../../hooks/useAuth";
+import { useEffect } from "react";
 
 type LoginFormProps = React.ComponentPropsWithoutRef<"form"> & {
 	className?: string;
@@ -33,7 +32,7 @@ const FormSchema = z.object({
 });
 
 export function LoginForm({ className, quickLoginStyle = "inline" }: LoginFormProps) {
-	const router = useRouter();
+	const { login, isLoginLoading, getUserInfo } = useAuth();
 	const form = useForm({
 		resolver: zodResolver(FormSchema),
 		defaultValues: {
@@ -43,21 +42,13 @@ export function LoginForm({ className, quickLoginStyle = "inline" }: LoginFormPr
 		},
 	});
 
-	async function onSubmit(data: z.infer<typeof FormSchema>) {
-		try {
-			const res = login(data);
-			const resData = await res.promise;
-			
-			// 将 token 存储到 localStorage
-			localStorage.setItem('token', resData.data?.token ?? "");
-			
-			toast.success("Login success");
-			router.navigate({ to: "/dashboard", replace: true });
-		} catch (error) {
-			console.error('Login error:', error);
-			toast.error("Login failed");
-		}
-	}
+	const onSubmit = (data: z.infer<typeof FormSchema>) => {
+		login(data);
+	};
+
+	useEffect(() => {
+		getUserInfo();
+	}, []);
 
 	return (
 		<Form {...form}>
@@ -108,9 +99,9 @@ export function LoginForm({ className, quickLoginStyle = "inline" }: LoginFormPr
 						Forgot your password?
 					</a>
 				</div>
-				<Button type="submit" className="w-full">
-					Submit
-				</Button>
+				<Button type="submit" className="w-full" disabled={isLoginLoading} >
+				{isLoginLoading ? 'Logging in...' : 'Submit'}
+			</Button>
 				<div className="relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t after:border-border">
 					<span className="relative z-10 bg-background px-2 text-muted-foreground">Or</span>
 				</div>

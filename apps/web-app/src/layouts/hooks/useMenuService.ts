@@ -1,5 +1,5 @@
-import { useState } from 'react';
-
+import { useState, useMemo } from 'react';
+import { pinyin } from 'pinyin-pro';
 export type MenuOpenMode = 'currentSystemTab' | 'newSystemTab' | 'iframe' | 'newBrowserTab';
 export type MenuType = 'menu' | 'dir' | 'button';
 export type MenuStatus = 'enabled' | 'disabled';
@@ -122,22 +122,29 @@ const flattenMenus = (menuList: MenuItem[], level = 0, parentPath: string[] = []
 };
 
 interface UseMenuServiceParams {
-  defaultMenus?: MenuItem[];
+  menus?: MenuItem[];
   defaultOpenKeys?: string[];
   defaultSelectedMenu?: MenuItem | null;
-  menuMutex?: boolean; // 控制菜单是否互斥展开
+  multiOpen?: boolean;
+	pinyinSearch?: boolean;
 }
 
 export function useMenuService(params?: UseMenuServiceParams) {
-  const { defaultMenus, defaultOpenKeys, defaultSelectedMenu, menuMutex = true } = params ?? {};
+  const { menus = [], defaultOpenKeys, defaultSelectedMenu, multiOpen = true, pinyinSearch = true } = params ?? {};
   
-  const [menus, setMenus] = useState<MenuItem[]>(defaultMenus ?? []);
+  //
+  
   const [selectedMenu, setSelectedMenu] = useState<MenuItem | null>(() => 
     defaultSelectedMenu ?? getStorageSelectedMenu()
   );
   const [openKeys, setOpenKeys] = useState<string[]>(() => 
-    defaultOpenKeys ?? calcOpenKeys(defaultSelectedMenu ?? getStorageSelectedMenu(), defaultMenus ?? [])
+    defaultOpenKeys ?? calcOpenKeys(defaultSelectedMenu ?? getStorageSelectedMenu(), menus)
   );
+  
+  // 使用useMemo确保flatMenus始终与最新的menus保持同步
+  const flatMenus = useMemo(() => {
+    return flattenMenus(menus);
+  }, [menus]);
 
   const updateSelectedMenu = (menu: MenuItem | null) => {
     setSelectedMenu(menu);
@@ -145,36 +152,32 @@ export function useMenuService(params?: UseMenuServiceParams) {
   };
 
   const updateOpenKeysByMenu = (selectedMenu: MenuItem | null) => {
-    const flatMenus = flattenMenus(menus);
-    const openKeys = calcOpenKeys(selectedMenu, flatMenus);
+    const openKeys = calcOpenKeys(selectedMenu, menus);
     setOpenKeys(openKeys);
   };
+  
   const toggleMenuOpen = (menuId: string) => {
     setOpenKeys(prevKeys => {
       if (prevKeys.includes(menuId)) {
-        // 关闭当前菜单
         return prevKeys.filter(key => key !== menuId);
       } else {
-        if (menuMutex) {
-          // 菜单互斥：只展开当前菜单的同级菜单，关闭其他同级菜单
+        if (multiOpen) {
           const menu = findMenuById(menuId);
           if (menu) {
-            // 找到所有同级菜单（相同parentId的菜单）
-            const siblingMenus = flatMenus.filter(item => item.parentId === menu.parentId);
+            const currentFlatMenus = flattenMenus(menus);
+            const siblingMenus = currentFlatMenus.filter(item => item.parentId === menu.parentId);
             const siblingMenuIds = siblingMenus.map(item => item.id);
-            
-            // 保留非同级菜单的展开状态，只关闭同级菜单并展开当前菜单
             return [...prevKeys.filter(key => !siblingMenuIds.includes(key)), menuId];
           }
         }
-        // 非互斥模式：直接添加当前菜单到展开列表
         return [...prevKeys, menuId];
       }
     });
   };
 
   const findMenuById = (menuId: string): MenuItem | null => {
-    return flatMenus.find(item => item.id === menuId) ?? null;
+    const currentFlatMenus = flattenMenus(menus);
+    return currentFlatMenus.find(item => item.id === menuId) ?? null;
   };
 
   const findMenuByUrl = (url: string): MenuItem | null => {
@@ -183,44 +186,9 @@ export function useMenuService(params?: UseMenuServiceParams) {
     };
 
     const targetUrl = normalizeUrl(url);
-
-    return flatMenus.find(menu => normalizeUrl(menu.url ?? '') === targetUrl) ?? null;
+    const currentFlatMenus = flattenMenus(menus);
+    return currentFlatMenus.find(menu => normalizeUrl(menu.url ?? '') === targetUrl) ?? null;
   };
-
-
-  // const filterByPermissions = (permissions: string[]): MenuItem[] => {
-  //   const filterMenu = (items: MenuItem[]): MenuItem[] => {
-  //     return items
-  //       .filter((menu) => {
-  //         if (menu.status === 'disabled' || menu.hidden) return false;
-
-  //         const hasPermission = (() => {
-  //           if (!menu.permissions || menu.permissions.length === 0) return true;
-
-  //           const menuPermissions = Array.isArray(menu.permissions)
-  //             ? menu.permissions
-  //             : [menu.permissions];
-
-  //           return menuPermissions.some((permission) => permissions.includes(permission));
-  //         })();
-
-  //         if (!hasPermission) return false;
-
-  //         if (menu.children) {
-  //           menu.children = filterMenu(menu.children);
-  //         }
-
-  //         return true;
-  //       })
-  //       .filter((menu) => {
-  //         if (menu.children && menu.children.length > 0) return true;
-  //         return menu.status !== 'disabled' && !menu.hidden;
-  //       });
-  //   };
-
-  //   return filterMenu(menus);
-  // };
-
 
   const findMenuAncestor = (menuId: string): MenuItem[] => {
     const ancestor: MenuItem[] = [];
@@ -238,73 +206,140 @@ export function useMenuService(params?: UseMenuServiceParams) {
     return ancestor;
   };
 
-  const searchMenus = (keyword: string): MenuItem[] => {
-    if (!keyword.trim()) return menus;
-
-    const searchKeyword = keyword.toLowerCase().trim();
-
-    const searchInMenu = (items: MenuItem[]): MenuItem[] => {
-      const result: MenuItem[] = [];
-
-      for (const item of items) {
-        const titleMatch = item.title.toLowerCase().includes(searchKeyword);
-        const codeMatch = item.code.toLowerCase().includes(searchKeyword);
-
-        let matchedChildren: MenuItem[] = [];
-        if (item.children && item.children.length > 0) {
-          matchedChildren = searchInMenu(item.children);
-        }
-
-        if (titleMatch || codeMatch || matchedChildren.length > 0) {
-          result.push({
-            ...item,
-            children: matchedChildren.length > 0 ? matchedChildren : item.children
-          });
-        }
+  const getTextMatchTexts = (searchKeyword: string, sourceText: string) => {
+    const matchTexts: string[] = [];
+    if (!searchKeyword || !sourceText) return matchTexts;
+    const key = searchKeyword.trim().toLowerCase();
+    const textLower = sourceText.toLowerCase();
+    const keyLen = key.length;
+    let start = 0;
+    while ((start = textLower.indexOf(key, start)) > -1) {
+      const realText = sourceText.substring(start, start + keyLen);
+      if (!matchTexts.includes(realText)) {
+        matchTexts.push(realText);
       }
-
-      return result;
-    };
-
-    return searchInMenu(menus);
+      start += keyLen;
+    }
+    return matchTexts;
   };
 
-  const searchMenusWithExpand = (keyword: string): { menus: MenuItem[]; expandKeys: string[] } => {
-    if (!keyword.trim()) return { menus, expandKeys: [] };
+  const getPinyinMatchTexts = (searchKeyword: string, sourceText: string) => {
+    const matchTexts: string[] = [];
+    if (!searchKeyword || !sourceText) return matchTexts;
+    const key = searchKeyword.trim().toLowerCase();
+    const keyLen = key.length;
+    const pyArr = pinyin(sourceText, { type: 'array', toneType: 'none', v: true });
+    const charArr = sourceText.split('');
+    const yunMuWhiteList = ['an','ang','ong','eng','ing','ian','iao','uan','uang','uen','uei','iong'];
+    const isOnlyYunMu = yunMuWhiteList.includes(key);
+    charArr.forEach((char, idx) => {
+      const currPy = pyArr[idx] || '';
+      if (currPy === key && char && !matchTexts.includes(char)) {
+        matchTexts.push(char);
+      }
+    });
+    if (isOnlyYunMu && matchTexts.length === 0) {
+      charArr.forEach((char, idx) => {
+        const currPy = pyArr[idx] || '';
+        if (currPy === key && char) matchTexts.push(char);
+      });
+    }
 
-    const searchKeyword = keyword.toLowerCase().trim();
-    const expandKeys: string[] = [];
-
-    const searchInMenu = (items: MenuItem[]): MenuItem[] => {
-      const result: MenuItem[] = [];
-
-      for (const item of items) {
-        const titleMatch = item.title.toLowerCase().includes(searchKeyword);
-        const codeMatch = item.code.toLowerCase().includes(searchKeyword);
-
-        let matchedChildren: MenuItem[] = [];
-        if (item.children && item.children.length > 0) {
-          matchedChildren = searchInMenu(item.children);
-        }
-
-        if (titleMatch || codeMatch || matchedChildren.length > 0) {
-          if (matchedChildren.length > 0) {
-            expandKeys.push(item.id);
+    if (keyLen > 1 && !isOnlyYunMu && matchTexts.length === 0) {
+      for (let i = 0; i < pyArr.length; i++) {
+        let currPy = '';
+        let currChar = '';
+        for (let j = i; j < pyArr.length; j++) {
+          currPy += pyArr[j];
+          currChar += charArr[j];
+          if (currPy === key) {
+            if (!matchTexts.includes(currChar)) {
+              matchTexts.push(currChar);
+            }
+            break;
           }
-          result.push({
-            ...item,
-            children: matchedChildren.length > 0 ? matchedChildren : item.children
-          });
+          if (currPy.length > keyLen) break;
         }
       }
-
-      return result;
-    };
-
-    return { menus: searchInMenu(menus), expandKeys };
+    }
+    return [...new Set(matchTexts)].filter(Boolean);
   };
 
-  const flatMenus = flattenMenus(menus);
+  const searchMenusReturnList = (keyword: string) => {
+    const currentFlatMenus = flattenMenus(menus);
+    if (!keyword.trim()) return { menus: currentFlatMenus, searchKeywords: [] };
+
+    const searchKeyword = keyword.toLowerCase().trim();
+    const searchKeywords: string[] = [];
+
+    const matchedMenus = currentFlatMenus.filter(item => {
+      const titleMatchTexts = getTextMatchTexts(searchKeyword, item.title);
+      const codeMatchTexts = getTextMatchTexts(searchKeyword, item.code);
+      const pinyinMatchTexts = pinyinSearch ? getPinyinMatchTexts(searchKeyword, item.title) : [];
+      
+      const match = titleMatchTexts.length > 0 || codeMatchTexts.length > 0 || pinyinMatchTexts.length > 0;
+      
+      if (match) {
+        searchKeywords.push(...titleMatchTexts, ...codeMatchTexts, ...pinyinMatchTexts);
+      }
+      
+      return match;
+    });
+    
+    return { menus: matchedMenus, searchKeywords: Array.from(new Set(searchKeywords)) };
+  };
+
+  const searchMenusReturnTree = (keyword: string) => {
+    if (!keyword.trim()) return { menus: menus, expandKeys: [], searchKeywords: [] };
+    const searchKeyword = keyword.toLowerCase().trim();
+    
+    const searchMenuItems = (items: MenuItem[]) => {
+      const expandKeys: string[] = [];
+      const searchKeywords: string[] = [];
+
+      const searchInMenu = (menuItems: MenuItem[]): MenuItem[] => {
+        const matchedItems: MenuItem[] = [];
+
+        for (const item of menuItems) {
+          const titleMatchTexts = getTextMatchTexts(searchKeyword, item.title);
+          const pinyinMatchTexts = pinyinSearch ? getPinyinMatchTexts(searchKeyword, item.title) : [];
+          const match = titleMatchTexts.length > 0 || pinyinMatchTexts.length > 0;
+
+          let matchedChildren: MenuItem[] = [];
+          if (item.children && item.children.length > 0) {
+            matchedChildren = searchInMenu(item.children);
+          }
+
+          if (match || matchedChildren.length > 0) {
+            if (matchedChildren.length > 0) {
+              expandKeys.push(item.id);
+            }
+            
+            matchedItems.push({
+              ...item,
+              children: matchedChildren.length > 0 ? matchedChildren : item.children
+            });
+            
+            searchKeywords.push(...titleMatchTexts, ...pinyinMatchTexts);
+          }
+        }
+
+        return matchedItems;
+      };
+
+      const matchedMenus = searchInMenu(items);
+      
+      return {
+        matchedMenus,
+        expandKeys,
+        searchKeywords: Array.from(new Set(searchKeywords))
+      };
+    };
+    
+    const { matchedMenus, expandKeys, searchKeywords } = searchMenuItems(menus);
+
+    return { menus: matchedMenus, expandKeys, searchKeywords };
+  };
 
   return {
     menus,
@@ -316,10 +351,9 @@ export function useMenuService(params?: UseMenuServiceParams) {
 		findMenuAncestor,
     toggleMenuOpen,
     updateSelectedMenu,
-    updateMenus: setMenus,
 		updateOpenKeysByMenu,
 		updateOpenKeys: setOpenKeys,
-    searchMenus,
-    searchMenusWithExpand
+    searchMenusReturnList,
+    searchMenusReturnTree
   };
 }

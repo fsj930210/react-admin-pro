@@ -11,5 +11,6 @@ export type {
 export { useFetchMenus, getMenus } from "./hooks/useFetchMenus";
 export { Footer } from "./components/footer";
 export { Header } from "./components/header";
-export { Sidebar, LayoutSidebarProvider, useSidebar } from "./components/sidebar";
+export { Sidebar, } from "./components/sidebar";
+export { LayoutSidebarProvider, useLayoutSidebar } from "./components/sidebar/sidebar-context";
 export { Breadcrumb } from "./components/breadcrumb";

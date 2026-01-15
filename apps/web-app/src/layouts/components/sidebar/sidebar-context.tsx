@@ -1,4 +1,5 @@
 import { createContext, use, useEffect, type ReactNode } from 'react';
+import { useLocation } from '@tanstack/react-router';
 import { useMenuService, type MenuItem } from '../../hooks/useMenuService';
 
 export interface SidebarContextValue {
@@ -14,21 +15,19 @@ export interface SidebarContextValue {
 	updateSelectedMenu: (menus: MenuItem | null) => void;
 	updateOpenKeys: (ids: string[]) => void;
 	updateOpenKeysByMenu: (selectedMenu: MenuItem | null) => void;
-	updateMenus: (menus: MenuItem[]) => void;
-	searchMenus: (keyword: string) => MenuItem[];
-	searchMenusWithExpand: (keyword: string) => { menus: MenuItem[]; expandKeys: string[] };
+	searchMenusReturnList: (keyword: string) => { menus: MenuItem[]; searchKeywords: string[] };
+	searchMenusReturnTree: (keyword: string) => { menus: MenuItem[]; expandKeys: string[], searchKeywords: string[] };
 }
 
 const SidebarContext = createContext<SidebarContextValue | undefined>(undefined);
 
 export interface SidebarProviderProps {
 	children: ReactNode;
-	defaultMenus?: MenuItem[];
+	menus?: MenuItem[];
 }
 
-export function LayoutSidebarProvider({ children, defaultMenus = [] }: SidebarProviderProps) {
+export function LayoutSidebarProvider({ children, menus = [] }: SidebarProviderProps) {
 	const {
-		menus,
 		flatMenus,
 		selectedMenu,
 		openKeys,
@@ -39,13 +38,24 @@ export function LayoutSidebarProvider({ children, defaultMenus = [] }: SidebarPr
 		updateSelectedMenu,
 		updateOpenKeys,
 		updateOpenKeysByMenu,
-		updateMenus,
-		searchMenus,
-		searchMenusWithExpand,
-	} = useMenuService({ defaultMenus });
+		searchMenusReturnList,
+		searchMenusReturnTree,
+	} = useMenuService({ menus });
+	
+
+	const pathname = useLocation({
+		select: (location) => location.pathname,
+	});
+
+	
 	useEffect(() => {
-		updateMenus(defaultMenus);
-	}, [defaultMenus, updateMenus]);
+		const menu = findMenuByUrl(pathname);
+		if (menu) {
+			updateSelectedMenu(menu);
+			updateOpenKeysByMenu(menu);
+		}
+	}, [menus]);
+	
 	const contextValue: SidebarContextValue = {
 		menus,
 		flatMenus,
@@ -56,11 +66,10 @@ export function LayoutSidebarProvider({ children, defaultMenus = [] }: SidebarPr
 		findMenuByUrl,
 		toggleMenuOpen,
 		updateSelectedMenu,
-		updateMenus,
 		updateOpenKeys,
 		updateOpenKeysByMenu,
-		searchMenus,
-		searchMenusWithExpand,
+		searchMenusReturnList,
+		searchMenusReturnTree,
 	};
 
 	return (
@@ -70,7 +79,7 @@ export function LayoutSidebarProvider({ children, defaultMenus = [] }: SidebarPr
 	);
 }
 
-export function useSidebar() {
+export function useLayoutSidebar() {
 	const context = use(SidebarContext);
 	if (context === undefined) {
 		throw new Error('useSidebar must be used within a SidebarProvider');

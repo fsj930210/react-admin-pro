@@ -7,14 +7,17 @@ import { APP_BASE_PATH } from "@/config";
 
 export const Route = createFileRoute("/(layouts)")({
 	component: Layout,
+	beforeLoad: ({ location }) => {
+		console.log(location);
+	},
 });
 
 function Layout() {
-	const { menus } = useFetchMenus();
+	const { menus ,isLoading} = useFetchMenus();
 	return (
 		<SidebarProvider defaultOpen>
-			<LayoutSidebarProvider defaultMenus={menus}>
-				<Sidebar logo={`${APP_BASE_PATH}/logo.svg`}  />
+			<LayoutSidebarProvider menus={menus}>
+				<Sidebar logo={`${APP_BASE_PATH}/logo.svg`} isLoading={isLoading} />
 				<SidebarInset className="overflow-x-hidden min-w-0">
 					<LayoutTabs />
 					<div className="h-9.5 bg-background">

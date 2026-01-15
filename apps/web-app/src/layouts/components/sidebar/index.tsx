@@ -1,5 +1,4 @@
 "use client";
-
 import {
   Sidebar as BaseSidebar,
   SidebarContent,
@@ -7,7 +6,7 @@ import {
   SidebarHeader,
   SidebarRail,
 	SidebarTrigger,
-	useSidebar as useBaseSidebar,
+	useSidebar,
 } from "@rap/components-base/resizable-sidebar";
 import {
   AudioWaveform,
@@ -17,13 +16,13 @@ import {
   Map,
   PieChart,
 } from "lucide-react";
-import type * as React from "react";
+import type React from "react";
 import { Logo } from "@rap/components-ui/logo";
 
 import { SidebarMain } from "./sidebar-main";
 import { SidebarUser } from "./sidebar-user";
-import { LayoutSidebarProvider, useSidebar, type SidebarContextValue } from "./sidebar-context";
 import { cn } from "@rap/utils";
+import { SidebarSkeleton } from "./sidebar-skeleton";
 
 const data = {
   user: {
@@ -69,18 +68,21 @@ const data = {
 
 export type SidebarProps = React.ComponentProps<typeof BaseSidebar> & {
   logo?: string;
+  isLoading?: boolean;
 };
 
-export function Sidebar({ ...props }: SidebarProps) {
-	const { state } = useBaseSidebar();
+export function Sidebar({ isLoading = false, ...props }: SidebarProps) {
+	const { state } = useSidebar();
   return (
     <BaseSidebar collapsible="icon" {...props}>
       <SidebarHeader className={cn('overflow-hidden', state === 'expanded' ? 'flex-row flex-items-center justify-between' : 'flex-col')}>
-				<Logo url={props.logo} />
-				<SidebarTrigger />
+			<Logo url={props.logo} />
+			<div className="flex-center">
+				<SidebarTrigger className="size-5" />
+			</div>
       </SidebarHeader>
       <SidebarContent>
-        <SidebarMain />
+        {isLoading ? <SidebarSkeleton /> : <SidebarMain />}
       </SidebarContent>
       <SidebarFooter>
         <SidebarUser user={data.user} />
@@ -90,5 +92,3 @@ export function Sidebar({ ...props }: SidebarProps) {
   );
 }
 
-export { LayoutSidebarProvider, useSidebar };
-export type { SidebarContextValue };

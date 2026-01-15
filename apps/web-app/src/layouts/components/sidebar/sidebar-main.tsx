@@ -8,22 +8,22 @@ import {
   SidebarMenuItem,
   SidebarMenuSub,
   SidebarMenuSubItem,
-	useSidebar as useBaseSidebar,
 } from "@rap/components-base/resizable-sidebar";
-import { InputWithClear } from "@rap/components-ui/input-with-clear";
-import { SidebarMenuContent } from "./sidebar-menu-content";
-import { useSidebar } from "./sidebar-context";
+import { SidebarContent } from "./sidebar-content";
+import { useLayoutSidebar } from "./sidebar-context";
 import { useNavigate } from "@tanstack/react-router";
 import { type MenuItem } from "@/layouts/hooks/useMenuService";
-import { Search } from "lucide-react";
-import { useRef, useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { cn } from "@rap/utils";
+import { SidebarSearch } from "./sidebar-search";
+
 
 interface MenuItemComponentProps {
   item: MenuItem;
   level?: number;
   selectedMenu?: MenuItem | null;
   openKeys: string[];
+	searchKeywords: string[];
   onMenuClick?: (item: MenuItem) => void;
   onOpenChange: (menuId: string) => void;
 	updateSelectedMenu: (item: MenuItem | null) => void;
@@ -34,6 +34,7 @@ function MenuItemComponent({
   level = 0, 
   selectedMenu, 
   openKeys,
+	searchKeywords,
   onMenuClick, 
   onOpenChange,
   updateSelectedMenu
@@ -78,20 +79,23 @@ function MenuItemComponent({
 				open={isOpen} 
 				onOpenChange={() => onOpenChange(item.id)}
 			>
-        <SidebarMenuItem>
+        <SidebarMenuItem className="px-0 my-1 mx-2">
           <CollapsibleTrigger asChild>
-            <SidebarMenuContent
+            <SidebarContent
               item={item}
               isActive={isActive}
               hasChildren={hasChildren}
               isOpen={isOpen}
               onMenuItemClick={handleMenuItemClick}
               isSubItem={isSubItem}
+              level={level}
+							searchKeywords={searchKeywords}
             />
           </CollapsibleTrigger>
+				</SidebarMenuItem>
           {hasChildren && (
             <CollapsibleContent>
-              <SidebarMenuSub className="mx-0">
+              <SidebarMenuSub className="border-none mx-0 px-0">
                 {item.children?.map((child) => (
                   <MenuItemComponent
                     key={child.id}
@@ -102,33 +106,37 @@ function MenuItemComponent({
                     onMenuClick={onMenuClick}
                     onOpenChange={onOpenChange}
                     updateSelectedMenu={updateSelectedMenu}
+										searchKeywords={searchKeywords}
                   />
                 ))}
               </SidebarMenuSub>
             </CollapsibleContent>
           )}
-        </SidebarMenuItem>
       </Collapsible>
     );
   }
 
   // 子菜单项（第二级及以后）
   return (
-    <SidebarMenuSubItem key={item.id}>
-      {hasChildren ? (
-        <Collapsible open={isOpen} onOpenChange={() => onOpenChange(item.id)}>
-          <CollapsibleTrigger asChild>
-            <SidebarMenuContent
-              item={item}
-              isActive={isActive}
-              hasChildren={hasChildren}
-              isOpen={isOpen}
-              onMenuItemClick={handleMenuItemClick}
-              isSubItem={isSubItem}
-            />
-          </CollapsibleTrigger>
-          <CollapsibleContent>
-            <SidebarMenuSub className="mx-0">
+    <Collapsible open={isOpen} onOpenChange={() => onOpenChange(item.id)}>
+    	<SidebarMenuSubItem key={item.id} className={cn("my-1 mx-2")}>
+        <CollapsibleTrigger asChild>
+					<SidebarContent
+						item={item}
+						isActive={isActive}
+						hasChildren={hasChildren}
+						isOpen={isOpen}
+						onMenuItemClick={handleMenuItemClick}
+						isSubItem={isSubItem}
+						level={level}
+						searchKeywords={searchKeywords}
+					/>
+        </CollapsibleTrigger>
+			</SidebarMenuSubItem>
+			{
+				hasChildren ? (
+					<CollapsibleContent>
+            <SidebarMenuSub className="border-none mx-0 px-0">
               {item.children?.map((child) => (
                 <MenuItemComponent
                   key={child.id}
@@ -139,24 +147,15 @@ function MenuItemComponent({
                   onMenuClick={onMenuClick}
                   onOpenChange={onOpenChange}
 									updateSelectedMenu={updateSelectedMenu}
+									searchKeywords={searchKeywords}
                 />
               ))}
             </SidebarMenuSub>
           </CollapsibleContent>
-        </Collapsible>
-      ) : (
-        // 如果没有子菜单，直接渲染按钮
-        <SidebarMenuContent
-          item={item}
-          isActive={isActive}
-          hasChildren={hasChildren}
-          isOpen={isOpen}
-          onMenuItemClick={handleMenuItemClick}
-          isSubItem={isSubItem}
-        />
-      )}
-    </SidebarMenuSubItem>
-  );
+				) : null
+			}
+    </Collapsible>
+  )
 }
 
 interface SidebarMainProps {
@@ -169,55 +168,36 @@ export function SidebarMain({ showSearch = true }: SidebarMainProps) {
 		openKeys,
 		toggleMenuOpen ,
 		updateSelectedMenu,
-		searchMenusWithExpand,
+		searchMenusReturnTree,
 		updateOpenKeys
-	} = useSidebar();
-	const searchRef = useRef<HTMLInputElement>(null);
-	const { state, toggleSidebar } = useBaseSidebar();
-	const [searchKeyword, setSearchKeyword] = useState('');
+	} = useLayoutSidebar();
 
-	const displayMenus = !searchKeyword.trim() ? menus : searchMenusWithExpand(searchKeyword).menus;
-
-	useEffect(() => {
-		if (!searchKeyword.trim()) {
-			return;
-		}
-		const { expandKeys } = searchMenusWithExpand(searchKeyword);
-		updateOpenKeys(expandKeys);
-	}, [searchKeyword, updateOpenKeys]);
+	const [displayMenus, setDisplayMenus] = useState(menus);
+	const [searchKeywords, setSearchKeywords] = useState<string[]>([]);
 
 	const handleInputChange = (value: string) => {
-		setSearchKeyword(value);
+		if (value) {
+			const { expandKeys, menus, searchKeywords } = searchMenusReturnTree(value);
+			updateOpenKeys(expandKeys);
+			setDisplayMenus(menus);
+			setSearchKeywords(searchKeywords);
+		} else {
+			setDisplayMenus(menus);
+			setSearchKeywords([]);
+		}
 	};
-
-	const handleClearSearch = () => {
-		setSearchKeyword('');
-	};
+	useEffect(() => {
+		// eslint-disable-next-line @eslint-react/hooks-extra/no-direct-set-state-in-use-effect
+		setDisplayMenus(menus);
+	}, [menus])
 
   return (
-    <SidebarMenu>
+    <SidebarMenu className="overflow-x-hidden">
 			{
-				showSearch ? (
-					<div className=" flex-center p-2">
-						<InputWithClear 
-							placeholder="搜索菜单" 
-              ref={searchRef as React.RefObject<HTMLInputElement>}
-							className={cn("w-full", state === 'collapsed' ? 'hidden' : '')}
-							onChange={handleInputChange}
-							value={searchKeyword}
-              onClear={handleClearSearch}
-						/>
-            <Search 
-              className={cn("size-5 cursor-pointer", state === 'expanded' ? 'hidden' : '')} 
-              onClick={() => {
-                toggleSidebar();
-                searchRef.current?.focus?.();
-              }} 
-            />
-					</div>
-				) : null
+				showSearch && (
+					<SidebarSearch onChange={handleInputChange} />
+				)
 			}
-
       {displayMenus.map((item: MenuItem) => (
         <MenuItemComponent
           key={item.id}
@@ -227,6 +207,7 @@ export function SidebarMain({ showSearch = true }: SidebarMainProps) {
           openKeys={openKeys}
           onOpenChange={toggleMenuOpen}
           updateSelectedMenu={updateSelectedMenu}
+					searchKeywords={searchKeywords}
         />
       ))}
     </SidebarMenu>
