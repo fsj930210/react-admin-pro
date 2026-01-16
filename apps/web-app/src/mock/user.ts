@@ -5,7 +5,7 @@ export default [
 	http.get("/api/rap/user/info",  ({ request }) => {
 		const token = request.headers.get('authorization') ?? '';
 		if (!token) {
-			return HttpResponse.json({ message: 'Not Authorized', code: '401', data: null }, { status: 401, });
+			return HttpResponse.json({ message: 'Not Authorized', code: '401', data: null });
 		}
 		const username = token.split(' ')[1] || '';
 		const user = {

@@ -1,10 +1,10 @@
-import { createHttpClient, type HttpClient } from "@rap/utils/fetch";
+import { createFetchClient } from "@rap/utils/fetch";
 
-const baseFetch: HttpClient = createHttpClient({
+const request = createFetchClient({
 	silent: false,
-	onError: (error) => {
-		console.error(error, 'baseFetch error');
-	},
+	// onError: (error: any) => {
+	// 	console.error(error, 'request error');
+	// },
 });
 
-export default baseFetch;
+export default request;

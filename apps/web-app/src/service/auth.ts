@@ -27,7 +27,7 @@ export interface IUserInfoResponseData {
  * 用户登录 API
  */
 export const login = (data: ILoginRequestData): Promise<ApiResponse<ILoginResponseData>> => {
-  return request.post<ILoginResponseData>('/api/rap/login', { body: data });
+  return request.post<ILoginResponseData>('/api/rap/login', { data: data });
 };
 
 /**
