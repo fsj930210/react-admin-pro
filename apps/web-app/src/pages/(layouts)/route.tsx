@@ -3,17 +3,20 @@ import { Breadcrumb, Footer, Sidebar,  LayoutSidebarProvider, useFetchMenus} fro
 import { LayoutTabs } from "@/layouts/components/tabs";
 import { createFileRoute, Outlet } from "@tanstack/react-router";
 import { APP_BASE_PATH } from "@/config";
+import { useAuth } from "../login/-hooks/useAuth";
+import { useMount } from "ahooks";
 
 
 export const Route = createFileRoute("/(layouts)")({
 	component: Layout,
-	beforeLoad: ({ location }) => {
-		console.log(location);
-	},
 });
 
 function Layout() {
 	const { menus ,isLoading} = useFetchMenus();
+	const { getUserInfoMutation } = useAuth();
+	useMount(() => {
+		getUserInfoMutation.mutate();
+	});
 	return (
 		<SidebarProvider defaultOpen>
 			<LayoutSidebarProvider menus={menus}>

@@ -1,9 +1,9 @@
 import { useQuery } from '@tanstack/react-query';
-import { type ApiResponse } from '@rap/utils/fetch';
+
 import type { MenuItem } from '../hooks/useMenuService';
-import baseFetch from '@/service/fetch';
+import request from '@/service/fetch';
 export const getMenus = () => {
-	return baseFetch.get<MenuItem[]>('/api/rap/user/menus') as Promise<ApiResponse<MenuItem[]>>;
+	return request.get<MenuItem[]>('/api/rap/user/menus') ;
 };
 
 

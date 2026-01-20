@@ -320,7 +320,7 @@ function ResizeFeaturePage() {
 					{/* 可调整大小的元素 */}
 					<div
 						ref={resizeRef}
-						className={`absolute w-[100px] h-[100px] bg-linear-to-br from-blue-500 to-purple-600 rounded-lg shadow-lg transition-shadow ${
+						className={`absolute w-25 h-25 bg-linear-to-br from-blue-500 to-purple-600 rounded-lg shadow-lg transition-shadow ${
 							isResizing ? "shadow-2xl" : "hover:shadow-xl"
 						}`}
 						style={
@@ -431,7 +431,7 @@ function ResizeFeaturePage() {
 						{/* Card 示例 */}
 						<div className="space-y-4">
 							<h4 className="text-md font-medium text-gray-800">可调整大小的卡片</h4>
-							<div className="relative h-[300px] border-2 border-dashed border-gray-200 rounded-lg p-4">
+							<div className="relative h-75 border-2 border-dashed border-gray-200 rounded-lg p-4">
 								<div className="absolute top-2 left-2 text-xs text-gray-500">
 									卡片区域 - 拖拽右下角手柄调整大小
 								</div>
@@ -442,7 +442,7 @@ function ResizeFeaturePage() {
 						{/* Dialog 示例 */}
 						<div className="space-y-4">
 							<h4 className="text-md font-medium text-gray-800">可调整大小的对话框</h4>
-							<div className="flex items-center justify-center h-[300px] border-2 border-dashed border-gray-200 rounded-lg">
+							<div className="flex items-center justify-center h-75 border-2 border-dashed border-gray-200 rounded-lg">
 								<ResizableDialog />
 							</div>
 						</div>

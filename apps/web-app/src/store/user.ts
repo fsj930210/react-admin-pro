@@ -1,5 +1,5 @@
 import { createSetter, createStore, type SetterFunction } from "@rap/hooks/use-zustand";
-interface UserState {
+export interface UserState {
 	userInfo: {
 		id: string;
 		username: string;
@@ -10,10 +10,10 @@ interface UserState {
 	}
 }
 
-interface UserActions {
+export interface UserActions {
 	setUserInfo: SetterFunction<UserState, "userInfo">;
 }
-type User = UserState & UserActions;
+export type User = UserState & UserActions;
 
 const { selector: useUserSelector } = createStore<User>(
 	(set) => ({

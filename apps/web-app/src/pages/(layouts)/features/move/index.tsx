@@ -39,7 +39,7 @@ function ContainerExample() {
 			<h3 className="text-lg font-semibold mb-3">容器模式，带边界，吸附，使用TopLeft</h3>
 			<div
 				ref={containerRef}
-				className="relative w-[300px] h-[300px] border-2 border-blue-500 overflow-hidden bg-blue-50 rounded-lg"
+				className="relative w-75 h-75 border-2 border-blue-500 overflow-hidden bg-blue-50 rounded-lg"
 			>
 				<div
 					ref={moveRef}
@@ -53,7 +53,7 @@ function ContainerExample() {
 								}
 							: undefined
 					}
-					className="absolute top-10 left-[60px] w-32 h-32 bg-blue-600 text-white rounded-lg shadow-lg flex flex-col items-center justify-center p-4"
+					className="absolute top-10 left-15 w-32 h-32 bg-blue-600 text-white rounded-lg shadow-lg flex flex-col items-center justify-center p-4"
 				>
 					<div className="font-semibold mb-2">
 						容器内移动, 当移动到距离边界小于30px时，松开鼠标会自动吸附到边界
@@ -84,7 +84,7 @@ function ScreenExample() {
 							}
 						: undefined
 				}
-				className="fixed top-[100px] left-[100px] z-10 w-32 h-32 bg-purple-600 text-white rounded-lg shadow-lg flex flex-col items-center justify-center p-4"
+				className="fixed top-25 left-25 z-10 w-32 h-32 bg-purple-600 text-white rounded-lg shadow-lg flex flex-col items-center justify-center p-4"
 			>
 				<div className="font-semibold mb-2">屏幕内移动，使用translate</div>
 			</div>
@@ -106,7 +106,7 @@ function OffsetExample() {
 			<h3 className="text-lg font-semibold mb-3">边界偏移示例 (20px偏移)</h3>
 			<div
 				ref={containerRef}
-				className="relative w-[300px] h-[300px] border-2 border-blue-500 overflow-hidden bg-blue-50 rounded-lg"
+				className="relative w-75 h-75 border-2 border-blue-500 overflow-hidden bg-blue-50 rounded-lg"
 			>
 				<div
 					ref={moveRef}
@@ -120,7 +120,7 @@ function OffsetExample() {
 								}
 							: undefined
 					}
-					className="absolute top-10 left-[60px] w-32 h-32 bg-blue-600 text-white rounded-lg shadow-lg flex flex-col items-center justify-center p-4"
+					className="absolute top-10 left-15 w-32 h-32 bg-blue-600 text-white rounded-lg shadow-lg flex flex-col items-center justify-center p-4"
 				>
 					<div className="font-semibold mb-2 text-xs">
 						容器内移动，不能贴边，有20px的偏移，使用translate
@@ -144,7 +144,7 @@ function AxisExample() {
 	return (
 		<div className="mb-8">
 			<h3 className="text-lg font-semibold mb-3">轴向限制示例</h3>
-			<div className="relative w-full h-[300px] border-2 border-green-500 bg-green-50 rounded-lg">
+			<div className="relative w-full h-75 border-2 border-green-500 bg-green-50 rounded-lg">
 				<div
 					ref={xMoveRef}
 					style={
@@ -195,7 +195,7 @@ function DraggableCard() {
 						}
 					: undefined
 			}
-			className={`absolute w-[300px] shadow-xl`}
+			className={`absolute w-75 shadow-xl`}
 		>
 			<CardHeader
 				ref={moveRef}
@@ -222,18 +222,18 @@ function DraggableDialog() {
 		useTopLeft: true,
 		styleRef: dialogRef
 	});
-	const rafId = useRef(-1);
+	const rafIdRef = useRef(-1);
 	const handleOpenChange = (open: boolean) => {
 		if (open) {
-			rafId.current = requestAnimationFrame(() => {
+			rafIdRef.current = requestAnimationFrame(() => {
 				bindEvent();
 			});
 		} else {
 			removeEvent();
-			cancelAnimationFrame(rafId.current);
+			cancelAnimationFrame(rafIdRef.current);
 		}
 	};
-	console.log(position)
+
 	return (
 		<Dialog onOpenChange={handleOpenChange}>
 			<DialogTrigger asChild>

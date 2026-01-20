@@ -1,19 +1,12 @@
 import { SidebarMenu, SidebarMenuItem } from "@rap/components-base/resizable-sidebar";
 import { User } from "../user";
 
-export function SidebarUser({
-  user,
-}: {
-  user: {
-    name: string;
-    email: string;
-    avatar: string;
-  };
-}) {
+
+export function SidebarUser() {
   return (
     <SidebarMenu>
       <SidebarMenuItem>
-        <User {...user} />
+        <User />
       </SidebarMenuItem>
     </SidebarMenu>
   );

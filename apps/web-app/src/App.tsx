@@ -8,7 +8,17 @@ import {
 import '@bprogress/core/css';
 import { BProgress } from '@bprogress/core';
 
-const queryClient = new QueryClient()
+const queryClient = new QueryClient({
+	defaultOptions: {
+		queries: {
+			staleTime: 1000 * 60,
+			retry: 0,
+		},
+		mutations: {
+			retry: 0,
+		},
+	},
+})
 
 const router = createRouter({
 	routeTree,

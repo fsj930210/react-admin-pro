@@ -71,8 +71,8 @@ export interface FetchOptions extends KyOptions {
  */
 export interface ApiResponse<T = unknown> {
   code: string;
-  message?: string;
-  data?: T;
+  message: string;
+  data: T;
 }
 
 function getDefaultAuthHeader(tokenStorageKey: string, defaultType: string): string{
@@ -116,9 +116,9 @@ const beforeRequestRemoveContentType = (request: Request) => {
 /**
  * 错误提示处理
  */
-function beforeErrorToast(options: FetchOptions) {
+function beforeErrorToast({ silent = true }: FetchOptions) {
 	return async (error: any) => {
-		if (!options.silent) {
+		if (!silent) {
 			const { response } = error;
 			if (response) {
 				try {
@@ -142,14 +142,16 @@ function afterResponseDefaultJson(options: FetchOptions) {
 		if (!enabled) return;
 		try {
 			const clonedResponse =  response.clone();
-			const body = await clonedResponse.json();
-			if (body.code !== defaultSuccessCode) {
-				if (!silent) {
-					toast.error(body.message || '请求失败');
+			if (clonedResponse.status >= 200 && clonedResponse.status < 300) {
+				const body = await clonedResponse.json();
+				if (body.code !== defaultSuccessCode) {
+					if (!silent) {
+						toast.error(body.message || '请求失败');
+					}
+					return Promise.reject(body);
 				}
-				return Promise.reject(body);
+				return body;
 			}
-			return body;
 		} catch (e: any){
 			if (!silent) {
 				toast.error(e?.message || '请求失败');
@@ -180,7 +182,6 @@ export class FetchClient {
       defaultSuccessCode: DEFAULT_SUCCESS_CODE,
     };
 
-    // 合并默认配置和用户配置
     this.defaultOptions = {
       silent: true,
       removeContentType: false,
@@ -188,30 +189,27 @@ export class FetchClient {
       defaultJsonConfig: { ...defaultJsonConfig, ...options.defaultJsonConfig },
       ...options,
     };
-
-    // 提取ky原生配置，排除自定义配置项
     const { 
       params,
       bodyStringify,
       silent,
       removeContentType,
-      ...kyNativeOptions
+      ...restOptions
     } = this.defaultOptions;
-
     this.client = ky.create({
-      ...kyNativeOptions,
+      ...restOptions,
       hooks: {
-        ...kyNativeOptions.hooks,
+        ...restOptions.hooks,
         beforeRequest: [
           beforeRequestDefaultAuthorization(this.defaultOptions),
           ...(removeContentType ? [beforeRequestRemoveContentType] : []),
-          ...(kyNativeOptions.hooks?.beforeRequest || []),
+          ...(restOptions.hooks?.beforeRequest || []),
         ].filter(Boolean),
         afterResponse: [
-          ...(kyNativeOptions.hooks?.afterResponse || []),
+          ...(restOptions.hooks?.afterResponse || []),
         ].filter(Boolean),
         beforeError: [
-          ...(kyNativeOptions.hooks?.beforeError || []),
+          ...(restOptions.hooks?.beforeError || []),
           beforeErrorToast(this.defaultOptions),
         ].filter(Boolean),
       },
@@ -234,23 +232,19 @@ export class FetchClient {
       params,
 			data,
       bodyStringify = true,
-      removeContentType,
-      defaultAuthConfig,
-      defaultJsonConfig,
-      ...kyOptions 
+			credentials = 'include',
     } = mergedOptions;
 
 
     if (params) {
-      kyOptions.searchParams = params;
+      mergedOptions.searchParams = params;
     }
-
 		if (bodyStringify) {
-			kyOptions.json = data;
-		} else if (data) {
-			kyOptions.body = data as BodyInit;
+			mergedOptions.json = data;
+		} else {
+			mergedOptions.body = data as BodyInit;
 		}
-
+		mergedOptions.credentials = credentials;
     return this.client<T>(url, mergedOptions);
   }
 

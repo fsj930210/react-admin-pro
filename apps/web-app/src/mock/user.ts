@@ -5,7 +5,7 @@ export default [
 	http.get("/api/rap/user/info",  ({ request }) => {
 		const token = request.headers.get('authorization') ?? '';
 		if (!token) {
-			return HttpResponse.json({ message: 'Not Authorized', code: '401', data: null });
+			return HttpResponse.json({ message: 'Not Authorized', code: '401', data: null }, {status: 401, statusText: 'unauthorized'});
 		}
 		const username = token.split(' ')[1] || '';
 		const user = {
@@ -14,7 +14,7 @@ export default [
 			gender: 1,
 			avatar: '/rap-web-app/shadcn.jpg',
 			phone: '13333333333',
-			email: 'shadcn@example.com',
+			email: `${username}@example.com`,
 		}
 		return HttpResponse.json({ code: SUCCESS_CODE, message: 'success', data: user });
 	}),

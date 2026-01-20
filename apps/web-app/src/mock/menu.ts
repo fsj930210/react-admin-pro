@@ -318,7 +318,7 @@ export default [
   http.get("/api/rap/user/menus", ({ request }) => {
 		const token = request.headers.get('authorization') ?? '';
 		if (!token) {
-			return HttpResponse.json({ code: '4010000000', message: 'unauthorized', data: null });
+			return HttpResponse.json({ code: '401', message: 'unauthorized', data: null }, {status: 401, statusText: 'unauthorized'});
 		}
 		const username = token.split(' ')[1] || '';
 		if (username !== 'admin') {

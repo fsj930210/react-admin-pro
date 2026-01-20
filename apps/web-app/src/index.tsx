@@ -1,7 +1,6 @@
 import { initMock } from "@rap/mock-config";
 import { APP_BASE_PATH } from "@/config";
 import "@rap/styles/globals.css";
-import React from "react";
 import ReactDOM from "react-dom/client";
 import App from "./App";
 
@@ -35,9 +34,7 @@ if (rootEl) {
 		currentEnvironment: import.meta.env.MODE || "development",
 	}).then(() => {
 		root.render(
-			<React.StrictMode>
-				<App />
-			</React.StrictMode>,
+			<App />
 		);
 	});
 }
