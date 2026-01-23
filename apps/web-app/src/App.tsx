@@ -7,6 +7,9 @@ import {
 } from '@tanstack/react-query'
 import '@bprogress/core/css';
 import { BProgress } from '@bprogress/core';
+import { AppProvider, type AppEvent } from "./app-context";
+import { useEventEmitter } from "ahooks";
+import { APP_BASE_PATH } from '@/config';
 
 const queryClient = new QueryClient({
 	defaultOptions: {
@@ -22,7 +25,7 @@ const queryClient = new QueryClient({
 
 const router = createRouter({
 	routeTree,
-	basepath: import.meta.env.RAP_WEB_APP_BASE_URL, // Set the base path for the router
+	basepath: APP_BASE_PATH, // Set the base path for the router
   defaultErrorComponent: ({ error }: any) => <ErrorComponent error={error} />,
   context: {
     queryClient,
@@ -59,12 +62,15 @@ declare module "@tanstack/react-router" {
 	}
 }
 const App = () => {
+	const eventBus = useEventEmitter<AppEvent<unknown>>();
 	return (
 		<div className="size-full overflow-x-hidden">
-			<QueryClientProvider client={queryClient}>
-				<RouterProvider router={router} />
-			</QueryClientProvider>
-			<Toaster />
+			<AppProvider eventBus={eventBus}>
+				<QueryClientProvider client={queryClient}>
+					<RouterProvider router={router} />
+				</QueryClientProvider>
+				<Toaster />
+			</AppProvider>
 		</div>
 	);
 };

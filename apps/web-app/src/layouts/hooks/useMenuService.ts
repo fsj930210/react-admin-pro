@@ -1,5 +1,7 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
 import { pinyin } from 'pinyin-pro';
+import {  useNavigate, useRouterState } from '@tanstack/react-router';
+import { useAppContext } from '@/app-context';
 export type MenuOpenMode = 'currentSystemTab' | 'newSystemTab' | 'iframe' | 'newBrowserTab';
 export type MenuType = 'menu' | 'dir' | 'button';
 export type MenuStatus = 'enabled' | 'disabled';
@@ -76,7 +78,6 @@ const setStorageSelectedMenu = (menu: MenuItem | null): void => {
   }
 };
 
-// 根据选中的菜单计算初始应该展开的菜单项
 const calcOpenKeys = (selectedMenu: MenuItem | null, menus: MenuItem[]): string[] => {
   if (!selectedMenu) return [];
   
@@ -130,10 +131,20 @@ interface UseMenuServiceParams {
 }
 
 export function useMenuService(params?: UseMenuServiceParams) {
-  const { menus = [], defaultOpenKeys, defaultSelectedMenu, multiOpen = true, pinyinSearch = true } = params ?? {};
-  
-  //
-  
+  const { 
+		menus = [], 
+		defaultOpenKeys, 
+		defaultSelectedMenu, 
+		multiOpen = true, 
+		pinyinSearch = true 
+	} = params ?? {};
+	const isMenuItemClickRef = useRef(false);
+	const { eventBus } = useAppContext();
+  const navigate = useNavigate();
+	const pathname = useRouterState({
+    select: (state) => state.location.pathname,
+  })
+
   const [selectedMenu, setSelectedMenu] = useState<MenuItem | null>(() => 
     defaultSelectedMenu ?? getStorageSelectedMenu()
   );
@@ -141,7 +152,6 @@ export function useMenuService(params?: UseMenuServiceParams) {
     defaultOpenKeys ?? calcOpenKeys(defaultSelectedMenu ?? getStorageSelectedMenu(), menus)
   );
   
-  // 使用useMemo确保flatMenus始终与最新的menus保持同步
   const flatMenus = useMemo(() => {
     return flattenMenus(menus);
   }, [menus]);
@@ -340,6 +350,41 @@ export function useMenuService(params?: UseMenuServiceParams) {
 
     return { menus: matchedMenus, expandKeys, searchKeywords };
   };
+	
+
+	const handleMenuItemClick = (menuItem: MenuItem | null) => {
+		if (!menuItem) return;
+		if (menuItem.type === 'dir') {
+			toggleMenuOpen(menuItem.id);
+			return;
+		}
+		if (menuItem.type === 'menu' && menuItem.url) {
+			if (menuItem.openMode === 'newBrowserTab') {
+				window.open(menuItem.url, '_blank');
+			} else {
+				navigate({ to: menuItem.url });
+			}
+			updateSelectedMenu(menuItem);
+			isMenuItemClickRef.current = true;
+			eventBus.emit({
+				type: 'onMenuItemClick',
+				payload: menuItem,
+			});
+		}
+	}
+	useEffect(() => {
+		if (isMenuItemClickRef.current) {
+			isMenuItemClickRef.current = false;
+			return;
+		}
+		const selectedMenu = findMenuByUrl(pathname);
+		queueMicrotask(() => {
+			if (selectedMenu) {
+				updateSelectedMenu(selectedMenu)
+				updateOpenKeysByMenu(selectedMenu)
+			}
+		});
+	}, [pathname])
 
   return {
     menus,
@@ -354,6 +399,7 @@ export function useMenuService(params?: UseMenuServiceParams) {
 		updateOpenKeysByMenu,
 		updateOpenKeys: setOpenKeys,
     searchMenusReturnList,
-    searchMenusReturnTree
+    searchMenusReturnTree,
+		handleMenuItemClick,
   };
 }

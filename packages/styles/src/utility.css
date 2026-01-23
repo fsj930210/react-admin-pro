@@ -5,30 +5,24 @@
 @utility flex-center {
   @apply flex justify-center items-center;
 }
-@utility flex-items-center {
-  @apply flex items-center;
-}
-@utility flex-justify-center {
-  @apply flex justify-center;
+@utility flex-between {
+  @apply flex justify-between;
 }
 @utility flex-col-center {
   @apply flex flex-col justify-center items-center;
 }
-@utility flex-col-items-center {
-  @apply flex flex-col items-center;
-}
-@utility flex-col-justify-center {
-  @apply flex flex-col justify-center;
-}
-@utility flex-between {
-  @apply flex justify-between;
-}
+
 @utility no-scrollbar {
   @apply [-ms-overflow-style:none] [scrollbar-width:none];
 
   &::-webkit-scrollbar {
-    @apply hidden;
+    display: none !important;
+		width: 0 !important;
+		height: 0 !important;
   }
+	&::-webkit-scrollbar-track {
+		display: none !important;
+	}
 }
 
 @utility inline-flex-center {

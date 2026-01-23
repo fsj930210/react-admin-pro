@@ -78,12 +78,12 @@ export function LoginForm({ className, quickLoginStyle = "inline" }: LoginFormPr
 						</FormItem>
 					)}
 				/>
-				<div className="flex-items-center">
+				<div className="flex items-center">
 					<FormField
 						control={form.control}
 						name="remember"
 						render={({ field }) => (
-							<FormItem className="!flex-items-center space-x-1">
+							<FormItem className="!flex items-center space-x-1">
 								<FormControl>
 									<Checkbox
 										checked={!!field.value}

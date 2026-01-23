@@ -1,1 +1,3 @@
-export function ExtendedFeatures() {}
+export function ExtendedFeatures() {
+	return <></>
+}

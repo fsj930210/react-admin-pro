@@ -25,6 +25,10 @@
 		"./fetch": {
 			"types": "./src/fetch.ts",
 			"default": "./src/fetch.ts"
+		},
+		"./storage": {
+			"types": "./src/storage.ts",
+			"default": "./src/storage.ts"
 		}
 	},
 	"devDependencies": {

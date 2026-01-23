@@ -2,18 +2,17 @@ import { cn } from "@rap/utils";
 import { X } from "lucide-react";
 import type { LayoutTabItemProps } from "../../types";
 
-export function CardTabItem({ tab, active, onClose }: LayoutTabItemProps) {
+export function CardTabItem({ tab, active, onClose, onItemClick, index }: LayoutTabItemProps) {
   return (
-    <div className="h-full py-1">
+    <div className="h-full py-0.5" onClick={() => onItemClick?.(tab)} tabIndex={index}>
       <div
         className={cn(
           "relative h-full flex items-center justify-between px-2 cursor-pointer",
           "rounded border border-layout-tabs-border bg-layout-tabs text-layout-tabs-foreground",
-          "transition-all duration-200 ease-in-out",
+          "transition-all duration-200 ease-in-out hover:not-[.active]:bg-layout-tabs-accent",
           {
-            "bg-layout-tabs-primary text-layout-tabs-primary-foreground border-layout-tabs-primary":
+            "bg-layout-tabs-primary text-layout-tabs-primary-foreground active":
               active,
-            "hover:bg-layout-tabs-accent": !active,
           }
         )}
         role="tab"
@@ -29,7 +28,7 @@ export function CardTabItem({ tab, active, onClose }: LayoutTabItemProps) {
           className="flex-center size-5 hover:bg-layout-tabs-close-accent rounded-xs cursor-pointer transition-all duration-200 ease-in-out group-[.active]:opacity-100 group-hover:opacity-100"
           onClick={(e) => {
             e.stopPropagation();
-            onClose?.(tab.key);
+            onClose?.(tab.id);
           }}
           type="button"
         >

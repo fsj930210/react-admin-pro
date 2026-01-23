@@ -8,15 +8,17 @@ import {
 import { ExternalLink, Maximize2, Pin, RefreshCw, X } from "lucide-react";
 import type * as React from "react";
 import { useTabsContextMenu } from "../hooks/use-tabs-context-menu";
-import type { LayoutTabItem, UpdateTabsFunc } from "../types";
+import type { LayoutTabItem } from "../types";
+import { cn } from "@rap/utils";
 
 interface TabsContextMenuProps {
   tab: LayoutTabItem;
   tabs: LayoutTabItem[];
   children: React.ReactNode;
-  activeTab: string;
-  updateTabs: UpdateTabsFunc;
-  setActiveTab: React.Dispatch<React.SetStateAction<string>>;
+  activeTab: LayoutTabItem | null;
+	className?: string;
+  updateTabs: React.Dispatch<React.SetStateAction<LayoutTabItem[]>>;
+  setActiveTab: React.Dispatch<React.SetStateAction<LayoutTabItem | null>>;
 }
 
 export function TabsContextMenu({
@@ -24,6 +26,7 @@ export function TabsContextMenu({
   tabs,
   children,
   activeTab,
+	className,
   updateTabs,
   setActiveTab,
 }: TabsContextMenuProps) {
@@ -44,7 +47,7 @@ export function TabsContextMenu({
   });
 
   // 查找当前tab在数组中的索引
-  const currentIndex = tabs.findIndex((t) => t.key === tab.key);
+  const currentIndex = tabs.findIndex((t) => t.id === tab.id);
 
   // 检查是否有左侧/右侧的tab可以关闭
   const hasTabsToLeft = currentIndex > 0;
@@ -52,7 +55,7 @@ export function TabsContextMenu({
   const hasOtherTabs = tabs.length > 1;
 
   // 检查当前标签页是否为激活状态
-  const isActiveTab = activeTab === tab.key;
+  const isActiveTab = activeTab?.id === tab.id;
 
   // 检查是否可以关闭（只有激活的标签页才能使用关闭左侧/右侧/其他功能）
   const canUseCloseActions = isActiveTab;
@@ -60,11 +63,15 @@ export function TabsContextMenu({
 
   return (
     <ContextMenu>
-      <ContextMenuTrigger className="size-full">{children}</ContextMenuTrigger>
+      <ContextMenuTrigger 
+				className={cn("size-full", className)}
+			>
+				{children}
+			</ContextMenuTrigger>
       <ContextMenuContent className="w-56">
         {/* 关闭当前标签页 */}
         <ContextMenuItem
-          onClick={() => handleCloseTab(tab.key)}
+          onClick={() => handleCloseTab(tab.id)}
           className="flex items-center gap-2"
           disabled={!canCloseCurrent}
         >
@@ -74,7 +81,7 @@ export function TabsContextMenu({
 
         {/* 固定/取消固定标签页 */}
         <ContextMenuItem
-          onClick={() => handlePinTab(tab.key)}
+          onClick={() => handlePinTab(tab.id)}
           className="flex items-center gap-2"
         >
           <Pin className="size-4" />
@@ -86,7 +93,7 @@ export function TabsContextMenu({
 
         {/* 关闭左侧标签页 */}
         <ContextMenuItem
-          onClick={() => handleCloseLeftTabs(tab.key)}
+          onClick={() => handleCloseLeftTabs(tab.id)}
           className="flex items-center gap-2"
           disabled={!canUseCloseActions || !hasTabsToLeft}
         >
@@ -96,7 +103,7 @@ export function TabsContextMenu({
 
         {/* 关闭右侧标签页 */}
         <ContextMenuItem
-          onClick={() => handleCloseRightTabs(tab.key)}
+          onClick={() => handleCloseRightTabs(tab.id)}
           className="flex items-center gap-2"
           disabled={!canUseCloseActions || !hasTabsToRight}
         >
@@ -106,7 +113,7 @@ export function TabsContextMenu({
 
         {/* 关闭其他标签页 */}
         <ContextMenuItem
-          onClick={() => handleCloseOtherTabs(tab.key)}
+          onClick={() => handleCloseOtherTabs(tab.id)}
           className="flex items-center gap-2"
           disabled={!canUseCloseActions || !hasOtherTabs}
         >
@@ -119,7 +126,7 @@ export function TabsContextMenu({
 
         {/* 重新加载 - 只有激活的标签页才能重新加载 */}
         <ContextMenuItem
-          onClick={() => handleReloadTab(tab.key)}
+          onClick={() => handleReloadTab(tab.id)}
           className="flex items-center gap-2"
           disabled={!isActiveTab}
         >
@@ -129,7 +136,7 @@ export function TabsContextMenu({
 
         {/* 最大化 */}
         <ContextMenuItem
-          onClick={() => handleMaximize(tab.key)}
+          onClick={() => handleMaximize(tab.id)}
           className="flex items-center gap-2"
           disabled={!isActiveTab}
         >
@@ -139,7 +146,7 @@ export function TabsContextMenu({
 
         {/* 在新标签页中打开 */}
         <ContextMenuItem
-          onClick={() => handleOpenInNewTab(tab.key)}
+          onClick={() => handleOpenInNewTab(tab.id)}
           className="flex items-center gap-2"
         >
           <ExternalLink className="size-4" />

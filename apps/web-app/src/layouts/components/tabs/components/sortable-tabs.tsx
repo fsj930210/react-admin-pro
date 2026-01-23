@@ -1,94 +1,139 @@
+import React from 'react';
 import {
-  Sortable,
-  SortableContent,
-  SortableItem,
-  SortableOverlay,
-} from "@rap/components-base/sortable";
-import { cn } from "@rap/utils";
-import type { Dispatch, ReactNode, SetStateAction } from "react";
-import type { LayoutTabItem, TabType } from "../types";
+  DndContext,
+  PointerSensor,
+  closestCenter,
+  useSensor,
+  type DragEndEvent,
+} from '@dnd-kit/core';
+import { restrictToHorizontalAxis } from '@dnd-kit/modifiers';
+import {
+  arrayMove,
+  horizontalListSortingStrategy,
+  SortableContext,
+  useSortable,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
+import { cn } from '@rap/utils';
+import type { Dispatch, ReactNode, SetStateAction } from 'react';
+import type { LayoutTabItem, TabType } from '../types';
 
-interface SortableTabsProps {
+interface SortableItemProps extends React.HTMLAttributes<HTMLDivElement> {
+  'data-tab-key': string;
+}
+
+
+const SortableItem = ({ children, ...props }: SortableItemProps) => {
+  const { attributes, listeners, setNodeRef, transform, transition } = useSortable({
+    id: props['data-tab-key'],
+  });
+
+  const style: React.CSSProperties = {
+    ...props.style,
+    transform: CSS.Translate.toString(transform),
+    transition,
+    cursor: 'grab',
+  };
+
+  // eslint-disable-next-line @eslint-react/no-clone-element
+  return React.cloneElement(
+    children as React.ReactElement<any>,
+    {
+      ref: setNodeRef,
+      style: { ...(children as React.ReactElement<any>)?.props?.style, ...style },
+      ...attributes,
+      ...listeners,
+    }
+  );
+};
+
+interface CustomSortableTabsProps {
   tabs: LayoutTabItem[];
-  setTabs: Dispatch<SetStateAction<LayoutTabItem[]>>;
-  children: (item: LayoutTabItem) => ReactNode;
-  activeTab: string;
+  activeTab: LayoutTabItem | null;
   tabType: TabType;
+  setTabs: Dispatch<SetStateAction<LayoutTabItem[]>>;
+  children: (item: LayoutTabItem, index: number) => ReactNode;
 }
 
 export function SortableTabs({
   tabs,
-  setTabs,
-  children,
   activeTab,
   tabType,
-}: SortableTabsProps) {
-  const handleTabsSort = (newTabs: LayoutTabItem[]) => {
-    // 将固定标签页始终放在前面
-    const pinnedTabs = newTabs.filter((tab) => tab.pinned);
-    const nonPinnedTabs = newTabs.filter((tab) => !tab.pinned);
-    const sortedTabs = [...pinnedTabs, ...nonPinnedTabs];
-    setTabs(sortedTabs);
+  setTabs,
+  children,
+}: CustomSortableTabsProps) {
+  const sensor = useSensor(PointerSensor, {
+    activationConstraint: { distance: 10 },
+  });
+
+  const onDragEnd = ({ active, over }: DragEndEvent) => {
+    if (over && active.id !== over.id) {
+      setTabs((prevTabs) => {
+        const activeIndex = prevTabs.findIndex((tab) => tab.id === active.id);
+        const overIndex = prevTabs.findIndex((tab) => tab.id === over?.id);
+        return arrayMove(prevTabs, activeIndex, overIndex);
+      });
+    }
   };
+
+  const itemIds = tabs.map((tab) => tab.id);
+
   return (
-    <Sortable
-      value={tabs}
-      onValueChange={handleTabsSort}
-      orientation="horizontal"
-      getItemValue={(item) => item.key}
+    <DndContext
+      sensors={[sensor]}
+      onDragEnd={onDragEnd}
+      collisionDetection={closestCenter}
+      modifiers={[restrictToHorizontalAxis]}
     >
-      <SortableContent
-        className={cn("size-full flex-items-center ", {
-          "gap-2": tabType === "card",
-        })}
+      <SortableContext
+        items={itemIds}
+        strategy={horizontalListSortingStrategy}
       >
-        {tabs.map((item, index) =>
-          item.pinned ? (
-            <div
-              key={item.key}
-              data-tab-key={item.key}
-              className={cn(
-                "group layout-tabs-tab-item flex-items-center size-full",
-                {
-                  active: activeTab === item.key,
-                  [`layout-tabs-${tabType}-tab-item`]: true,
-                }
-              )}
-              role="tab"
-              tabIndex={index}
-            >
-              {children(item)}
-            </div>
-          ) : (
-            <SortableItem
-              key={item.key}
-              value={item.key}
-              className={cn(
-                "group layout-tabs-tab-item flex-items-center size-full",
-                {
-                  active: activeTab === item.key,
-                  [`layout-tabs-${tabType}-tab-item`]: true,
-                }
-              )}
-              data-tab-key={item.key}
-              role="tab"
-              tabIndex={index}
-              asHandle
-            >
-              {children(item)}
-            </SortableItem>
-          )
-        )}
-      </SortableContent>
-      <SortableOverlay>
-        {(activeItem) => {
-          const item = tabs.find((tabItem) => tabItem.key === activeItem.value);
-
-          if (!item) return null;
-
-          return children(item);
-        }}
-      </SortableOverlay>
-    </Sortable>
+        <div
+          className={cn("size-full flex items-center ", {
+            "gap-2": tabType === "card",
+          })}
+        >
+          {tabs.map((item, index) =>
+            item.pinned ? (
+              <div
+                key={item.id}
+                data-tab-key={item.id}
+                className={cn(
+                  "group relative layout-tabs-tab-item flex items-center h-full w-fit max-w-45",
+                  {
+                    active: activeTab?.id === item.id,
+                    [`layout-tabs-${tabType}-tab-item`]: true,
+                  }
+                )}
+                role="tab"
+                tabIndex={index}
+              >
+                {children(item, index)}
+              </div>
+            ) : (
+              <SortableItem
+                key={item.id}
+                data-tab-key={item.id}
+              >
+                <div
+                  className={cn(
+                    "group relative layout-tabs-tab-item flex items-center h-full w-fit max-w-45",
+                    {
+                      active: activeTab?.id === item.id,
+                      [`layout-tabs-${tabType}-tab-item`]: true,
+                    }
+                  )}
+                  role="tab"
+                  tabIndex={index}
+                >
+                  {children(item, index)}
+                </div>
+              </SortableItem>
+            )
+          )}
+        </div>
+      </SortableContext>
+    </DndContext>
   );
 }

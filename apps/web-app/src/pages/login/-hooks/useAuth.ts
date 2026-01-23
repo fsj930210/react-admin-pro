@@ -1,12 +1,12 @@
 import { useMutation } from '@tanstack/react-query';
 import { login, logout, fetchUserInfo } from '@/service/auth';
-import { useRouter } from '@tanstack/react-router';
+import { useNavigate } from '@tanstack/react-router';
 import { toast } from 'sonner';
 import { useUserSelector } from '@/store/user';
 import type { ILoginRequestData} from '@/service/auth';
 
 export function useAuth() {
-  const router = useRouter();
+  const navigate = useNavigate();
   const { setUserInfo } = useUserSelector(['setUserInfo']);
 
   const loginMutation = useMutation({
@@ -19,7 +19,7 @@ export function useAuth() {
         localStorage.setItem('token', data.token);
         toast.success('Login success');
         getUserInfoMutation.mutate();
-        router.navigate({ to: '/dashboard', replace: true });
+        navigate({ to: '/dashboard', replace: true });
       }
     },
     onError: (error: Error) => {
@@ -44,10 +44,6 @@ export function useAuth() {
         return res;
       } catch (error) {
         console.error('Failed to fetch user info:', error);
-        // 如果获取用户信息失败且是401错误，自动登出
-        // if (error instanceof Error && error.message.includes('401')) {
-        //   logout();
-        // }
         throw error;
       }
     },
@@ -70,15 +66,13 @@ export function useAuth() {
       });
       toast.success('Logout success');
 			localStorage.removeItem('token');
-      router.navigate({ to: '/login', replace: true });
+      navigate({ to: '/login', replace: true });
     },
     onError: (error: Error) => {
       console.error('Logout error:', error);
       toast.error('Logout failed');
     },
   });
-
-
 
   return {
     loginMutation,

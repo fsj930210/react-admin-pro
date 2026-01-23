@@ -17,7 +17,7 @@ const Logo = ({
   onClick,
 }: LogoProps) => {
   return (
-    <div className={cn("flex-items-center gap-2", className)} onClick={onClick}>
+    <div className={cn("flex items-center gap-2", className)} onClick={onClick}>
       <img
         src={url ?? '/logo.svg'}
         alt="logo"

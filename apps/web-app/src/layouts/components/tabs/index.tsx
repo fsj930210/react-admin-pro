@@ -12,14 +12,11 @@ import { useTabs } from "./hooks/use-tabs";
 import { useTabsScroll } from "./hooks/use-tabs-scroll";
 import type { LayoutTabItem, TabType } from "./types";
 
-export type LayoutTabsProps = {
+export interface LayoutTabsProps {
   sortable?: boolean;
-  activeTab?: string;
-  defaultActiveTab?: string;
   tabType?: TabType;
 };
 
-// Tab Item 渲染策略对象
 const TabItemStrategies = {
   chrome: ChromeLikeTabItem,
   classic: ClassicTabItem,
@@ -30,17 +27,16 @@ const TabItemStrategies = {
 
 export function LayoutTabs({
   sortable = true,
-  tabType = "card",
-  defaultActiveTab,
+  tabType = "chrome",
 }: LayoutTabsProps) {
   const {
-    tabs,
+		tabs,
     activeTab,
-    updateTabs,
+    setTabs,
     handleTabItemClick,
     setActiveTab,
     handleCloseTab,
-  } = useTabs(defaultActiveTab);
+  } = useTabs();
 
   const {
     containerRef,
@@ -55,32 +51,18 @@ export function LayoutTabs({
     scrollToTab,
   } = useTabsScroll();
 
-  // 添加一个 setter 函数用于 SortableTabs
-  const setTabs = (
-    newTabs: LayoutTabItem[] | ((prev: LayoutTabItem[]) => LayoutTabItem[])
-  ) => {
-    if (typeof newTabs === "function") {
-      updateTabs(newTabs);
-    } else {
-      updateTabs(() => newTabs);
-    }
-  };
-
-  // 处理tab点击（结合滚动）
   const handleTabClick = (item: LayoutTabItem) => {
     handleTabItemClick(item);
-    scrollToTab(item.key);
+    scrollToTab(item.id);
   };
 
-  // 获取当前tab类型的组件
-  const TabItemComponent =
-    TabItemStrategies[tabType] || TabItemStrategies.chrome;
+  const TabItemComponent = TabItemStrategies[tabType] || TabItemStrategies.chrome;
 
   return (
     <div
-      className={cn("relative flex h-9 bg-layout-tabs", {
-        'border-b-layout-tabs-border border-b': tabType === 'card' || tabType === 'classic',
-      })}
+      className={cn("relative flex h-full", {
+				"border-b border-solid border-layout-tabs-border": tabType !== "chrome" && tabType !== "trapezoid",
+			})}
     >
       <ScrollButton
         canScroll={canScrollLeft}
@@ -91,7 +73,9 @@ export function LayoutTabs({
       </ScrollButton>
       <div
         ref={containerRef}
-        className="size-full px-2 overflow-x-auto whitespace-nowrap no-scrollbar touch-action-pan-x"
+        className={cn("size-full overflow-x-auto whitespace-nowrap no-scrollbar touch-action-pan-x", {
+          "px-2": tabType === "card",
+        })}
         style={{ touchAction: "pan-x" }}
         onWheel={handleWheel}
         onScroll={handleScroll}
@@ -99,70 +83,66 @@ export function LayoutTabs({
         onTouchMove={handleTouchMove}
       >
         {sortable ? (
-          <div className="inline-flex items-center h-full">
-            <SortableTabs
-              tabs={tabs}
-              setTabs={setTabs}
-              activeTab={activeTab}
-              tabType={tabType}
-            >
-              {(item) => (
-                <TabsContextMenu
-                  key={item.key}
-                  tab={item}
-                  tabs={tabs}
-                  updateTabs={updateTabs}
-                  activeTab={activeTab}
-                  setActiveTab={setActiveTab}
-                >
-                  <TabItemComponent
-                    tab={item}
-                    active={activeTab === item.key}
-                    onClose={handleCloseTab}
-                  />
-                </TabsContextMenu>
-              )}
-            </SortableTabs>
-          </div>
+					<SortableTabs
+						tabs={tabs}
+						setTabs={setTabs}
+						activeTab={activeTab}
+						tabType={tabType}
+					>
+						{(item, index) => (
+							<TabsContextMenu
+								key={item.id}
+								tab={item}
+								tabs={tabs}
+								updateTabs={setTabs}
+								activeTab={activeTab}
+								setActiveTab={setActiveTab}
+							>
+								<TabItemComponent
+									tab={item}
+									active={activeTab?.id === item.id}
+									onClose={handleCloseTab}
+									onItemClick={handleTabClick}
+									index={index}
+								/>
+							</TabsContextMenu>
+						)}
+					</SortableTabs>
         ) : (
           <div
-            className={cn("inline-flex items-center h-full", {
+            className={cn("size-full flex items-center", {
               "gap-2": tabType === "card",
             })}
           >
             {tabs.map((item, index) => (
-              <TabsContextMenu
-                key={item.key}
-                tab={item}
-                tabs={tabs}
-                updateTabs={updateTabs}
-                activeTab={activeTab}
-                setActiveTab={setActiveTab}
-              >
-                <div
-                  key={item.key}
-                  data-tab-key={item.key}
-                  className={cn("group flex-items-center size-full", {
-                    active: activeTab === item.key,
-                    [`layout-tabs-${tabType}-tab-item`]: true,
-                  })}
-                  onClick={() => handleTabClick(item)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" || e.key === " ") {
-                      e.preventDefault();
-                      handleTabClick(item);
-                    }
-                  }}
-                  role="tab"
-                  tabIndex={index}
-                >
-                  <TabItemComponent
-                    tab={item}
-                    active={activeTab === item.key}
-                    onClose={handleCloseTab}
-                  />
-                </div>
-              </TabsContextMenu>
+							<div
+								key={item.id}
+								data-tab-key={item.id}
+								className={cn("group relative flex items-center h-full w-fit max-w-45", {
+									active: activeTab?.id === item.id,
+									[`layout-tabs-${tabType}-tab-item`]: true,
+								})}
+								role="tab"
+								tabIndex={index}
+							>
+								<TabsContextMenu
+									key={item.id}
+									tab={item}
+									tabs={tabs}
+									updateTabs={setTabs}
+									activeTab={activeTab}
+									setActiveTab={setActiveTab}
+									className="w-fit max-w-45"
+								>
+									<TabItemComponent
+										tab={item}
+										active={activeTab?.id === item.id}
+										onClose={handleCloseTab}
+										onItemClick={handleTabClick}
+										index={index}
+									/>
+								</TabsContextMenu>
+							</div>
             ))}
           </div>
         )}
@@ -177,8 +157,4 @@ export function LayoutTabs({
     </div>
   );
 }
-
-export type { useTabs as UseTabsReturn } from "./hooks/use-tabs";
-// 导出额外的功能供外部使用
-export { useTabs } from "./hooks/use-tabs";
 

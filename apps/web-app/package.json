@@ -50,6 +50,10 @@
 	},
 	"dependencies": {
 		"@bprogress/core": "catalog:",
+		"@dnd-kit/core": "catalog:",
+		"@dnd-kit/modifiers": "catalog:",
+		"@dnd-kit/sortable": "catalog:",
+		"@dnd-kit/utilities": "catalog:",
 		"@hookform/resolvers": "catalog:",
 		"@rap/components-base": "workspace:*",
 		"@rap/components-ui": "workspace:*",

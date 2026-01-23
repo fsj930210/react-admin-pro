@@ -6,27 +6,29 @@ import {
   BreadcrumbPage,
 } from "@rap/components-base/breadcrumb";
 import { cn } from "@rap/utils";
+import type { BreadcrumbItemProps } from "../types";
 
-export function RibbonBreadcrumb({ list }: { list: { label: string; href: string }[] }) {
+
+export function RibbonBreadcrumb({ data, onBreadcrumbItemClick }: BreadcrumbItemProps) {
   return (
     <BreadcrumbBase className="p-1">
-      <BreadcrumbList className="w-[max-content] flex-items-center border border-layout-breadcrumb-border rounded-sm overflow-hidden">
+      <BreadcrumbList className="w-max flex items-center border border-layout-breadcrumb-border rounded-sm overflow-hidden">
         {
-          list.map((item, index) => (
-            <BreadcrumbItem key={item.href}>
+          data.map((item, index) => (
+            <BreadcrumbItem key={item.id}>
               {
-                index === list.length - 1 ? (
+                index === data.length - 1 ? (
                   <BreadcrumbPage className="inline-flex items-center gap-0.5 px-4 py-0.5 text-sm leading-[1.75] bg-layout-breadcrumb hover:bg-layout-breadcrumb-accent transition-all duration-300 ribbon-breadcrumb-last">
-                    {item.label}
+                    {item.title}
                   </BreadcrumbPage>
                 ) : (
                   <BreadcrumbLink
-                    className={cn('inline-flex items-center gap-0.5 px-4 py-0.5 mr-[calc(-1*10px+-8px)] text-sm leading-[1.75] bg-layout-breadcrumb hover:bg-layout-breadcrumb-accent transition-all duration-300 ribbon-breadcrumb', {
+                    className={cn('inline-flex items-center gap-0.5 px-4 py-0.5 mr-[calc(-1*10px+-8px)] text-sm leading-[1.75] bg-layout-breadcrumb hover:bg-layout-breadcrumb-accent transition-all duration-300 ribbon-breadcrumb cursor-pointer', {
                       'ribbon-breadcrumb-first': index === 0,
                     })}
-                    href={item.href}
+                    asChild
                   >
-                    {item.label}
+                    <span onClick={() => onBreadcrumbItemClick?.(item)}>{item.title}</span> 
                   </BreadcrumbLink>
                 )
               }

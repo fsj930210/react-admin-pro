@@ -453,13 +453,28 @@ const SortableItem = React.forwardRef<HTMLDivElement, SortableItemProps>(
 					data-slot="sortable-item"
 					{...itemProps}
 					{...(asHandle && !disabled ? attributes : {})}
-					{...(asHandle && !disabled ? listeners : {})}
+					{...(asHandle && !disabled ? {
+						...listeners,
+						onClick: (e) => {
+							// 先调用原始的 onClick 回调
+							itemProps.onClick?.(e);
+							// 再调用 DnD Kit 的 onClick 处理
+							listeners?.onClick?.(e);
+						},
+						// 确保鼠标按下事件不会阻止点击事件
+						onMouseDown: (e) => {
+							listeners?.onMouseDown?.(e);
+						},
+						// 确保触摸事件不会阻止点击事件
+						onTouchStart: (e) => {
+							listeners?.onTouchStart?.(e);
+						}
+					} : listeners)}
 					ref={composedRef}
 					style={composedStyle}
 					className={cn(
 						"focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-1",
 						{
-							"touch-none select-none": asHandle,
 							"cursor-default": context.flatCursor,
 							"data-dragging:cursor-grabbing": !context.flatCursor,
 							"cursor-grab": !isDragging && asHandle && !context.flatCursor,

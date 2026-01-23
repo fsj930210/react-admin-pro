@@ -1,29 +1,28 @@
 
-// import { RibbonBreadcrumb } from "./ribbon-breadcrumb";
-import { ParallelogramBreadcrumb } from "./parallelogram-breadcrumb";
-// import { CapsuleBreadcrumb } from "./capsule-breadcrumb";
-// import { ClassicBreadcrumb } from "./classic-breadcrumb";
-const breadcrumbList = [
-  {
-    label: '首页',
-    href: '/',
-  },
-  {
-    label: '概览',
-    href: '/overview',
-  },
-  {
-    label: 'Echarts高级图表',
-    href: '/echarts',
-  },
-  {
-    label: '设置',
-    href: '/settings',
-  },
-]
+import { RibbonBreadcrumb } from "./components/ribbon-breadcrumb";
+import { ParallelogramBreadcrumb } from "./components/parallelogram-breadcrumb";
+import { useBreadcrumb } from "./use-breadcrumb";
+import { CapsuleBreadcrumb } from "./components/capsule-breadcrumb";
+import { ClassicBreadcrumb } from "./components/classic-breadcrumb";
+import type { BreadcrumbMode, BreadcrumbType } from "./types";
 
-export function Breadcrumb() {
+
+interface BreadcrumbProps {
+	type?: BreadcrumbType;
+	mode?: BreadcrumbMode;
+}
+
+const BreadcrumbItemStrategies = {
+	parallelogram: ParallelogramBreadcrumb,
+	capsule: CapsuleBreadcrumb,
+	classic: ClassicBreadcrumb,
+	ribbon: RibbonBreadcrumb,
+};
+
+export function Breadcrumb({ type = 'capsule', mode = 'menu' }: BreadcrumbProps) {
+	const { breadcrumbList, handleBreadcrumbItemClick } = useBreadcrumb();
+	const BreadcrumbComponent = BreadcrumbItemStrategies[type];
   return (
-    <ParallelogramBreadcrumb list={breadcrumbList} />
+    <BreadcrumbComponent data={breadcrumbList} mode={mode} onBreadcrumbItemClick={handleBreadcrumbItemClick} />
   )
 }

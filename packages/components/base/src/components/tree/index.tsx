@@ -112,7 +112,7 @@ function TreeItem({
       data-key={item.key}
       style={mergedStyle}
       className={cn(
-        "flex-items-center z-10 ps-(--tree-padding) outline-hidden select-none not-last:pb-0.5 focus:z-20 data-disabled:pointer-events-none data-disabled:opacity-50",
+        "flex items-center z-10 ps-(--tree-padding) outline-hidden select-none not-last:pb-0.5 focus:z-20 data-disabled:pointer-events-none data-disabled:opacity-50",
         className
       )}
       data-leaf={item.isLeaf || false}

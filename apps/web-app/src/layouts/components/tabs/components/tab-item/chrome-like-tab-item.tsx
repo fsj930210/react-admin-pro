@@ -50,11 +50,15 @@ export function ChromeLikeTabItem({
   tab,
   active,
   onClose,
+	onItemClick,
+	index,
   ...props
 }: LayoutTabItemProps & React.HTMLAttributes<HTMLDivElement>) {
   return (
     <div
       className={cn("relative size-full min-w-30 max-w-38 py-1 cursor-pointer")}
+			onClick={() => onItemClick?.(tab)}
+			tabIndex={index}
       {...props}
     >
       <div
@@ -69,7 +73,7 @@ export function ChromeLikeTabItem({
         <ChromeTabBackground />
       </div>
       <div className="absolute top-0 bottom-0 left-0 right-0 p-1">
-        <div className="flex-items-center h-full px-1 text-layout-tabs-foreground hover:text-layout-tabs-primary-foreground hover:bg-layout-tabs-accent group-[.active]:text-layout-tabs-primary-foreground group-[.active]:hover:text-layout-tabs-primary-foreground group-[.active]:hover:bg-layout-tabs-primary leading-none overflow-hidden rounded-md">
+        <div className="flex items-center h-full px-1 text-layout-tabs-foreground hover:text-layout-tabs-primary-foreground hover:bg-layout-tabs-accent group-[.active]:text-layout-tabs-primary-foreground group-[.active]:hover:text-layout-tabs-primary-foreground group-[.active]:hover:bg-layout-tabs-primary leading-none overflow-hidden rounded-md">
           <span className="flex-1 truncate text-sm" title={tab.title || ""}>
             {tab.title}
           </span>
@@ -78,7 +82,7 @@ export function ChromeLikeTabItem({
               className="flex-center size-4 hover:bg-layout-tabs-close-accent rounded-full cursor-pointer transition-all duration-20"
               onClick={(e) => {
                 e.stopPropagation();
-                onClose(tab.key);
+                onClose(tab.id);
               }}
               type="button"
             >

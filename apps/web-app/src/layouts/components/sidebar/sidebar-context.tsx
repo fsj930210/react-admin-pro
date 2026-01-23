@@ -1,5 +1,5 @@
-import { createContext, use, useEffect, type ReactNode } from 'react';
-import { useLocation } from '@tanstack/react-router';
+import { createContext, use, type ReactNode } from 'react';
+
 import { useMenuService, type MenuItem } from '../../hooks/useMenuService';
 
 export interface SidebarContextValue {
@@ -17,6 +17,7 @@ export interface SidebarContextValue {
 	updateOpenKeysByMenu: (selectedMenu: MenuItem | null) => void;
 	searchMenusReturnList: (keyword: string) => { menus: MenuItem[]; searchKeywords: string[] };
 	searchMenusReturnTree: (keyword: string) => { menus: MenuItem[]; expandKeys: string[], searchKeywords: string[] };
+	handleMenuItemClick: (item: MenuItem | null) => void;
 }
 
 const SidebarContext = createContext<SidebarContextValue | undefined>(undefined);
@@ -40,21 +41,8 @@ export function LayoutSidebarProvider({ children, menus = [] }: SidebarProviderP
 		updateOpenKeysByMenu,
 		searchMenusReturnList,
 		searchMenusReturnTree,
+		handleMenuItemClick,
 	} = useMenuService({ menus });
-	
-
-	const pathname = useLocation({
-		select: (location) => location.pathname,
-	});
-
-	
-	useEffect(() => {
-		const menu = findMenuByUrl(pathname);
-		if (menu) {
-			updateSelectedMenu(menu);
-			updateOpenKeysByMenu(menu);
-		}
-	}, [menus]);
 	
 	const contextValue: SidebarContextValue = {
 		menus,
@@ -70,6 +58,7 @@ export function LayoutSidebarProvider({ children, menus = [] }: SidebarProviderP
 		updateOpenKeysByMenu,
 		searchMenusReturnList,
 		searchMenusReturnTree,
+		handleMenuItemClick,
 	};
 
 	return (
@@ -82,7 +71,7 @@ export function LayoutSidebarProvider({ children, menus = [] }: SidebarProviderP
 export function useLayoutSidebar() {
 	const context = use(SidebarContext);
 	if (context === undefined) {
-		throw new Error('useSidebar must be used within a SidebarProvider');
+		throw new Error('useLayoutSidebar must be used within a LayoutSidebarProvider');
 	}
 	return context;
 }

@@ -3,6 +3,7 @@ import { APP_BASE_PATH } from "@/config";
 import "@rap/styles/globals.css";
 import ReactDOM from "react-dom/client";
 import App from "./App";
+import './styles/global.css'
 
  const getHandelers = () => {
 	const modules = (() => {

@@ -3,6 +3,7 @@ import { ChevronRight } from "lucide-react";
 import type { MenuItem } from "@/layouts/hooks/useMenuService";
 import { SidebarBadge } from "./sidebar-badge";
 import { SidebarHighlightText } from "./sidebar-highlight-text";
+import { useLayoutSidebar } from "./sidebar-context";
 
 interface SidebarMenuContentProps {
   item: MenuItem;
@@ -12,7 +13,7 @@ interface SidebarMenuContentProps {
   isSubItem?: boolean;
   level?: number;
 	searchKeywords?: string[];
-  onMenuItemClick: (item: MenuItem | null) => void;
+
 }
 
 export function SidebarContent({ 
@@ -23,8 +24,8 @@ export function SidebarContent({
   isSubItem = false,
   level = 0,
 	searchKeywords = [],
-  onMenuItemClick,
 }: SidebarMenuContentProps) {
+	const { handleMenuItemClick } = useLayoutSidebar();
   const ButtonComponent = isSubItem ? SidebarMenuSubButton : SidebarMenuButton;
   const title = (
     <SidebarHighlightText
@@ -37,8 +38,8 @@ export function SidebarContent({
     <ButtonComponent
       isActive={isActive}
       tooltip={isSubItem ? undefined : item.title}
-      className="cursor-pointer flex-items-center whitespace-nowrap"
-      onClick={() => onMenuItemClick(item)}
+      className="cursor-pointer flex items-center whitespace-nowrap"
+      onClick={() => handleMenuItemClick?.(item)}
 			style={{
 				paddingLeft: `calc(var(--spacing) * 4 + var(--spacing) * 4 * ${level})`,
 			}}

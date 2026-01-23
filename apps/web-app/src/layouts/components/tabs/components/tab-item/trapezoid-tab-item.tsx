@@ -2,9 +2,9 @@ import { cn } from "@rap/utils";
 import { X } from "lucide-react";
 import type { LayoutTabItemProps } from "../../types";
 
-export function TrapezoidTabItem({ tab, active }: LayoutTabItemProps) {
+export function TrapezoidTabItem({ tab, active,index, onItemClick, onClose }: LayoutTabItemProps) {
   return (
-    <div className="h-full pt-2">
+    <div className="h-full pt-2" onClick={() => onItemClick?.(tab)} tabIndex={index}>
       <div
         className={cn(
           "relative flex-center h-full w-40 hover:not-[.active]:after:border-b-layout-tabs-accent",
@@ -23,7 +23,13 @@ export function TrapezoidTabItem({ tab, active }: LayoutTabItemProps) {
         >
           {tab.title}
         </span>
-        <div className="relative flex-center size-4 z-2 opacity-0 hover:bg-layout-tabs-close-accent rounded-full cursor-pointer transition-all duration-200 esae-in-out group-hover:opacity-100">
+        <div 
+					className="relative flex-center size-4 z-2 opacity-0 hover:bg-layout-tabs-close-accent rounded-full cursor-pointer transition-all duration-200 ease-in-out group-hover:opacity-100"
+					onClick={(e) => {
+						e.stopPropagation();
+						onClose?.(tab.id);
+					}}
+				>
           <X className="size-3.5" />
         </div>
       </div>

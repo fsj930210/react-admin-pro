@@ -33,7 +33,7 @@ export function ScrollButton({
       onClick={scroll}
       disabled={!canScroll}
       className={cn(
-        "h-full px-2 flex-items-center bg-layout-tabs/90 hover:bg-layout-tabs transition-all duration-200",
+        "h-full px-2 flex items-center bg-layout-tabs/90 hover:bg-layout-tabs transition-all duration-200",
         {
           "opacity-50 cursor-not-allowed": !canScroll,
           // "shadow-md hover:shadow-lg": canScroll, // 只有可滚动时才有阴影

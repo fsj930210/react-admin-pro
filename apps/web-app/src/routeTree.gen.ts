@@ -82,15 +82,15 @@ const layoutsComponentsTreeIndexRoute =
 
 export interface FileRoutesByFullPath {
   "/": typeof IndexRoute;
-  "/login": typeof LoginIndexRoute;
-  "/components": typeof layoutsComponentsIndexRoute;
-  "/dashboard": typeof layoutsDashboardIndexRoute;
-  "/features": typeof layoutsFeaturesIndexRoute;
-  "/overview": typeof layoutsOverviewIndexRoute;
-  "/components/tree": typeof layoutsComponentsTreeIndexRoute;
-  "/features/move": typeof layoutsFeaturesMoveIndexRoute;
-  "/features/panel-controls": typeof layoutsFeaturesPanelControlsIndexRoute;
-  "/features/resize": typeof layoutsFeaturesResizeIndexRoute;
+  "/login/": typeof LoginIndexRoute;
+  "/components/": typeof layoutsComponentsIndexRoute;
+  "/dashboard/": typeof layoutsDashboardIndexRoute;
+  "/features/": typeof layoutsFeaturesIndexRoute;
+  "/overview/": typeof layoutsOverviewIndexRoute;
+  "/components/tree/": typeof layoutsComponentsTreeIndexRoute;
+  "/features/move/": typeof layoutsFeaturesMoveIndexRoute;
+  "/features/panel-controls/": typeof layoutsFeaturesPanelControlsIndexRoute;
+  "/features/resize/": typeof layoutsFeaturesResizeIndexRoute;
 }
 export interface FileRoutesByTo {
   "/": typeof IndexRoute;
@@ -122,15 +122,15 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath;
   fullPaths:
     | "/"
-    | "/login"
-    | "/components"
-    | "/dashboard"
-    | "/features"
-    | "/overview"
-    | "/components/tree"
-    | "/features/move"
-    | "/features/panel-controls"
-    | "/features/resize";
+    | "/login/"
+    | "/components/"
+    | "/dashboard/"
+    | "/features/"
+    | "/overview/"
+    | "/components/tree/"
+    | "/features/move/"
+    | "/features/panel-controls/"
+    | "/features/resize/";
   fileRoutesByTo: FileRoutesByTo;
   to:
     | "/"
@@ -183,63 +183,63 @@ declare module "@tanstack/react-router" {
     "/login/": {
       id: "/login/";
       path: "/login";
-      fullPath: "/login";
+      fullPath: "/login/";
       preLoaderRoute: typeof LoginIndexRouteImport;
       parentRoute: typeof rootRouteImport;
     };
     "/(layouts)/overview/": {
       id: "/(layouts)/overview/";
       path: "/overview";
-      fullPath: "/overview";
+      fullPath: "/overview/";
       preLoaderRoute: typeof layoutsOverviewIndexRouteImport;
       parentRoute: typeof layoutsRouteRoute;
     };
     "/(layouts)/features/": {
       id: "/(layouts)/features/";
       path: "/features";
-      fullPath: "/features";
+      fullPath: "/features/";
       preLoaderRoute: typeof layoutsFeaturesIndexRouteImport;
       parentRoute: typeof layoutsRouteRoute;
     };
     "/(layouts)/dashboard/": {
       id: "/(layouts)/dashboard/";
       path: "/dashboard";
-      fullPath: "/dashboard";
+      fullPath: "/dashboard/";
       preLoaderRoute: typeof layoutsDashboardIndexRouteImport;
       parentRoute: typeof layoutsRouteRoute;
     };
     "/(layouts)/components/": {
       id: "/(layouts)/components/";
       path: "/components";
-      fullPath: "/components";
+      fullPath: "/components/";
       preLoaderRoute: typeof layoutsComponentsIndexRouteImport;
       parentRoute: typeof layoutsRouteRoute;
     };
     "/(layouts)/features/resize/": {
       id: "/(layouts)/features/resize/";
       path: "/features/resize";
-      fullPath: "/features/resize";
+      fullPath: "/features/resize/";
       preLoaderRoute: typeof layoutsFeaturesResizeIndexRouteImport;
       parentRoute: typeof layoutsRouteRoute;
     };
     "/(layouts)/features/panel-controls/": {
       id: "/(layouts)/features/panel-controls/";
       path: "/features/panel-controls";
-      fullPath: "/features/panel-controls";
+      fullPath: "/features/panel-controls/";
       preLoaderRoute: typeof layoutsFeaturesPanelControlsIndexRouteImport;
       parentRoute: typeof layoutsRouteRoute;
     };
     "/(layouts)/features/move/": {
       id: "/(layouts)/features/move/";
       path: "/features/move";
-      fullPath: "/features/move";
+      fullPath: "/features/move/";
       preLoaderRoute: typeof layoutsFeaturesMoveIndexRouteImport;
       parentRoute: typeof layoutsRouteRoute;
     };
     "/(layouts)/components/tree/": {
       id: "/(layouts)/components/tree/";
       path: "/components/tree";
-      fullPath: "/components/tree";
+      fullPath: "/components/tree/";
       preLoaderRoute: typeof layoutsComponentsTreeIndexRouteImport;
       parentRoute: typeof layoutsRouteRoute;
     };
