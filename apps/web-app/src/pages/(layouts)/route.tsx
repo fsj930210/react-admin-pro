@@ -7,10 +7,10 @@ import { useAuth } from "../login/-hooks/useAuth";
 import { useMount } from "ahooks";
 import { SidebarFooter } from "@/layouts/components/sidebar/sidebar-footer";
 import { SidebarHeader } from "@/layouts/components/sidebar/sidebar-header";
-import { SidebarSkeleton } from "@/layouts/components/skeleton/sidebar-skeleton";
-import { TabsSkeleton } from "@/layouts/components/skeleton/tabs-skeleton";
-import { BreadcrumbSkeleton } from "@/layouts/components/skeleton/breadcrumb-skeleton";
-import { ContentSkeleton } from "@/layouts/components/skeleton/content-skeleton";
+import { SidebarSkeleton } from "@/layouts/components/shared/skeleton/sidebar-skeleton";
+import { TabsSkeleton } from "@/layouts/components/shared/skeleton/tabs-skeleton";
+import { BreadcrumbSkeleton } from "@/layouts/components/shared/skeleton/breadcrumb-skeleton";
+import { ContentSkeleton } from "@/layouts/components/shared/skeleton/content-skeleton";
 
 export const Route = createFileRoute("/(layouts)")({
 	component: Layout,
