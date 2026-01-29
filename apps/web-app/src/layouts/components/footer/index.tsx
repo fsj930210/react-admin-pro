@@ -1,6 +1,6 @@
 export function Footer() {
   return (
-    <footer className="text-center bg-transparent w-full c-[var(--ant-color-text-secondary)] p-4">
+    <footer className="w-full p-4 text-center text-secondary-foreground bg-transparent">
       ©{new Date().getFullYear()} React Admin Pro
     </footer>
   );

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import type { BreadcrumbItem } from "./types";
 import { useNavigate, useRouterState } from "@tanstack/react-router";
-import { useLayoutSidebar } from "../sidebar/sidebar-context";
+import { useLayout } from "@/layouts/context/layout-context";
 
 
 function findFirstMenuInternal(menuItem: BreadcrumbItem): BreadcrumbItem | null {
@@ -22,7 +22,7 @@ function findFirstMenuInternal(menuItem: BreadcrumbItem): BreadcrumbItem | null 
 
 export function useBreadcrumb() {
   const [breadcrumbList, setBreadcrumbList] = useState<BreadcrumbItem[]>([]);
-	const { findMenuByUrl, findMenuAncestor } = useLayoutSidebar();
+	const { menuService } = useLayout();
 	const navigate = useNavigate();
 	const pathname = useRouterState({
 		select: (state) => state.location.pathname,
@@ -39,9 +39,9 @@ export function useBreadcrumb() {
 		}
 	}
 	useEffect(() => {
-		const selectedTab = findMenuByUrl(pathname);
+		const selectedTab = menuService.findMenuByUrl(pathname);
 		if (selectedTab) {
-			const items = findMenuAncestor(selectedTab.id);
+			const items = menuService.findMenuAncestor(selectedTab.id);
 			queueMicrotask(() => {
 				setBreadcrumbList(items);
 			})

@@ -1,8 +1,9 @@
 import ky, { type KyInstance, type Options as KyOptions, type KyResponse, type SearchParamsOption } from 'ky';
 import { toast } from 'sonner';
 
-const DEFAULT_SUCCESS_CODE = '0000000000';
 
+export type {Options as KyOptions} from 'ky';
+export const DEFAULT_SUCCESS_CODE = '0000000000';
 export const ContentType = {
   json: 'application/json',
   form: 'application/x-www-form-urlencoded;charset=UTF-8',

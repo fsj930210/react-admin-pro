@@ -1,6 +1,7 @@
 import { APP_BASE_PATH } from "@/config";
-import { createFetchClient,  } from "@rap/utils/fetch";
+import { createFetchClient, type FetchOptions, type KyOptions,  } from "@rap/utils/fetch";
 
+export const SUCCESS_CODE = '0000000000';
 
 const beforeErrorStatus = () => (error: any) => {
 	const { response } = error;
@@ -12,12 +13,33 @@ const beforeErrorStatus = () => (error: any) => {
 	}
 	return error;
 }
+async function afterResponseJson(_request: Request, _options: KyOptions, response: Response) {
+	try {
+		const clonedResponse =  response.clone();
+		if (clonedResponse.status >= 200 && clonedResponse.status < 300) {
+			const body = await clonedResponse.json();
+			if (body.code === SUCCESS_CODE) {
+				return body.data.data;
+			}
+			return body;
+		}
+	} catch (e: any){
+		// eslint-disable-next-line @typescript-eslint/prefer-promise-reject-errors
+		return Promise.reject(e);
+	}
+}
 const request = createFetchClient({
 	silent: false,
 	retry: 0,
+	defaultJsonConfig: {
+		defaultSuccessCode: SUCCESS_CODE
+	},
 	hooks: {
 		beforeError: [
 			beforeErrorStatus(),
+		],
+		afterResponse: [
+			afterResponseJson
 		]
 	}
 });

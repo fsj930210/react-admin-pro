@@ -2,14 +2,15 @@ import { useEffect, useRef, useState } from "react";
 import type { LayoutTabItem } from "../types";
 import { useNavigate, useRouterState } from '@tanstack/react-router';
 import storage from '@rap/utils/storage';
-import { useLayoutSidebar } from "../../sidebar/sidebar-context";
+import { useLayout } from "@/layouts/context/layout-context";
+
 
 const TABS_CACHE_KEY = "layout-tabs-data";
 const SELECTED_TAB_CACHE_KEY = "layout-selected-tab";
 
 export function useTabs() {
 	const navigate = useNavigate();
-	const { findMenuByUrl } = useLayoutSidebar();
+	const { menuService } = useLayout();
 	const isTabItemClickRef = useRef(false);
 	const pathname = useRouterState({
 		select: (state) => state.location.pathname,
@@ -68,7 +69,7 @@ export function useTabs() {
 			isTabItemClickRef.current = false;
 			return;
 		}
-		const selectedTab = findMenuByUrl(pathname);
+		const selectedTab = menuService.findMenuByUrl(pathname);
 		
 		if (selectedTab) {
 			queueMicrotask(() => {

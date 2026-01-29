@@ -1,13 +1,11 @@
 import { useMutation } from '@tanstack/react-query';
-import { login, logout, fetchUserInfo } from '@/service/auth';
+import { login, logout } from '@/service/auth';
 import { useNavigate } from '@tanstack/react-router';
 import { toast } from 'sonner';
-import { useUserSelector } from '@/store/user';
 import type { ILoginRequestData} from '@/service/auth';
 
 export function useAuth() {
   const navigate = useNavigate();
-  const { setUserInfo } = useUserSelector(['setUserInfo']);
 
   const loginMutation = useMutation({
     mutationFn: async (credentials: ILoginRequestData) => {
@@ -18,34 +16,12 @@ export function useAuth() {
       if (data.token) {
         localStorage.setItem('token', data.token);
         toast.success('Login success');
-        getUserInfoMutation.mutate();
         navigate({ to: '/dashboard', replace: true });
       }
     },
     onError: (error: Error) => {
       console.error('Login error:', error);
       toast.error('Login failed');
-    },
-  });
-
-  const getUserInfoMutation = useMutation({
-    mutationKey: ['getUserInfo'],
-    mutationFn: async () => {
-      try {
-        const res = await fetchUserInfo();
-        setUserInfo(res?.data ?? {
-          id: '',
-          username: '',
-          gender: 0,
-          avatar: '',
-          phone: '',
-          email: '',
-        });
-        return res;
-      } catch (error) {
-        console.error('Failed to fetch user info:', error);
-        throw error;
-      }
     },
   });
 
@@ -56,16 +32,7 @@ export function useAuth() {
     },
     onSuccess: () => {
       localStorage.removeItem('token');
-      setUserInfo({
-        id: '',
-        username: '',
-        gender: 0,
-        avatar: '',
-        phone: '',
-        email: '',
-      });
       toast.success('Logout success');
-			localStorage.removeItem('token');
       navigate({ to: '/login', replace: true });
     },
     onError: (error: Error) => {
@@ -77,6 +44,5 @@ export function useAuth() {
   return {
     loginMutation,
 		logoutMutation,
-		getUserInfoMutation,
   };
 }

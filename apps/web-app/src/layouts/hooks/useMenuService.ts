@@ -1,7 +1,6 @@
 import { useState, useMemo, useEffect, useRef } from 'react';
 import { pinyin } from 'pinyin-pro';
 import {  useNavigate, useRouterState } from '@tanstack/react-router';
-import { useAppContext } from '@/app-context';
 export type MenuOpenMode = 'currentSystemTab' | 'newSystemTab' | 'iframe' | 'newBrowserTab';
 export type MenuType = 'menu' | 'dir' | 'button';
 export type MenuStatus = 'enabled' | 'disabled';
@@ -101,8 +100,10 @@ const calcOpenKeys = (selectedMenu: MenuItem | null, menus: MenuItem[]): string[
   return openKeys;
 };
 
-const flattenMenus = (menuList: MenuItem[], level = 0, parentPath: string[] = []): FlatMenuItem[] => {
+const flattenMenus = (menuList: MenuItem[] = [], level = 0, parentPath: string[] = []): FlatMenuItem[] => {
   const result: FlatMenuItem[] = [];
+
+  if (!menuList) return result;
 
   menuList.forEach((menu) => {
     const currentPath = [...parentPath, menu.code];
@@ -139,7 +140,6 @@ export function useMenuService(params?: UseMenuServiceParams) {
 		pinyinSearch = true 
 	} = params ?? {};
 	const isMenuItemClickRef = useRef(false);
-	const { eventBus } = useAppContext();
   const navigate = useNavigate();
 	const pathname = useRouterState({
     select: (state) => state.location.pathname,
@@ -148,7 +148,7 @@ export function useMenuService(params?: UseMenuServiceParams) {
   const [selectedMenu, setSelectedMenu] = useState<MenuItem | null>(() => 
     defaultSelectedMenu ?? getStorageSelectedMenu()
   );
-  const [openKeys, setOpenKeys] = useState<string[]>(() => 
+  const [openKeys, setOpenKeys] = useState<string[]>(() =>
     defaultOpenKeys ?? calcOpenKeys(defaultSelectedMenu ?? getStorageSelectedMenu(), menus)
   );
   
@@ -366,10 +366,6 @@ export function useMenuService(params?: UseMenuServiceParams) {
 			}
 			updateSelectedMenu(menuItem);
 			isMenuItemClickRef.current = true;
-			eventBus.emit({
-				type: 'onMenuItemClick',
-				payload: menuItem,
-			});
 		}
 	}
 	useEffect(() => {

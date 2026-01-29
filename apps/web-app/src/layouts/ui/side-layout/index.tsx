@@ -1,4 +1,4 @@
-import { Sidebar } from "./sidebar"
+import { Sidebar } from "./shared/sidebar"
 import { Content } from "./shared/content"
 import { Header } from "./shared/header"
 import AppLogo from "@/components/app/AppLogo"

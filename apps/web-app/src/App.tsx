@@ -10,6 +10,7 @@ import { BProgress } from '@bprogress/core';
 import { AppProvider, type AppEvent } from "./app-context";
 import { useEventEmitter } from "ahooks";
 import { APP_BASE_PATH } from '@/config';
+import ThemeProvider from "@rap/components-ui/theme-provider";
 
 const queryClient = new QueryClient({
 	defaultOptions: {
@@ -66,10 +67,12 @@ const App = () => {
 	return (
 		<div className="size-full overflow-x-hidden">
 			<AppProvider eventBus={eventBus}>
-				<QueryClientProvider client={queryClient}>
-					<RouterProvider router={router} />
-				</QueryClientProvider>
-				<Toaster />
+				<ThemeProvider id="app">
+					<QueryClientProvider client={queryClient}>
+						<RouterProvider router={router} />
+					</QueryClientProvider>
+					<Toaster />
+				</ThemeProvider>
 			</AppProvider>
 		</div>
 	);
