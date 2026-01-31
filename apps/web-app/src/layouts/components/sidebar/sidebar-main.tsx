@@ -26,16 +26,16 @@ interface SidebarMainProps {
 	disableCollapsedDropdown?: boolean;
 	collapsedDropdownTrigger?: ('hover' | 'click')[];
 }
-export function SidebarMain({ 
-	showSearch = true, 
+export function SidebarMain({
+	showSearch = true,
 	menus = [],
 	disableCollapsedDropdown = false,
 }: SidebarMainProps) {
 	const menuService = new MenuService(menus);
-	const { 
-		openKeys, 
+	const {
+		openKeys,
 		selectedMenu,
-		updateOpenKeys, 
+		updateOpenKeys,
 		handleMenuItemClick,
 		toggleMenuOpen
 	} = useMenu({ menuService })
@@ -94,8 +94,8 @@ interface SidebarMenuItemContentProps {
 }
 
 function SidebarMenuItemContent (props: SidebarMenuItemContentProps) {
-	const { 
-	item, 
+	const {
+	item,
 	selectedMenu,
 	searchKeywords,
 	openKeys,
@@ -108,21 +108,21 @@ function SidebarMenuItemContent (props: SidebarMenuItemContentProps) {
 	const { state: sidebarState } = useSidebar();
 	const isCollapsed = sidebarState === 'collapsed';
 
-	if (item.hidden) return null;
+	if (item.hidden || item.status !== 'enabled' || item.type === 'button') return null;
 	if (!children || !children.length) {
 		return (
 			<SidebarMenuItem className={cn("px-0 my-1 mx-2", { "mx-0": level > 0 } )}>
 				<SidebarMenuButton
 					isActive={selectedMenu?.id === item.id}
 					onClick={() => onItemClick?.(item)}
-					className="flex items-center justify-between p-0 pr-1 cursor-pointer whitespace-nowrap" 
+					className="flex items-center justify-between p-0 pr-1 cursor-pointer whitespace-nowrap"
 					style={{
 						paddingLeft: `calc(var(--spacing) * 4 + var(--spacing) * 4 * ${level})`,
 					}}
 				>
-					<MenuItemContent 
-						item={item} 
-						searchKeywords={searchKeywords} 
+					<MenuItemContent
+						item={item}
+						searchKeywords={searchKeywords}
 					/>
 				</SidebarMenuButton>
 			</SidebarMenuItem>
@@ -132,18 +132,18 @@ function SidebarMenuItemContent (props: SidebarMenuItemContentProps) {
 	if (isCollapsed && !disableCollapsedDropdown) {
 		return (
 			<SidebarMenuItem className="px-0 my-1 mx-2">
-				<DropdownSubmenu 
-					item={item} 
-					searchKeywords={searchKeywords} 
+				<DropdownSubmenu
+					item={item}
+					searchKeywords={searchKeywords}
 					onItemClick={onItemClick}
 				>
 					<SidebarMenuButton
 						isActive={selectedMenu?.id === item.id}
 						className="flex items-center justify-center p-0"
 					>
-						<MenuItemContent 
-							item={item} 
-							searchKeywords={searchKeywords} 
+						<MenuItemContent
+							item={item}
+							searchKeywords={searchKeywords}
 						/>
 					</SidebarMenuButton>
 				</DropdownSubmenu>
@@ -159,15 +159,15 @@ function SidebarMenuItemContent (props: SidebarMenuItemContentProps) {
 				open={openKeys.includes(item.id)}
       >
         <CollapsibleTrigger asChild>
-          <SidebarMenuButton 
-						className="flex items-center justify-between p-0 pr-1 cursor-pointer whitespace-nowrap" 
+          <SidebarMenuButton
+						className="flex items-center justify-between p-0 pr-1 cursor-pointer whitespace-nowrap"
 						style={{
 							paddingLeft: `calc(var(--spacing) * 4 + var(--spacing) * 4 * ${level})`,
 						}}
 					>
-						<MenuItemContent 
-							item={item} 
-							searchKeywords={searchKeywords} 
+						<MenuItemContent
+							item={item}
+							searchKeywords={searchKeywords}
 						/>
             <ChevronRight className="size-4 transition-transform duration-200 ease-in-out" />
           </SidebarMenuButton>

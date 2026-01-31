@@ -12,7 +12,7 @@ import {
 } from "./features";
 import { Breadcrumb } from "../breadcrumb";
 
-type AppHeaderFeatures = 'logo' | 'reloadCurrentTab' | 'userCenter' | 'themeSwitch' | 'fullscreen' | 'notify' | 'globalSearch' | 'breadcrumb' | 'collapseSidebar' | 'i18n';
+type AppHeaderFeatures = 'logo' | 'reload' | 'userCenter' | 'themeSwitch' | 'fullscreen' | 'notify' | 'globalSearch' | 'breadcrumb' | 'collapseSidebar' | 'i18n';
 
 interface LayoutHeaderProps {
 	leftFeatures?: AppHeaderFeatures[];
@@ -23,7 +23,7 @@ interface LayoutHeaderProps {
 
 const featureComponents: Record<AppHeaderFeatures, React.FC<any>> = {
 	logo: Logo,
-	reloadCurrentTab: ReloadCurrentTabFeature,
+	reload: ReloadCurrentTabFeature,
 	userCenter: UserCenterFeature,
 	themeSwitch: ThemeSwitchFeature,
 	fullscreen: FullscreenFeature,
@@ -34,13 +34,13 @@ const featureComponents: Record<AppHeaderFeatures, React.FC<any>> = {
 	i18n: I18nFeature,
 };
 
-export function AppHeader({ 
+export function AppHeader({
 	leftFeatures = ['breadcrumb'],
-	rightFeatures = ['globalSearch', 'themeSwitch', 'i18n', 'fullscreen', 'reloadCurrentTab', 'notify', 'userCenter'],
+	rightFeatures = ['globalSearch', 'themeSwitch', 'i18n', 'fullscreen', 'reload', 'notify', 'userCenter'],
 	leftRender,
 	rightRender
 }: LayoutHeaderProps) {
-	
+
 
 	const renderFeature = (feature: AppHeaderFeatures, index: number) => {
 		const Component = featureComponents[feature];

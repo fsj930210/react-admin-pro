@@ -21,47 +21,70 @@ interface DropdownSubmenuProps {
 	align?: 'start' | 'end' | 'center';
 	sideOffset?: number;
 	onItemClick?: (item: MenuItem) => void;
+	onOpenChange?: (open: boolean) => void;
 }
-export function DropdownSubmenu({ 
-	item, 
-	searchKeywords = [], 
-	children, 
-	side = 'right', 
-	align = 'center', 
+export function DropdownSubmenu({
+	item,
+	searchKeywords = [],
+	children,
+	side = 'right',
+	align = 'center',
 	sideOffset = 8,
 	onItemClick,
+	onOpenChange,
  }: DropdownSubmenuProps) {
 	const [open, setOpen] = useState(false);
+
   return (
-    <DropdownMenu open={open} onOpenChange={setOpen}>
-      <DropdownMenuTrigger onMouseEnter={() => setOpen(true)}>
-        {children}
-      </DropdownMenuTrigger>
-      <DropdownMenuContent 
-				side={side} 
-				align={align}
-				sideOffset={sideOffset} 
-				onMouseLeave={() => setOpen(false)}
+		<DropdownMenu
+			open={open}
+			onOpenChange={(open) => {
+				setOpen(open);
+				onOpenChange?.(open);
+			}}
+		>
+			<DropdownMenuTrigger
+				onMouseEnter={() => {
+					setOpen(true);
+					onOpenChange?.(true);
+				}}
+				className="cursor-pointer"
 			>
-				<DropdownSubmenuContent
-					item={item}
-					searchKeywords={searchKeywords}
-					onItemClick={onItemClick}
-				/>
-      </DropdownMenuContent>
+        {children}
+			</DropdownMenuTrigger>
+			{
+				item.children?.length && (
+					<DropdownMenuContent
+						side={side}
+						align={align}
+						sideOffset={sideOffset}
+					>
+						{
+							item.children?.map(child => (
+								<DropdownSubmenuContent
+									key={child.id}
+									item={child}
+									searchKeywords={searchKeywords}
+									onItemClick={onItemClick}
+								/>
+							))
+						}
+					</DropdownMenuContent>
+				)
+			}
     </DropdownMenu>
   )
 }
 
-function DropdownSubmenuContent({ 
-	item, 
-	searchKeywords = [], 
+function DropdownSubmenuContent({
+	item,
+	searchKeywords = [],
 	sideOffset = 8,
 	onItemClick,
 }: DropdownSubmenuProps) {
 	const { children } = item;
 
-	if (item.hidden) return null;
+	if (item.hidden || item.type === 'button' || item.status !== 'enabled') return null;
 	if (!children || !children.length) {
 		return (
 			<DropdownMenuItem onClick={() => onItemClick?.(item)}>
@@ -71,12 +94,12 @@ function DropdownSubmenuContent({
 	}
 
 	return (
-		<DropdownMenuSub>
+		<DropdownMenuSub >
 			<DropdownMenuSubTrigger>
 				<MenuItemContent item={item} searchKeywords={searchKeywords} />
 			</DropdownMenuSubTrigger>
 			<DropdownMenuPortal>
-				<DropdownMenuSubContent sideOffset={sideOffset}>
+				<DropdownMenuSubContent sideOffset={sideOffset} >
 					{item.children?.map(child => (
 						<DropdownSubmenuContent
 							key={child.id}

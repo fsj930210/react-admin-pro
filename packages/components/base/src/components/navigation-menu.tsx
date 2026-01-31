@@ -154,6 +154,16 @@ function NavigationMenuIndicator({
   );
 }
 
+function NavigationMenuSub({
+  ...props
+}: React.ComponentProps<typeof NavigationMenuPrimitive.Sub>) {
+  return (
+    <NavigationMenuPrimitive.Sub
+      data-slot="navigation-menu-sub"
+      {...props}
+    />
+  );
+}
 export {
   NavigationMenu,
   NavigationMenuList,
@@ -164,4 +174,5 @@ export {
   NavigationMenuIndicator,
   NavigationMenuViewport,
   navigationMenuTriggerStyle,
+  NavigationMenuSub
 };

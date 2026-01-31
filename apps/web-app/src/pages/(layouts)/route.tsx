@@ -9,6 +9,7 @@ import { MenuService } from "@/layouts/service/menuService";
 import VerticalLayout from "@/layouts/ui/vertical-layout";
 import { useQueries, useQuery } from "@tanstack/react-query";
 import { fetchUserInfo, fetchUserMenus } from "@/service/auth";
+import HorizontalLayout from "@/layouts/ui/horizontal-layout";
 
 export const Route = createFileRoute("/(layouts)")({
 	component: Layout,
@@ -43,7 +44,7 @@ function Layout() {
 	const queryResults = useQueries({
     queries: [
       {
-        queryKey: ['fetchUserInfo'], 
+        queryKey: ['fetchUserInfo'],
         queryFn: fetchUserInfo,
       },
       {
@@ -67,8 +68,8 @@ function Layout() {
 						userMenus={menus}
 						userInfo={userInfo}
 					>
-						{/* <HorizontalLayout /> */}
-						<VerticalLayout />
+						<HorizontalLayout />
+						{/* <VerticalLayout /> */}
 					</LayoutProvider>
 				)
 			}
