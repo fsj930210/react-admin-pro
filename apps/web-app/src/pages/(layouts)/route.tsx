@@ -1,13 +1,9 @@
-import { SidebarInset, SidebarProvider, Sidebar as BaseSidebar, SidebarContent, SidebarRail } from "@rap/components-base/resizable-sidebar";
-// import { useFetchMenus } from "@/layouts";
+import { SidebarProvider} from "@rap/components-base/resizable-sidebar";
 import { createFileRoute } from "@tanstack/react-router";
-import { APP_BASE_PATH } from "@/config";
-import { useAuth } from "../login/-hooks/useAuth";
-import { useMount } from "ahooks";
 import { LayoutProvider } from "@/layouts/context/layout-context";
 import { MenuService } from "@/layouts/service/menuService";
 import VerticalLayout from "@/layouts/ui/vertical-layout";
-import { useQueries, useQuery } from "@tanstack/react-query";
+import { useQueries } from "@tanstack/react-query";
 import { fetchUserInfo, fetchUserMenus } from "@/service/auth";
 import HorizontalLayout from "@/layouts/ui/horizontal-layout";
 
@@ -40,7 +36,15 @@ export const Route = createFileRoute("/(layouts)")({
 // 		</>
 // 	);
 // }
-function Layout() {
+type LayoutType = 'horizontal' | 'vertical';
+const LayoutComponentStrategies = {
+	'horizontal': HorizontalLayout,
+	'vertical': VerticalLayout,
+}
+interface LayoutProps  {
+	type?: LayoutType;
+}
+function Layout({ type = 'horizontal' }: LayoutProps) {
 	const queryResults = useQueries({
     queries: [
       {
@@ -58,7 +62,7 @@ function Layout() {
 	const userInfo = userInfoResult.data?.data ?? null
   const loading = queryResults.some((result) => result.isLoading);
 	const menuService = new MenuService(menus);
-
+const LayoutComponent = LayoutComponentStrategies[type] || LayoutComponentStrategies['vertical'];
 	return (
 		<SidebarProvider className="max-h-full">
 			{
@@ -68,8 +72,7 @@ function Layout() {
 						userMenus={menus}
 						userInfo={userInfo}
 					>
-						<HorizontalLayout />
-						{/* <VerticalLayout /> */}
+						<LayoutComponent />
 					</LayoutProvider>
 				)
 			}

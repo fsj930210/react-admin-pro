@@ -1,4 +1,4 @@
-import type { MenuItem } from "@/layouts/hooks/useMenuService";
+import type { MenuItem } from "@/layouts/types";
 
 export type BreadcrumbItem = MenuItem;
 export type BreadcrumbType = 'parallelogram' | 'capsule' | 'classic' | 'ribbon';

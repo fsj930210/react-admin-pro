@@ -1,4 +1,4 @@
-import type { MenuItem } from "@/layouts/hooks/useMenuService";
+import type { MenuItem } from "@/layouts/types";
 import type { RefAttributes } from "react";
 export type TabType = "chrome" | "vscode" | "classic" | "card" | "trapezoid";
 export interface LayoutTabItem extends MenuItem {

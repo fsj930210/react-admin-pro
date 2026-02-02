@@ -1,6 +1,6 @@
 import { cn } from "@rap/utils";
 import { SidebarMenuBadge } from "@rap/components-base/resizable-sidebar";
-import type { MenuBadge, MenuBadgeColor } from "@/layouts/hooks/useMenuService";
+import type { MenuBadge, MenuBadgeColor } from "@/layouts/types";
 
 
 interface SidebarBadgeProps {
@@ -26,7 +26,7 @@ const textColorMap: Record<MenuBadgeColor, string> = {
   custom: '',
 };
 
-export function SidebarBadge({ badge, className }: SidebarBadgeProps) {
+export function MenuItemBadge({ badge, className }: SidebarBadgeProps) {
   if (!badge) return null;
 
   const { type = 'badge', text, color = 'default', customColor } = badge;
@@ -34,7 +34,7 @@ export function SidebarBadge({ badge, className }: SidebarBadgeProps) {
   if (type === 'dot') {
     const bgColor = customColor ?? (color === 'custom' ? '' : colorMap[color]);
     return (
-      <SidebarMenuBadge className={className}>
+      <SidebarMenuBadge className={cn("right-3", className)}>
         <span
           className={cn(
             "absolute size-1.5 inline-flex rounded-full animate-ping opacity-75",

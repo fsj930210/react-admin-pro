@@ -10,15 +10,15 @@ import {
   SidebarMenuSub,
   useSidebar,
 } from "@rap/components-base/resizable-sidebar";
-import type { MenuItem } from "@/layouts/hooks/useMenuService";
 import { useState, useEffect } from "react";
 import { cn } from "@rap/utils";
 import { SidebarSearch } from "./sidebar-search";
 import { MenuService } from "@/layouts/service/menuService";
 import { useMenu } from "@/layouts/hooks/useMenu";
 import { ChevronRight } from "lucide-react";
-import { MenuItemContent } from "./menu-item-content";
-import { DropdownSubmenu } from "./dropdown-submenu";
+import { MenuItemContent } from "../menu/menu-item-content";
+import { DropdownSubmenu } from "../menu/dropdown-submenu";
+import type { MenuItem } from "@/layouts/types";
 
 interface SidebarMainProps {
 	showSearch?: boolean;

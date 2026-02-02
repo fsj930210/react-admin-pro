@@ -6,7 +6,7 @@ interface HighlightTextProps {
   highlightColor?: string;
 }
 
-export function SidebarHighlightText({
+export function MenuItemHighlightText({
   text,
   searchKeywords,
   highlightColor = 'text-blue-500',

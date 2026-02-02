@@ -55,6 +55,7 @@ const allMenus = [
     isActive: true,
     status: 'enabled' as const,
     category: 'application' as const,
+		badge: { type: 'dot', color: 'success' },
     children: [
       {
         id: 'features-move',
