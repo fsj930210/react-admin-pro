@@ -13,6 +13,7 @@ import {
   getInitialTheme,
   handleSystemThemeChange,
 } from "./utils/utils";
+import { cn } from "@rap/utils";
 
 const ThemeContext = createContext<ThemeContextValue | undefined>(undefined);
 
@@ -28,6 +29,7 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({
   defaultTheme = "light",
   forcedTheme,
   cacheClearRecovery = "default",
+	className,
 }) => {
   const parentContext = useContext(ThemeContext);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -289,7 +291,7 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({
 
   return (
     <ThemeContext.Provider value={contextValue}>
-      <div ref={containerRef} className={themeScope}>
+      <div ref={containerRef} className={cn(themeScope, className)}>
         {children}
       </div>
     </ThemeContext.Provider>

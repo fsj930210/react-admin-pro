@@ -1,6 +1,6 @@
 import { PanelLeft, PanelRight } from "lucide-react";
 import { Button } from "@rap/components-base/button";
-import { useSidebar } from "@rap/components-base/resizable-sidebar";
+import { useSidebar } from "@rap/components-base/sidebar";
 
 interface CollapseSidebarFeatureProps {
   className?: string;

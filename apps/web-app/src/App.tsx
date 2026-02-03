@@ -67,7 +67,7 @@ const App = () => {
 	return (
 		<div className="size-full overflow-x-hidden">
 			<AppProvider eventBus={eventBus}>
-				<ThemeProvider id="app">
+				<ThemeProvider id="app" className="size-full">
 					<QueryClientProvider client={queryClient}>
 						<RouterProvider router={router} />
 					</QueryClientProvider>

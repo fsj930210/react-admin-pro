@@ -3,7 +3,7 @@ import { Logo } from "@rap/components-ui/logo"
 import { DropdownSubmenu } from "@/layouts/components/menu/dropdown-submenu"
 
 import { APP_BASE_PATH } from "@/config"
-import { SidebarInset } from "@rap/components-base/resizable-sidebar/index"
+import { SidebarInset } from "@rap/components-base/sidebar/index"
 import { AppHeader } from "@/layouts/components/header"
 import { AppContent } from "@/layouts/components/content"
 import type { MenuItem } from "@/layouts/types"

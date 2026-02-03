@@ -44,6 +44,7 @@ export interface ThemeProviderProps {
   attribute?: Attribute;
   defaultTheme?: string;
   forcedTheme?: string;
+	className?: string;
   cacheClearRecovery?: "default" | "system" | "none";
   /** Nonce string to pass to the inline script and style elements for CSP headers */
   nonce?: string;

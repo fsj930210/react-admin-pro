@@ -32,8 +32,8 @@ Demo: [shadcn-resize-sidebar.vercel.app](https://shadcn-resize-sidebar.vercel.ap
 1. Clone the repository:
 
 ```bash
-git clone https://github.com/lumpinif/shadcn-resizable-sidebar.git
-cd shadcn-resizable-sidebar
+git clone https://github.com/lumpinif/shadcn-sidebar.git
+cd shadcn-sidebar
 ```
 
 2. Install dependencies:

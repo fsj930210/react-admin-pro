@@ -1,5 +1,4 @@
 import React from "react";
-import { Logo } from "@rap/components-ui/logo";
 import {
   ReloadCurrentTabFeature,
   UserCenterFeature,
@@ -11,6 +10,8 @@ import {
   I18nFeature,
 } from "./features";
 import { Breadcrumb } from "../breadcrumb";
+import { AppLogo } from "@/components/app/logo";
+import { cn } from "@rap/utils";
 
 type AppHeaderFeatures = 'logo' | 'reload' | 'userCenter' | 'themeSwitch' | 'fullscreen' | 'notify' | 'globalSearch' | 'breadcrumb' | 'collapseSidebar' | 'i18n';
 
@@ -19,10 +20,11 @@ interface LayoutHeaderProps {
 	rightFeatures?: AppHeaderFeatures[];
 	leftRender?: React.ReactNode;
 	rightRender?: React.ReactNode;
+	className?: string;
 }
 
 const featureComponents: Record<AppHeaderFeatures, React.FC<any>> = {
-	logo: Logo,
+	logo: AppLogo,
 	reload: ReloadCurrentTabFeature,
 	userCenter: UserCenterFeature,
 	themeSwitch: ThemeSwitchFeature,
@@ -38,7 +40,8 @@ export function AppHeader({
 	leftFeatures = ['breadcrumb'],
 	rightFeatures = ['globalSearch', 'themeSwitch', 'i18n', 'fullscreen', 'reload', 'notify', 'userCenter'],
 	leftRender,
-	rightRender
+	rightRender,
+	className,
 }: LayoutHeaderProps) {
 
 
@@ -48,12 +51,12 @@ export function AppHeader({
 	};
 
 	return (
-		<header className="flex items-center justify-between h-11 w-full px-2">
-			<div className="flex items-center">
+		<header className={cn("flex items-center justify-between h-11 w-full px-2", className)}>
+			<div className="flex items-center gap-2">
 				{leftRender ?? leftFeatures.map((feature, index) => renderFeature(feature, index))}
 			</div>
 
-			<div className="flex items-center">
+			<div className="flex items-center gap-2">
 				{rightRender ?? rightFeatures.map((feature, index) => renderFeature(feature, index))}
 			</div>
 		</header>

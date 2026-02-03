@@ -1,4 +1,4 @@
-import { SidebarInset } from "@rap/components-base/resizable-sidebar/index"
+import { SidebarInset } from "@rap/components-base/sidebar/index"
 import { Content } from "./shared/content"
 
 const FullScreenLayout = () => {

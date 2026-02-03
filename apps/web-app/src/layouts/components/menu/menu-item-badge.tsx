@@ -1,5 +1,5 @@
 import { cn } from "@rap/utils";
-import { SidebarMenuBadge } from "@rap/components-base/resizable-sidebar";
+import { SidebarMenuBadge } from "@rap/components-base/sidebar";
 import type { MenuBadge, MenuBadgeColor } from "@/layouts/types";
 
 

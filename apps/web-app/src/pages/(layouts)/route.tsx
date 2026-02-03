@@ -1,11 +1,13 @@
-import { SidebarProvider} from "@rap/components-base/resizable-sidebar";
+import { SidebarProvider} from "@rap/components-base/sidebar";
 import { createFileRoute } from "@tanstack/react-router";
 import { LayoutProvider } from "@/layouts/context/layout-context";
 import { MenuService } from "@/layouts/service/menuService";
-import VerticalLayout from "@/layouts/ui/vertical-layout";
 import { useQueries } from "@tanstack/react-query";
 import { fetchUserInfo, fetchUserMenus } from "@/service/auth";
 import HorizontalLayout from "@/layouts/ui/horizontal-layout";
+import VerticalLayout from "@/layouts/ui/vertical-layout";
+import DoubleColumnLayout from "@/layouts/ui/double-column-layout";
+import SideLayout from "@/layouts/ui/side-layout";
 
 export const Route = createFileRoute("/(layouts)")({
 	component: Layout,
@@ -36,15 +38,17 @@ export const Route = createFileRoute("/(layouts)")({
 // 		</>
 // 	);
 // }
-type LayoutType = 'horizontal' | 'vertical';
+type LayoutType = 'horizontal' | 'vertical' | 'double-column' | 'side';
 const LayoutComponentStrategies = {
 	'horizontal': HorizontalLayout,
 	'vertical': VerticalLayout,
+	'double-column': DoubleColumnLayout,
+	'side': SideLayout,
 }
 interface LayoutProps  {
 	type?: LayoutType;
 }
-function Layout({ type = 'horizontal' }: LayoutProps) {
+function Layout({ type = 'side' }: LayoutProps) {
 	const queryResults = useQueries({
     queries: [
       {
@@ -62,9 +66,9 @@ function Layout({ type = 'horizontal' }: LayoutProps) {
 	const userInfo = userInfoResult.data?.data ?? null
   const loading = queryResults.some((result) => result.isLoading);
 	const menuService = new MenuService(menus);
-const LayoutComponent = LayoutComponentStrategies[type] || LayoutComponentStrategies['vertical'];
+  const LayoutComponent = LayoutComponentStrategies[type] || LayoutComponentStrategies['vertical'];
 	return (
-		<SidebarProvider className="max-h-full">
+		<>
 			{
 				loading ? null : (
 					<LayoutProvider
@@ -76,6 +80,6 @@ const LayoutComponent = LayoutComponentStrategies[type] || LayoutComponentStrate
 					</LayoutProvider>
 				)
 			}
-		</SidebarProvider>
+		</>
 	);
 }

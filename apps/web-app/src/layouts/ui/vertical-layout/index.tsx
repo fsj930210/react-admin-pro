@@ -1,6 +1,11 @@
 
-import { Sidebar, SidebarContent, SidebarInset, SidebarRail } from "@rap/components-base/resizable-sidebar"
-import { APP_BASE_PATH } from "@/config"
+import { 
+	Sidebar,
+	SidebarContent, 
+	SidebarInset, 
+	SidebarProvider, 
+	SidebarRail 
+} from "@rap/components-base/sidebar"
 import { AppHeader } from "@/layouts/components/header"
 import { AppContent } from "@/layouts/components/content"
 import { SidebarHeader } from "@/layouts/components/sidebar/sidebar-header"
@@ -13,24 +18,24 @@ function VerticalLayoutSidebar () {
 	const { userMenus } = useLayout()
 	return (
 		<Sidebar collapsible="icon">
-			<SidebarHeader logo={`${APP_BASE_PATH}/logo.svg`} />
+			<SidebarHeader />
 			<SidebarContent>
-        <SidebarMain menus={userMenus} />
-      </SidebarContent>
-      <SidebarFooter />
-      <SidebarRail />
+				<SidebarMain menus={userMenus} />
+			</SidebarContent>
+			<SidebarFooter />
+			<SidebarRail />
 		</Sidebar>
 	)
 }
 function VerticalLayout ()  {
   return (
-    <>
+    <SidebarProvider>
       <VerticalLayoutSidebar />
       <SidebarInset className="overflow-hidden min-w-0">
         <AppHeader />
         <AppContent />
       </SidebarInset>
-    </>
+    </SidebarProvider>
   )
 }
 

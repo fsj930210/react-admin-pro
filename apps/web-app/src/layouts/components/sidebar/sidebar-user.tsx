@@ -1,4 +1,4 @@
-import { SidebarMenu, SidebarMenuItem } from "@rap/components-base/resizable-sidebar";
+import { SidebarMenu, SidebarMenuItem } from "@rap/components-base/sidebar";
 
 import {
 	Avatar,
@@ -14,7 +14,7 @@ import {
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
 } from "@rap/components-base/dropdown-menu";
-import { SidebarMenuButton } from "@rap/components-base/resizable-sidebar";
+import { SidebarMenuButton } from "@rap/components-base/sidebar";
 import { useIsMobile } from "@rap/hooks/use-mobile";
 import { cn } from "@rap/utils";
 import {
@@ -43,7 +43,7 @@ interface UserProps {
 	dropdownMenuTriggerClassName?: string;
 }
 
-function User({ dropdownMenuTriggerClassName }: UserProps) {
+export function User({ dropdownMenuTriggerClassName }: UserProps) {
 	const isMobile = useIsMobile();
 	const { userInfo } = useUserSelector(['userInfo']);
 	const { logoutMutation } = useAuth();

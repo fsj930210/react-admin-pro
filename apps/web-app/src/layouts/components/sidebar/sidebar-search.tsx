@@ -1,4 +1,4 @@
-import { useSidebar } from "@rap/components-base/resizable-sidebar";
+import { useSidebar } from "@rap/components-base/sidebar";
 import { InputWithClear } from "@rap/components-ui/input-with-clear";
 import { cn } from "@rap/utils";
 import { Search } from "lucide-react";

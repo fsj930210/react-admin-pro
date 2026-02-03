@@ -9,7 +9,7 @@ import {
   SidebarMenuItem,
   SidebarMenuSub,
   useSidebar,
-} from "@rap/components-base/resizable-sidebar";
+} from "@rap/components-base/sidebar";
 import { useState, useEffect } from "react";
 import { cn } from "@rap/utils";
 import { SidebarSearch } from "./sidebar-search";
