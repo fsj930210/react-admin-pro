@@ -13,18 +13,7 @@ import { SidebarFooter } from "@/layouts/components/sidebar/sidebar-footer";
 import { useLayout } from "@/layouts/context/layout-context";
 
 
-function SideLayoutSidebar () {
-	const { userMenus } = useLayout()
-	return (
-		<Sidebar collapsible="icon" className="top-11 h-[calc(100%-var(--spacing)*11)]">
-			<SidebarContent>
-				<SidebarMain menus={userMenus} />
-			</SidebarContent>
-			<SidebarFooter />
-			<SidebarRail />
-		</Sidebar>
-	)
-}
+
 function SideLayout ()  {
 	return (
 		<SidebarProvider className="flex flex-col h-full min-h-auto overflow-hidden">
@@ -36,6 +25,19 @@ function SideLayout ()  {
 				</SidebarInset>
 			</div>
 		</SidebarProvider>
+	)
+}
+
+function SideLayoutSidebar () {
+	const { userMenus } = useLayout()
+	return (
+		<Sidebar collapsible="icon" className="top-11 h-[calc(100%-var(--spacing)*11)]">
+			<SidebarContent>
+				<SidebarMain menus={userMenus} />
+			</SidebarContent>
+			<SidebarFooter />
+			<SidebarRail />
+		</Sidebar>
 	)
 }
 

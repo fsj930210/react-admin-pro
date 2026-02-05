@@ -1,5 +1,5 @@
 import { pinyin } from "pinyin-pro";
-import { dfsSearch, traverseTree } from "@rap/utils";
+import { bfsSearch, traverseTree } from "@rap/utils";
 import type { FlatMenuItem, MenuItem } from "../types";
 
 export class MenuService {
@@ -192,12 +192,15 @@ export class MenuService {
 		}
 	}
 
-	findFirstChildMenu(item: MenuItem): MenuItem | null {
-		if (!item.children || item.children.length === 0) {
-			return null;
+	findFirstChildMenu(item: MenuItem, comparator?: (item: MenuItem) => MenuItem | null): MenuItem | null {
+		if (item.type === 'menu' || !item.children || item.children.length === 0) {
+			return item;
 		}
-		return dfsSearch(item.children, (child) => {
-			return child.type === 'menu';
+		if (comparator) {
+			return comparator(item);
+		}
+		return bfsSearch(item.children, (node) => {
+			return node.type === 'menu';
 		});
 	}
 }

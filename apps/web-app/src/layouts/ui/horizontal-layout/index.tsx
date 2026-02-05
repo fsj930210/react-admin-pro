@@ -1,8 +1,5 @@
 
-import { Logo } from "@rap/components-ui/logo"
 import { DropdownSubmenu } from "@/layouts/components/menu/dropdown-submenu"
-
-import { APP_BASE_PATH } from "@/config"
 import { SidebarInset } from "@rap/components-base/sidebar/index"
 import { AppHeader } from "@/layouts/components/header"
 import { AppContent } from "@/layouts/components/content"
@@ -14,12 +11,55 @@ import { MenuService } from "@/layouts/service/menuService"
 import { cn } from "@rap/utils"
 import { ChevronDown } from "lucide-react"
 import { useState } from "react"
+import { AppLogo } from "@/components/app/logo"
 
+
+function HorizontalLayout () {
+  const { userMenus } = useLayout();
+  const menuService = new MenuService(userMenus);
+  const { handleMenuItemClick } = useMenu({ menuService });
+
+  return (
+    <SidebarInset className="overflow-hidden min-w-0">
+      <AppHeader
+        rightFeatures={['globalSearch', 'themeSwitch', 'i18n', 'fullscreen', 'reload', 'notify', 'userCenter']}
+        leftRender={
+          <div className="flex items-center w-full">
+            <div className="mr-6">
+              <AppLogo  />
+            </div>
+            <HorizontalMenu
+              className="flex-1"
+              menus={userMenus}
+              onMenuItemClick={handleMenuItemClick}
+            />
+          </div>
+        }
+      />
+      <AppContent />
+    </SidebarInset>
+  );
+};
 
 interface HorizontalMenuProps {
   menus: MenuItem[];
   className?: string;
   onMenuItemClick?: (menu: MenuItem) => void;
+}
+
+
+function HorizontalMenu({ menus, onMenuItemClick, className }: HorizontalMenuProps) {
+  return (
+    <nav className={cn("flex items-center gap-1", className)}>
+      {menus.map((item) => (
+        <HorizontalMenuItem
+          key={item.id}
+          item={item}
+          onMenuItemClick={onMenuItemClick}
+        />
+      ))}
+    </nav>
+  );
 }
 
 interface HorizontalMenuItemProps {
@@ -42,6 +82,7 @@ function HorizontalMenuItem({ item, onMenuItemClick }: HorizontalMenuItemProps) 
         onOpenChange={(open) => setIsOpen(open)}
         onItemClick={onMenuItemClick}
 				showBadge={false}
+				sideOffset={2}
       >
         <div className="px-4 py-2 text-sm font-medium text-foreground/80 hover:text-foreground hover:bg-accent rounded-md transition-colors flex items-center gap-1 cursor-pointer">
           <MenuItemContent item={item} showBadge={false} />
@@ -52,47 +93,6 @@ function HorizontalMenuItem({ item, onMenuItemClick }: HorizontalMenuItemProps) 
   );
 }
 
-function HorizontalMenu({ menus, onMenuItemClick, className }: HorizontalMenuProps) {
-  return (
-    <nav className={cn("flex items-center gap-1", className)}>
-      {menus.map((item) => (
-        <HorizontalMenuItem
-          key={item.id}
-          item={item}
-          onMenuItemClick={onMenuItemClick}
-        />
-      ))}
-    </nav>
-  );
-}
 
-
-
-const HorizontalLayout = () => {
-  const { userMenus } = useLayout();
-  const menuService = new MenuService(userMenus);
-  const { handleMenuItemClick } = useMenu({ menuService });
-
-  return (
-    <SidebarInset className="overflow-hidden min-w-0">
-      <AppHeader
-        rightFeatures={['globalSearch', 'themeSwitch', 'i18n', 'fullscreen', 'reload', 'notify', 'userCenter']}
-        leftRender={
-          <div className="flex items-center w-full">
-            <div className="mr-6">
-              <Logo url={`${APP_BASE_PATH}/logo.svg`} title="React Admin Pro" />
-            </div>
-            <HorizontalMenu
-              className="flex-1"
-              menus={userMenus}
-              onMenuItemClick={handleMenuItemClick}
-            />
-          </div>
-        }
-      />
-      <AppContent />
-    </SidebarInset>
-  );
-};
 
 export default HorizontalLayout

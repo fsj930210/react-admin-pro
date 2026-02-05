@@ -1,4 +1,3 @@
-import { SidebarProvider} from "@rap/components-base/sidebar";
 import { createFileRoute } from "@tanstack/react-router";
 import { LayoutProvider } from "@/layouts/context/layout-context";
 import { MenuService } from "@/layouts/service/menuService";
@@ -8,6 +7,8 @@ import HorizontalLayout from "@/layouts/ui/horizontal-layout";
 import VerticalLayout from "@/layouts/ui/vertical-layout";
 import DoubleColumnLayout from "@/layouts/ui/double-column-layout";
 import SideLayout from "@/layouts/ui/side-layout";
+import MixVerticalLayout from "@/layouts/ui/mix-vertical-layout";
+import MixDoubleColumnLayout from "@/layouts/ui/mix-double-column-layout";
 
 export const Route = createFileRoute("/(layouts)")({
 	component: Layout,
@@ -38,17 +39,19 @@ export const Route = createFileRoute("/(layouts)")({
 // 		</>
 // 	);
 // }
-type LayoutType = 'horizontal' | 'vertical' | 'double-column' | 'side';
+type LayoutType = 'horizontal' | 'vertical' | 'double-column' | 'side' | 'mix-vertical' | 'mix-double-column';
 const LayoutComponentStrategies = {
 	'horizontal': HorizontalLayout,
 	'vertical': VerticalLayout,
 	'double-column': DoubleColumnLayout,
 	'side': SideLayout,
+	'mix-vertical': MixVerticalLayout,
+	'mix-double-column': MixDoubleColumnLayout,
 }
 interface LayoutProps  {
 	type?: LayoutType;
 }
-function Layout({ type = 'side' }: LayoutProps) {
+function Layout({ type = 'vertical' }: LayoutProps) {
 	const queryResults = useQueries({
     queries: [
       {

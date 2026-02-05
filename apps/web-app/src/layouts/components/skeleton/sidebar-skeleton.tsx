@@ -1,4 +1,4 @@
-import { SidebarMenu, SidebarMenuItem, SidebarMenuSkeleton } from "@rap/components-base/resizable-sidebar/index";
+import { SidebarMenu, SidebarMenuItem, SidebarMenuSkeleton } from "@rap/components-base/sidebar";
 
 export function SidebarSkeleton() {
   return (

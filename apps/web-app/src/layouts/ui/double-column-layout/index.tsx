@@ -13,27 +13,78 @@ import {
 import { useLayout } from "@/layouts/context/layout-context";
 import type { MenuItem } from "@/layouts/types";
 import { MenuItemContent } from "@/layouts/components/menu/menu-item-content";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Logo } from "@rap/components-ui/logo";
 import { APP_BASE_PATH } from "@/config";
 import { User } from "@/layouts/components/sidebar/sidebar-user";
 import { cn } from "@rap/utils";
-import { useNavigate } from "@tanstack/react-router";
+import { useNavigate, useRouterState } from "@tanstack/react-router";
 import { ChevronsLeft, ChevronsRight } from "lucide-react";
+import { MenuService } from "@/layouts/service/menuService";
+
+
+
+function DoubleColumnLayout() {
+	const navigate = useNavigate();
+	const pathname = useRouterState({
+		select: (state) => state.location.pathname,
+	});
+	const { userMenus } = useLayout();
+	const menuService = new MenuService(userMenus);
+	const [selectedFistLevelMenu, setSelectedFistLevelMenu] = useState<MenuItem | null>(null);
+	const isMenuItemClickRef = useRef(false);
+	
+
+	useEffect(() => {
+		if (isMenuItemClickRef.current) {
+			isMenuItemClickRef.current = false;
+			return;
+		}
+		queueMicrotask(() => {
+			const currentMenu = menuService.findMenuByUrl(pathname);
+			if (currentMenu) {
+				const ancestorMenus = menuService.findMenuAncestor(currentMenu.id);
+				if (ancestorMenus.length > 0) {
+					setSelectedFistLevelMenu(ancestorMenus[0]);
+				}
+			}
+		});
+	}, [pathname]);
+	
+	const handleMenuItemClick = (menu: MenuItem) => {
+		isMenuItemClickRef.current = true;
+		setSelectedFistLevelMenu(menu);
+		if (menu.type === 'menu') {
+			navigate({to: menu.url});
+		} else if (menu.type === 'dir') {
+			const firstChildMenu = menuService.findFirstChildMenu(menu);
+			if (firstChildMenu) {
+				navigate({to: firstChildMenu.url});
+			}
+		}
+	};
+  return (
+		<SidebarProvider className="h-full">
+			<DoubleColumnLayoutSidebar 
+				selectedFistLevelMenu={selectedFistLevelMenu}
+				onMenuItemClick={handleMenuItemClick}
+				userMenus={userMenus}
+			/>
+			<SidebarInset className="h-full min-h-auto overflow-hidden min-w-0">
+				<AppHeader />
+				<AppContent />
+			</SidebarInset>
+		</SidebarProvider>
+  );
+};
+
 
 interface FirstLevelMenuProps {
 	menus: MenuItem[];
 	selectedItem?: MenuItem | null;
-	onItemClick?: (item: MenuItem) => void;
+	onMenuItemClick?: (item: MenuItem) => void;
 }
-function FirstLevelMenu({ menus, selectedItem, onItemClick }: FirstLevelMenuProps) {
-	const navigate = useNavigate();
-	const handleItemClick = (item: MenuItem) => {
-		if (item.type === 'menu') {
-			navigate({to: item.url});
-		}
-		onItemClick?.(item);
-	}
+function FirstLevelMenu({ menus, selectedItem, onMenuItemClick }: FirstLevelMenuProps) {
 		return (
 		<div className="flex flex-col items-center py-2 w-25 h-full border-r">
 			<Logo url={`${APP_BASE_PATH}/logo.svg`} showTitle={false} />
@@ -45,7 +96,7 @@ function FirstLevelMenu({ menus, selectedItem, onItemClick }: FirstLevelMenuProp
 							"flex-center h-8 cursor-pointer hover:bg-sidebar-accent hover:text-sidebar-accent-foreground my-1 mx-2 p-0 text-sm whitespace-nowrap overflow-hidden rounded-md",
 							selectedItem?.id === item.id ? 'bg-sidebar-accent text-sidebar-accent-foreground' : ''
 						)}
-						onClick={() => handleItemClick(item)}
+						onClick={() => onMenuItemClick?.(item)}
 					>
 						<MenuItemContent
 							item={item}
@@ -61,17 +112,24 @@ function FirstLevelMenu({ menus, selectedItem, onItemClick }: FirstLevelMenuProp
 	)
 }
 
-function DoubleColumnLayoutSidebar() {
-	const { userMenus } = useLayout();
-	const firstLevelMenus = userMenus || [];
-	const [selectedFistLevelMenu, setSelectedFistLevelMenu] = useState<MenuItem | null>(null);
+interface DoubleColumnLayoutSidebarProps {
+	selectedFistLevelMenu: MenuItem | null;
+	userMenus: MenuItem[];
+	onMenuItemClick: (menu: MenuItem) => void;
+}
+
+function DoubleColumnLayoutSidebar({ 
+	selectedFistLevelMenu, 
+	onMenuItemClick,
+	userMenus 
+}: DoubleColumnLayoutSidebarProps) {
 	const secondLevelMenus = selectedFistLevelMenu?.children ?? [];
 	const { state, toggleSidebar } = useSidebar();
 	return (
 		<div className="flex">
 			<FirstLevelMenu 
-				menus={firstLevelMenus} 
-				onItemClick={setSelectedFistLevelMenu}
+				menus={userMenus || []} 
+				onMenuItemClick={onMenuItemClick}
 				selectedItem={selectedFistLevelMenu}
 			/>
 			{
@@ -99,18 +157,6 @@ function DoubleColumnLayoutSidebar() {
 		</div>
 	)
 }
-
-function DoubleColumnLayout() {
-  return (
-		<SidebarProvider>
-			<DoubleColumnLayoutSidebar />
-			<SidebarInset className="overflow-hidden min-w-0">
-				<AppHeader />
-				<AppContent />
-			</SidebarInset>
-		</SidebarProvider>
-  );
-};
 
 export default DoubleColumnLayout;
 

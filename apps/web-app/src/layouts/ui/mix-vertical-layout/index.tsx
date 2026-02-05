@@ -1,139 +1,146 @@
-import { useEffect, useState } from 'react';
-import { useLocation } from '@tanstack/react-router';
+import { AppLogo } from "@/components/app/logo";
+import { AppContent } from "@/layouts/components/content";
+import { AppHeader } from "@/layouts/components/header";
+import { MenuItemContent } from "@/layouts/components/menu/menu-item-content";
+import { SidebarMain } from "@/layouts/components/sidebar/sidebar-main";
+import { useLayout } from "@/layouts/context/layout-context";
+import { MenuService } from "@/layouts/service/menuService";
+import type { MenuItem } from "@/layouts/types";
+import { Sidebar, SidebarContent, SidebarFooter, SidebarInset, SidebarProvider, useSidebar } from "@rap/components-base/sidebar/index";
+import { cn } from "@rap/utils";
+import { useNavigate } from "@tanstack/react-router";
+import { ChevronsLeft, ChevronsRight } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import { useRouterState } from "@tanstack/react-router";
 
-import { Content } from './shared/content';
-import { Header } from './shared/header';
-import AppLogo from '@/components/app/AppLogo';
-
-import type { MenuItem } from '@/types/menu';
-
-import { getAncestorLevelKey } from '@/layouts/utils/utils';
-import useMenuStoreSelector from '@/store/menu';
-
-const MixVerticalLayout = () => {
-  const location = useLocation();
-  const { menuItems, flatMenuItems } = useMenuStoreSelector([
-    'menuItems',
-    'flatMenuItems',
-  ]);
-  const [firstLevelMenuSelectedKeys, setFirstLevelMenuSelectedKeys] = useState<
-    string[]
-  >([]);
-  const [secondLevelMenuItems, setSecondLevelMenuItems] = useState<MenuItem[]>(
-    [],
-  );
-  const firstLevelMenuItems = menuItems.map((item) => {
-    return {
-      ...item,
-      children: undefined,
-    };
-  });
-
-  useEffect(() => {
-    const selectedItem = flatMenuItems[location.pathname];
-    if (selectedItem) {
-      const ancestorLevelKeys: string[] = [];
-      getAncestorLevelKey(selectedItem, flatMenuItems, ancestorLevelKeys);
-      setFirstLevelMenuSelectedKeys(
-        ancestorLevelKeys.length > 0
-          ? [ancestorLevelKeys[0]]
-          : [selectedItem.key],
-      );
-      const firstLevelMenuItem = flatMenuItems[ancestorLevelKeys[0]];
-      if (firstLevelMenuItem?.children) {
-        setSecondLevelMenuItems(firstLevelMenuItem.children);
-      } else {
-        setSecondLevelMenuItems([]);
-      }
-    }
-  }, [location.pathname, flatMenuItems]);
-
+function MixVerticalLayout  () {
+	const navigate = useNavigate();
+	const pathname = useRouterState({
+		select: (state) => state.location.pathname,
+	});
+  const { userMenus } = useLayout();
+	const menuService = new MenuService(userMenus);
+	const [selectedFistLevelMenu, setSelectedFistLevelMenu] = useState<MenuItem | null>(null);
+	const secondLevelMenus = selectedFistLevelMenu?.children ?? [];
+	const isMenuItemClickRef = useRef(false);
+	
+	useEffect(() => {
+		if (isMenuItemClickRef.current) {
+			isMenuItemClickRef.current = false;
+			return;
+		}
+		queueMicrotask(() => {
+			const currentMenu = menuService.findMenuByUrl(pathname);
+			if (currentMenu) {
+				const ancestorMenus = menuService.findMenuAncestor(currentMenu.id);
+				if (ancestorMenus.length > 0) {
+					setSelectedFistLevelMenu(ancestorMenus[0]);
+				}
+			}
+		});
+	}, [pathname]);
+	
+	const handleMenuItemClick = (menu: MenuItem) => {
+		isMenuItemClickRef.current = true;
+		setSelectedFistLevelMenu(menu);
+		if (menu.type === 'menu') {
+			navigate({to: menu.url});
+		} else if (menu.type === 'dir') {
+			const firstChildMenu = menuService.findFirstChildMenu(menu);
+			if (firstChildMenu) {
+				navigate({to: firstChildMenu.url});
+			}
+		}
+	};
+	
+	const handleHorizontalMenuItemClick = (menu: MenuItem) => {
+		handleMenuItemClick(menu);
+	};
   return (
-    <div className="flex flex-col h-full bg-zinc-50 dark:bg-zinc-950">
-      {/* 顶部水平菜单 */}
-      <Header
-        Logo={<AppLogo />}
-        desktopItems={
-          <nav className="flex items-center space-x-4">
-            {firstLevelMenuItems.map((item) => (
-              <button
-                key={item.key}
-                className={`px-3 py-2 text-sm font-medium rounded-md transition-colors ${firstLevelMenuSelectedKeys.includes(item.key) ? 'bg-zinc-100 dark:bg-zinc-800 text-primary dark:text-primary' : 'text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800'}`}
-                onClick={() => {
-                  const menuItem = flatMenuItems[item.key];
-                  if (!menuItem) return;
-                  setFirstLevelMenuSelectedKeys([item.key]);
-                  if (menuItem.children) {
-                    setSecondLevelMenuItems(menuItem.children);
-                  } else {
-                    setSecondLevelMenuItems([]);
-                  }
-                }}
-              >
-                {item.label}
-              </button>
-            ))}
-          </nav>
-        }
-        mobileItems={() => (
-          <nav className="flex flex-col space-y-2 py-2">
-            {firstLevelMenuItems.map((item) => (
-              <button
-                key={item.key}
-                className={`px-3 py-2 text-sm font-medium rounded-md transition-colors ${firstLevelMenuSelectedKeys.includes(item.key) ? 'bg-zinc-100 dark:bg-zinc-800 text-primary dark:text-primary' : 'text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800'}`}
-                onClick={() => {
-                  const menuItem = flatMenuItems[item.key];
-                  if (!menuItem) return;
-                  setFirstLevelMenuSelectedKeys([item.key]);
-                  if (menuItem.children) {
-                    setSecondLevelMenuItems(menuItem.children);
-                  } else {
-                    setSecondLevelMenuItems([]);
-                  }
-                }}
-              >
-                {item.label}
-              </button>
-            ))}
-          </nav>
-        )}
-      />
-
-      {/* 主内容区和侧边菜单 */}
-      <div className="flex flex-1 overflow-hidden">
-        {/* 侧边二级菜单 */}
-        {secondLevelMenuItems.length > 0 && (
-          <div className="w-64 bg-white dark:bg-zinc-900 border-r border-zinc-200 dark:border-zinc-800 overflow-y-auto">
-            <div className="p-4 border-b border-zinc-200 dark:border-zinc-800">
-              <h3 className="text-sm font-medium text-zinc-900 dark:text-zinc-100">
-                二级菜单
-              </h3>
-            </div>
-            <nav className="p-2">
-              {secondLevelMenuItems.map((item) => (
-                <button
-                  key={item.key}
-                  className="w-full text-left px-3 py-2 text-sm rounded-md transition-colors text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800"
-                  onClick={() => {
-                    // 处理菜单点击
-                  }}
-                >
-                  {item.label}
-                </button>
-              ))}
-            </nav>
-          </div>
-        )}
-
-        {/* 主内容区 */}
-        <Content>
-          <div className="h-full">
-            {/* 页面内容将通过路由渲染到这里 */}
-          </div>
-        </Content>
-      </div>
-    </div>
-  );
+		<SidebarProvider className="flex flex-col h-full min-h-auto overflow-hidden">
+			<AppHeader
+				className="border-b"
+				rightFeatures={['globalSearch', 'themeSwitch', 'i18n', 'fullscreen', 'reload', 'notify', 'userCenter']}
+				leftRender={
+					<div className="flex items-center w-full">
+						<div className="mr-6">
+							<AppLogo />
+						</div>
+						<HorizontalMenu
+							className="flex-1"
+							menus={userMenus || []}
+							onMenuItemClick={handleHorizontalMenuItemClick}
+							selectedItem={selectedFistLevelMenu}
+						/>
+					</div>
+				}
+			/>
+			<SidebarInset className="flex-row overflow-hidden min-h-auto h-[calc(100%-var(--spacing)*11)]">
+				<MixVerticalLayoutSidebar menus={secondLevelMenus} />
+				<AppContent />
+			</SidebarInset>
+		</SidebarProvider>
+	)
 };
+
+interface HorizontalMenuProps {
+	menus: MenuItem[];
+	className?: string;
+	selectedItem?: MenuItem | null;
+	onMenuItemClick?: (menu: MenuItem) => void;
+}
+
+function HorizontalMenu({ menus, onMenuItemClick, className, selectedItem }: HorizontalMenuProps) {
+	return (
+		<nav className={cn("flex items-center gap-1", className)}>
+			{menus.map((item) => (
+				<div 
+					key={item.id}
+					className={cn(
+						"flex-center h-full cursor-pointer hover:bg-sidebar-accent hover:text-sidebar-accent-foreground my-1 mx-2 p-2 text-sm whitespace-nowrap overflow-hidden rounded-md",
+						selectedItem?.id === item.id ? 'bg-sidebar-accent text-sidebar-accent-foreground' : ''
+					)}
+					onClick={() => onMenuItemClick?.(item)}
+				>
+					<MenuItemContent
+						item={item}
+						searchKeywords={[]}
+						showBadge={false}
+						className="justify-center"
+					/>
+				</div>
+			))}
+		</nav>
+	);
+}
+
+interface MixVerticalLayoutSidebarProps {
+	menus: MenuItem[];
+}
+function MixVerticalLayoutSidebar({ menus }: MixVerticalLayoutSidebarProps) {
+	const { state, toggleSidebar } = useSidebar();
+	return (
+		menus.length > 0 ? (
+			<Sidebar 
+				collapsible="icon" 
+				className={`h-[calc(100%-var(--spacing)*11)] top-11 flex-1 transition-all duration-300`}
+			>
+				<SidebarContent>
+					<SidebarMain 
+						menus={menus} 
+						showSearch={false}
+					/>
+				</SidebarContent>
+				<SidebarFooter>
+					<button className="flex-center size-6 rounded-xs cursor-pointer bg-muted" onClick={toggleSidebar}>
+						{
+							state === 'collapsed' ? <ChevronsRight className="size-4" /> : <ChevronsLeft className="size-4" />
+						}
+					</button>
+				</SidebarFooter>
+			</Sidebar>
+		) : null
+	)
+}
 
 export default MixVerticalLayout;
