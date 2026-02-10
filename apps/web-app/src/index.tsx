@@ -1,26 +1,26 @@
 import { initMock } from "@rap/mock-config";
-import { APP_BASE_PATH } from "@/config";
-import "@rap/styles/globals.css";
 import ReactDOM from "react-dom/client";
+import { APP_BASE_PATH } from "@/config";
 import App from "./App";
-import './styles/global.css'
+import "virtual-react-local-iconify";
+import "@rap/styles/globals.css";
+import "./styles/global.css";
 
- const getHandelers = () => {
+const getHandelers = () => {
 	const modules = (() => {
-		// @ts-ignore
-		if (typeof __webpack_require__ !== 'undefined') {
-			const context = (require as any).context('./mock', false, /\.(ts|js)$/);
-			return context.keys().map((key: string) => context(key).default)
+		if (typeof __webpack_require__ !== "undefined") {
+			const context = (require as any).context("./mock", false, /\.(ts|js)$/);
+			return context.keys().map((key: string) => context(key).default);
 		} else {
-			const globModules = (import.meta as any).glob('./mock/*.{js,ts}', { eager: true })
-			return Object.values(globModules).map((mod: any) => mod.default)
+			const globModules = (import.meta as any).glob("./mock/*.{js,ts}", { eager: true });
+			return Object.values(globModules).map((mod: any) => mod.default);
 		}
-	})()
+	})();
 
-	const handlers = modules.flat().filter(Boolean)
+	const handlers = modules.flat().filter(Boolean);
 
-	return handlers ?? []
-}
+	return handlers ?? [];
+};
 
 const rootEl = document.getElementById("root");
 if (rootEl) {
@@ -34,8 +34,6 @@ if (rootEl) {
 		enableMock: import.meta.env.RAP_WEB_APP_ENABLE_MOCK || "",
 		currentEnvironment: import.meta.env.MODE || "development",
 	}).then(() => {
-		root.render(
-			<App />
-		);
+		root.render(<App />);
 	});
 }

@@ -16,6 +16,7 @@
 		"@rsbuild/plugin-react": "catalog:",
 		"@rsbuild/plugin-svgr": "catalog:",
 		"@rsbuild/plugin-type-check": "catalog:",
+		"@rspack/core": "catalog:",
 		"@tanstack/router-plugin": "catalog:",
 		"code-inspector-plugin": "catalog:"
 	},
@@ -33,5 +34,8 @@
 			"types": "./src/production.ts",
 			"default": "./src/production.ts"
 		}
+	},
+	"dependencies": {
+		"@iconify/tools": "catalog:"
 	}
 }

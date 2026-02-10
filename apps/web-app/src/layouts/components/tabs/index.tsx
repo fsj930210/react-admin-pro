@@ -13,82 +13,67 @@ import { useTabsScroll } from "./hooks/use-tabs-scroll";
 import type { LayoutTabItem, TabType } from "./types";
 
 export interface LayoutTabsProps {
-  sortable?: boolean;
-  tabType?: TabType;
-};
+	sortable?: boolean;
+	tabType?: TabType;
+}
 
 const TabItemStrategies = {
-  chrome: ChromeLikeTabItem,
-  classic: ClassicTabItem,
-  card: CardTabItem,
-  vscode: VscodeLikeTabItem,
-  trapezoid: TrapezoidTabItem,
+	chrome: ChromeLikeTabItem,
+	classic: ClassicTabItem,
+	card: CardTabItem,
+	vscode: VscodeLikeTabItem,
+	trapezoid: TrapezoidTabItem,
 };
 
-export function LayoutTabs({
-  sortable = true,
-  tabType = "chrome",
-}: LayoutTabsProps) {
-  const {
-		tabs,
-    activeTab,
-    setTabs,
-    handleTabItemClick,
-    setActiveTab,
-    handleCloseTab,
-  } = useTabs();
+export function LayoutTabs({ sortable = true, tabType = "chrome" }: LayoutTabsProps) {
+	const { tabs, activeTab, setTabs, handleTabItemClick, setActiveTab, handleCloseTab } = useTabs();
 
-  const {
-    containerRef,
-    canScrollLeft,
-    canScrollRight,
-    handleWheel,
-    handleScroll,
-    handleTouchStart,
-    handleTouchMove,
-    scrollToLeft,
-    scrollRight,
-    scrollToTab,
-  } = useTabsScroll();
+	const {
+		containerRef,
+		canScrollLeft,
+		canScrollRight,
+		handleWheel,
+		handleScroll,
+		handleTouchStart,
+		handleTouchMove,
+		scrollToLeft,
+		scrollRight,
+		scrollToTab,
+	} = useTabsScroll();
 
-  const handleTabClick = (item: LayoutTabItem) => {
-    handleTabItemClick(item);
-    scrollToTab(item.id);
-  };
+	const handleTabClick = (item: LayoutTabItem) => {
+		handleTabItemClick(item);
+		scrollToTab(item.id);
+	};
 
-  const TabItemComponent = TabItemStrategies[tabType] || TabItemStrategies.chrome;
+	const TabItemComponent = TabItemStrategies[tabType] || TabItemStrategies.chrome;
 
-  return (
-    <div
-      className={cn("relative flex h-full", {
-				"border-b border-solid border-layout-tabs-border": tabType !== "chrome" && tabType !== "trapezoid",
+	return (
+		<div
+			className={cn("relative flex h-full", {
+				"border-b border-solid border-layout-tabs-border":
+					tabType !== "chrome" && tabType !== "trapezoid",
 			})}
-    >
-      <ScrollButton
-        canScroll={canScrollLeft}
-        direction="left"
-        scroll={scrollToLeft}
-      >
-        <ChevronLeft size={16} />
-      </ScrollButton>
-      <div
-        ref={containerRef}
-        className={cn("size-full overflow-x-auto whitespace-nowrap no-scrollbar touch-action-pan-x", {
-          "px-2": tabType === "card",
-        })}
-        style={{ touchAction: "pan-x" }}
-        onWheel={handleWheel}
-        onScroll={handleScroll}
-        onTouchStart={handleTouchStart}
-        onTouchMove={handleTouchMove}
-      >
-        {sortable ? (
-					<SortableTabs
-						tabs={tabs}
-						setTabs={setTabs}
-						activeTab={activeTab}
-						tabType={tabType}
-					>
+		>
+			<ScrollButton canScroll={canScrollLeft} direction="left" scroll={scrollToLeft}>
+				<ChevronLeft size={16} />
+			</ScrollButton>
+			<div
+				ref={containerRef}
+				className={cn(
+					"size-full overflow-x-auto whitespace-nowrap no-scrollbar touch-action-pan-x",
+					{
+						"px-2": tabType === "card",
+					},
+				)}
+				style={{ touchAction: "pan-x" }}
+				onWheel={handleWheel}
+				onScroll={handleScroll}
+				onTouchStart={handleTouchStart}
+				onTouchMove={handleTouchMove}
+			>
+				{sortable ? (
+					<SortableTabs tabs={tabs} setTabs={setTabs} activeTab={activeTab} tabType={tabType}>
 						{(item, index) => (
 							<TabsContextMenu
 								key={item.id}
@@ -108,13 +93,13 @@ export function LayoutTabs({
 							</TabsContextMenu>
 						)}
 					</SortableTabs>
-        ) : (
-          <div
-            className={cn("size-full flex items-center", {
-              "gap-2": tabType === "card",
-            })}
-          >
-            {tabs.map((item, index) => (
+				) : (
+					<div
+						className={cn("size-full flex items-center", {
+							"gap-2": tabType === "card",
+						})}
+					>
+						{tabs.map((item, index) => (
 							<div
 								key={item.id}
 								data-tab-key={item.id}
@@ -143,18 +128,13 @@ export function LayoutTabs({
 									/>
 								</TabsContextMenu>
 							</div>
-            ))}
-          </div>
-        )}
-      </div>
-      <ScrollButton
-        canScroll={canScrollRight}
-        direction="right"
-        scroll={scrollRight}
-      >
-        <ChevronRight />
-      </ScrollButton>
-    </div>
-  );
+						))}
+					</div>
+				)}
+			</div>
+			<ScrollButton canScroll={canScrollRight} direction="right" scroll={scrollRight}>
+				<ChevronRight />
+			</ScrollButton>
+		</div>
+	);
 }
-

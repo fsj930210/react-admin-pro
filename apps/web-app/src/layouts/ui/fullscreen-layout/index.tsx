@@ -1,12 +1,11 @@
-import { SidebarInset } from "@rap/components-base/sidebar/index"
-import { Content } from "./shared/content"
+import { AppContent } from "@/layouts/components/content";
+import { SidebarInset } from "@rap/components-base/sidebar/index";
 
-const FullScreenLayout = () => {
-  return (
-    <SidebarInset>
-      <Content />
-    </SidebarInset>
-  )
-}
+export function FullscreenLayout  ()  {
+	return (
+		<SidebarInset>
+			<AppContent />
+		</SidebarInset>
+	);
+};
 
-export default FullScreenLayout

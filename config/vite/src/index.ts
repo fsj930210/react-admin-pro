@@ -5,14 +5,17 @@ import react from "@vitejs/plugin-react-swc";
 import browserslist from "browserslist";
 import { browserslistToTargets } from "lightningcss";
 import { visualizer } from "rollup-plugin-visualizer";
-import { defineConfig } from "vite";
+import { defineConfig, type UserConfig, mergeConfig } from "vite";
 import viteCompression from "vite-plugin-compression";
 import svgr from "vite-plugin-svgr";
 import { codeInspectorPlugin } from 'code-inspector-plugin';
+import { pluginReactLocalIconify } from './plugins/react-local-iconify.ts';
 
-export function defineViteConfig(config) {
+export function defineViteConfig(config: UserConfig = {}) {
   const root = process.cwd();
-  return defineConfig({
+  
+  // 基础配置
+  const baseConfig = defineConfig({
     plugins: [
       tanstackRouter({
         autoCodeSplitting: true,
@@ -25,31 +28,37 @@ export function defineViteConfig(config) {
       react(),
       tailwindcss(),
       svgr(),
-      // gz包
       {
         ...viteCompression(),
         apply: "build",
       },
-      // 分析生成包的大小
       visualizer({
         open: true,
       }),
       codeInspectorPlugin({
         bundler: 'vite',
       }),
-      ...(config.plugins || []),
+      pluginReactLocalIconify({
+        resolver: '@iconify/react',
+        configs: [
+          {
+            dir: './src/assets/icons',
+            monotone: false,
+            prefix: 'rap-icon',
+            provider: 'rap-icon',
+          },
+        ],
+      }),
     ],
     resolve: {
       alias: {
         "@": path.resolve(root, "./src"),
-        ...config.resolve?.alias,
       },
       extensions: [
         ".ts",
         ".tsx",
         ".js",
         "jsx",
-        ...(config.resolve?.extensions || []),
       ],
     },
     css: {
@@ -57,13 +66,13 @@ export function defineViteConfig(config) {
       lightningcss: {
         targets: browserslistToTargets(browserslist(">= 0.25%")),
       },
-      ...config.css,
     },
     build: {
       cssCodeSplit: true,
       cssMinify: "lightningcss",
-      ...config.build,
     },
-    ...config,
   });
+
+  // 使用 mergeConfig 合并配置
+  return mergeConfig(baseConfig, config);
 }

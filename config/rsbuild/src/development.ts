@@ -1,14 +1,15 @@
 import {
 	defineConfig as defineRsbuildConfig,
 	type RsbuildConfig,
+	mergeRsbuildConfig,
 } from "@rsbuild/core";
 
-export function defineRsbuildDevConfig(options: RsbuildConfig) {
-	return defineRsbuildConfig({
+export function defineRsbuildDevConfig(options: RsbuildConfig = {}) {
+	// 基础开发配置
+	const baseDevConfig = defineRsbuildConfig({
 		dev: {
 			progressBar: true,
 			lazyCompilation: true,
-			...options.dev,
 		},
 		tools: {
 			rspack: (config, { isDev }) => {
@@ -18,6 +19,8 @@ export function defineRsbuildDevConfig(options: RsbuildConfig) {
 				return config;
 			},
 		},
-		...options,
 	});
+
+	// 使用 mergeRsbuildConfig 合并配置
+	return mergeRsbuildConfig(baseDevConfig, options);
 }

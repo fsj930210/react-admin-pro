@@ -1,9 +1,9 @@
 import { defineViteConfig } from "@rap/vite-config";
-import { loadEnv, UserConfig } from "vite";
+import { loadEnv, type UserConfig } from "vite";
 
 export default ({ mode }: UserConfig) => {
 	const root = process.cwd();
-	const envConfig = loadEnv(mode || 'development', root, ["RAP_WEB_"]);
+	const envConfig = loadEnv(mode || "development", root, ["RAP_WEB_"]);
 
 	return defineViteConfig({
 		envPrefix: "RAP_WEB_",

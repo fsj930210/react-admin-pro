@@ -1,10 +1,4 @@
-import { SidebarMenu, SidebarMenuItem } from "@rap/components-base/sidebar";
-
-import {
-	Avatar,
-	AvatarFallback,
-	AvatarImage,
-} from "@rap/components-base/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@rap/components-base/avatar";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -14,30 +8,22 @@ import {
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
 } from "@rap/components-base/dropdown-menu";
-import { SidebarMenuButton } from "@rap/components-base/sidebar";
+import { SidebarMenu, SidebarMenuButton, SidebarMenuItem } from "@rap/components-base/sidebar";
 import { useIsMobile } from "@rap/hooks/use-mobile";
 import { cn } from "@rap/utils";
-import {
-	BadgeCheck,
-	Bell,
-	ChevronsUpDown,
-	CreditCard,
-	LogOut,
-	Sparkles,
-} from "lucide-react";
-import { useUserSelector } from "@/store/user";
+import { BadgeCheck, Bell, ChevronsUpDown, CreditCard, LogOut, Sparkles } from "lucide-react";
 import { useAuth } from "@/pages/login/-hooks/useAuth";
+import { useUserSelector } from "@/store/user";
 
 export function SidebarUser() {
-  return (
-    <SidebarMenu>
-      <SidebarMenuItem>
-        <User />
-      </SidebarMenuItem>
-    </SidebarMenu>
-  );
+	return (
+		<SidebarMenu>
+			<SidebarMenuItem>
+				<User />
+			</SidebarMenuItem>
+		</SidebarMenu>
+	);
 }
-
 
 interface UserProps {
 	dropdownMenuTriggerClassName?: string;
@@ -45,9 +31,8 @@ interface UserProps {
 
 export function User({ dropdownMenuTriggerClassName }: UserProps) {
 	const isMobile = useIsMobile();
-	const { userInfo } = useUserSelector(['userInfo']);
+	const { userInfo } = useUserSelector(["userInfo"]);
 	const { logoutMutation } = useAuth();
-
 
 	return (
 		<DropdownMenu>
@@ -56,7 +41,7 @@ export function User({ dropdownMenuTriggerClassName }: UserProps) {
 					size="lg"
 					className={cn(
 						"data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground cursor-pointer",
-						dropdownMenuTriggerClassName
+						dropdownMenuTriggerClassName,
 					)}
 				>
 					<Avatar className="h-8 w-8 rounded-lg">
@@ -116,7 +101,7 @@ export function User({ dropdownMenuTriggerClassName }: UserProps) {
 					disabled={logoutMutation.isPending}
 				>
 					<LogOut />
-					{logoutMutation.isPending ? 'Logging out...' : 'Log out'}
+					{logoutMutation.isPending ? "Logging out..." : "Log out"}
 				</DropdownMenuItem>
 			</DropdownMenuContent>
 		</DropdownMenu>

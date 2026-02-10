@@ -13,9 +13,8 @@ import { Input } from "@rap/components-base/input";
 import { cn } from "@rap/utils";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { QuickLogForm } from "../quick-login";
 import { useAuth } from "../../-hooks/useAuth";
-
+import { QuickLogForm } from "../quick-login";
 
 type LoginFormProps = React.ComponentPropsWithoutRef<"form"> & {
 	className?: string;
@@ -45,7 +44,6 @@ export function LoginForm({ className, quickLoginStyle = "inline" }: LoginFormPr
 	const onSubmit = (data: z.infer<typeof FormSchema>) => {
 		loginMutation.mutate(data);
 	};
-
 
 	return (
 		<Form {...form}>
@@ -96,9 +94,9 @@ export function LoginForm({ className, quickLoginStyle = "inline" }: LoginFormPr
 						Forgot your password?
 					</a>
 				</div>
-				<Button type="submit" className="w-full" disabled={loginMutation.isPending} >
-				{loginMutation.isPending ? 'Logging in...' : 'Submit'}
-			</Button>
+				<Button type="submit" className="w-full" disabled={loginMutation.isPending}>
+					{loginMutation.isPending ? "Logging in..." : "Submit"}
+				</Button>
 				<div className="relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t after:border-border">
 					<span className="relative z-10 bg-background px-2 text-muted-foreground">Or</span>
 				</div>

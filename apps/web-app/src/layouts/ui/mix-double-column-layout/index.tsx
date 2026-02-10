@@ -1,38 +1,36 @@
-
-
-import { AppContent } from "@/layouts/components/content";
-import { AppHeader } from "@/layouts/components/header";
-import { SidebarMain } from "@/layouts/components/sidebar/sidebar-main";
 import {
-  Sidebar,
-  SidebarContent,
-  SidebarFooter,
-  SidebarInset,
+	Sidebar,
+	SidebarContent,
+	SidebarFooter,
+	SidebarInset,
 	SidebarProvider,
 	useSidebar,
-} from "@rap/components-base/sidebar"
-import { useLayout } from "@/layouts/context/layout-context";
-import type { MenuItem } from "@/layouts/types";
-import { MenuItemContent } from "@/layouts/components/menu/menu-item-content";
-import { useState, useEffect, useRef } from "react";
+} from "@rap/components-base/sidebar";
 import { cn } from "@rap/utils";
 import { useNavigate, useRouterState } from "@tanstack/react-router";
 import { ChevronsLeft, ChevronsRight } from "lucide-react";
-import { MenuService } from "@/layouts/service/menuService";
+import { useEffect, useRef, useState } from "react";
 import { AppLogo } from "@/components/app/logo";
+import { AppContent } from "@/layouts/components/content";
+import { AppHeader } from "@/layouts/components/header";
+import { MenuItemContent } from "@/layouts/components/menu/menu-item-content";
+import { SidebarMain } from "@/layouts/components/sidebar/sidebar-main";
 import { User } from "@/layouts/components/sidebar/sidebar-user";
+import { useLayout } from "@/layouts/context/layout-context";
+import { MenuService } from "@/layouts/service/menuService";
+import type { MenuItem } from "@/layouts/types";
 
-function MixDoubleColumnLayout() {
+export function MixDoubleColumnLayout() {
 	const navigate = useNavigate();
 	const pathname = useRouterState({
 		select: (state) => state.location.pathname,
 	});
-  const { userMenus } = useLayout();
+	const { userMenus } = useLayout();
 	const menuService = new MenuService(userMenus);
 	const [selectedFistLevelMenu, setSelectedFistLevelMenu] = useState<MenuItem | null>(null);
 	const [selectedSecondLevelMenu, setSelectedSecondLevelMenu] = useState<MenuItem | null>(null);
 	const isMenuItemClickRef = useRef(false);
-	
+
 	useEffect(() => {
 		if (isMenuItemClickRef.current) {
 			isMenuItemClickRef.current = false;
@@ -49,7 +47,7 @@ function MixDoubleColumnLayout() {
 			}
 		});
 	}, [pathname]);
-	const handleMenuItemClick = (menu: MenuItem,) => {
+	const handleMenuItemClick = (menu: MenuItem) => {
 		isMenuItemClickRef.current = true;
 		const firstChildMenu = menuService.findFirstChildMenu(menu);
 		if (firstChildMenu) {
@@ -59,17 +57,25 @@ function MixDoubleColumnLayout() {
 				setSelectedSecondLevelMenu(ancestorMenus[1] || null);
 			}
 		}
-		if (menu.type === 'menu') {
-			navigate({to: menu.url});
-		} else if (menu.type === 'dir') {
-			navigate({to: firstChildMenu?.url});
+		if (menu.type === "menu") {
+			navigate({ to: menu.url });
+		} else if (menu.type === "dir") {
+			navigate({ to: firstChildMenu?.url });
 		}
 	};
-  return (
+	return (
 		<SidebarProvider className="flex flex-col h-full min-h-auto overflow-hidden">
 			<AppHeader
 				className="border-b"
-				rightFeatures={['globalSearch', 'themeSwitch', 'i18n', 'fullscreen', 'reload', 'notify', 'userCenter']}
+				rightFeatures={[
+					"globalSearch",
+					"themeSwitch",
+					"i18n",
+					"fullscreen",
+					"reload",
+					"notify",
+					"userCenter",
+				]}
 				leftRender={
 					<div className="flex items-center w-full">
 						<div className="mr-6">
@@ -85,7 +91,7 @@ function MixDoubleColumnLayout() {
 				}
 			/>
 			<SidebarInset className="flex-row overflow-hidden min-w-0 flex-1">
-				<DoubleColumnLayoutSidebar 
+				<DoubleColumnLayoutSidebar
 					selectedFistLevelMenu={selectedFistLevelMenu}
 					selectedSecondLevelMenu={selectedSecondLevelMenu}
 					onMenuItemClick={handleMenuItemClick}
@@ -94,8 +100,8 @@ function MixDoubleColumnLayout() {
 				<AppContent />
 			</SidebarInset>
 		</SidebarProvider>
-  );
-};
+	);
+}
 
 interface HorizontalMenuProps {
 	menus: MenuItem[];
@@ -108,11 +114,11 @@ function HorizontalMenu({ menus, onMenuItemClick, className, selectedItem }: Hor
 	return (
 		<nav className={cn("flex items-center gap-1", className)}>
 			{menus.map((item) => (
-				<div 
+				<div
 					key={item.id}
 					className={cn(
 						"flex-center h-full cursor-pointer hover:bg-sidebar-accent hover:text-sidebar-accent-foreground my-1 mx-2 p-2 text-sm whitespace-nowrap overflow-hidden rounded-md",
-						selectedItem?.id === item.id ? 'bg-sidebar-accent text-sidebar-accent-foreground' : ''
+						selectedItem?.id === item.id ? "bg-sidebar-accent text-sidebar-accent-foreground" : "",
 					)}
 					onClick={() => onMenuItemClick?.(item)}
 				>
@@ -135,9 +141,9 @@ interface DoubleColumnLayoutSidebarProps {
 	menuService: MenuService;
 }
 
-function DoubleColumnLayoutSidebar({ 
-	selectedFistLevelMenu, 
-	selectedSecondLevelMenu, 
+function DoubleColumnLayoutSidebar({
+	selectedFistLevelMenu,
+	selectedSecondLevelMenu,
 	onMenuItemClick,
 }: DoubleColumnLayoutSidebarProps) {
 	const secondLevelMenus = selectedFistLevelMenu?.children ?? [];
@@ -148,33 +154,30 @@ function DoubleColumnLayoutSidebar({
 	}
 	return (
 		<div className="flex h-full">
-			<SecondLevelMenu 
-				menus={secondLevelMenus} 
+			<SecondLevelMenu
+				menus={secondLevelMenus}
 				onMenuItemClick={onMenuItemClick}
 				selectedItem={selectedSecondLevelMenu}
 			/>
-			{
-				thirdLevelMenus.length > 0 && (
-					<Sidebar 
-						collapsible="icon" 
-						className={`h-full left-25 flex-1 transition-all duration-300`}
-					>
-						<SidebarContent>
-							<SidebarMain 
-								menus={thirdLevelMenus} 
-								showSearch={false}
-							/>
-						</SidebarContent>
-						<SidebarFooter>
-							<button className="flex-center size-6 rounded-xs cursor-pointer bg-muted" onClick={toggleSidebar}>
-								{
-									state === 'collapsed' ? <ChevronsRight className="size-4" /> : <ChevronsLeft className="size-4" />
-								}
-							</button>
-						</SidebarFooter>
-					</Sidebar>
-				)
-			}
+			{thirdLevelMenus.length > 0 && (
+				<Sidebar collapsible="icon" className={`h-full left-25 flex-1 transition-all duration-300`}>
+					<SidebarContent>
+						<SidebarMain menus={thirdLevelMenus} showSearch={false} />
+					</SidebarContent>
+					<SidebarFooter>
+						<button
+							className="flex-center size-6 rounded-xs cursor-pointer bg-muted"
+							onClick={toggleSidebar}
+						>
+							{state === "collapsed" ? (
+								<ChevronsRight className="size-4" />
+							) : (
+								<ChevronsLeft className="size-4" />
+							)}
+						</button>
+					</SidebarFooter>
+				</Sidebar>
+			)}
 		</div>
 	);
 }
@@ -190,11 +193,13 @@ function SecondLevelMenu({ menus, selectedItem, onMenuItemClick }: SecondLevelMe
 		<div className="flex flex-col items-center py-2 w-25 h-full border-r">
 			<ol className="flex flex-col flex-1 w-full mt-2">
 				{menus.map((item) => (
-					<li 
+					<li
 						key={item.id}
 						className={cn(
 							"flex-center h-8 cursor-pointer hover:bg-sidebar-accent hover:text-sidebar-accent-foreground my-1 mx-2 p-0 text-sm whitespace-nowrap overflow-hidden rounded-md",
-							selectedItem?.id === item.id ? 'bg-sidebar-accent text-sidebar-accent-foreground' : ''
+							selectedItem?.id === item.id
+								? "bg-sidebar-accent text-sidebar-accent-foreground"
+								: "",
 						)}
 						onClick={() => onMenuItemClick?.(item)}
 					>
@@ -211,5 +216,3 @@ function SecondLevelMenu({ menus, selectedItem, onMenuItemClick }: SecondLevelMe
 		</div>
 	);
 }
-
-export default MixDoubleColumnLayout;

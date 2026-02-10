@@ -1,8 +1,8 @@
 import { SidebarMenu, SidebarMenuItem, SidebarMenuSkeleton } from "@rap/components-base/sidebar";
 
 export function SidebarSkeleton() {
-  return (
-    <SidebarMenu>
+	return (
+		<SidebarMenu>
 			{Array.from({ length: 5 }).map((_, index) => (
 				// eslint-disable-next-line @eslint-react/no-array-index-key
 				<SidebarMenuItem key={index}>
@@ -10,5 +10,5 @@ export function SidebarSkeleton() {
 				</SidebarMenuItem>
 			))}
 		</SidebarMenu>
-  );
+	);
 }

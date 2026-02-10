@@ -1,6 +1,5 @@
-
-import type { LayoutTabItem } from "@/layouts/components/tabs/types";
 import { createSetter, createStore, type SetterFunction } from "@rap/hooks/use-zustand";
+import type { LayoutTabItem } from "@/layouts/components/tabs/types";
 export interface LayoutState {
 	tabs: LayoutTabItem[];
 	breadcrumb: any[];

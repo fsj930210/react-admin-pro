@@ -1,19 +1,29 @@
-import React from "react";
-import {
-  ReloadCurrentTabFeature,
-  UserCenterFeature,
-  ThemeSwitchFeature,
-  FullscreenFeature,
-  NotifyFeature,
-  GlobalSearchFeature,
-  CollapseSidebarFeature,
-  I18nFeature,
-} from "./features";
-import { Breadcrumb } from "../breadcrumb";
-import { AppLogo } from "@/components/app/logo";
 import { cn } from "@rap/utils";
+import type React from "react";
+import { AppLogo } from "@/components/app/logo";
+import { Breadcrumb } from "../breadcrumb";
+import {
+	CollapseSidebarFeature,
+	FullscreenFeature,
+	GlobalSearchFeature,
+	I18nFeature,
+	NotifyFeature,
+	ReloadCurrentTabFeature,
+	ThemeSwitchFeature,
+	UserCenterFeature,
+} from "./features";
 
-type AppHeaderFeatures = 'logo' | 'reload' | 'userCenter' | 'themeSwitch' | 'fullscreen' | 'notify' | 'globalSearch' | 'breadcrumb' | 'collapseSidebar' | 'i18n';
+type AppHeaderFeatures =
+	| "logo"
+	| "reload"
+	| "userCenter"
+	| "themeSwitch"
+	| "fullscreen"
+	| "notify"
+	| "globalSearch"
+	| "breadcrumb"
+	| "collapseSidebar"
+	| "i18n";
 
 interface LayoutHeaderProps {
 	leftFeatures?: AppHeaderFeatures[];
@@ -37,14 +47,20 @@ const featureComponents: Record<AppHeaderFeatures, React.FC<any>> = {
 };
 
 export function AppHeader({
-	leftFeatures = ['breadcrumb'],
-	rightFeatures = ['globalSearch', 'themeSwitch', 'i18n', 'fullscreen', 'reload', 'notify', 'userCenter'],
+	leftFeatures = ["breadcrumb"],
+	rightFeatures = [
+		"globalSearch",
+		"themeSwitch",
+		"i18n",
+		"fullscreen",
+		"reload",
+		"notify",
+		"userCenter",
+	],
 	leftRender,
 	rightRender,
 	className,
 }: LayoutHeaderProps) {
-
-
 	const renderFeature = (feature: AppHeaderFeatures, index: number) => {
 		const Component = featureComponents[feature];
 		return Component ? <Component key={`${feature}-${index}`} /> : null;
@@ -60,5 +76,5 @@ export function AppHeader({
 				{rightRender ?? rightFeatures.map((feature, index) => renderFeature(feature, index))}
 			</div>
 		</header>
-	)
+	);
 }

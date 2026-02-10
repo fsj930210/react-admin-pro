@@ -217,10 +217,10 @@ function DraggableCard() {
 
 // 可拖拽的Dialog组件
 function DraggableDialog() {
-	const dialogRef = useRef<HTMLDivElement | null>(null)
+	const dialogRef = useRef<HTMLDivElement | null>(null);
 	const { position, isMoving, moveRef, bindEvent, removeEvent } = useMove<HTMLDivElement>({
 		useTopLeft: true,
-		styleRef: dialogRef
+		styleRef: dialogRef,
 	});
 	const rafIdRef = useRef(-1);
 	const handleOpenChange = (open: boolean) => {
@@ -246,12 +246,14 @@ function DraggableDialog() {
 								// transform: `translate(${position.x}px, ${position.y}px)`,
 								// willChange: "transfrom",
 								top: position.y,
-								left: position.x
+								left: position.x,
 							}
 						: undefined
 				}
 				// className="absolute w-[400px] shadow-2xl"
-				onInteractOutside={(e) => {e.preventDefault()}}
+				onInteractOutside={(e) => {
+					e.preventDefault();
+				}}
 				ref={dialogRef}
 			>
 				<DialogHeader

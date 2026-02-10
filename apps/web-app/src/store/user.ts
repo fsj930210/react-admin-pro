@@ -7,7 +7,7 @@ export interface UserState {
 		avatar: string;
 		phone: string;
 		email: string;
-	}
+	};
 }
 
 export interface UserActions {
@@ -18,12 +18,12 @@ export type User = UserState & UserActions;
 const { selector: useUserSelector } = createStore<User>(
 	(set) => ({
 		userInfo: {
-			id: '',
-			username: '',
+			id: "",
+			username: "",
 			gender: 0,
-			avatar: '',
-			phone: '',
-			email: '',
+			avatar: "",
+			phone: "",
+			email: "",
 		},
 		setUserInfo: createSetter<UserState, "userInfo">(set, "userInfo"),
 	}),

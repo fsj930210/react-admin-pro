@@ -1,84 +1,79 @@
-import { createFileRoute } from "@tanstack/react-router";
-import {  useRef, useState } from "react";
-import { usePanelControls, PanelState } from "@rap/hooks/use-panel-controls";
-import { 
-  Card, 
-  CardHeader, 
-  CardTitle, 
-  CardDescription, 
-  CardContent, 
-  CardFooter 
+import { Button } from "@rap/components-base/button";
+import {
+	Card,
+	CardContent,
+	CardDescription,
+	CardFooter,
+	CardHeader,
+	CardTitle,
 } from "@rap/components-base/card";
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
+	Dialog,
+	DialogContent,
+	DialogDescription,
+	DialogFooter,
+	DialogHeader,
+	DialogTitle,
+	DialogTrigger,
 } from "@rap/components-base/dialog";
-import { Button } from "@rap/components-base/button";
-import { Minus, Square, X, Maximize2 } from "lucide-react";
 import { useMove } from "@rap/hooks/use-move";
-import { cn } from "@rap/utils";
+import { PanelState, usePanelControls } from "@rap/hooks/use-panel-controls";
 import { useResize } from "@rap/hooks/use-resize";
+import { cn } from "@rap/utils";
+import { createFileRoute } from "@tanstack/react-router";
+import { Maximize2, Minus, Square, X } from "lucide-react";
+import { useRef, useState } from "react";
 
 export const Route = createFileRoute("/(layouts)/features/panel-controls/")({
 	component: PanelControlsFeaturePage,
 });
 
-
 function WindowsStyleCard() {
-	const [cardStyle, setCardStyle] = useState<React.CSSProperties>({})
+	const [cardStyle, setCardStyle] = useState<React.CSSProperties>({});
 	const { position, isMoving, moveRef } = useMove<HTMLDivElement>({});
-	const { resizeRef,  size, position: resizePosition, cursor } = useResize<HTMLDivElement>(
-		{
-			minSize: { width: 400, height: 400 },
-			maxSize: { width: 1000, height: 1000 },
-			positionMode: "topLeft",
-			enableEdgeResize: true,
-			edgeSize: 8,
-			onResize: (newSize, newPosition) => {
-				console.log("Card resized:", newSize, newPosition);
-			},
-		},
-	);
 	const {
-		isMinimized, 
-		isMaximized,
-		handleClose,
-		handleMaximize,
-		handleMinimize,
-		handleRestore
-	} = usePanelControls({
-		onStateChange: (state) => {
-			console.log("Card panel state changed to:", state);
-			let style: React.CSSProperties = {}
-			if (state === PanelState.MINIMIZED) {
-				style = {
-					display: 'none'
-				}
-			} else if (state === PanelState.MAXIMIZED) {
-				style = {
-					width: window.innerWidth,
-					height: window.innerHeight,
-					position: 'fixed',
-					top: 0,
-					left: 0,
-					zIndex: 100,
-					maxWidth: 'none'
-				}
-			} else if (state === PanelState.NORMAL) {
-				style = {}
-			}
-			setCardStyle(style);
+		resizeRef,
+		size,
+		position: resizePosition,
+		cursor,
+	} = useResize<HTMLDivElement>({
+		minSize: { width: 400, height: 400 },
+		maxSize: { width: 1000, height: 1000 },
+		positionMode: "topLeft",
+		enableEdgeResize: true,
+		edgeSize: 8,
+		onResize: (newSize, newPosition) => {
+			console.log("Card resized:", newSize, newPosition);
 		},
-		onClose: () => {
-			setCardStyle({ display: 'none' });
-		}
 	});
-
+	const { isMinimized, isMaximized, handleClose, handleMaximize, handleMinimize, handleRestore } =
+		usePanelControls({
+			onStateChange: (state) => {
+				console.log("Card panel state changed to:", state);
+				let style: React.CSSProperties = {};
+				if (state === PanelState.MINIMIZED) {
+					style = {
+						display: "none",
+					};
+				} else if (state === PanelState.MAXIMIZED) {
+					style = {
+						width: window.innerWidth,
+						height: window.innerHeight,
+						position: "fixed",
+						top: 0,
+						left: 0,
+						zIndex: 100,
+						maxWidth: "none",
+					};
+				} else if (state === PanelState.NORMAL) {
+					style = {};
+				}
+				setCardStyle(style);
+			},
+			onClose: () => {
+				setCardStyle({ display: "none" });
+			},
+		});
 
 	const style = { ...cardStyle };
 	if (position) {
@@ -92,11 +87,11 @@ function WindowsStyleCard() {
 		style.top = resizePosition.y;
 		style.left = resizePosition.x;
 	}
-	
-if (isMaximized) {
-	style.width = window.innerWidth
-	style.height = window.innerHeight
-}
+
+	if (isMaximized) {
+		style.width = window.innerWidth;
+		style.height = window.innerHeight;
+	}
 
 	return (
 		<>
@@ -105,9 +100,12 @@ if (isMaximized) {
 				className="fixed top-0 left-0 z-100 transition-all duration-300 p-0 border-none"
 				style={style}
 			>
-				<CardHeader 
-					ref={moveRef} 
-					className={cn("border-b border-gray-200 bg-gray-50 dark:bg-gray-800 p-0", `select-none ${isMoving ? "cursor-move" : "cursor-default"}`) }
+				<CardHeader
+					ref={moveRef}
+					className={cn(
+						"border-b border-gray-200 bg-gray-50 dark:bg-gray-800 p-0",
+						`select-none ${isMoving ? "cursor-move" : "cursor-default"}`,
+					)}
 				>
 					<div className="flex justify-between">
 						<div className="flex-1 px-6 py-4">
@@ -151,36 +149,55 @@ if (isMaximized) {
 						<div className="p-4 bg-muted rounded-lg">
 							<h3 className="font-semibold mb-2">Current Panel State:</h3>
 							<div className="space-y-1 text-sm">
-								<p><strong>State:</strong> {
-									isMaximized ? PanelState.MAXIMIZED : 
-									isMinimized ? PanelState.MINIMIZED : PanelState.NORMAL}</p>
-								<p><strong>Is Minimized:</strong> {isMinimized ? "Yes" : "No"}</p>
-								<p><strong>Is Maximized:</strong> {isMaximized ? "Yes" : "No"}</p>
-								<p><strong>Window Size:</strong> {window.innerWidth} × {window.innerHeight}</p>
+								<p>
+									<strong>State:</strong>{" "}
+									{isMaximized
+										? PanelState.MAXIMIZED
+										: isMinimized
+											? PanelState.MINIMIZED
+											: PanelState.NORMAL}
+								</p>
+								<p>
+									<strong>Is Minimized:</strong> {isMinimized ? "Yes" : "No"}
+								</p>
+								<p>
+									<strong>Is Maximized:</strong> {isMaximized ? "Yes" : "No"}
+								</p>
+								<p>
+									<strong>Window Size:</strong> {window.innerWidth} × {window.innerHeight}
+								</p>
 							</div>
 						</div>
 						<div className="p-4 border rounded-lg">
 							<p>This card uses Windows-style panel controls:</p>
 							<ul className="mt-2 text-sm space-y-1">
-								<li>• <strong>Controls:</strong> Right-top corner (minimize, maximize/restore, close)</li>
-								<li>• <strong>Minimize:</strong> Windows-style taskbar preview</li>
-								<li>• <strong>Maximize:</strong> Full window with fixed positioning</li>
-								<li>• <strong>Close:</strong> Red close button</li>
+								<li>
+									• <strong>Controls:</strong> Right-top corner (minimize, maximize/restore, close)
+								</li>
+								<li>
+									• <strong>Minimize:</strong> Windows-style taskbar preview
+								</li>
+								<li>
+									• <strong>Maximize:</strong> Full window with fixed positioning
+								</li>
+								<li>
+									• <strong>Close:</strong> Red close button
+								</li>
 							</ul>
 						</div>
 					</div>
 				</CardContent>
 				<CardFooter className="border-t border-gray-200 bg-gray-50 dark:bg-gray-800">
-					<div className="text-sm text-muted-foreground">
-						Windows-style card footer
-					</div>
+					<div className="text-sm text-muted-foreground">Windows-style card footer</div>
 				</CardFooter>
 			</Card>
-			
+
 			{isMinimized && (
 				<div className="fixed bottom-4 right-4 z-50 animate-in slide-in-from-bottom-2 duration-300">
-					<div className="bg-gray-100 dark:bg-gray-800 px-3 py-1 rounded-sm shadow-lg border border-gray-300 dark:border-gray-600 flex items-center gap-2 cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
-						onClick={handleRestore}>
+					<div
+						className="bg-gray-100 dark:bg-gray-800 px-3 py-1 rounded-sm shadow-lg border border-gray-300 dark:border-gray-600 flex items-center gap-2 cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+						onClick={handleRestore}
+					>
 						<div className="w-3 h-3 bg-blue-500 rounded-sm"></div>
 						<span className="text-xs font-medium text-gray-700 dark:text-gray-300">Card</span>
 						<div className="flex gap-1 ml-2">
@@ -210,30 +227,30 @@ function MacOSStyleDialog() {
 	const [isDialogOpen, setIsDialogOpen] = useState(false);
 	const resizeRafIdRef = useRef<number | null>(null);
 	const moveRafIdRef = useRef<number | null>(null);
-	const { 
-		resizeRef, 
-		size, 
-		position: resizePosition, 
-		cursor, 
-		bindEvent: bindResizeEvent, 
-		removeEvent: removeResizeEvent 
+	const {
+		resizeRef,
+		size,
+		position: resizePosition,
+		cursor,
+		bindEvent: bindResizeEvent,
+		removeEvent: removeResizeEvent,
 	} = useResize<HTMLDivElement>({
-			minSize: { width: 200, height: 200 },
-			maxSize: { width: 1000, height: 1000 },
-			positionMode: "topLeft",
-			enableEdgeResize: true,
-			edgeSize: 8,
-			onResize: (newSize, newPosition) => {
-				console.log("Dialog resized:", newSize, newPosition);
-			},
-		});
+		minSize: { width: 200, height: 200 },
+		maxSize: { width: 1000, height: 1000 },
+		positionMode: "topLeft",
+		enableEdgeResize: true,
+		edgeSize: 8,
+		onResize: (newSize, newPosition) => {
+			console.log("Dialog resized:", newSize, newPosition);
+		},
+	});
 
-	const { 
-		position: movePosition, 
-		isMoving, 
-		moveRef, 
-		bindEvent: bindMoveEvent, 
-		removeEvent: removeMoveEvent 
+	const {
+		position: movePosition,
+		isMoving,
+		moveRef,
+		bindEvent: bindMoveEvent,
+		removeEvent: removeMoveEvent,
 	} = useMove<HTMLDivElement>({});
 
 	// 阻止点击外部关闭Dialog
@@ -241,24 +258,16 @@ function MacOSStyleDialog() {
 		e.preventDefault();
 	};
 
-
-	const {  
-		isFullscreen, 
-		isMinimized, 
-		handleClose, 
-		handleMinimize, 
-		handleMaximize,
-		handleRestore,
-	} = usePanelControls({
-		useRequestFullScreen: true,
-		onStateChange: (state) => {
-			console.log("Dialog panel state changed to:", state);
-		},
-		onClose: () => {
-			setIsDialogOpen(false);
-		}
-	});
-
+	const { isFullscreen, isMinimized, handleClose, handleMinimize, handleMaximize, handleRestore } =
+		usePanelControls({
+			useRequestFullScreen: true,
+			onStateChange: (state) => {
+				console.log("Dialog panel state changed to:", state);
+			},
+			onClose: () => {
+				setIsDialogOpen(false);
+			},
+		});
 
 	const handleOpenChange = (open: boolean) => {
 		setIsDialogOpen(open);
@@ -271,7 +280,7 @@ function MacOSStyleDialog() {
 			});
 		} else {
 			removeResizeEvent();
-			removeMoveEvent()
+			removeMoveEvent();
 			if (resizeRafIdRef.current) {
 				cancelAnimationFrame(resizeRafIdRef.current);
 			}
@@ -281,7 +290,7 @@ function MacOSStyleDialog() {
 		}
 	};
 	const style: React.CSSProperties = {
-		cursor: cursor ,
+		cursor: cursor,
 		maxWidth: "none",
 		width: "auto",
 	};
@@ -289,8 +298,8 @@ function MacOSStyleDialog() {
 	if (size && resizePosition) {
 		style.width = `${size.width}px`;
 		style.height = `${size.height}px`;
-		style.top = resizePosition.y
-		style.left = resizePosition.x
+		style.top = resizePosition.y;
+		style.left = resizePosition.x;
 	}
 	if (movePosition) {
 		style.transform = `translate(${movePosition.x}px, ${movePosition.y}px)`;
@@ -312,14 +321,17 @@ function MacOSStyleDialog() {
 						</DialogTrigger>
 						<DialogContent
 							ref={resizeRef}
-							className={`transition-all duration-300 p-0 ${isFullscreen ? 'w-screen! h-screen! max-w-none! rounded-none!' : ''}`}
+							className={`transition-all duration-300 p-0 ${isFullscreen ? "w-screen! h-screen! max-w-none! rounded-none!" : ""}`}
 							showCloseButton={false}
 							onInteractOutside={handleInteractOutside}
 							style={style}
 						>
-							<DialogHeader 
+							<DialogHeader
 								ref={moveRef}
-								className={cn("border-b border-gray-200 bg-gray-50 dark:bg-gray-800 p-0", `select-none ${isMoving ? "cursor-move" : "cursor-move"}`)}
+								className={cn(
+									"border-b border-gray-200 bg-gray-50 dark:bg-gray-800 p-0",
+									`select-none ${isMoving ? "cursor-move" : "cursor-move"}`,
+								)}
 							>
 								<div className="flex justify-between">
 									<div className="flex gap-2 p-2">
@@ -358,45 +370,63 @@ function MacOSStyleDialog() {
 									</div>
 								</div>
 							</DialogHeader>
-							
+
 							<div className="space-y-4">
 								<div className="p-4 bg-muted rounded-lg">
 									<h3 className="font-semibold mb-2">Dialog Panel State:</h3>
 									<div className="space-y-1 text-sm">
-										<p><strong>State:</strong> {isFullscreen ? PanelState.FULLSCREEN : 
-											isFullscreen ? PanelState.FULLSCREEN : 
-											isMinimized ? PanelState.MINIMIZED : PanelState.NORMAL}</p>
-										<p><strong>Is Minimized:</strong> {isMinimized ? "Yes" : "No"}</p>
-										<p><strong>Is Dialog Fullscreen:</strong> {isFullscreen ? "Yes" : "No"}</p>
+										<p>
+											<strong>State:</strong>{" "}
+											{isFullscreen
+												? PanelState.FULLSCREEN
+												: isFullscreen
+													? PanelState.FULLSCREEN
+													: isMinimized
+														? PanelState.MINIMIZED
+														: PanelState.NORMAL}
+										</p>
+										<p>
+											<strong>Is Minimized:</strong> {isMinimized ? "Yes" : "No"}
+										</p>
+										<p>
+											<strong>Is Dialog Fullscreen:</strong> {isFullscreen ? "Yes" : "No"}
+										</p>
 									</div>
 								</div>
 								<div className="p-4 border rounded-lg">
 									<p>This dialog uses macOS-style panel controls:</p>
 									<ul className="mt-2 text-sm space-y-1">
-										<li>• <strong>Controls:</strong> Left-top corner (red=close, yellow=minimize, green=maximize)</li>
-										<li>• <strong>Minimize:</strong> Simple circular taskbar button</li>
-										<li>• <strong>Fullscreen:</strong> Dialog-specific fullscreen mode</li>
-										<li>• <strong>Style:</strong> macOS-inspired design</li>
+										<li>
+											• <strong>Controls:</strong> Left-top corner (red=close, yellow=minimize,
+											green=maximize)
+										</li>
+										<li>
+											• <strong>Minimize:</strong> Simple circular taskbar button
+										</li>
+										<li>
+											• <strong>Fullscreen:</strong> Dialog-specific fullscreen mode
+										</li>
+										<li>
+											• <strong>Style:</strong> macOS-inspired design
+										</li>
 									</ul>
 								</div>
 							</div>
-							
+
 							<DialogFooter className="border-t border-gray-200">
 								<Button variant="outline" onClick={() => setIsDialogOpen(false)}>
 									Cancel
 								</Button>
-								<Button onClick={() => setIsDialogOpen(false)}>
-									Save Changes
-								</Button>
+								<Button onClick={() => setIsDialogOpen(false)}>Save Changes</Button>
 							</DialogFooter>
 						</DialogContent>
 					</Dialog>
 				</CardContent>
 			</Card>
-			
+
 			{/* Minimized Dialog Bar */}
 			{isMinimized && (
-				<div 
+				<div
 					className="fixed bottom-4 right-4 z-50 animate-in slide-in-from-bottom-2 duration-300 cursor-pointer"
 					onClick={() => {
 						handleRestore();
@@ -430,9 +460,7 @@ function PanelControlsFeaturePage() {
 			<Card className="w-full max-w-2xl">
 				<CardHeader>
 					<CardTitle>Enhanced Panel Controls Features</CardTitle>
-					<CardDescription>
-						Windows and macOS style implementations
-					</CardDescription>
+					<CardDescription>Windows and macOS style implementations</CardDescription>
 				</CardHeader>
 				<CardContent>
 					<div className="grid gap-4 md:grid-cols-2">

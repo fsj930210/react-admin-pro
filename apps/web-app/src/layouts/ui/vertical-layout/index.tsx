@@ -1,34 +1,31 @@
-
-import { 
+import {
 	Sidebar,
-	SidebarContent, 
-	SidebarInset, 
-	SidebarProvider, 
-	SidebarRail 
-} from "@rap/components-base/sidebar"
-import { AppHeader } from "@/layouts/components/header"
-import { AppContent } from "@/layouts/components/content"
-import { SidebarHeader } from "@/layouts/components/sidebar/sidebar-header"
-import { SidebarMain } from "@/layouts/components/sidebar/sidebar-main"
-import { SidebarFooter } from "@/layouts/components/sidebar/sidebar-footer"
-import { useLayout } from "@/layouts/context/layout-context"
+	SidebarContent,
+	SidebarInset,
+	SidebarProvider,
+	SidebarRail,
+} from "@rap/components-base/sidebar";
+import { AppContent } from "@/layouts/components/content";
+import { AppHeader } from "@/layouts/components/header";
+import { SidebarFooter } from "@/layouts/components/sidebar/sidebar-footer";
+import { SidebarHeader } from "@/layouts/components/sidebar/sidebar-header";
+import { SidebarMain } from "@/layouts/components/sidebar/sidebar-main";
+import { useLayout } from "@/layouts/context/layout-context";
 
-
-
-function VerticalLayout ()  {
-  return (
-    <SidebarProvider>
-      <VerticalLayoutSidebar />
-      <SidebarInset className="overflow-hidden min-w-0">
-        <AppHeader />
-        <AppContent />
-      </SidebarInset>
-    </SidebarProvider>
-  )
+export function VerticalLayout() {
+	return (
+		<SidebarProvider className="h-full">
+			<VerticalLayoutSidebar />
+			<SidebarInset className="min-height-auto overflow-hidden min-w-0 h-full">
+				<AppHeader />
+				<AppContent />
+			</SidebarInset>
+		</SidebarProvider>
+	);
 }
 
-function VerticalLayoutSidebar () {
-	const { userMenus } = useLayout()
+function VerticalLayoutSidebar() {
+	const { userMenus } = useLayout();
 	return (
 		<Sidebar collapsible="icon">
 			<SidebarHeader />
@@ -38,7 +35,5 @@ function VerticalLayoutSidebar () {
 			<SidebarFooter />
 			<SidebarRail />
 		</Sidebar>
-	)
+	);
 }
-
-export default VerticalLayout

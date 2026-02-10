@@ -1,5 +1,5 @@
-// import { Loading } from "@rap/components-ui/loading";
-
+import IconView from "@rap/components-ui/icon-view";
+import Icon from "@rap/components-ui/icon";
 import { Button } from "@rap/components-base/button";
 import { createFileRoute } from "@tanstack/react-router";
 import { useAppConfigSelector } from "@/store/app-config";
@@ -17,6 +17,9 @@ export function DashboardPage() {
 
 	return (
 		<div className="size-full">
+			<Icon icon="rap-icon:github" fontSize={24} />
+			<Icon icon="rap-icon:google" fontSize={24} />
+			<Icon icon="rap-icon:logo" fontSize={24} />
 			showTabs: {`${layoutConfig?.showTabs}`}
 			<div>
 				<Button
@@ -49,6 +52,8 @@ export function DashboardPage() {
 					{count} -
 				</Button>
 			</div>
+			<IconView />
+
 		</div>
 	);
 }

@@ -17,9 +17,14 @@ catalog:
   '@dnd-kit/modifiers': 9.0.0
   '@dnd-kit/sortable': 10.0.0
   '@dnd-kit/utilities': 3.2.2
-  '@eslint-react/eslint-plugin': ^2.9.4
+  '@eslint-react/eslint-plugin': ^2.12.2
   '@eslint/js': ^9.39.2
   '@hookform/resolvers': 5.2.2
+  '@iconify-json/carbon': ^1.2.18
+  '@iconify-json/lucide': ^1.2.89
+  '@iconify-json/ri': ^1.2.9
+  '@iconify/react': ^6.0.2
+  '@iconify/tools': ^5.0.3
   '@next/eslint-plugin-next': ^16.1.6
   '@radix-ui/react-accordion': ^1.2.12
   '@radix-ui/react-alert-dialog': ^1.1.15
@@ -51,6 +56,7 @@ catalog:
   '@rsbuild/plugin-react': ^1.4.5
   '@rsbuild/plugin-svgr': ^1.3.0
   '@rsbuild/plugin-type-check': ^1.3.3
+  '@rspack/core': ^1.7.5
   '@stylistic/stylelint-plugin': ^5.0.1
   '@tailwindcss/postcss': ^4.1.18
   '@tailwindcss/vite': ^4.1.18
@@ -58,8 +64,8 @@ catalog:
   '@tanstack/eslint-plugin-router': ^1.155.0
   '@tanstack/react-query': 5.90.19
   '@tanstack/react-query-devtools': 5.91.2
-  '@tanstack/react-router': ^1.158.1
-  '@tanstack/react-router-devtools': ^1.158.1
+  '@tanstack/react-router': ^1.159.5
+  '@tanstack/react-router-devtools': ^1.159.5
   '@tanstack/react-table': ^8.21.3
   '@tanstack/react-virtual': ^3.13.18
   '@tanstack/router-plugin': 1.154.12
@@ -81,6 +87,7 @@ catalog:
   eslint-config-biome: 2.1.3
   eslint-plugin-react-hooks: ^7.0.1
   eslint-plugin-react-refresh: ^0.4.26
+  framer-motion: ^12.34.0
   globals: ^17.3.0
   husky: ^9.1.7
   immer: ^11.1.3
@@ -100,14 +107,14 @@ catalog:
   rollup-plugin-visualizer: ^6.0.5
   sonner: 2.0.7
   stylelint: 17.0.0
-  stylelint-config-recess-order: ^7.6.0
+  stylelint-config-recess-order: ^7.6.1
   stylelint-order: ^7.0.1
   tailwind-merge: 3.4.0
   tailwindcss: 4.1.18
   turbo: ^2.8.3
   tw-animate-css: 1.4.0
   typescript: 5.9.3
-  typescript-eslint: ^8.54.0
+  typescript-eslint: ^8.55.0
   vaul: ^1.1.2
   vite: 7.3.1
   vite-plugin-compression: ^0.5.1

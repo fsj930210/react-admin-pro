@@ -1,6 +1,6 @@
 "use client";
 import type React from "react";
-import { createContext, useContext, useEffect, useRef, useState } from "react";
+import { createContext, use, useContext, useEffect, useRef, useState } from "react";
 import type { ThemeContextValue, ThemeProviderProps } from "./types";
 import {
   clearAllThemesFromStorage,
@@ -290,18 +290,18 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({
   };
 
   return (
-    <ThemeContext.Provider value={contextValue}>
+    <ThemeContext value={contextValue}>
       <div ref={containerRef} className={cn(themeScope, className)}>
         {children}
       </div>
-    </ThemeContext.Provider>
+    </ThemeContext>
   );
 };
 
 export default ThemeProvider;
 
 export const useTheme = () => {
-  const context = useContext(ThemeContext);
+  const context = use(ThemeContext);
   if (context === undefined) {
     throw new Error("useTheme must be used within a ThemeProvider");
   }

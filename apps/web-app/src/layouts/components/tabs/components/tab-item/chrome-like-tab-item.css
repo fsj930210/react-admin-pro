@@ -1,42 +1,42 @@
 .layout-tabs-chrome-tab-item.active + .layout-tabs-chrome-tab-item {
-  .layout-tabs-chrome-tab-item-divider {
-    opacity: 0;
-  }
+	.layout-tabs-chrome-tab-item-divider {
+		opacity: 0;
+	}
 }
 .layout-tabs-chrome-tab-item {
-  &:last-child {
-    &::after {
-      content: "";
-      position: absolute;
-      top: 50%;
-      transform: translateY(-50%);
-      right: 0;
-      bottom: 0;
-      width: 1px;
-      height: calc(var(--spacing) * 3.5);
-      background-color: var(--layout-tabs-border);
-      transition: background-color 0.2s ease-in-out;
-    }
-  }
+	&:last-child {
+		&::after {
+			content: "";
+			position: absolute;
+			top: 50%;
+			transform: translateY(-50%);
+			right: 0;
+			bottom: 0;
+			width: 1px;
+			height: calc(var(--spacing) * 3.5);
+			background-color: var(--layout-tabs-border);
+			transition: background-color 0.2s ease-in-out;
+		}
+	}
 }
 @media (hover: hover) {
-  .layout-tabs-chrome-tab-item:not(.active) {
-    &:hover {
-      .layout-tabs-chrome-tab-item-divider {
-        opacity: 0;
-      }
-      &:last-child {
-        &:hover {
-          &::after {
-            background-color: transparent;
-          }
-        }
-      }
-      & + .layout-tabs-chrome-tab-item {
-        .layout-tabs-chrome-tab-item-divider {
-          opacity: 0;
-        }
-      }
-    }
-  }
+	.layout-tabs-chrome-tab-item:not(.active) {
+		&:hover {
+			.layout-tabs-chrome-tab-item-divider {
+				opacity: 0;
+			}
+			&:last-child {
+				&:hover {
+					&::after {
+						background-color: transparent;
+					}
+				}
+			}
+			& + .layout-tabs-chrome-tab-item {
+				.layout-tabs-chrome-tab-item-divider {
+					opacity: 0;
+				}
+			}
+		}
+	}
 }

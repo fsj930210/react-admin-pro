@@ -1,12 +1,14 @@
 import {
 	defineConfig as defineRsbuildConfig,
 	type RsbuildConfig,
+	mergeRsbuildConfig,
 } from "@rsbuild/core";
 
 const needAnalyzer = process.env.analyzer;
 
-export function defineRsbuildProdConfig(options: RsbuildConfig) {
-	return defineRsbuildConfig({
+export function defineRsbuildProdConfig(options: RsbuildConfig = {}) {
+	// 基础生产配置
+	const baseProdConfig = defineRsbuildConfig({
 		performance: {
 			removeConsole: true,
 			preload: {
@@ -29,12 +31,11 @@ export function defineRsbuildProdConfig(options: RsbuildConfig) {
 							chunks: "all",
 						},
 					},
-					...options.performance?.chunkSplit?.override,
 				},
-				...options.performance?.chunkSplit,
 			},
-			...options.performance,
 		},
-		...options,
 	});
+
+	// 使用 mergeRsbuildConfig 合并配置
+	return mergeRsbuildConfig(baseProdConfig, options);
 }

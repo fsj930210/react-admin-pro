@@ -13,10 +13,15 @@
 	],
 	"type": "module",
 	"dependencies": {
+		"@iconify-json/carbon": "catalog:",
+		"@iconify-json/lucide": "catalog:",
+		"@iconify-json/ri": "catalog:",
+		"@iconify/react": "catalog:",
 		"@radix-ui/react-slot": "catalog:",
 		"@rap/components-base": "workspace:*",
 		"@rap/hooks": "workspace:*",
 		"@rap/utils": "workspace:*",
+		"@tanstack/react-virtual": "catalog:",
 		"ahooks": "catalog:",
 		"class-variance-authority": "catalog:",
 		"lucide-react": "catalog:",
@@ -27,7 +32,10 @@
 		"./loading": "./src/components/loading/index.tsx",
 		"./logo": "./src/components/logo/index.tsx",
 		"./theme-provider": "./src/components/theme-provider/index.tsx",
-		"./input-with-clear": "./src/components/input-with-clear/index.tsx"
+		"./input-with-clear": "./src/components/input-with-clear/index.tsx",
+		"./icon": "./src/components/icon/index.tsx",
+		"./icon-set-view": "./src/components/icon/icon-set-view.tsx",
+		"./icon-view": "./src/components/icon/icon-view.tsx"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "catalog:",

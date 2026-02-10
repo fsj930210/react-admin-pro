@@ -1,30 +1,30 @@
 import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
+	Collapsible,
+	CollapsibleContent,
+	CollapsibleTrigger,
 } from "@rap/components-base/collapsible";
 import {
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-  SidebarMenuSub,
-  useSidebar,
+	SidebarMenu,
+	SidebarMenuButton,
+	SidebarMenuItem,
+	SidebarMenuSub,
+	useSidebar,
 } from "@rap/components-base/sidebar";
-import { useState, useEffect } from "react";
 import { cn } from "@rap/utils";
-import { SidebarSearch } from "./sidebar-search";
-import { MenuService } from "@/layouts/service/menuService";
-import { useMenu } from "@/layouts/hooks/useMenu";
 import { ChevronRight } from "lucide-react";
-import { MenuItemContent } from "../menu/menu-item-content";
-import { DropdownSubmenu } from "../menu/dropdown-submenu";
+import { useEffect, useState } from "react";
+import { useMenu } from "@/layouts/hooks/useMenu";
+import { MenuService } from "@/layouts/service/menuService";
 import type { MenuItem } from "@/layouts/types";
+import { DropdownSubmenu } from "../menu/dropdown-submenu";
+import { MenuItemContent } from "../menu/menu-item-content";
+import { SidebarSearch } from "./sidebar-search";
 
 interface SidebarMainProps {
 	showSearch?: boolean;
 	menus: MenuItem[];
 	disableCollapsedDropdown?: boolean;
-	collapsedDropdownTrigger?: ('hover' | 'click')[];
+	collapsedDropdownTrigger?: ("hover" | "click")[];
 }
 export function SidebarMain({
 	showSearch = true,
@@ -32,13 +32,9 @@ export function SidebarMain({
 	disableCollapsedDropdown = false,
 }: SidebarMainProps) {
 	const menuService = new MenuService(menus);
-	const {
-		openKeys,
-		selectedMenu,
-		updateOpenKeys,
-		handleMenuItemClick,
-		toggleMenuOpen
-	} = useMenu({ menuService })
+	const { openKeys, selectedMenu, updateOpenKeys, handleMenuItemClick, toggleMenuOpen } = useMenu({
+		menuService,
+	});
 	const [displayMenus, setDisplayMenus] = useState(menus);
 	const [searchKeywords, setSearchKeywords] = useState<string[]>([]);
 
@@ -56,19 +52,15 @@ export function SidebarMain({
 	useEffect(() => {
 		// eslint-disable-next-line @eslint-react/hooks-extra/no-direct-set-state-in-use-effect
 		setDisplayMenus(menus);
-	}, [menus])
+	}, [menus]);
 
-  return (
-    <SidebarMenu className="overflow-x-hidden h-full">
-		{
-			showSearch && (
-				<SidebarSearch onChange={handleInputChange} />
-			)
-		}
-      {displayMenus.map((item: MenuItem) => (
-        <SidebarMenuItemContent
-          key={item.id}
-          item={item}
+	return (
+		<SidebarMenu className="overflow-x-hidden h-full">
+			{showSearch && <SidebarSearch onChange={handleInputChange} />}
+			{displayMenus.map((item: MenuItem) => (
+				<SidebarMenuItemContent
+					key={item.id}
+					item={item}
 					searchKeywords={searchKeywords}
 					openKeys={openKeys}
 					selectedMenu={selectedMenu}
@@ -76,14 +68,14 @@ export function SidebarMain({
 					onItemClick={handleMenuItemClick}
 					level={0}
 					disableCollapsedDropdown={disableCollapsedDropdown}
-        />
-      ))}
-    </SidebarMenu>
-  );
+				/>
+			))}
+		</SidebarMenu>
+	);
 }
 
 interface SidebarMenuItemContentProps {
-  item: MenuItem;
+	item: MenuItem;
 	searchKeywords?: string[];
 	selectedMenu: MenuItem | null;
 	openKeys: string[];
@@ -93,25 +85,25 @@ interface SidebarMenuItemContentProps {
 	onItemClick?: (item: MenuItem) => void;
 }
 
-function SidebarMenuItemContent (props: SidebarMenuItemContentProps) {
+function SidebarMenuItemContent(props: SidebarMenuItemContentProps) {
 	const {
-	item,
-	selectedMenu,
-	searchKeywords,
-	openKeys,
-	level = 0,
-	onItemClick,
-	toggleMenuOpen,
-	disableCollapsedDropdown = false,
-} = props;
+		item,
+		selectedMenu,
+		searchKeywords,
+		openKeys,
+		level = 0,
+		onItemClick,
+		toggleMenuOpen,
+		disableCollapsedDropdown = false,
+	} = props;
 	const { children } = item;
 	const { state: sidebarState } = useSidebar();
-	const isCollapsed = sidebarState === 'collapsed';
+	const isCollapsed = sidebarState === "collapsed";
 
-	if (item.hidden || item.status !== 'enabled' || item.type === 'button') return null;
+	if (item.hidden || item.status !== "enabled" || item.type === "button") return null;
 	if (!children || !children.length) {
 		return (
-			<SidebarMenuItem className={cn("px-0 my-1 mx-2", { "mx-0": level > 0 } )}>
+			<SidebarMenuItem className={cn("px-0 my-1 mx-2", { "mx-0": level > 0 })}>
 				<SidebarMenuButton
 					isActive={selectedMenu?.id === item.id}
 					onClick={() => onItemClick?.(item)}
@@ -120,72 +112,59 @@ function SidebarMenuItemContent (props: SidebarMenuItemContentProps) {
 						paddingLeft: `calc(var(--spacing) * 4 + var(--spacing) * 4 * ${level})`,
 					}}
 				>
-					<MenuItemContent
-						item={item}
-						searchKeywords={searchKeywords}
-					/>
+					<MenuItemContent item={item} searchKeywords={searchKeywords} />
 				</SidebarMenuButton>
 			</SidebarMenuItem>
-		)
+		);
 	}
 
 	if (isCollapsed && !disableCollapsedDropdown) {
 		return (
 			<SidebarMenuItem className="px-0 my-1 mx-2">
-				<DropdownSubmenu
-					item={item}
-					searchKeywords={searchKeywords}
-					onItemClick={onItemClick}
-				>
+				<DropdownSubmenu item={item} searchKeywords={searchKeywords} onItemClick={onItemClick}>
 					<SidebarMenuButton
 						isActive={selectedMenu?.id === item.id}
 						className="flex items-center justify-center p-0"
 					>
-						<MenuItemContent
-							item={item}
-							searchKeywords={searchKeywords}
-						/>
+						<MenuItemContent item={item} searchKeywords={searchKeywords} />
 					</SidebarMenuButton>
 				</DropdownSubmenu>
 			</SidebarMenuItem>
-		)
+		);
 	}
 
 	return (
 		<SidebarMenuItem className={cn("px-0 my-1 mx-2", { "mx-0": level > 0 })}>
-      <Collapsible
-        className="group/collapsible [&[data-state=open]>button>svg:last-child]:rotate-90"
+			<Collapsible
+				className="group/collapsible [&[data-state=open]>button>svg:last-child]:rotate-90"
 				onOpenChange={() => toggleMenuOpen(item.id)}
 				open={openKeys.includes(item.id)}
-      >
-        <CollapsibleTrigger asChild>
-          <SidebarMenuButton
+			>
+				<CollapsibleTrigger asChild>
+					<SidebarMenuButton
 						className="flex items-center justify-between p-0 pr-1 cursor-pointer whitespace-nowrap"
 						style={{
 							paddingLeft: `calc(var(--spacing) * 4 + var(--spacing) * 4 * ${level})`,
 						}}
 					>
-						<MenuItemContent
-							item={item}
-							searchKeywords={searchKeywords}
-						/>
-            <ChevronRight className="size-4 transition-transform duration-200 ease-in-out" />
-          </SidebarMenuButton>
-        </CollapsibleTrigger>
-        <CollapsibleContent>
-          <SidebarMenuSub className="border-none mx-0 px-0">
-            {children.map((subItem) => (
-              <SidebarMenuItemContent
+						<MenuItemContent item={item} searchKeywords={searchKeywords} />
+						<ChevronRight className="size-4 transition-transform duration-200 ease-in-out" />
+					</SidebarMenuButton>
+				</CollapsibleTrigger>
+				<CollapsibleContent>
+					<SidebarMenuSub className="border-none mx-0 px-0">
+						{children.map((subItem) => (
+							<SidebarMenuItemContent
 								key={subItem.id}
 								{...props}
 								level={level + 1}
 								item={subItem}
 								disableCollapsedDropdown={disableCollapsedDropdown}
 							/>
-            ))}
-          </SidebarMenuSub>
-        </CollapsibleContent>
-      </Collapsible>
-    </SidebarMenuItem>
-	)
+						))}
+					</SidebarMenuSub>
+				</CollapsibleContent>
+			</Collapsible>
+		</SidebarMenuItem>
+	);
 }

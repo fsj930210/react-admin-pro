@@ -1,14 +1,15 @@
+import { useQueries } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { LayoutProvider } from "@/layouts/context/layout-context";
 import { MenuService } from "@/layouts/service/menuService";
-import { useQueries } from "@tanstack/react-query";
+import { DoubleColumnLayout } from "@/layouts/ui/double-column-layout";
+import { HorizontalLayout } from "@/layouts/ui/horizontal-layout";
+import { MixDoubleColumnLayout } from "@/layouts/ui/mix-double-column-layout";
+import { MixVerticalLayout } from "@/layouts/ui/mix-vertical-layout";
+import { SideLayout} from "@/layouts/ui/side-layout";
+import { VerticalLayout } from "@/layouts/ui/vertical-layout";
+import { FullscreenLayout } from "@/layouts/ui/fullscreen-layout";
 import { fetchUserInfo, fetchUserMenus } from "@/service/auth";
-import HorizontalLayout from "@/layouts/ui/horizontal-layout";
-import VerticalLayout from "@/layouts/ui/vertical-layout";
-import DoubleColumnLayout from "@/layouts/ui/double-column-layout";
-import SideLayout from "@/layouts/ui/side-layout";
-import MixVerticalLayout from "@/layouts/ui/mix-vertical-layout";
-import MixDoubleColumnLayout from "@/layouts/ui/mix-double-column-layout";
 
 export const Route = createFileRoute("/(layouts)")({
 	component: Layout,
@@ -39,50 +40,52 @@ export const Route = createFileRoute("/(layouts)")({
 // 		</>
 // 	);
 // }
-type LayoutType = 'horizontal' | 'vertical' | 'double-column' | 'side' | 'mix-vertical' | 'mix-double-column';
+type LayoutType =
+	| "horizontal"
+	| "vertical"
+	| "double-column"
+	| "side"
+	| "mix-vertical"
+	| "mix-double-column"
+	| "fullscreen";
 const LayoutComponentStrategies = {
-	'horizontal': HorizontalLayout,
-	'vertical': VerticalLayout,
-	'double-column': DoubleColumnLayout,
-	'side': SideLayout,
-	'mix-vertical': MixVerticalLayout,
-	'mix-double-column': MixDoubleColumnLayout,
-}
-interface LayoutProps  {
+	horizontal: HorizontalLayout,
+	vertical: VerticalLayout,
+	"double-column": DoubleColumnLayout,
+	side: SideLayout,
+	"mix-vertical": MixVerticalLayout,
+	"mix-double-column": MixDoubleColumnLayout,
+	"fullscreen": FullscreenLayout,
+};
+interface LayoutProps {
 	type?: LayoutType;
 }
-function Layout({ type = 'vertical' }: LayoutProps) {
+function Layout({ type = "double-column" }: LayoutProps) {
 	const queryResults = useQueries({
-    queries: [
-      {
-        queryKey: ['fetchUserInfo'],
-        queryFn: fetchUserInfo,
-      },
-      {
-        queryKey: ['fetchUserMenus'],
-        queryFn: fetchUserMenus,
-      },
-    ],
-  });
-  const [userInfoResult, userMenusResult] = queryResults;
+		queries: [
+			{
+				queryKey: ["fetchUserInfo"],
+				queryFn: fetchUserInfo,
+			},
+			{
+				queryKey: ["fetchUserMenus"],
+				queryFn: fetchUserMenus,
+			},
+		],
+	});
+	const [userInfoResult, userMenusResult] = queryResults;
 	const menus = userMenusResult.data?.data ?? [];
-	const userInfo = userInfoResult.data?.data ?? null
-  const loading = queryResults.some((result) => result.isLoading);
+	const userInfo = userInfoResult.data?.data ?? null;
+	const loading = queryResults.some((result) => result.isLoading);
 	const menuService = new MenuService(menus);
-  const LayoutComponent = LayoutComponentStrategies[type] || LayoutComponentStrategies['vertical'];
+	const LayoutComponent = LayoutComponentStrategies[type] || LayoutComponentStrategies["vertical"];
 	return (
 		<>
-			{
-				loading ? null : (
-					<LayoutProvider
-						menuService={menuService}
-						userMenus={menus}
-						userInfo={userInfo}
-					>
-						<LayoutComponent />
-					</LayoutProvider>
-				)
-			}
+			{loading ? null : (
+				<LayoutProvider menuService={menuService} userMenus={menus} userInfo={userInfo}>
+					<LayoutComponent />
+				</LayoutProvider>
+			)}
 		</>
 	);
 }
