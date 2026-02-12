@@ -7,6 +7,7 @@ import {
 } from "@rap/components-base/breadcrumb";
 import { cn } from "@rap/utils";
 import type { BreadcrumbItemProps } from "../types";
+import Icon from "@rap/components-ui/icon";
 
 export function RibbonBreadcrumb({ data, onBreadcrumbItemClick }: BreadcrumbItemProps) {
 	return (
@@ -16,6 +17,7 @@ export function RibbonBreadcrumb({ data, onBreadcrumbItemClick }: BreadcrumbItem
 					<BreadcrumbItem key={item.id}>
 						{index === data.length - 1 ? (
 							<BreadcrumbPage className="inline-flex items-center gap-0.5 px-4 py-0.5 text-sm leading-[1.75] bg-layout-breadcrumb hover:bg-layout-breadcrumb-accent transition-all duration-300 ribbon-breadcrumb-last">
+								{item.icon && <Icon icon={item.icon} />}
 								{item.title}
 							</BreadcrumbPage>
 						) : (
@@ -28,7 +30,10 @@ export function RibbonBreadcrumb({ data, onBreadcrumbItemClick }: BreadcrumbItem
 								)}
 								asChild
 							>
-								<span onClick={() => onBreadcrumbItemClick?.(item)}>{item.title}</span>
+								<span onClick={() => onBreadcrumbItemClick?.(item)}>
+									{item.icon && <Icon icon={item.icon} />}
+									{item.title}
+								</span>
 							</BreadcrumbLink>
 						)}
 					</BreadcrumbItem>

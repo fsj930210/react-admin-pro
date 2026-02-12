@@ -14,6 +14,7 @@ import {
 } from "@rap/components-base/dropdown-menu";
 import { ChevronDown } from "lucide-react";
 import type { BreadcrumbItemProps } from "../types";
+import Icon from "@rap/components-ui/icon";
 
 export function ClassicBreadcrumb({ data, onBreadcrumbItemClick, mode }: BreadcrumbItemProps) {
 	return (
@@ -22,7 +23,10 @@ export function ClassicBreadcrumb({ data, onBreadcrumbItemClick, mode }: Breadcr
 				{data.map((item, index) => (
 					<BreadcrumbItem key={item.id}>
 						{index === data.length - 1 ? (
-							<BreadcrumbPage className="leading-[2.15]">{item.title}</BreadcrumbPage>
+							<BreadcrumbPage className="flex items-center gap-1 leading-[2.15]">
+								{item.icon && <Icon icon={item.icon} />}
+								{item.title}
+							</BreadcrumbPage>
 						) : (
 							<>
 								{mode === "menu" && item.type === "dir" ? (
@@ -32,7 +36,8 @@ export function ClassicBreadcrumb({ data, onBreadcrumbItemClick, mode }: Breadcr
 												className="leading-[2.15] cursor-pointer flex items-center gap-1"
 												asChild
 											>
-												<span>
+												<span className="flex items-center gap-1">
+													{item.icon && <Icon icon={item.icon} />}
 													{item.title}
 													<ChevronDown className="h-4 w-4" />
 												</span>
@@ -45,8 +50,9 @@ export function ClassicBreadcrumb({ data, onBreadcrumbItemClick, mode }: Breadcr
 													<DropdownMenuItem
 														key={child.id}
 														onClick={() => onBreadcrumbItemClick?.(child)}
-														className="cursor-pointer"
+														className="flex gap-1 cursor-pointer"
 													>
+														{child.icon && <Icon icon={child.icon} />}
 														{child.title}
 													</DropdownMenuItem>
 												))}
@@ -54,7 +60,10 @@ export function ClassicBreadcrumb({ data, onBreadcrumbItemClick, mode }: Breadcr
 									</DropdownMenu>
 								) : (
 									<BreadcrumbLink className="leading-[2.15] cursor-pointer" asChild>
-										<span onClick={() => onBreadcrumbItemClick?.(item)}>{item.title}</span>
+										<span className="flex items-center gap-1" onClick={() => onBreadcrumbItemClick?.(item)}>
+											{item.icon && <Icon icon={item.icon} />}
+											{item.title}
+										</span>
 									</BreadcrumbLink>
 								)}
 								<BreadcrumbSeparator />

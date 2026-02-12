@@ -27,37 +27,7 @@ export const Route = createFileRoute("/(layouts)/components/tree/")({
 	component: TreeComponentPage,
 });
 
-// const treeNodes: TreeNode[] = [
-//   {
-//     key: "root",
-//     label: "root",
-//     children: [
-//       {
-//         key: "1",
-//         label: "Node 1",
-//         children: [
-//           { key: "1-1", label: "Child Node 1-1" },
-//           { key: "1-2", label: "Child Node 1-2" },
-//         ],
-//       },
-//       { key: "2", label: "Node 2" },
-//       {
-//         key: "3",
-//         label: "Node 3",
-//         children: [
-//           { key: "3-1", label: "Child Node 3-1" },
-//           {
-//             key: "3-2",
-//             label: "Child Node 3-2",
-//             children: [{ key: "3-2-1", label: "Child Node 3-2-1" }],
-//           },
-//           { key: "3-3", label: "Child Node 3-3" },
-//         ],
-//       },
-//       { key: "4", label: "Node 4" },
-//     ],
-//   },
-// ];
+
 const dig = (path = "0", level = 3) => {
 	const list = [];
 	for (let i = 0; i < 10; i += 1) {

@@ -17,7 +17,7 @@ const BreadcrumbItemStrategies = {
 	ribbon: RibbonBreadcrumb,
 };
 
-export function Breadcrumb({ type = "capsule", mode = "menu" }: BreadcrumbProps) {
+export function Breadcrumb({ type = "ribbon", mode = "menu" }: BreadcrumbProps) {
 	const { breadcrumbList, handleBreadcrumbItemClick } = useBreadcrumb();
 	const BreadcrumbComponent = BreadcrumbItemStrategies[type];
 	return (

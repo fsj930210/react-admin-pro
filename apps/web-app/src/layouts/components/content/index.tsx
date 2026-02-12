@@ -6,7 +6,7 @@ interface AppContentProps {
 }
 export const AppContent = ({ className = "" }: AppContentProps) => {
 	return (
-		<div className={`flex flex-col flex-1 bg-muted overflow-y-auto overflow-x-hidden ${className}`}>
+		<div className={`flex flex-col flex-1 bg-white overflow-y-auto overflow-x-hidden ${className}`}>
 			<div className="flex-1">
 				<Outlet />
 			</div>

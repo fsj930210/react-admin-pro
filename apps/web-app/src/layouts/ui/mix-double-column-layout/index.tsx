@@ -196,7 +196,7 @@ function SecondLevelMenu({ menus, selectedItem, onMenuItemClick }: SecondLevelMe
 					<li
 						key={item.id}
 						className={cn(
-							"flex-center h-8 cursor-pointer hover:bg-sidebar-accent hover:text-sidebar-accent-foreground my-1 mx-2 p-0 text-sm whitespace-nowrap overflow-hidden rounded-md",
+							"flex-center h-16 cursor-pointer hover:bg-sidebar-accent hover:text-sidebar-accent-foreground my-1 mx-2 p-0 text-sm whitespace-nowrap overflow-hidden rounded-md",
 							selectedItem?.id === item.id
 								? "bg-sidebar-accent text-sidebar-accent-foreground"
 								: "",
@@ -207,7 +207,8 @@ function SecondLevelMenu({ menus, selectedItem, onMenuItemClick }: SecondLevelMe
 							item={item}
 							searchKeywords={[]}
 							showBadge={false}
-							className="justify-center"
+							className="flex-col justify-center"
+							iconSize={20}
 						/>
 					</li>
 				))}

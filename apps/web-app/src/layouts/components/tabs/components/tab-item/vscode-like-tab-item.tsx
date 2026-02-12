@@ -1,6 +1,7 @@
 import { cn } from "@rap/utils";
 import { X } from "lucide-react";
 import type { LayoutTabItemProps } from "../../types";
+import Icon from "@rap/components-ui/icon";
 
 export function VscodeLikeTabItem({
 	tab,
@@ -21,7 +22,8 @@ export function VscodeLikeTabItem({
 			tabIndex={index}
 			onClick={() => onItemClick?.(tab)}
 		>
-			<span className="flex-1 pr-4 truncate text-sm" title={tab.title || ""}>
+			<span className="flex items-center gap-1 flex-1 pr-4 truncate text-sm" title={tab.title || ""}>
+				{tab.icon && <Icon icon={tab.icon} />}
 				{tab.title}
 			</span>
 			<div

@@ -6,6 +6,7 @@ import {
 	BreadcrumbPage,
 } from "@rap/components-base/breadcrumb";
 import type { BreadcrumbItemProps } from "../types";
+import Icon from "@rap/components-ui/icon";
 
 export function ParallelogramBreadcrumb({ data, onBreadcrumbItemClick }: BreadcrumbItemProps) {
 	return (
@@ -15,6 +16,7 @@ export function ParallelogramBreadcrumb({ data, onBreadcrumbItemClick }: Breadcr
 					<BreadcrumbItem key={item.id}>
 						{index === data.length - 1 ? (
 							<BreadcrumbPage className="inline-flex items-center gap-0.5 px-4 text-sm leading-[2.15] bg-layout-breadcrumb hover:bg-layout-breadcrumb-accent transition-all duration-300 parallelogram-breadcrumb">
+								{item.icon && <Icon icon={item.icon} />}
 								{item.title}
 							</BreadcrumbPage>
 						) : (
@@ -22,7 +24,10 @@ export function ParallelogramBreadcrumb({ data, onBreadcrumbItemClick }: Breadcr
 								className="inline-flex items-center gap-0.5 px-4 -mr-1.5 text-sm leading-[2.15] bg-layout-breadcrumb hover:bg-layout-breadcrumb-accent transition-all duration-300 parallelogram-breadcrumb cursor-pointer"
 								asChild
 							>
-								<span onClick={() => onBreadcrumbItemClick?.(item)}>{item.title}</span>
+								<span onClick={() => onBreadcrumbItemClick?.(item)}>
+									{item.icon && <Icon icon={item.icon} />}
+									{item.title}
+								</span>
 							</BreadcrumbLink>
 						)}
 					</BreadcrumbItem>

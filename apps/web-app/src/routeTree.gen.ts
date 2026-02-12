@@ -13,13 +13,23 @@ import { Route as layoutsRouteRouteImport } from "./pages/(layouts)/route";
 import { Route as IndexRouteImport } from "./pages/index";
 import { Route as LoginIndexRouteImport } from "./pages/login/index";
 import { Route as layoutsOverviewIndexRouteImport } from "./pages/(layouts)/overview/index";
+import { Route as layoutsNestedMenuIndexRouteImport } from "./pages/(layouts)/nested-menu/index";
 import { Route as layoutsFeaturesIndexRouteImport } from "./pages/(layouts)/features/index";
 import { Route as layoutsDashboardIndexRouteImport } from "./pages/(layouts)/dashboard/index";
 import { Route as layoutsComponentsIndexRouteImport } from "./pages/(layouts)/components/index";
+import { Route as layoutsNestedMenuNestedMenu3RouteImport } from "./pages/(layouts)/nested-menu/nested-menu-3";
+import { Route as layoutsNestedMenuNestedMenu2IndexRouteImport } from "./pages/(layouts)/nested-menu/nested-menu-2/index";
+import { Route as layoutsNestedMenuNestedMenu1IndexRouteImport } from "./pages/(layouts)/nested-menu/nested-menu-1/index";
 import { Route as layoutsFeaturesResizeIndexRouteImport } from "./pages/(layouts)/features/resize/index";
 import { Route as layoutsFeaturesPanelControlsIndexRouteImport } from "./pages/(layouts)/features/panel-controls/index";
 import { Route as layoutsFeaturesMoveIndexRouteImport } from "./pages/(layouts)/features/move/index";
 import { Route as layoutsComponentsTreeIndexRouteImport } from "./pages/(layouts)/components/tree/index";
+import { Route as layoutsNestedMenuNestedMenu2NestedMenu21RouteImport } from "./pages/(layouts)/nested-menu/nested-menu-2/nested-menu-2-1";
+import { Route as layoutsNestedMenuNestedMenu1NestedMenu13RouteImport } from "./pages/(layouts)/nested-menu/nested-menu-1/nested-menu-1-3";
+import { Route as layoutsNestedMenuNestedMenu1NestedMenu11RouteImport } from "./pages/(layouts)/nested-menu/nested-menu-1/nested-menu-1-1";
+import { Route as layoutsNestedMenuNestedMenu1NestedMenu12IndexRouteImport } from "./pages/(layouts)/nested-menu/nested-menu-1/nested-menu-1-2/index";
+import { Route as layoutsNestedMenuNestedMenu1NestedMenu12NestedMenu122RouteImport } from "./pages/(layouts)/nested-menu/nested-menu-1/nested-menu-1-2/nested-menu-1-2-2";
+import { Route as layoutsNestedMenuNestedMenu1NestedMenu12NestedMenu121RouteImport } from "./pages/(layouts)/nested-menu/nested-menu-1/nested-menu-1-2/nested-menu-1-2-1";
 
 const layoutsRouteRoute = layoutsRouteRouteImport.update({
   id: "/(layouts)",
@@ -40,6 +50,11 @@ const layoutsOverviewIndexRoute = layoutsOverviewIndexRouteImport.update({
   path: "/overview/",
   getParentRoute: () => layoutsRouteRoute,
 } as any);
+const layoutsNestedMenuIndexRoute = layoutsNestedMenuIndexRouteImport.update({
+  id: "/nested-menu/",
+  path: "/nested-menu/",
+  getParentRoute: () => layoutsRouteRoute,
+} as any);
 const layoutsFeaturesIndexRoute = layoutsFeaturesIndexRouteImport.update({
   id: "/features/",
   path: "/features/",
@@ -55,6 +70,24 @@ const layoutsComponentsIndexRoute = layoutsComponentsIndexRouteImport.update({
   path: "/components/",
   getParentRoute: () => layoutsRouteRoute,
 } as any);
+const layoutsNestedMenuNestedMenu3Route =
+  layoutsNestedMenuNestedMenu3RouteImport.update({
+    id: "/nested-menu/nested-menu-3",
+    path: "/nested-menu/nested-menu-3",
+    getParentRoute: () => layoutsRouteRoute,
+  } as any);
+const layoutsNestedMenuNestedMenu2IndexRoute =
+  layoutsNestedMenuNestedMenu2IndexRouteImport.update({
+    id: "/nested-menu/nested-menu-2/",
+    path: "/nested-menu/nested-menu-2/",
+    getParentRoute: () => layoutsRouteRoute,
+  } as any);
+const layoutsNestedMenuNestedMenu1IndexRoute =
+  layoutsNestedMenuNestedMenu1IndexRouteImport.update({
+    id: "/nested-menu/nested-menu-1/",
+    path: "/nested-menu/nested-menu-1/",
+    getParentRoute: () => layoutsRouteRoute,
+  } as any);
 const layoutsFeaturesResizeIndexRoute =
   layoutsFeaturesResizeIndexRouteImport.update({
     id: "/features/resize/",
@@ -79,83 +112,179 @@ const layoutsComponentsTreeIndexRoute =
     path: "/components/tree/",
     getParentRoute: () => layoutsRouteRoute,
   } as any);
+const layoutsNestedMenuNestedMenu2NestedMenu21Route =
+  layoutsNestedMenuNestedMenu2NestedMenu21RouteImport.update({
+    id: "/nested-menu/nested-menu-2/nested-menu-2-1",
+    path: "/nested-menu/nested-menu-2/nested-menu-2-1",
+    getParentRoute: () => layoutsRouteRoute,
+  } as any);
+const layoutsNestedMenuNestedMenu1NestedMenu13Route =
+  layoutsNestedMenuNestedMenu1NestedMenu13RouteImport.update({
+    id: "/nested-menu/nested-menu-1/nested-menu-1-3",
+    path: "/nested-menu/nested-menu-1/nested-menu-1-3",
+    getParentRoute: () => layoutsRouteRoute,
+  } as any);
+const layoutsNestedMenuNestedMenu1NestedMenu11Route =
+  layoutsNestedMenuNestedMenu1NestedMenu11RouteImport.update({
+    id: "/nested-menu/nested-menu-1/nested-menu-1-1",
+    path: "/nested-menu/nested-menu-1/nested-menu-1-1",
+    getParentRoute: () => layoutsRouteRoute,
+  } as any);
+const layoutsNestedMenuNestedMenu1NestedMenu12IndexRoute =
+  layoutsNestedMenuNestedMenu1NestedMenu12IndexRouteImport.update({
+    id: "/nested-menu/nested-menu-1/nested-menu-1-2/",
+    path: "/nested-menu/nested-menu-1/nested-menu-1-2/",
+    getParentRoute: () => layoutsRouteRoute,
+  } as any);
+const layoutsNestedMenuNestedMenu1NestedMenu12NestedMenu122Route =
+  layoutsNestedMenuNestedMenu1NestedMenu12NestedMenu122RouteImport.update({
+    id: "/nested-menu/nested-menu-1/nested-menu-1-2/nested-menu-1-2-2",
+    path: "/nested-menu/nested-menu-1/nested-menu-1-2/nested-menu-1-2-2",
+    getParentRoute: () => layoutsRouteRoute,
+  } as any);
+const layoutsNestedMenuNestedMenu1NestedMenu12NestedMenu121Route =
+  layoutsNestedMenuNestedMenu1NestedMenu12NestedMenu121RouteImport.update({
+    id: "/nested-menu/nested-menu-1/nested-menu-1-2/nested-menu-1-2-1",
+    path: "/nested-menu/nested-menu-1/nested-menu-1-2/nested-menu-1-2-1",
+    getParentRoute: () => layoutsRouteRoute,
+  } as any);
 
 export interface FileRoutesByFullPath {
   "/": typeof IndexRoute;
   "/login/": typeof LoginIndexRoute;
+  "/nested-menu/nested-menu-3": typeof layoutsNestedMenuNestedMenu3Route;
   "/components/": typeof layoutsComponentsIndexRoute;
   "/dashboard/": typeof layoutsDashboardIndexRoute;
   "/features/": typeof layoutsFeaturesIndexRoute;
+  "/nested-menu/": typeof layoutsNestedMenuIndexRoute;
   "/overview/": typeof layoutsOverviewIndexRoute;
+  "/nested-menu/nested-menu-1/nested-menu-1-1": typeof layoutsNestedMenuNestedMenu1NestedMenu11Route;
+  "/nested-menu/nested-menu-1/nested-menu-1-3": typeof layoutsNestedMenuNestedMenu1NestedMenu13Route;
+  "/nested-menu/nested-menu-2/nested-menu-2-1": typeof layoutsNestedMenuNestedMenu2NestedMenu21Route;
   "/components/tree/": typeof layoutsComponentsTreeIndexRoute;
   "/features/move/": typeof layoutsFeaturesMoveIndexRoute;
   "/features/panel-controls/": typeof layoutsFeaturesPanelControlsIndexRoute;
   "/features/resize/": typeof layoutsFeaturesResizeIndexRoute;
+  "/nested-menu/nested-menu-1/": typeof layoutsNestedMenuNestedMenu1IndexRoute;
+  "/nested-menu/nested-menu-2/": typeof layoutsNestedMenuNestedMenu2IndexRoute;
+  "/nested-menu/nested-menu-1/nested-menu-1-2/nested-menu-1-2-1": typeof layoutsNestedMenuNestedMenu1NestedMenu12NestedMenu121Route;
+  "/nested-menu/nested-menu-1/nested-menu-1-2/nested-menu-1-2-2": typeof layoutsNestedMenuNestedMenu1NestedMenu12NestedMenu122Route;
+  "/nested-menu/nested-menu-1/nested-menu-1-2/": typeof layoutsNestedMenuNestedMenu1NestedMenu12IndexRoute;
 }
 export interface FileRoutesByTo {
   "/": typeof IndexRoute;
   "/login": typeof LoginIndexRoute;
+  "/nested-menu/nested-menu-3": typeof layoutsNestedMenuNestedMenu3Route;
   "/components": typeof layoutsComponentsIndexRoute;
   "/dashboard": typeof layoutsDashboardIndexRoute;
   "/features": typeof layoutsFeaturesIndexRoute;
+  "/nested-menu": typeof layoutsNestedMenuIndexRoute;
   "/overview": typeof layoutsOverviewIndexRoute;
+  "/nested-menu/nested-menu-1/nested-menu-1-1": typeof layoutsNestedMenuNestedMenu1NestedMenu11Route;
+  "/nested-menu/nested-menu-1/nested-menu-1-3": typeof layoutsNestedMenuNestedMenu1NestedMenu13Route;
+  "/nested-menu/nested-menu-2/nested-menu-2-1": typeof layoutsNestedMenuNestedMenu2NestedMenu21Route;
   "/components/tree": typeof layoutsComponentsTreeIndexRoute;
   "/features/move": typeof layoutsFeaturesMoveIndexRoute;
   "/features/panel-controls": typeof layoutsFeaturesPanelControlsIndexRoute;
   "/features/resize": typeof layoutsFeaturesResizeIndexRoute;
+  "/nested-menu/nested-menu-1": typeof layoutsNestedMenuNestedMenu1IndexRoute;
+  "/nested-menu/nested-menu-2": typeof layoutsNestedMenuNestedMenu2IndexRoute;
+  "/nested-menu/nested-menu-1/nested-menu-1-2/nested-menu-1-2-1": typeof layoutsNestedMenuNestedMenu1NestedMenu12NestedMenu121Route;
+  "/nested-menu/nested-menu-1/nested-menu-1-2/nested-menu-1-2-2": typeof layoutsNestedMenuNestedMenu1NestedMenu12NestedMenu122Route;
+  "/nested-menu/nested-menu-1/nested-menu-1-2": typeof layoutsNestedMenuNestedMenu1NestedMenu12IndexRoute;
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport;
   "/": typeof IndexRoute;
   "/(layouts)": typeof layoutsRouteRouteWithChildren;
   "/login/": typeof LoginIndexRoute;
+  "/(layouts)/nested-menu/nested-menu-3": typeof layoutsNestedMenuNestedMenu3Route;
   "/(layouts)/components/": typeof layoutsComponentsIndexRoute;
   "/(layouts)/dashboard/": typeof layoutsDashboardIndexRoute;
   "/(layouts)/features/": typeof layoutsFeaturesIndexRoute;
+  "/(layouts)/nested-menu/": typeof layoutsNestedMenuIndexRoute;
   "/(layouts)/overview/": typeof layoutsOverviewIndexRoute;
+  "/(layouts)/nested-menu/nested-menu-1/nested-menu-1-1": typeof layoutsNestedMenuNestedMenu1NestedMenu11Route;
+  "/(layouts)/nested-menu/nested-menu-1/nested-menu-1-3": typeof layoutsNestedMenuNestedMenu1NestedMenu13Route;
+  "/(layouts)/nested-menu/nested-menu-2/nested-menu-2-1": typeof layoutsNestedMenuNestedMenu2NestedMenu21Route;
   "/(layouts)/components/tree/": typeof layoutsComponentsTreeIndexRoute;
   "/(layouts)/features/move/": typeof layoutsFeaturesMoveIndexRoute;
   "/(layouts)/features/panel-controls/": typeof layoutsFeaturesPanelControlsIndexRoute;
   "/(layouts)/features/resize/": typeof layoutsFeaturesResizeIndexRoute;
+  "/(layouts)/nested-menu/nested-menu-1/": typeof layoutsNestedMenuNestedMenu1IndexRoute;
+  "/(layouts)/nested-menu/nested-menu-2/": typeof layoutsNestedMenuNestedMenu2IndexRoute;
+  "/(layouts)/nested-menu/nested-menu-1/nested-menu-1-2/nested-menu-1-2-1": typeof layoutsNestedMenuNestedMenu1NestedMenu12NestedMenu121Route;
+  "/(layouts)/nested-menu/nested-menu-1/nested-menu-1-2/nested-menu-1-2-2": typeof layoutsNestedMenuNestedMenu1NestedMenu12NestedMenu122Route;
+  "/(layouts)/nested-menu/nested-menu-1/nested-menu-1-2/": typeof layoutsNestedMenuNestedMenu1NestedMenu12IndexRoute;
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath;
   fullPaths:
     | "/"
     | "/login/"
+    | "/nested-menu/nested-menu-3"
     | "/components/"
     | "/dashboard/"
     | "/features/"
+    | "/nested-menu/"
     | "/overview/"
+    | "/nested-menu/nested-menu-1/nested-menu-1-1"
+    | "/nested-menu/nested-menu-1/nested-menu-1-3"
+    | "/nested-menu/nested-menu-2/nested-menu-2-1"
     | "/components/tree/"
     | "/features/move/"
     | "/features/panel-controls/"
-    | "/features/resize/";
+    | "/features/resize/"
+    | "/nested-menu/nested-menu-1/"
+    | "/nested-menu/nested-menu-2/"
+    | "/nested-menu/nested-menu-1/nested-menu-1-2/nested-menu-1-2-1"
+    | "/nested-menu/nested-menu-1/nested-menu-1-2/nested-menu-1-2-2"
+    | "/nested-menu/nested-menu-1/nested-menu-1-2/";
   fileRoutesByTo: FileRoutesByTo;
   to:
     | "/"
     | "/login"
+    | "/nested-menu/nested-menu-3"
     | "/components"
     | "/dashboard"
     | "/features"
+    | "/nested-menu"
     | "/overview"
+    | "/nested-menu/nested-menu-1/nested-menu-1-1"
+    | "/nested-menu/nested-menu-1/nested-menu-1-3"
+    | "/nested-menu/nested-menu-2/nested-menu-2-1"
     | "/components/tree"
     | "/features/move"
     | "/features/panel-controls"
-    | "/features/resize";
+    | "/features/resize"
+    | "/nested-menu/nested-menu-1"
+    | "/nested-menu/nested-menu-2"
+    | "/nested-menu/nested-menu-1/nested-menu-1-2/nested-menu-1-2-1"
+    | "/nested-menu/nested-menu-1/nested-menu-1-2/nested-menu-1-2-2"
+    | "/nested-menu/nested-menu-1/nested-menu-1-2";
   id:
     | "__root__"
     | "/"
     | "/(layouts)"
     | "/login/"
+    | "/(layouts)/nested-menu/nested-menu-3"
     | "/(layouts)/components/"
     | "/(layouts)/dashboard/"
     | "/(layouts)/features/"
+    | "/(layouts)/nested-menu/"
     | "/(layouts)/overview/"
+    | "/(layouts)/nested-menu/nested-menu-1/nested-menu-1-1"
+    | "/(layouts)/nested-menu/nested-menu-1/nested-menu-1-3"
+    | "/(layouts)/nested-menu/nested-menu-2/nested-menu-2-1"
     | "/(layouts)/components/tree/"
     | "/(layouts)/features/move/"
     | "/(layouts)/features/panel-controls/"
-    | "/(layouts)/features/resize/";
+    | "/(layouts)/features/resize/"
+    | "/(layouts)/nested-menu/nested-menu-1/"
+    | "/(layouts)/nested-menu/nested-menu-2/"
+    | "/(layouts)/nested-menu/nested-menu-1/nested-menu-1-2/nested-menu-1-2-1"
+    | "/(layouts)/nested-menu/nested-menu-1/nested-menu-1-2/nested-menu-1-2-2"
+    | "/(layouts)/nested-menu/nested-menu-1/nested-menu-1-2/";
   fileRoutesById: FileRoutesById;
 }
 export interface RootRouteChildren {
@@ -194,6 +323,13 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof layoutsOverviewIndexRouteImport;
       parentRoute: typeof layoutsRouteRoute;
     };
+    "/(layouts)/nested-menu/": {
+      id: "/(layouts)/nested-menu/";
+      path: "/nested-menu";
+      fullPath: "/nested-menu/";
+      preLoaderRoute: typeof layoutsNestedMenuIndexRouteImport;
+      parentRoute: typeof layoutsRouteRoute;
+    };
     "/(layouts)/features/": {
       id: "/(layouts)/features/";
       path: "/features";
@@ -213,6 +349,27 @@ declare module "@tanstack/react-router" {
       path: "/components";
       fullPath: "/components/";
       preLoaderRoute: typeof layoutsComponentsIndexRouteImport;
+      parentRoute: typeof layoutsRouteRoute;
+    };
+    "/(layouts)/nested-menu/nested-menu-3": {
+      id: "/(layouts)/nested-menu/nested-menu-3";
+      path: "/nested-menu/nested-menu-3";
+      fullPath: "/nested-menu/nested-menu-3";
+      preLoaderRoute: typeof layoutsNestedMenuNestedMenu3RouteImport;
+      parentRoute: typeof layoutsRouteRoute;
+    };
+    "/(layouts)/nested-menu/nested-menu-2/": {
+      id: "/(layouts)/nested-menu/nested-menu-2/";
+      path: "/nested-menu/nested-menu-2";
+      fullPath: "/nested-menu/nested-menu-2/";
+      preLoaderRoute: typeof layoutsNestedMenuNestedMenu2IndexRouteImport;
+      parentRoute: typeof layoutsRouteRoute;
+    };
+    "/(layouts)/nested-menu/nested-menu-1/": {
+      id: "/(layouts)/nested-menu/nested-menu-1/";
+      path: "/nested-menu/nested-menu-1";
+      fullPath: "/nested-menu/nested-menu-1/";
+      preLoaderRoute: typeof layoutsNestedMenuNestedMenu1IndexRouteImport;
       parentRoute: typeof layoutsRouteRoute;
     };
     "/(layouts)/features/resize/": {
@@ -243,30 +400,100 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof layoutsComponentsTreeIndexRouteImport;
       parentRoute: typeof layoutsRouteRoute;
     };
+    "/(layouts)/nested-menu/nested-menu-2/nested-menu-2-1": {
+      id: "/(layouts)/nested-menu/nested-menu-2/nested-menu-2-1";
+      path: "/nested-menu/nested-menu-2/nested-menu-2-1";
+      fullPath: "/nested-menu/nested-menu-2/nested-menu-2-1";
+      preLoaderRoute: typeof layoutsNestedMenuNestedMenu2NestedMenu21RouteImport;
+      parentRoute: typeof layoutsRouteRoute;
+    };
+    "/(layouts)/nested-menu/nested-menu-1/nested-menu-1-3": {
+      id: "/(layouts)/nested-menu/nested-menu-1/nested-menu-1-3";
+      path: "/nested-menu/nested-menu-1/nested-menu-1-3";
+      fullPath: "/nested-menu/nested-menu-1/nested-menu-1-3";
+      preLoaderRoute: typeof layoutsNestedMenuNestedMenu1NestedMenu13RouteImport;
+      parentRoute: typeof layoutsRouteRoute;
+    };
+    "/(layouts)/nested-menu/nested-menu-1/nested-menu-1-1": {
+      id: "/(layouts)/nested-menu/nested-menu-1/nested-menu-1-1";
+      path: "/nested-menu/nested-menu-1/nested-menu-1-1";
+      fullPath: "/nested-menu/nested-menu-1/nested-menu-1-1";
+      preLoaderRoute: typeof layoutsNestedMenuNestedMenu1NestedMenu11RouteImport;
+      parentRoute: typeof layoutsRouteRoute;
+    };
+    "/(layouts)/nested-menu/nested-menu-1/nested-menu-1-2/": {
+      id: "/(layouts)/nested-menu/nested-menu-1/nested-menu-1-2/";
+      path: "/nested-menu/nested-menu-1/nested-menu-1-2";
+      fullPath: "/nested-menu/nested-menu-1/nested-menu-1-2/";
+      preLoaderRoute: typeof layoutsNestedMenuNestedMenu1NestedMenu12IndexRouteImport;
+      parentRoute: typeof layoutsRouteRoute;
+    };
+    "/(layouts)/nested-menu/nested-menu-1/nested-menu-1-2/nested-menu-1-2-2": {
+      id: "/(layouts)/nested-menu/nested-menu-1/nested-menu-1-2/nested-menu-1-2-2";
+      path: "/nested-menu/nested-menu-1/nested-menu-1-2/nested-menu-1-2-2";
+      fullPath: "/nested-menu/nested-menu-1/nested-menu-1-2/nested-menu-1-2-2";
+      preLoaderRoute: typeof layoutsNestedMenuNestedMenu1NestedMenu12NestedMenu122RouteImport;
+      parentRoute: typeof layoutsRouteRoute;
+    };
+    "/(layouts)/nested-menu/nested-menu-1/nested-menu-1-2/nested-menu-1-2-1": {
+      id: "/(layouts)/nested-menu/nested-menu-1/nested-menu-1-2/nested-menu-1-2-1";
+      path: "/nested-menu/nested-menu-1/nested-menu-1-2/nested-menu-1-2-1";
+      fullPath: "/nested-menu/nested-menu-1/nested-menu-1-2/nested-menu-1-2-1";
+      preLoaderRoute: typeof layoutsNestedMenuNestedMenu1NestedMenu12NestedMenu121RouteImport;
+      parentRoute: typeof layoutsRouteRoute;
+    };
   }
 }
 
 interface layoutsRouteRouteChildren {
+  layoutsNestedMenuNestedMenu3Route: typeof layoutsNestedMenuNestedMenu3Route;
   layoutsComponentsIndexRoute: typeof layoutsComponentsIndexRoute;
   layoutsDashboardIndexRoute: typeof layoutsDashboardIndexRoute;
   layoutsFeaturesIndexRoute: typeof layoutsFeaturesIndexRoute;
+  layoutsNestedMenuIndexRoute: typeof layoutsNestedMenuIndexRoute;
   layoutsOverviewIndexRoute: typeof layoutsOverviewIndexRoute;
+  layoutsNestedMenuNestedMenu1NestedMenu11Route: typeof layoutsNestedMenuNestedMenu1NestedMenu11Route;
+  layoutsNestedMenuNestedMenu1NestedMenu13Route: typeof layoutsNestedMenuNestedMenu1NestedMenu13Route;
+  layoutsNestedMenuNestedMenu2NestedMenu21Route: typeof layoutsNestedMenuNestedMenu2NestedMenu21Route;
   layoutsComponentsTreeIndexRoute: typeof layoutsComponentsTreeIndexRoute;
   layoutsFeaturesMoveIndexRoute: typeof layoutsFeaturesMoveIndexRoute;
   layoutsFeaturesPanelControlsIndexRoute: typeof layoutsFeaturesPanelControlsIndexRoute;
   layoutsFeaturesResizeIndexRoute: typeof layoutsFeaturesResizeIndexRoute;
+  layoutsNestedMenuNestedMenu1IndexRoute: typeof layoutsNestedMenuNestedMenu1IndexRoute;
+  layoutsNestedMenuNestedMenu2IndexRoute: typeof layoutsNestedMenuNestedMenu2IndexRoute;
+  layoutsNestedMenuNestedMenu1NestedMenu12NestedMenu121Route: typeof layoutsNestedMenuNestedMenu1NestedMenu12NestedMenu121Route;
+  layoutsNestedMenuNestedMenu1NestedMenu12NestedMenu122Route: typeof layoutsNestedMenuNestedMenu1NestedMenu12NestedMenu122Route;
+  layoutsNestedMenuNestedMenu1NestedMenu12IndexRoute: typeof layoutsNestedMenuNestedMenu1NestedMenu12IndexRoute;
 }
 
 const layoutsRouteRouteChildren: layoutsRouteRouteChildren = {
+  layoutsNestedMenuNestedMenu3Route: layoutsNestedMenuNestedMenu3Route,
   layoutsComponentsIndexRoute: layoutsComponentsIndexRoute,
   layoutsDashboardIndexRoute: layoutsDashboardIndexRoute,
   layoutsFeaturesIndexRoute: layoutsFeaturesIndexRoute,
+  layoutsNestedMenuIndexRoute: layoutsNestedMenuIndexRoute,
   layoutsOverviewIndexRoute: layoutsOverviewIndexRoute,
+  layoutsNestedMenuNestedMenu1NestedMenu11Route:
+    layoutsNestedMenuNestedMenu1NestedMenu11Route,
+  layoutsNestedMenuNestedMenu1NestedMenu13Route:
+    layoutsNestedMenuNestedMenu1NestedMenu13Route,
+  layoutsNestedMenuNestedMenu2NestedMenu21Route:
+    layoutsNestedMenuNestedMenu2NestedMenu21Route,
   layoutsComponentsTreeIndexRoute: layoutsComponentsTreeIndexRoute,
   layoutsFeaturesMoveIndexRoute: layoutsFeaturesMoveIndexRoute,
   layoutsFeaturesPanelControlsIndexRoute:
     layoutsFeaturesPanelControlsIndexRoute,
   layoutsFeaturesResizeIndexRoute: layoutsFeaturesResizeIndexRoute,
+  layoutsNestedMenuNestedMenu1IndexRoute:
+    layoutsNestedMenuNestedMenu1IndexRoute,
+  layoutsNestedMenuNestedMenu2IndexRoute:
+    layoutsNestedMenuNestedMenu2IndexRoute,
+  layoutsNestedMenuNestedMenu1NestedMenu12NestedMenu121Route:
+    layoutsNestedMenuNestedMenu1NestedMenu12NestedMenu121Route,
+  layoutsNestedMenuNestedMenu1NestedMenu12NestedMenu122Route:
+    layoutsNestedMenuNestedMenu1NestedMenu12NestedMenu122Route,
+  layoutsNestedMenuNestedMenu1NestedMenu12IndexRoute:
+    layoutsNestedMenuNestedMenu1NestedMenu12IndexRoute,
 };
 
 const layoutsRouteRouteWithChildren = layoutsRouteRoute._addFileChildren(

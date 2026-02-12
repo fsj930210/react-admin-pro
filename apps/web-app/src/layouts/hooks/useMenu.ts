@@ -60,7 +60,7 @@ export function useMenu({ menuService, multiOpen = false }: UseMenuServiceParams
 			}
 		});
 	};
-	const handleMenuItemClick = (menuItem: MenuItem | null) => {
+		const handleMenuItemClick = (menuItem: MenuItem | null) => {
 		if (!menuItem) return;
 		if (menuItem.type === "dir") {
 			toggleMenuOpen(menuItem.id);

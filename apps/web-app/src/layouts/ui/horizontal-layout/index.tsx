@@ -86,7 +86,7 @@ function HorizontalMenuItem({ item, onMenuItemClick }: HorizontalMenuItemProps) 
 				sideOffset={2}
 			>
 				<div className="px-4 py-2 text-sm font-medium text-foreground/80 hover:text-foreground hover:bg-accent rounded-md transition-colors flex items-center gap-1 cursor-pointer">
-					<MenuItemContent item={item} showBadge={false} />
+					<MenuItemContent item={item} showBadge={false}  />
 					{children && (
 						<ChevronDown
 							className={cn(

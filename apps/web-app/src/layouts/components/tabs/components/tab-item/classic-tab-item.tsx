@@ -1,6 +1,7 @@
 import { cn } from "@rap/utils";
 import { X } from "lucide-react";
 import type { LayoutTabItemProps } from "../../types";
+import Icon from "@rap/components-ui/icon";
 
 export function ClassicTabItem({ tab, active, index, onClose, onItemClick }: LayoutTabItemProps) {
 	return (
@@ -16,7 +17,8 @@ export function ClassicTabItem({ tab, active, index, onClose, onItemClick }: Lay
 			role="tab"
 			onClick={() => onItemClick?.(tab)}
 		>
-			<span className="flex-1 truncate text-sm text-left pr-4" title={tab.title || ""}>
+			<span className="flex items-center gap-1 flex-1 truncate text-sm text-left pr-4" title={tab.title || ""}>
+				{tab.icon && <Icon icon={tab.icon} />}
 				{tab.title}
 			</span>
 

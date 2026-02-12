@@ -1,6 +1,7 @@
 import { cn } from "@rap/utils";
 import { X } from "lucide-react";
 import type { LayoutTabItemProps } from "../../types";
+import Icon from "@rap/components-ui/icon";
 
 export function TrapezoidTabItem({ tab, active, index, onItemClick, onClose }: LayoutTabItemProps) {
 	return (
@@ -16,9 +17,10 @@ export function TrapezoidTabItem({ tab, active, index, onItemClick, onClose }: L
 				)}
 			>
 				<span
-					className="relative w-30 text-center z-2 truncate text-sm cursor-pointer"
+					className="flex items-center gap-1 relative w-30 text-center z-2 truncate text-sm cursor-pointer"
 					title={tab.title || ""}
 				>
+					{tab.icon && <Icon icon={tab.icon} />}
 					{tab.title}
 				</span>
 				<div

@@ -60,7 +60,7 @@ const LayoutComponentStrategies = {
 interface LayoutProps {
 	type?: LayoutType;
 }
-function Layout({ type = "double-column" }: LayoutProps) {
+function Layout({ type = "vertical" }: LayoutProps) {
 	const queryResults = useQueries({
 		queries: [
 			{

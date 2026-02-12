@@ -12,6 +12,7 @@ import {
 	ThemeSwitchFeature,
 	UserCenterFeature,
 } from "./features";
+import { LayoutTabs } from "../tabs";
 
 type AppHeaderFeatures =
 	| "logo"
@@ -67,14 +68,19 @@ export function AppHeader({
 	};
 
 	return (
-		<header className={cn("flex items-center justify-between h-11 w-full px-2", className)}>
-			<div className="flex items-center gap-2">
-				{leftRender ?? leftFeatures.map((feature, index) => renderFeature(feature, index))}
-			</div>
+		<>
+			<header className={cn("flex items-center justify-between h-11 w-full px-2", className)}>
+				<div className="flex items-center gap-2">
+					{leftRender ?? leftFeatures.map((feature, index) => renderFeature(feature, index))}
+				</div>
 
-			<div className="flex items-center gap-2">
-				{rightRender ?? rightFeatures.map((feature, index) => renderFeature(feature, index))}
+				<div className="flex items-center gap-2">
+					{rightRender ?? rightFeatures.map((feature, index) => renderFeature(feature, index))}
+				</div>
+			</header>
+			<div className="w-full h-9 bg-layout-tabs border-t border-layout-tabs-border">
+				<LayoutTabs />
 			</div>
-		</header>
+		</>
 	);
 }

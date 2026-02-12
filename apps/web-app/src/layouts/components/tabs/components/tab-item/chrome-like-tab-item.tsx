@@ -4,6 +4,7 @@ import { cn } from "@rap/utils";
 import { X } from "lucide-react";
 import type { LayoutTabItemProps } from "../../types";
 import "./chrome-like-tab-item.css";
+import Icon from "@rap/components-ui/icon";
 
 function ChromeTabBackground() {
 	return (
@@ -70,8 +71,9 @@ export function ChromeLikeTabItem({
 			</div>
 			<div className="absolute top-0 bottom-0 left-0 right-0 p-1">
 				<div className="flex items-center h-full px-1 text-layout-tabs-foreground hover:text-layout-tabs-primary-foreground hover:bg-layout-tabs-accent group-[.active]:text-layout-tabs-primary-foreground group-[.active]:hover:text-layout-tabs-primary-foreground group-[.active]:hover:bg-layout-tabs-primary leading-none overflow-hidden rounded-md">
-					<span className="flex-1 truncate text-sm" title={tab.title || ""}>
-						{tab.title}
+					<span className="flex items-center gap-1 flex-1 text-sm" title={tab.title || ""}>
+						{tab.icon && <Icon icon={tab.icon} />}
+						<span className="max-w-17 truncate">{tab.title}</span>
 					</span>
 					{onClose && (
 						<button

@@ -6,6 +6,7 @@ import {
 	BreadcrumbPage,
 } from "@rap/components-base/breadcrumb";
 import type { BreadcrumbItemProps } from "../types";
+import Icon from "@rap/components-ui/icon";
 
 export function CapsuleBreadcrumb({ data, onBreadcrumbItemClick }: BreadcrumbItemProps) {
 	return (
@@ -20,6 +21,7 @@ export function CapsuleBreadcrumb({ data, onBreadcrumbItemClick }: BreadcrumbIte
 					>
 						{index === data.length - 1 ? (
 							<BreadcrumbPage className="inline-flex items-center gap-0.5 px-4 border border-layout-breadcrumb-border rounded-full text-sm leading-loose bg-layout-breadcrumb hover:bg-layout-breadcrumb-accent transition-all duration-300 group-not-first:pl-6">
+								{item.icon && <Icon icon={item.icon} />}
 								{item.title}
 							</BreadcrumbPage>
 						) : (
@@ -27,7 +29,10 @@ export function CapsuleBreadcrumb({ data, onBreadcrumbItemClick }: BreadcrumbIte
 								className="inline-flex items-center gap-0.5 px-4 border border-layout-breadcrumb-border rounded-full text-sm leading-loose bg-layout-breadcrumb hover:bg-layout-breadcrumb-accent transition-all duration-300 group-not-first:pl-6 cursor-pointer"
 								asChild
 							>
-								<span onClick={() => onBreadcrumbItemClick?.(item)}>{item.title}</span>
+								<span onClick={() => onBreadcrumbItemClick?.(item)}>
+									{item.icon && <Icon icon={item.icon} />}
+									{item.title}
+								</span>
 							</BreadcrumbLink>
 						)}
 					</BreadcrumbItem>
