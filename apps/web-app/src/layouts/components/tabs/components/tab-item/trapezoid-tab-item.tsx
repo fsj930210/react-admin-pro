@@ -17,7 +17,7 @@ export function TrapezoidTabItem({ tab, active, index, onItemClick, onClose }: L
 				)}
 			>
 				<span
-					className="flex items-center gap-1 relative w-30 text-center z-2 truncate text-sm cursor-pointer"
+					className="flex items-center justify-center gap-1 relative w-30 z-2 truncate text-sm cursor-pointer"
 					title={tab.title || ""}
 				>
 					{tab.icon && <Icon icon={tab.icon} />}

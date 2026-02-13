@@ -4,6 +4,7 @@ import {
 	SidebarFooter,
 	SidebarInset,
 	SidebarProvider,
+	SidebarRail,
 	useSidebar,
 } from "@rap/components-base/sidebar/index";
 import { cn } from "@rap/utils";
@@ -153,6 +154,7 @@ function MixVerticalLayoutSidebar({ menus }: MixVerticalLayoutSidebarProps) {
 					)}
 				</button>
 			</SidebarFooter>
+			<SidebarRail />
 		</Sidebar>
 	) : null;
 }

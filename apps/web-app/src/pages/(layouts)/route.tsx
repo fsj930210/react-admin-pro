@@ -10,36 +10,18 @@ import { SideLayout} from "@/layouts/ui/side-layout";
 import { VerticalLayout } from "@/layouts/ui/vertical-layout";
 import { FullscreenLayout } from "@/layouts/ui/fullscreen-layout";
 import { fetchUserInfo, fetchUserMenus } from "@/service/auth";
+import { DoubleColumnLayoutSkeleton } from "@/layouts/ui/double-column-layout/skeleton";
+import { VerticalLayoutSkeleton } from "@/layouts/ui/vertical-layout/skeleton";
+import { SideLayoutSkeleton } from "@/layouts/ui/side-layout/skeleton";
+import { HorizontalLayoutSkeleton } from "@/layouts/ui/horizontal-layout/skeleton";
+import { FullscreenLayoutSkeleton } from "@/layouts/ui/fullscreen-layout/skeleton";
+import { MixVerticalLayoutSkeleton } from "@/layouts/ui/mix-vertical-layout/skeleton";
+import { MixDoubleColumnLayoutSkeleton } from "@/layouts/ui/mix-double-column-layout/skeleton";
 
 export const Route = createFileRoute("/(layouts)")({
 	component: Layout,
 });
 
-// function LayoutSkeleton() {
-// 	return (
-// 		<>
-// 			<BaseSidebar collapsible="icon">
-// 				<SidebarHeader logo={`${APP_BASE_PATH}/logo.svg`}  />
-// 				<SidebarContent className="p-2">
-// 					<SidebarSkeleton />
-// 				</SidebarContent>
-// 				<SidebarFooter />
-// 				<SidebarRail />
-// 			</BaseSidebar>
-// 			<SidebarInset className="overflow-x-hidden min-w-0 p-6">
-// 				<div className="h-9 space-y-2">
-// 					<TabsSkeleton />
-// 				</div>
-// 				<div className="h-9.5 bg-background mt-4 space-y-2">
-// 					<BreadcrumbSkeleton />
-// 				</div>
-// 				<div className="min-h-screen flex-1 rounded-xl md:min-h-min">
-// 					<ContentSkeleton />
-// 				</div>
-// 			</SidebarInset>
-// 		</>
-// 	);
-// }
 type LayoutType =
 	| "horizontal"
 	| "vertical"
@@ -48,14 +30,24 @@ type LayoutType =
 	| "mix-vertical"
 	| "mix-double-column"
 	| "fullscreen";
+
 const LayoutComponentStrategies = {
 	horizontal: HorizontalLayout,
 	vertical: VerticalLayout,
-	"double-column": DoubleColumnLayout,
+	fullscreen: FullscreenLayout,
 	side: SideLayout,
+	"double-column": DoubleColumnLayout,
 	"mix-vertical": MixVerticalLayout,
 	"mix-double-column": MixDoubleColumnLayout,
-	"fullscreen": FullscreenLayout,
+};
+const LayoutSkeletonStrategies = {
+	horizontal: HorizontalLayoutSkeleton,
+	vertical: VerticalLayoutSkeleton,
+	side: SideLayoutSkeleton,
+	fullscreen: FullscreenLayoutSkeleton,
+	"double-column": DoubleColumnLayoutSkeleton,
+	"mix-vertical": MixVerticalLayoutSkeleton,
+	"mix-double-column": MixDoubleColumnLayoutSkeleton,
 };
 interface LayoutProps {
 	type?: LayoutType;
@@ -79,13 +71,14 @@ function Layout({ type = "vertical" }: LayoutProps) {
 	const loading = queryResults.some((result) => result.isLoading);
 	const menuService = new MenuService(menus);
 	const LayoutComponent = LayoutComponentStrategies[type] || LayoutComponentStrategies["vertical"];
+	const LayoutSkeleton = LayoutSkeletonStrategies[type] || LayoutSkeletonStrategies["vertical"];
 	return (
-		<>
-			{loading ? null : (
-				<LayoutProvider menuService={menuService} userMenus={menus} userInfo={userInfo}>
-					<LayoutComponent />
-				</LayoutProvider>
+		<LayoutProvider menuService={menuService} userMenus={menus} userInfo={userInfo}>
+			{loading ? (
+				<LayoutSkeleton />
+			) : (
+				<LayoutComponent />
 			)}
-		</>
+		</LayoutProvider>
 	);
 }

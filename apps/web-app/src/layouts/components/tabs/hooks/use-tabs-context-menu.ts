@@ -15,19 +15,13 @@ export function useTabsContextMenu({
 	// 关闭当前标签页
 	const handleCloseTab = (tabId: string) => {
 		updateTabs((tabs) => {
-			// 找到要关闭的标签页索引
 			const tabIndex = tabs.findIndex((tab) => tab.id === tabId);
-
-			// 如果是最后一个标签页，不允许关闭
 			if (tabs.length <= 1) return tabs;
-
-			// 如果关闭的是当前选中的标签页，选择下一个或上一个标签页
 			if (activeTab?.id === tabId) {
 				const nextTabIndex = tabIndex < tabs.length - 1 ? tabIndex : tabIndex - 1;
 				setActiveTab(tabs[nextTabIndex]);
+				// todo: 跳转到新的标签页
 			}
-
-			// 移除标签页
 			return tabs.filter((tab) => tab.id !== tabId);
 		});
 	};
@@ -42,12 +36,10 @@ export function useTabsContextMenu({
 			const isPinning = !tabToPin.pinned;
 
 			if (isPinning) {
-				// 固定标签页：添加到固定标签页列表的前面
 				const pinnedTabs = newTabs.filter((tab) => tab.pinned);
 				const nonFixedTabs = newTabs.filter((tab) => !tab.pinned);
 				return [{ ...tabToPin, pinned: true }, ...pinnedTabs, ...nonFixedTabs];
 			} else {
-				// 取消固定标签页：添加到非固定标签页列表的后面
 				const pinnedTabs = newTabs.filter((tab) => tab.pinned);
 				const nonFixedTabs = newTabs.filter((tab) => !tab.pinned);
 				return [...pinnedTabs, ...nonFixedTabs, { ...tabToPin, pinned: false }];

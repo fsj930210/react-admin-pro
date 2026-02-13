@@ -4,14 +4,13 @@ import {
 	SidebarFooter,
 	SidebarInset,
 	SidebarProvider,
+	SidebarRail,
 	useSidebar,
 } from "@rap/components-base/sidebar";
-import { Logo } from "@rap/components-ui/logo";
 import { cn } from "@rap/utils";
 import { useNavigate, useRouterState } from "@tanstack/react-router";
 import { ChevronsLeft, ChevronsRight } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import { APP_BASE_PATH } from "@/config";
 import { AppContent } from "@/layouts/components/content";
 import { AppHeader } from "@/layouts/components/header";
 import { MenuItemContent } from "@/layouts/components/menu/menu-item-content";
@@ -20,6 +19,7 @@ import { User } from "@/layouts/components/sidebar/sidebar-user";
 import { useLayout } from "@/layouts/context/layout-context";
 import { MenuService } from "@/layouts/service/menuService";
 import type { MenuItem } from "@/layouts/types";
+import { AppLogo } from "@/components/app/logo";
 
 export function DoubleColumnLayout() {
 	const navigate = useNavigate();
@@ -81,14 +81,14 @@ interface FirstLevelMenuProps {
 }
 function FirstLevelMenu({ menus, selectedItem, onMenuItemClick }: FirstLevelMenuProps) {
 	return (
-		<div className="flex flex-col items-center py-2 w-25 h-full border-r">
-			<Logo url={`${APP_BASE_PATH}/logo.svg`} showTitle={false} />
+		<div className="flex flex-col items-center py-2 w-22 h-full border-r">
+			<AppLogo showTitle={false} />
 			<ol className="flex flex-col flex-1 w-full mt-2">
 				{menus.map((item) => (
 					<li
 						key={item.id}
 						className={cn(
-							"flex-center h-16 cursor-pointer hover:bg-sidebar-accent hover:text-sidebar-accent-foreground my-1 mx-2 p-0 text-sm whitespace-nowrap overflow-hidden rounded-md",
+							"flex-center h-15 cursor-pointer hover:bg-sidebar-accent hover:text-sidebar-accent-foreground my-1 mx-2 p-0 text-sm whitespace-nowrap overflow-hidden rounded-md",
 							selectedItem?.id === item.id
 								? "bg-sidebar-accent text-sidebar-accent-foreground"
 								: "",
@@ -131,7 +131,7 @@ function DoubleColumnLayoutSidebar({
 				selectedItem={selectedFistLevelMenu}
 			/>
 			{secondLevelMenus.length > 0 && (
-				<Sidebar collapsible="icon" className={`h-full left-25 flex-1 transition-all duration-300`}>
+				<Sidebar collapsible="icon" className={`h-full left-22 flex-1 transition-all duration-300`}>
 					<SidebarContent>
 						<SidebarMain menus={secondLevelMenus} showSearch={false} />
 					</SidebarContent>
@@ -147,6 +147,7 @@ function DoubleColumnLayoutSidebar({
 							)}
 						</button>
 					</SidebarFooter>
+					<SidebarRail />
 				</Sidebar>
 			)}
 		</div>

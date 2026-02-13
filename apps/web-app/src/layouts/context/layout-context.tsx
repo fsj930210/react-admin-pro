@@ -6,6 +6,7 @@ import type { MenuItem } from "../types";
 interface LayoutContextValue {
 	menuService: MenuService;
 	userMenus: MenuItem[];
+	userInfo: IUserInfoResponseData | null;
 }
 
 const LayoutContext = createContext<LayoutContextValue | undefined>(undefined);

@@ -18,6 +18,11 @@
 			transition: background-color 0.2s ease-in-out;
 		}
 	}
+	&.active {
+		&::after {
+			opacity: 0;
+		}
+	}
 }
 @media (hover: hover) {
 	.layout-tabs-chrome-tab-item:not(.active) {

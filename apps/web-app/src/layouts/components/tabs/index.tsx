@@ -12,7 +12,7 @@ import { useTabs } from "./hooks/use-tabs";
 import { useTabsScroll } from "./hooks/use-tabs-scroll";
 import type { LayoutTabItem, TabType } from "./types";
 
-export interface LayoutTabsProps {
+export interface AppTabsProps {
 	sortable?: boolean;
 	tabType?: TabType;
 }
@@ -25,7 +25,7 @@ const TabItemStrategies = {
 	trapezoid: TrapezoidTabItem,
 };
 
-export function LayoutTabs({ sortable = true, tabType = "chrome" }: LayoutTabsProps) {
+export function AppTabs({ sortable = true, tabType = "chrome" }: AppTabsProps) {
 	const { tabs, activeTab, setTabs, handleTabItemClick, setActiveTab, handleCloseTab } = useTabs();
 
 	const {
@@ -50,7 +50,7 @@ export function LayoutTabs({ sortable = true, tabType = "chrome" }: LayoutTabsPr
 
 	return (
 		<div
-			className={cn("relative flex h-full", {
+			className={cn("relative flex h-9 bg-layout-tabs", {
 				"border-b border-solid border-layout-tabs-border":
 					tabType !== "chrome" && tabType !== "trapezoid",
 			})}

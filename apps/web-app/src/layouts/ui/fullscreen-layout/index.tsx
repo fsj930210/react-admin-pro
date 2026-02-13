@@ -4,7 +4,7 @@ import { SidebarInset } from "@rap/components-base/sidebar/index";
 export function FullscreenLayout  ()  {
 	return (
 		<SidebarInset>
-			<AppContent />
+			<AppContent showTabs={false} />
 		</SidebarInset>
 	);
 };

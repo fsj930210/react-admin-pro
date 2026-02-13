@@ -4,6 +4,7 @@ import {
 	SidebarFooter,
 	SidebarInset,
 	SidebarProvider,
+	SidebarRail,
 	useSidebar,
 } from "@rap/components-base/sidebar";
 import { cn } from "@rap/utils";
@@ -90,7 +91,7 @@ export function MixDoubleColumnLayout() {
 					</div>
 				}
 			/>
-			<SidebarInset className="flex-row overflow-hidden min-w-0 flex-1">
+			<SidebarInset className="flex-row min-h-auto overflow-hidden min-w-0 flex-1">
 				<DoubleColumnLayoutSidebar
 					selectedFistLevelMenu={selectedFistLevelMenu}
 					selectedSecondLevelMenu={selectedSecondLevelMenu}
@@ -160,7 +161,7 @@ function DoubleColumnLayoutSidebar({
 				selectedItem={selectedSecondLevelMenu}
 			/>
 			{thirdLevelMenus.length > 0 && (
-				<Sidebar collapsible="icon" className={`h-full left-25 flex-1 transition-all duration-300`}>
+				<Sidebar collapsible="icon" className={`h-full left-22 flex-1 transition-all duration-300`}>
 					<SidebarContent>
 						<SidebarMain menus={thirdLevelMenus} showSearch={false} />
 					</SidebarContent>
@@ -176,6 +177,7 @@ function DoubleColumnLayoutSidebar({
 							)}
 						</button>
 					</SidebarFooter>
+					<SidebarRail />
 				</Sidebar>
 			)}
 		</div>
@@ -190,7 +192,7 @@ interface SecondLevelMenuProps {
 
 function SecondLevelMenu({ menus, selectedItem, onMenuItemClick }: SecondLevelMenuProps) {
 	return (
-		<div className="flex flex-col items-center py-2 w-25 h-full border-r">
+		<div className="flex flex-col items-center py-2 w-22 h-full border-r">
 			<ol className="flex flex-col flex-1 w-full mt-2">
 				{menus.map((item) => (
 					<li

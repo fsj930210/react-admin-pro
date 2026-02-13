@@ -13,7 +13,7 @@ import { useIsMobile } from "@rap/hooks/use-mobile";
 import { cn } from "@rap/utils";
 import { BadgeCheck, Bell, ChevronsUpDown, CreditCard, LogOut, Sparkles } from "lucide-react";
 import { useAuth } from "@/pages/login/-hooks/useAuth";
-import { useUserSelector } from "@/store/user";
+import { useLayout } from "@/layouts/context/layout-context";
 
 export function SidebarUser() {
 	return (
@@ -31,7 +31,7 @@ interface UserProps {
 
 export function User({ dropdownMenuTriggerClassName }: UserProps) {
 	const isMobile = useIsMobile();
-	const { userInfo } = useUserSelector(["userInfo"]);
+	const { userInfo } = useLayout();
 	const { logoutMutation } = useAuth();
 
 	return (
