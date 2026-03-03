@@ -2,11 +2,9 @@ import { Button } from "@rap/components-base/button";
 import { useSidebar } from "@rap/components-base/sidebar";
 import { PanelLeft, PanelRight } from "lucide-react";
 
-interface CollapseSidebarFeatureProps {
-	className?: string;
-}
 
-export function CollapseSidebarFeature({ className }: CollapseSidebarFeatureProps) {
+
+export function CollapseSidebarFeature(props: React.ComponentProps<"button">) {
 	const { toggleSidebar, state } = useSidebar();
 
 	return (
@@ -14,8 +12,8 @@ export function CollapseSidebarFeature({ className }: CollapseSidebarFeatureProp
 			variant="ghost"
 			size="icon"
 			onClick={toggleSidebar}
-			className={className}
 			title={state === "collapsed" ? "展开侧边栏" : "收起侧边栏"}
+			{...props}
 		>
 			{state === "collapsed" ? (
 				<PanelRight className="h-4 w-4" />

@@ -24,7 +24,7 @@ export function ThemeSwitchFeature({ className }: ThemeSwitchFeatureProps) {
 					<span className="sr-only">切换主题</span>
 				</Button>
 			</DropdownMenuTrigger>
-			<DropdownMenuContent align="end">
+			<DropdownMenuContent align="center">
 				<DropdownMenuItem onClick={() => setTheme("light")}>浅色主题</DropdownMenuItem>
 				<DropdownMenuItem onClick={() => setTheme("dark")}>深色主题</DropdownMenuItem>
 				<DropdownMenuItem onClick={() => setTheme("system")}>系统默认</DropdownMenuItem>

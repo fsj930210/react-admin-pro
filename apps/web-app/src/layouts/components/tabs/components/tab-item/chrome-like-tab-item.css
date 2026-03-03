@@ -1,9 +1,9 @@
-.layout-tabs-chrome-tab-item.active + .layout-tabs-chrome-tab-item {
-	.layout-tabs-chrome-tab-item-divider {
+.app-tabs-chrome-tab-item.active + .app-tabs-chrome-tab-item {
+	.app-tabs-chrome-tab-item-divider {
 		opacity: 0;
 	}
 }
-.layout-tabs-chrome-tab-item {
+.app-tabs-chrome-tab-item {
 	&:last-child {
 		&::after {
 			content: "";
@@ -14,7 +14,7 @@
 			bottom: 0;
 			width: 1px;
 			height: calc(var(--spacing) * 3.5);
-			background-color: var(--layout-tabs-border);
+			background-color: var(--app-tabs-border);
 			transition: background-color 0.2s ease-in-out;
 		}
 	}
@@ -25,9 +25,9 @@
 	}
 }
 @media (hover: hover) {
-	.layout-tabs-chrome-tab-item:not(.active) {
+	.app-tabs-chrome-tab-item:not(.active) {
 		&:hover {
-			.layout-tabs-chrome-tab-item-divider {
+			.app-tabs-chrome-tab-item-divider {
 				opacity: 0;
 			}
 			&:last-child {
@@ -37,8 +37,8 @@
 					}
 				}
 			}
-			& + .layout-tabs-chrome-tab-item {
-				.layout-tabs-chrome-tab-item-divider {
+			& + .app-tabs-chrome-tab-item {
+				.app-tabs-chrome-tab-item-divider {
 					opacity: 0;
 				}
 			}

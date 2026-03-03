@@ -2,7 +2,7 @@
 
 import { cn } from "@rap/utils";
 import { X } from "lucide-react";
-import type { LayoutTabItemProps } from "../../types";
+import type { AppTabItemProps, } from "../../types";
 import "./chrome-like-tab-item.css";
 import Icon from "@rap/components-ui/icon";
 
@@ -50,7 +50,7 @@ export function ChromeLikeTabItem({
 	onItemClick,
 	index,
 	...props
-}: LayoutTabItemProps & React.HTMLAttributes<HTMLDivElement>) {
+}: AppTabItemProps & React.HTMLAttributes<HTMLDivElement>) {
 	return (
 		<div
 			className={cn("relative size-full min-w-30 max-w-38 py-1 cursor-pointer")}
@@ -60,24 +60,24 @@ export function ChromeLikeTabItem({
 		>
 			<div
 				className={cn(
-					"absolute top-1/2 left-0 w-px h-3.5 -translate-y-1/2 bg-layout-tabs-border group-[.active]:opacity-0 group-first:opacity-0",
+					"absolute top-1/2 left-0 w-px h-3.5 -translate-y-1/2 bg-app-tabs-border group-[.active]:opacity-0 group-first:opacity-0",
 					{
-						"layout-tabs-chrome-tab-item-divider": true,
+						"app-tabs-chrome-tab-item-divider": true,
 					},
 				)}
 			/>
-			<div className="absolute top-1 -left-2.5 -right-2.5 bottom-0 group-[.active]:text-layout-tabs-primary text-layout-tabs opacity-0 group-[.active]:opacity-100 overflow-hidden pointer-events-none transition-opacity duration-20">
+			<div className="absolute top-1 -left-2.5 -right-2.5 bottom-0 group-[.active]:text-app-tabs-primary text-app-tabs opacity-0 group-[.active]:opacity-100 overflow-hidden pointer-events-none transition-opacity duration-20">
 				<ChromeTabBackground />
 			</div>
 			<div className="absolute top-0 bottom-0 left-0 right-0 p-1">
-				<div className="flex items-center h-full px-1 text-layout-tabs-foreground hover:text-layout-tabs-primary-foreground hover:bg-layout-tabs-accent group-[.active]:text-layout-tabs-primary-foreground group-[.active]:hover:text-layout-tabs-primary-foreground group-[.active]:hover:bg-layout-tabs-primary leading-none overflow-hidden rounded-md">
+				<div className="flex items-center h-full px-1 text-app-tabs-foreground hover:text-app-tabs-primary-foreground hover:bg-app-tabs-accent group-[.active]:bg-app-tabs-primary group-[.active]:text-app-tabs-primary-foreground group-[.active]:hover:text-app-tabs-primary-foreground group-[.active]:hover:bg-app-tabs-primary leading-none overflow-hidden rounded-md">
 					<span className="flex items-center gap-1 flex-1 text-sm" title={tab.title || ""}>
 						{tab.icon && <Icon icon={tab.icon} />}
 						<span className="max-w-17 truncate">{tab.title}</span>
 					</span>
 					{onClose && (
 						<button
-							className="flex-center size-4 hover:bg-layout-tabs-close-accent rounded-full cursor-pointer transition-all duration-20"
+							className="flex-center size-4 hover:bg-app-tabs-close-accent rounded-full cursor-pointer transition-all duration-20"
 							onClick={(e) => {
 								e.stopPropagation();
 								onClose(tab.id);

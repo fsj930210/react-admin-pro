@@ -18,7 +18,7 @@ export function HorizontalLayout() {
 	const { handleMenuItemClick } = useMenu({ menuService });
 
 	return (
-		<SidebarInset className="overflow-hidden min-w-0">
+		<SidebarInset className="overflow-hidden  min-w-0">
 			<AppHeader
 				rightFeatures={[
 					"globalSearch",

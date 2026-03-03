@@ -16,7 +16,7 @@ import { CSS } from "@dnd-kit/utilities";
 import { cn } from "@rap/utils";
 import type { Dispatch, ReactNode, SetStateAction } from "react";
 import React from "react";
-import type { LayoutTabItem, TabType } from "../types";
+import type { AppTabItem, TabType } from "../types";
 
 interface SortableItemProps extends React.HTMLAttributes<HTMLDivElement> {
 	"data-tab-key": string;
@@ -44,11 +44,11 @@ const SortableItem = ({ children, ...props }: SortableItemProps) => {
 };
 
 interface CustomSortableTabsProps {
-	tabs: LayoutTabItem[];
-	activeTab: LayoutTabItem | null;
+	tabs: AppTabItem[];
+	activeTab: AppTabItem | null;
 	tabType: TabType;
-	setTabs: Dispatch<SetStateAction<LayoutTabItem[]>>;
-	children: (item: LayoutTabItem, index: number) => ReactNode;
+	setTabs: Dispatch<SetStateAction<AppTabItem[]>>;
+	children: (item: AppTabItem, index: number) => ReactNode;
 }
 
 export function SortableTabs({
@@ -93,10 +93,10 @@ export function SortableTabs({
 								key={item.id}
 								data-tab-key={item.id}
 								className={cn(
-									"group relative layout-tabs-tab-item flex items-center h-full w-fit max-w-45",
+									"group relative app-tabs-tab-item flex items-center h-full w-fit max-w-45",
 									{
 										active: activeTab?.id === item.id,
-										[`layout-tabs-${tabType}-tab-item`]: true,
+										[`app-tabs-${tabType}-tab-item`]: true,
 									},
 								)}
 								role="tab"
@@ -108,10 +108,10 @@ export function SortableTabs({
 							<SortableItem key={item.id} data-tab-key={item.id}>
 								<div
 									className={cn(
-										"group relative layout-tabs-tab-item flex items-center h-full w-fit max-w-45",
+										"group relative app-tabs-tab-item flex items-center h-full w-fit max-w-45",
 										{
 											active: activeTab?.id === item.id,
-											[`layout-tabs-${tabType}-tab-item`]: true,
+											[`app-tabs-${tabType}-tab-item`]: true,
 										},
 									)}
 									role="tab"

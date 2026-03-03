@@ -10,7 +10,7 @@ import { TrapezoidTabItem } from "./components/tab-item/trapezoid-tab-item";
 import { VscodeLikeTabItem } from "./components/tab-item/vscode-like-tab-item";
 import { useTabs } from "./hooks/use-tabs";
 import { useTabsScroll } from "./hooks/use-tabs-scroll";
-import type { LayoutTabItem, TabType } from "./types";
+import type { AppTabItem, TabType } from "./types";
 
 export interface AppTabsProps {
 	sortable?: boolean;
@@ -41,7 +41,7 @@ export function AppTabs({ sortable = true, tabType = "chrome" }: AppTabsProps) {
 		scrollToTab,
 	} = useTabsScroll();
 
-	const handleTabClick = (item: LayoutTabItem) => {
+	const handleTabClick = (item: AppTabItem) => {
 		handleTabItemClick(item);
 		scrollToTab(item.id);
 	};
@@ -50,8 +50,8 @@ export function AppTabs({ sortable = true, tabType = "chrome" }: AppTabsProps) {
 
 	return (
 		<div
-			className={cn("relative flex h-9 bg-layout-tabs", {
-				"border-b border-solid border-layout-tabs-border":
+			className={cn("relative flex h-9 bg-app-tabs", {
+				"border-b border-solid border-app-tabs-border":
 					tabType !== "chrome" && tabType !== "trapezoid",
 			})}
 		>
@@ -105,7 +105,7 @@ export function AppTabs({ sortable = true, tabType = "chrome" }: AppTabsProps) {
 								data-tab-key={item.id}
 								className={cn("group relative flex items-center h-full w-fit max-w-45", {
 									active: activeTab?.id === item.id,
-									[`layout-tabs-${tabType}-tab-item`]: true,
+									[`app-tabs-${tabType}-tab-item`]: true,
 								})}
 								role="tab"
 								tabIndex={index}

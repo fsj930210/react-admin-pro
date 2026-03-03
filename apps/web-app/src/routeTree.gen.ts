@@ -20,6 +20,7 @@ import { Route as layoutsComponentsIndexRouteImport } from "./pages/(layouts)/co
 import { Route as layoutsNestedMenuNestedMenu3RouteImport } from "./pages/(layouts)/nested-menu/nested-menu-3";
 import { Route as layoutsNestedMenuNestedMenu2IndexRouteImport } from "./pages/(layouts)/nested-menu/nested-menu-2/index";
 import { Route as layoutsNestedMenuNestedMenu1IndexRouteImport } from "./pages/(layouts)/nested-menu/nested-menu-1/index";
+import { Route as layoutsFeaturesThemeIndexRouteImport } from "./pages/(layouts)/features/theme/index";
 import { Route as layoutsFeaturesResizeIndexRouteImport } from "./pages/(layouts)/features/resize/index";
 import { Route as layoutsFeaturesPanelControlsIndexRouteImport } from "./pages/(layouts)/features/panel-controls/index";
 import { Route as layoutsFeaturesMoveIndexRouteImport } from "./pages/(layouts)/features/move/index";
@@ -86,6 +87,12 @@ const layoutsNestedMenuNestedMenu1IndexRoute =
   layoutsNestedMenuNestedMenu1IndexRouteImport.update({
     id: "/nested-menu/nested-menu-1/",
     path: "/nested-menu/nested-menu-1/",
+    getParentRoute: () => layoutsRouteRoute,
+  } as any);
+const layoutsFeaturesThemeIndexRoute =
+  layoutsFeaturesThemeIndexRouteImport.update({
+    id: "/features/theme/",
+    path: "/features/theme/",
     getParentRoute: () => layoutsRouteRoute,
   } as any);
 const layoutsFeaturesResizeIndexRoute =
@@ -165,6 +172,7 @@ export interface FileRoutesByFullPath {
   "/features/move/": typeof layoutsFeaturesMoveIndexRoute;
   "/features/panel-controls/": typeof layoutsFeaturesPanelControlsIndexRoute;
   "/features/resize/": typeof layoutsFeaturesResizeIndexRoute;
+  "/features/theme/": typeof layoutsFeaturesThemeIndexRoute;
   "/nested-menu/nested-menu-1/": typeof layoutsNestedMenuNestedMenu1IndexRoute;
   "/nested-menu/nested-menu-2/": typeof layoutsNestedMenuNestedMenu2IndexRoute;
   "/nested-menu/nested-menu-1/nested-menu-1-2/nested-menu-1-2-1": typeof layoutsNestedMenuNestedMenu1NestedMenu12NestedMenu121Route;
@@ -187,6 +195,7 @@ export interface FileRoutesByTo {
   "/features/move": typeof layoutsFeaturesMoveIndexRoute;
   "/features/panel-controls": typeof layoutsFeaturesPanelControlsIndexRoute;
   "/features/resize": typeof layoutsFeaturesResizeIndexRoute;
+  "/features/theme": typeof layoutsFeaturesThemeIndexRoute;
   "/nested-menu/nested-menu-1": typeof layoutsNestedMenuNestedMenu1IndexRoute;
   "/nested-menu/nested-menu-2": typeof layoutsNestedMenuNestedMenu2IndexRoute;
   "/nested-menu/nested-menu-1/nested-menu-1-2/nested-menu-1-2-1": typeof layoutsNestedMenuNestedMenu1NestedMenu12NestedMenu121Route;
@@ -211,6 +220,7 @@ export interface FileRoutesById {
   "/(layouts)/features/move/": typeof layoutsFeaturesMoveIndexRoute;
   "/(layouts)/features/panel-controls/": typeof layoutsFeaturesPanelControlsIndexRoute;
   "/(layouts)/features/resize/": typeof layoutsFeaturesResizeIndexRoute;
+  "/(layouts)/features/theme/": typeof layoutsFeaturesThemeIndexRoute;
   "/(layouts)/nested-menu/nested-menu-1/": typeof layoutsNestedMenuNestedMenu1IndexRoute;
   "/(layouts)/nested-menu/nested-menu-2/": typeof layoutsNestedMenuNestedMenu2IndexRoute;
   "/(layouts)/nested-menu/nested-menu-1/nested-menu-1-2/nested-menu-1-2-1": typeof layoutsNestedMenuNestedMenu1NestedMenu12NestedMenu121Route;
@@ -235,6 +245,7 @@ export interface FileRouteTypes {
     | "/features/move/"
     | "/features/panel-controls/"
     | "/features/resize/"
+    | "/features/theme/"
     | "/nested-menu/nested-menu-1/"
     | "/nested-menu/nested-menu-2/"
     | "/nested-menu/nested-menu-1/nested-menu-1-2/nested-menu-1-2-1"
@@ -257,6 +268,7 @@ export interface FileRouteTypes {
     | "/features/move"
     | "/features/panel-controls"
     | "/features/resize"
+    | "/features/theme"
     | "/nested-menu/nested-menu-1"
     | "/nested-menu/nested-menu-2"
     | "/nested-menu/nested-menu-1/nested-menu-1-2/nested-menu-1-2-1"
@@ -280,6 +292,7 @@ export interface FileRouteTypes {
     | "/(layouts)/features/move/"
     | "/(layouts)/features/panel-controls/"
     | "/(layouts)/features/resize/"
+    | "/(layouts)/features/theme/"
     | "/(layouts)/nested-menu/nested-menu-1/"
     | "/(layouts)/nested-menu/nested-menu-2/"
     | "/(layouts)/nested-menu/nested-menu-1/nested-menu-1-2/nested-menu-1-2-1"
@@ -372,6 +385,13 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof layoutsNestedMenuNestedMenu1IndexRouteImport;
       parentRoute: typeof layoutsRouteRoute;
     };
+    "/(layouts)/features/theme/": {
+      id: "/(layouts)/features/theme/";
+      path: "/features/theme";
+      fullPath: "/features/theme/";
+      preLoaderRoute: typeof layoutsFeaturesThemeIndexRouteImport;
+      parentRoute: typeof layoutsRouteRoute;
+    };
     "/(layouts)/features/resize/": {
       id: "/(layouts)/features/resize/";
       path: "/features/resize";
@@ -459,6 +479,7 @@ interface layoutsRouteRouteChildren {
   layoutsFeaturesMoveIndexRoute: typeof layoutsFeaturesMoveIndexRoute;
   layoutsFeaturesPanelControlsIndexRoute: typeof layoutsFeaturesPanelControlsIndexRoute;
   layoutsFeaturesResizeIndexRoute: typeof layoutsFeaturesResizeIndexRoute;
+  layoutsFeaturesThemeIndexRoute: typeof layoutsFeaturesThemeIndexRoute;
   layoutsNestedMenuNestedMenu1IndexRoute: typeof layoutsNestedMenuNestedMenu1IndexRoute;
   layoutsNestedMenuNestedMenu2IndexRoute: typeof layoutsNestedMenuNestedMenu2IndexRoute;
   layoutsNestedMenuNestedMenu1NestedMenu12NestedMenu121Route: typeof layoutsNestedMenuNestedMenu1NestedMenu12NestedMenu121Route;
@@ -484,6 +505,7 @@ const layoutsRouteRouteChildren: layoutsRouteRouteChildren = {
   layoutsFeaturesPanelControlsIndexRoute:
     layoutsFeaturesPanelControlsIndexRoute,
   layoutsFeaturesResizeIndexRoute: layoutsFeaturesResizeIndexRoute,
+  layoutsFeaturesThemeIndexRoute: layoutsFeaturesThemeIndexRoute,
   layoutsNestedMenuNestedMenu1IndexRoute:
     layoutsNestedMenuNestedMenu1IndexRoute,
   layoutsNestedMenuNestedMenu2IndexRoute:

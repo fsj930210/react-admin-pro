@@ -7,7 +7,7 @@ interface GlobalSearchFeatureProps {
 	className?: string;
 }
 
-export function GlobalSearchFeature({ className }: GlobalSearchFeatureProps) {
+export function AppSearchFeature({ className }: GlobalSearchFeatureProps) {
 	const [isOpen, setIsOpen] = useState(false);
 	const [searchValue, setSearchValue] = useState("");
 

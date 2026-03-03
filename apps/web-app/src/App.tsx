@@ -60,16 +60,24 @@ declare module "@tanstack/react-router" {
 const App = () => {
 	const eventBus = useEventEmitter<AppEvent<unknown>>();
 	return (
-		<div className="size-full overflow-x-hidden">
-			<AppProvider eventBus={eventBus}>
-				<ThemeProvider id="app" className="size-full">
-					<QueryClientProvider client={queryClient}>
-						<RouterProvider router={router} />
-					</QueryClientProvider>
-					<Toaster />
-				</ThemeProvider>
-			</AppProvider>
-		</div>
+		<ThemeProvider
+			storageKey="rap-web-theme"
+		  className="size-full" 
+		  attributes="class" 
+		  asChild="html"
+			enableSystem
+			enableColorScheme
+			defaultTheme="dark"
+		>
+			<div className="size-full overflow-x-hidden">
+				<AppProvider eventBus={eventBus}>
+						<QueryClientProvider client={queryClient}>
+							<RouterProvider router={router} />
+						</QueryClientProvider>
+						<Toaster />
+				</AppProvider>
+			</div>
+		</ThemeProvider>
 	);
 };
 

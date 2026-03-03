@@ -2,30 +2,28 @@ import { cn } from "@rap/utils";
 import type React from "react";
 import { AppLogo } from "@/components/app/logo";
 import { Breadcrumb } from "../breadcrumb";
-import {
-	CollapseSidebarFeature,
-	FullscreenFeature,
-	GlobalSearchFeature,
-	I18nFeature,
-	NotifyFeature,
-	ReloadCurrentTabFeature,
-	ThemeSwitchFeature,
-	UserCenterFeature,
-} from "./features";
+import { CollapseSidebarFeature } from "../../widget/collapse-sidebar";
+import { FullscreenFeature } from "../../widget/fullscreen";
+import { AppSearchFeature } from "./features/app-search";
+import { I18nFeature } from "../../widget/i18n";
+import { NotifyFeature } from "./features/notify";
+import { ReloadFeature } from "../../widget/reload";
+import { ThemeSwitchFeature } from "../../widget/theme-switch";
+import { UserCenterFeature } from "./features/user-center";
 
 type AppHeaderFeatures =
 	| "logo"
 	| "reload"
-	| "userCenter"
-	| "themeSwitch"
+	| "user-center"
+	| "theme-switch"
 	| "fullscreen"
 	| "notify"
-	| "globalSearch"
+	| "app-search"
 	| "breadcrumb"
-	| "collapseSidebar"
+	| "collapse-sidebar"
 	| "i18n";
 
-interface LayoutHeaderProps {
+interface AppHeaderProps {
 	leftFeatures?: AppHeaderFeatures[];
 	rightFeatures?: AppHeaderFeatures[];
 	leftRender?: React.ReactNode;
@@ -35,39 +33,39 @@ interface LayoutHeaderProps {
 
 const featureComponents: Record<AppHeaderFeatures, React.FC<any>> = {
 	logo: AppLogo,
-	reload: ReloadCurrentTabFeature,
-	userCenter: UserCenterFeature,
-	themeSwitch: ThemeSwitchFeature,
+	reload: ReloadFeature,
+	i18n: I18nFeature,
 	fullscreen: FullscreenFeature,
 	notify: NotifyFeature,
-	globalSearch: GlobalSearchFeature,
 	breadcrumb: Breadcrumb,
-	collapseSidebar: CollapseSidebarFeature,
-	i18n: I18nFeature,
+	"app-search": AppSearchFeature,
+	"collapse-sidebar": CollapseSidebarFeature,
+	"user-center": UserCenterFeature,
+	"theme-switch": ThemeSwitchFeature,
 };
 
 export function AppHeader({
 	leftFeatures = ["breadcrumb"],
 	rightFeatures = [
-		"globalSearch",
-		"themeSwitch",
+		"app-search",
+		"theme-switch",
 		"i18n",
 		"fullscreen",
 		"reload",
 		"notify",
-		"userCenter",
+		"user-center",
 	],
 	leftRender,
 	rightRender,
 	className,
-}: LayoutHeaderProps) {
+}: AppHeaderProps) {
 	const renderFeature = (feature: AppHeaderFeatures, index: number) => {
 		const Component = featureComponents[feature];
 		return Component ? <Component key={`${feature}-${index}`} /> : null;
 	};
 
 	return (
-		<header className={cn("flex items-center justify-between h-11 w-full px-2", className)}>
+		<header className={cn("flex items-center justify-between h-11 w-full px-2 bg-app-header", className)}>
 			<div className="flex items-center gap-2">
 				{leftRender ?? leftFeatures.map((feature, index) => renderFeature(feature, index))}
 			</div>

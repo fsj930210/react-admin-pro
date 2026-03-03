@@ -1,7 +1,6 @@
 type DataAttribute = `data-${string}`;
 
-export type Attribute = DataAttribute | "class";
-
+export type Attributes = DataAttribute | "class";
 export interface ThemeStorage {
   [id: string]: string;
 }
@@ -17,37 +16,25 @@ interface ScriptProps
 export interface ThemeContextValue {
   theme: string;
   themes: string[];
-  enableSystem: boolean;
-  enableColorScheme: boolean;
-  id: string;
+	resolvedTheme: string;
   forcedTheme?: string;
-  storageKey?: string;
-  systemTheme?: string;
-  themeScope?: string;
-  cacheClearRecovery?: "default" | "system" | "none";
-  defaultTheme?: string;
-  refreshTheme: () => void;
+	systemTheme?: 'light' | 'dark';
   setTheme: (theme: string) => void;
-  setFollowSystemTheme: (follow: boolean) => void;
-  clearTheme: () => void;
-  clearAllThemes: () => void;
 }
 
 export interface ThemeProviderProps {
   children: React.ReactNode;
-  id: string;
   storageKey?: string;
   themes?: string[];
   enableSystem?: boolean;
   enableColorScheme?: boolean;
   inheritTheme?: boolean;
-  attribute?: Attribute;
+  attributes?: Attributes;
   defaultTheme?: string;
   forcedTheme?: string;
 	className?: string;
-  cacheClearRecovery?: "default" | "system" | "none";
-  /** Nonce string to pass to the inline script and style elements for CSP headers */
+	asChild?: string;
+	isIsolated?: boolean;
   nonce?: string;
-  /** Props to pass the inline script */
   scriptProps?: ScriptProps;
 }

@@ -9,16 +9,16 @@ import { cn } from "@rap/utils";
 import { ExternalLink, Maximize2, Pin, RefreshCw, X } from "lucide-react";
 import type * as React from "react";
 import { useTabsContextMenu } from "../hooks/use-tabs-context-menu";
-import type { LayoutTabItem } from "../types";
+import type { AppTabItem } from "../types";
 
 interface TabsContextMenuProps {
-	tab: LayoutTabItem;
-	tabs: LayoutTabItem[];
+	tab: AppTabItem;
+	tabs: AppTabItem[];
 	children: React.ReactNode;
-	activeTab: LayoutTabItem | null;
+	activeTab: AppTabItem | null;
 	className?: string;
-	updateTabs: React.Dispatch<React.SetStateAction<LayoutTabItem[]>>;
-	setActiveTab: React.Dispatch<React.SetStateAction<LayoutTabItem | null>>;
+	updateTabs: React.Dispatch<React.SetStateAction<AppTabItem[]>>;
+	setActiveTab: React.Dispatch<React.SetStateAction<AppTabItem | null>>;
 }
 
 export function TabsContextMenu({

@@ -2,11 +2,9 @@ import { Button } from "@rap/components-base/button";
 import { Maximize, Minimize } from "lucide-react";
 import { useState } from "react";
 
-interface FullscreenFeatureProps {
-	className?: string;
-}
 
-export function FullscreenFeature({ className }: FullscreenFeatureProps) {
+
+export function FullscreenFeature(props: React.ComponentProps<"button">) {
 	const [isFullscreen, setIsFullscreen] = useState(false);
 
 	const toggleFullscreen = () => {
@@ -28,8 +26,8 @@ export function FullscreenFeature({ className }: FullscreenFeatureProps) {
 			variant="ghost"
 			size="icon"
 			onClick={toggleFullscreen}
-			className={className}
 			title={isFullscreen ? "退出全屏" : "进入全屏"}
+			{...props}
 		>
 			{isFullscreen ? <Minimize className="h-4 w-4" /> : <Maximize className="h-4 w-4" />}
 		</Button>

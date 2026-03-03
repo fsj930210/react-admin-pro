@@ -1,18 +1,18 @@
 import { cn } from "@rap/utils";
 import { X } from "lucide-react";
-import type { LayoutTabItemProps } from "../../types";
+import type { AppTabItemProps } from "../../types";
 import Icon from "@rap/components-ui/icon";
 
-export function CardTabItem({ tab, active, onClose, onItemClick, index }: LayoutTabItemProps) {
+export function CardTabItem({ tab, active, onClose, onItemClick, index }: AppTabItemProps) {
 	return (
 		<div className="h-full py-0.5" onClick={() => onItemClick?.(tab)} tabIndex={index}>
 			<div
 				className={cn(
 					"relative h-full flex items-center justify-between px-2 cursor-pointer",
-					"rounded border border-layout-tabs-border bg-layout-tabs text-layout-tabs-foreground",
-					"transition-all duration-200 ease-in-out hover:not-[.active]:bg-layout-tabs-accent",
+					"rounded border border-app-tabs-border bg-app-tabs text-app-tabs-foreground",
+					"transition-all duration-200 ease-in-out hover:not-[.active]:bg-app-tabs-accent",
 					{
-						"bg-layout-tabs-primary text-layout-tabs-primary-foreground active": active,
+						"bg-app-tabs-primary text-app-tabs-primary-foreground active": active,
 					},
 				)}
 				role="tab"
@@ -23,7 +23,7 @@ export function CardTabItem({ tab, active, onClose, onItemClick, index }: Layout
 					{tab.title}
 				</span>
 				<button
-					className="flex-center size-5 hover:bg-layout-tabs-close-accent rounded-xs cursor-pointer transition-all duration-200 ease-in-out group-[.active]:opacity-100 group-hover:opacity-100"
+					className="flex-center size-5 hover:bg-app-tabs-close-accent rounded-xs cursor-pointer transition-all duration-200 ease-in-out group-[.active]:opacity-100 group-hover:opacity-100"
 					onClick={(e) => {
 						e.stopPropagation();
 						onClose?.(tab.id);
