@@ -1,10 +1,15 @@
+import {
+	Sidebar,
+	SidebarContent,
+	SidebarInset,
+	SidebarProvider,
+} from "@rap/components-base/sidebar/index";
+import { Skeleton } from "@rap/components-base/skeleton";
 import { AppLogo } from "@/components/app/logo";
 import { HeaderSkeleton } from "@/layouts/components/skeleton";
 import { ContentSkeleton } from "@/layouts/components/skeleton/content-skeleton";
 import { SidebarSkeleton } from "@/layouts/components/skeleton/sidebar-skeleton";
 import { TabsSkeleton } from "@/layouts/components/skeleton/tabs-skeleton";
-import { Sidebar, SidebarContent, SidebarInset, SidebarProvider } from "@rap/components-base/sidebar/index";
-import { Skeleton } from "@rap/components-base/skeleton";
 
 export function DoubleColumnLayoutSkeleton() {
 	return (
@@ -34,6 +39,5 @@ export function DoubleColumnLayoutSkeleton() {
 				<ContentSkeleton />
 			</SidebarInset>
 		</SidebarProvider>
-	)
+	);
 }
-		

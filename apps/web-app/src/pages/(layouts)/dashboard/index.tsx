@@ -1,6 +1,6 @@
-import IconView from "@rap/components-ui/icon-view";
-import Icon from "@rap/components-ui/icon";
 import { Button } from "@rap/components-base/button";
+import Icon from "@rap/components-ui/icon";
+import IconView from "@rap/components-ui/icon-view";
 import { createFileRoute } from "@tanstack/react-router";
 import { useAppConfigSelector } from "@/store/app-config";
 export const Route = createFileRoute("/(layouts)/dashboard/")({
@@ -53,7 +53,6 @@ export function DashboardPage() {
 				</Button>
 			</div>
 			<IconView />
-
 		</div>
 	);
 }

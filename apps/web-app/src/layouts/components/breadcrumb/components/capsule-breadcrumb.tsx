@@ -5,8 +5,8 @@ import {
 	BreadcrumbList,
 	BreadcrumbPage,
 } from "@rap/components-base/breadcrumb";
-import type { BreadcrumbItemProps } from "../types";
 import Icon from "@rap/components-ui/icon";
+import type { BreadcrumbItemProps } from "../types";
 
 export function CapsuleBreadcrumb({ data, onBreadcrumbItemClick }: BreadcrumbItemProps) {
 	return (

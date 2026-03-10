@@ -11,6 +11,7 @@ import { cn } from "@rap/utils";
 import { useNavigate, useRouterState } from "@tanstack/react-router";
 import { ChevronsLeft, ChevronsRight } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { AppLogo } from "@/components/app/logo";
 import { AppContent } from "@/layouts/components/content";
 import { AppHeader } from "@/layouts/components/header";
 import { MenuItemContent } from "@/layouts/components/menu/menu-item-content";
@@ -19,7 +20,6 @@ import { User } from "@/layouts/components/sidebar/sidebar-user";
 import { useLayout } from "@/layouts/context/layout-context";
 import { MenuService } from "@/layouts/service/menuService";
 import type { MenuItem } from "@/layouts/types";
-import { AppLogo } from "@/components/app/logo";
 
 export function DoubleColumnLayout() {
 	const navigate = useNavigate();

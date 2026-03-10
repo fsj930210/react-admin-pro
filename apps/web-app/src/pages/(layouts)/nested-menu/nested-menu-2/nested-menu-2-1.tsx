@@ -6,6 +6,4 @@ export const Route = createFileRoute("/(layouts)/nested-menu/nested-menu-2/neste
 
 function RouteComponent() {
 	return <div>嵌套菜单-2-1（三级菜单-2-1）</div>;
-};
-
-
+}

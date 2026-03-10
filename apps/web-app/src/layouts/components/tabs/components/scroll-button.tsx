@@ -7,20 +7,18 @@ interface ScrollButtonProps extends React.HTMLAttributes<HTMLButtonElement> {
 	className?: string;
 	scroll: () => void;
 }
-	const LeftIcon = ({ canScroll }: { canScroll: boolean }) => (
-		<div className={cn("relative", { "animate-arrow-left": canScroll })}>
-			<ChevronLeft className="size-4" />
-		</div>
-	);
+const LeftIcon = ({ canScroll }: { canScroll: boolean }) => (
+	<div className={cn("relative", { "animate-arrow-left": canScroll })}>
+		<ChevronLeft className="size-4" />
+	</div>
+);
 
-	const RightIcon = ({ canScroll }: { canScroll: boolean }) => (
-		<div className={cn("relative", { "animate-arrow-right": canScroll })}>
-			<ChevronRight className="size-4" />
-		</div>
-	);
+const RightIcon = ({ canScroll }: { canScroll: boolean }) => (
+	<div className={cn("relative", { "animate-arrow-right": canScroll })}>
+		<ChevronRight className="size-4" />
+	</div>
+);
 export function ScrollButton({ canScroll, direction, scroll, className }: ScrollButtonProps) {
-
-
 	return (
 		<button
 			type="button"
@@ -37,7 +35,11 @@ export function ScrollButton({ canScroll, direction, scroll, className }: Scroll
 				className,
 			)}
 		>
-			{direction === "left" ? <LeftIcon canScroll={canScroll} /> : <RightIcon canScroll={canScroll} />}
+			{direction === "left" ? (
+				<LeftIcon canScroll={canScroll} />
+			) : (
+				<RightIcon canScroll={canScroll} />
+			)}
 		</button>
 	);
 }

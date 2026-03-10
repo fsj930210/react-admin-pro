@@ -28,9 +28,9 @@
       "types": "./src/use-resize.ts",
       "default": "./src/use-resize.ts"
     },
-    "./use-panel-controls": {
-      "types": "./src/use-panel-controls.tsx",
-      "default": "./src/use-panel-controls.tsx"
+    "./use-minimax": {
+      "types": "./src/use-minimax.ts",
+      "default": "./src/use-minimax.ts"
     }
   },
   "devDependencies": {

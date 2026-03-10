@@ -1,30 +1,30 @@
 import { useState, useEffect } from "react";
 
-export enum PanelState {
+export enum MinimaxState {
   NORMAL = "normal",
   MINIMIZED = "minimized",
   MAXIMIZED = "maximized",
   FULLSCREEN = "fullscreen",
 }
 
-export interface PanelControlsOptions {
+export interface MinimaxOptions {
   onClose?: () => void;
-  onStateChange?: (state: PanelState) => void;
+  onStateChange?: (state: MinimaxState) => void;
   useRequestFullScreen?: boolean;
   fullscreenElement?: HTMLElement;
 }
 
-export function usePanelControls(options: PanelControlsOptions) {
-  const [panelState, setPanelState] = useState<PanelState>(PanelState.NORMAL);
+export function useMinimax(options?: MinimaxOptions) {
+  const [minimax, setMinimax] = useState<MinimaxState>(MinimaxState.NORMAL);
   const [isFullscreen, setIsFullscreen] = useState(false);
 
-  const isMinimized = panelState === PanelState.MINIMIZED;
+  const isMinimized = minimax === MinimaxState.MINIMIZED;
   const isMaximized =
-    panelState === PanelState.MAXIMIZED || panelState === PanelState.FULLSCREEN;
+    minimax === MinimaxState.MAXIMIZED || minimax === MinimaxState.FULLSCREEN;
 
-  const changeState = (newState: PanelState) => {
-    setPanelState(newState);
-    options.onStateChange?.(newState);
+  const changeState = (newState: MinimaxState) => {
+    setMinimax(newState);
+    options?.onStateChange?.(newState);
   };
 
   // 监听全屏状态变化
@@ -34,23 +34,23 @@ export function usePanelControls(options: PanelControlsOptions) {
       setIsFullscreen(newFullscreenState);
 
       if (newFullscreenState) {
-        changeState(PanelState.FULLSCREEN);
-      } else if (panelState === PanelState.FULLSCREEN) {
-        changeState(PanelState.NORMAL);
+        changeState(MinimaxState.FULLSCREEN);
+      } else if (minimax === MinimaxState.FULLSCREEN) {
+        changeState(MinimaxState.NORMAL);
       }
     };
 
     document.addEventListener("fullscreenchange", handleFullscreenChange);
     return () =>
       document.removeEventListener("fullscreenchange", handleFullscreenChange);
-  }, [panelState]);
+  }, []);
 
   function handleMinimize() {
     if (isMaximized) {
       handleRestore();
       return;
     }
-    changeState(PanelState.MINIMIZED);
+    changeState(MinimaxState.MINIMIZED);
   }
 
   async function handleMaximize() {
@@ -59,8 +59,8 @@ export function usePanelControls(options: PanelControlsOptions) {
       return;
     }
 
-    if (options.useRequestFullScreen) {
-      const element = options.fullscreenElement || document.documentElement;
+    if (options?.useRequestFullScreen) {
+      const element = options?.fullscreenElement || document.documentElement;
       try {
         if (element.requestFullscreen) {
           await element.requestFullscreen();
@@ -69,19 +69,19 @@ export function usePanelControls(options: PanelControlsOptions) {
         console.warn("Failed to enter fullscreen mode:", error);
       }
     } else {
-      changeState(PanelState.MAXIMIZED);
+      changeState(MinimaxState.MAXIMIZED);
     }
   }
 
   function handleRestore() {
-    changeState(PanelState.NORMAL);
+    changeState(MinimaxState.NORMAL);
     if (document.fullscreenElement) {
       document.exitFullscreen?.().catch(console.error);
     }
   }
 
   function handleClose() {
-    options.onClose?.();
+    options?.onClose?.();
   }
 
   return {

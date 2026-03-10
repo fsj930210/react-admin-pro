@@ -2,7 +2,7 @@
 
 import { cn } from "@rap/utils";
 import { X } from "lucide-react";
-import type { AppTabItemProps, } from "../../types";
+import type { AppTabItemProps } from "../../types";
 import "./chrome-like-tab-item.css";
 import Icon from "@rap/components-ui/icon";
 

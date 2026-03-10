@@ -1,19 +1,12 @@
 import { SidebarInset } from "@rap/components-base/sidebar/index";
 
-
 import { Skeleton } from "@rap/components-base/skeleton";
-
-
-import { HeaderSkeleton } from "@/layouts/components/skeleton";
-
-import { TabsSkeleton } from "@/layouts/components/skeleton";
-
-import { ContentSkeleton } from "@/layouts/components/skeleton";
 import { AppLogo } from "@/components/app/logo";
+import { ContentSkeleton, HeaderSkeleton, TabsSkeleton } from "@/layouts/components/skeleton";
 
 export function HorizontalLayoutSkeleton() {
 	return (
-  	<SidebarInset className="overflow-x-hidden min-w-0">
+		<SidebarInset className="overflow-x-hidden min-w-0">
 			<HeaderSkeleton>
 				<div className="flex items-center gap-4">
 					<AppLogo showTitle={false} />
@@ -29,5 +22,5 @@ export function HorizontalLayoutSkeleton() {
 			<TabsSkeleton />
 			<ContentSkeleton />
 		</SidebarInset>
-	)
+	);
 }

@@ -1,7 +1,6 @@
 import { Skeleton } from "@rap/components-base/skeleton";
-import { BreadcrumbSkeleton } from "./breadcrumb-skeleton";
 import type { ReactNode } from "react";
-
+import { BreadcrumbSkeleton } from "./breadcrumb-skeleton";
 
 interface HeaderSkeletonProps {
 	className?: string;
@@ -9,7 +8,9 @@ interface HeaderSkeletonProps {
 }
 export function HeaderSkeleton({ className, children }: HeaderSkeletonProps) {
 	return (
-		<div className={`flex items-center justify-between h-11 p-2 bg-background border-b border-b-border ${className}`}>
+		<div
+			className={`flex items-center justify-between h-11 p-2 bg-background border-b border-b-border ${className}`}
+		>
 			{children ?? <BreadcrumbSkeleton />}
 			<div className="flex items-center space-x-4">
 				<Skeleton className="h-6 w-6 rounded-full" />

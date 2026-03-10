@@ -1,11 +1,7 @@
-@import "@rap/styles/globals.css";
 
 html,
 body,
 #root {
 	width: 100%;
 	height: 100%;
-}
-.theme-scope-app{
-	@apply bg-background text-foreground;
 }

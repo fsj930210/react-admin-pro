@@ -2,7 +2,7 @@
 import type React from "react";
 import { 
 	createContext, 
-	createElement, 
+	createElement,
 	use, 
 	useContext, 
 	useEffect, 
@@ -11,7 +11,6 @@ import {
 	useState 
 } from "react";
 import type {  ThemeContextValue, ThemeProviderProps } from "./types";
-
 import {
   applyThemeToElement,
   getSystemTheme,
@@ -184,8 +183,6 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({
   );
 };
 
-export default ThemeProvider;
-
 export const useTheme = () => {
   const context = use(ThemeContext);
   if (context === undefined) {
@@ -200,61 +197,4 @@ export const useTheme = () => {
 		forcedTheme,
     setTheme,
   };
-};
-
-export const ThemeScript = ({
-  storageKey,
-  attributes = "class",
-  enableColorScheme = false,
-	asChild = 'html',
-  nonce,
-  scriptProps,
-}: Omit<ThemeProviderProps, "children">) => {
-  const scriptContent = `
-    (function() {
-      try {
-        const storageKey = ${storageKey};
-        const attributes = ${attributes};
-        const themeData = localStorage.getItem(storageKey);
-
-        if (themeData) {
-          const themeValue = JSON.parse(themeData);
-          for (let id in themes) {
-            const element = ${asChild === 'html' ? document.documentElement: storageKey ? document.getElementById(storageKey) : null};
-            if (element) {
-              const systemValue = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
-              const resolvedTheme = themeValue === "system" ? systemValue : themeValue;
-							const attrs = Array.isArray(attributes) ? attributes : [attributes];
-							attrs.forEach((attr) => {
-								if (attr === "class") {
-									themes.forEach((t) => {
-										element.classList.remove(t);
-									});
-									element.classList.add(theme);
-								} else {
-									const attrName = attr.startsWith("data-")
-										? attr
-										: 'data-' + attr;
-									element.setAttribute(attrName, theme);
-								}
-							});
-							if (${enableColorScheme}) {
-								element.style.colorScheme = theme;
-							}
-            }
-          }
-        }
-      } catch (e) {}
-    })();
-  `;
-
-  return (
-    <script
-      {...scriptProps}
-      suppressHydrationWarning
-      nonce={typeof window === "undefined" ? nonce : ""}
-      // biome-ignore lint:security/noDangerouslySetInnerHtml
-      dangerouslySetInnerHTML={{ __html: scriptContent }}
-    />
-  );
 };

@@ -4,7 +4,7 @@ import { createRouter, ErrorComponent, RouterProvider } from "@tanstack/react-ro
 import { routeTree } from "./routeTree.gen";
 import "@bprogress/core/css";
 import { BProgress } from "@bprogress/core";
-import ThemeProvider from "@rap/components-ui/theme-provider";
+import { ThemeProvider } from "@rap/components-ui/theme-provider";
 import { useEventEmitter } from "ahooks";
 import { APP_BASE_PATH } from "@/config";
 import { type AppEvent, AppProvider } from "./app-context";
@@ -62,19 +62,19 @@ const App = () => {
 	return (
 		<ThemeProvider
 			storageKey="rap-web-theme"
-		  className="size-full" 
-		  attributes="class" 
-		  asChild="html"
+			className="size-full"
+			attributes="class"
+			asChild="html"
 			enableSystem
 			enableColorScheme
 			defaultTheme="dark"
 		>
 			<div className="size-full overflow-x-hidden">
 				<AppProvider eventBus={eventBus}>
-						<QueryClientProvider client={queryClient}>
-							<RouterProvider router={router} />
-						</QueryClientProvider>
-						<Toaster />
+					<QueryClientProvider client={queryClient}>
+						<RouterProvider router={router} />
+					</QueryClientProvider>
+					<Toaster />
 				</AppProvider>
 			</div>
 		</ThemeProvider>

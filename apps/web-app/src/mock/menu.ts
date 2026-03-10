@@ -72,7 +72,7 @@ const allMenus = [
 				order: 1,
 				isActive: true,
 				status: "enabled" as const,
-			}
+			},
 		],
 	},
 	{
@@ -128,9 +128,9 @@ const allMenus = [
 			},
 			{
 				id: "features-panel-controls",
-				code: "features-panel-controls",
-				title: "面板控制",
-				url: "/features/panel-controls",
+				code: "features-minimax",
+				title: "最大最小化",
+				url: "/features/minimax",
 				type: "menu" as const,
 				icon: "rap-icon:mini-max",
 				parentId: "features",
@@ -143,7 +143,7 @@ const allMenus = [
 				status: "enabled" as const,
 				badge: { type: "badge", color: "destructive", text: "99+" },
 			},
-						{
+			{
 				id: "features-theme",
 				code: "features-theme",
 				title: "主题切换",

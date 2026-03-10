@@ -7,18 +7,11 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@rap/components-base/card";
-import {
-	Dialog,
-	DialogContent,
-	DialogDescription,
-	DialogHeader,
-	DialogTitle,
-	DialogTrigger,
-} from "@rap/components-base/dialog";
+import { DialogDescription, DialogTitle } from "@rap/components-base/dialog";
+import { MovableDialog } from "@rap/components-ui/dialog";
 import { useMove } from "@rap/hooks/use-move";
 import { createFileRoute } from "@tanstack/react-router";
 import { useRef, useState } from "react";
-
 export const Route = createFileRoute("/(layouts)/features/move/")({
 	component: MoveFeaturePage,
 });
@@ -28,7 +21,6 @@ function ContainerExample() {
 	const containerRef = useRef<HTMLDivElement>(null);
 	const { moveRef, position } = useMove<HTMLDivElement>({
 		containerRef,
-		useTopLeft: true,
 		boundary: true,
 		snapThreshold: 30,
 		snapToBoundary: true,
@@ -36,7 +28,7 @@ function ContainerExample() {
 
 	return (
 		<div className="mb-8">
-			<h3 className="text-lg font-semibold mb-3">容器模式，带边界，吸附，使用TopLeft</h3>
+			<h3 className="text-lg font-semibold mb-3">容器模式，带边界，吸附</h3>
 			<div
 				ref={containerRef}
 				className="relative w-75 h-75 border-2 border-blue-500 overflow-hidden bg-blue-50 rounded-lg"
@@ -46,16 +38,14 @@ function ContainerExample() {
 					style={
 						position
 							? {
-									// transform: `translate(${position.x}px, ${position.y}px)`,
-									// willChange: "transform",
-									top: position.y,
-									left: position.x,
+									transform: `translate(${position.x}px, ${position.y}px)`,
+									willChange: "transform",
 								}
 							: undefined
 					}
 					className="absolute top-10 left-15 w-32 h-32 bg-blue-600 text-white rounded-lg shadow-lg flex flex-col items-center justify-center p-4"
 				>
-					<div className="font-semibold mb-2">
+					<div className="font-semibold mb-2 text-xs">
 						容器内移动, 当移动到距离边界小于30px时，松开鼠标会自动吸附到边界
 					</div>
 				</div>
@@ -67,7 +57,6 @@ function ContainerExample() {
 // 屏幕模式示例
 function ScreenExample() {
 	const { moveRef, position } = useMove<HTMLDivElement>({
-		useTopLeft: false,
 		boundary: true,
 	});
 
@@ -79,14 +68,12 @@ function ScreenExample() {
 					position
 						? {
 								transform: `translate(${position.x}px, ${position.y}px)`,
-								// top: position.y,
-								// left: position.x
 							}
 						: undefined
 				}
 				className="fixed top-25 left-25 z-10 w-32 h-32 bg-purple-600 text-white rounded-lg shadow-lg flex flex-col items-center justify-center p-4"
 			>
-				<div className="font-semibold mb-2">屏幕内移动，使用translate</div>
+				<div className="font-semibold mb-2">屏幕内移动</div>
 			</div>
 		</div>
 	);
@@ -115,16 +102,12 @@ function OffsetExample() {
 							? {
 									transform: `translate(${position.x}px, ${position.y}px)`,
 									willChange: "transform",
-									// top: position.y,
-									// left: position.x,
 								}
 							: undefined
 					}
 					className="absolute top-10 left-15 w-32 h-32 bg-blue-600 text-white rounded-lg shadow-lg flex flex-col items-center justify-center p-4"
 				>
-					<div className="font-semibold mb-2 text-xs">
-						容器内移动，不能贴边，有20px的偏移，使用translate
-					</div>
+					<div className="font-semibold mb-2 text-xs">容器内移动，不能贴边，有20px的偏移</div>
 				</div>
 			</div>
 		</div>
@@ -217,58 +200,21 @@ function DraggableCard() {
 
 // 可拖拽的Dialog组件
 function DraggableDialog() {
-	const dialogRef = useRef<HTMLDivElement | null>(null);
-	const { position, isMoving, moveRef, bindEvent, removeEvent } = useMove<HTMLDivElement>({
-		useTopLeft: true,
-		styleRef: dialogRef,
-	});
-	const rafIdRef = useRef(-1);
-	const handleOpenChange = (open: boolean) => {
-		if (open) {
-			rafIdRef.current = requestAnimationFrame(() => {
-				bindEvent();
-			});
-		} else {
-			removeEvent();
-			cancelAnimationFrame(rafIdRef.current);
-		}
-	};
-
 	return (
-		<Dialog onOpenChange={handleOpenChange}>
-			<DialogTrigger asChild>
-				<Button variant="outline">打开可拖拽对话框</Button>
-			</DialogTrigger>
-			<DialogContent
-				style={
-					position
-						? {
-								// transform: `translate(${position.x}px, ${position.y}px)`,
-								// willChange: "transfrom",
-								top: position.y,
-								left: position.x,
-							}
-						: undefined
-				}
-				// className="absolute w-[400px] shadow-2xl"
-				onInteractOutside={(e) => {
-					e.preventDefault();
-				}}
-				ref={dialogRef}
-			>
-				<DialogHeader
-					ref={moveRef}
-					className={`select-none ${isMoving ? "cursor-move" : "cursor-move"}`}
-				>
-					<DialogTitle>可拖拽的对话框</DialogTitle>
-					<DialogDescription>拖拽标题栏来移动对话框</DialogDescription>
-				</DialogHeader>
-				<div className="py-4">
-					<p className="mb-2">这是一个可以拖拽的对话框组件。</p>
-					<p className="mb-2">只有标题栏可以被拖拽。</p>
-				</div>
-			</DialogContent>
-		</Dialog>
+		<MovableDialog
+			triggerChildren={<Button variant="outline">打开可移动对话框</Button>}
+			header={
+				<>
+					<DialogTitle>可移动对话框</DialogTitle>
+					<DialogDescription>尝试拖动标题栏来移动对话框</DialogDescription>
+				</>
+			}
+		>
+			<div className="py-4">
+				<p className="mb-2">这是一个可以移动的对话框组件。</p>
+				<p className="mb-2">尝试拖动标题栏来移动对话框。</p>
+			</div>
+		</MovableDialog>
 	);
 }
 
@@ -276,9 +222,6 @@ function MoveFeaturePage() {
 	return (
 		<div className="p-8 max-w-6xl mx-auto">
 			<h1 className="text-3xl font-bold mb-4">useMove Hook 示例</h1>
-			<p className="text-gray-600 mb-8">
-				以下是useMove hook的各种使用示例，尝试拖动各种彩色方块体验不同的功能
-			</p>
 
 			<div className="space-y-8">
 				<ContainerExample />

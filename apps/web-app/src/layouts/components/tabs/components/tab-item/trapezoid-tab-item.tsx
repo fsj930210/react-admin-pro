@@ -1,7 +1,7 @@
+import Icon from "@rap/components-ui/icon";
 import { cn } from "@rap/utils";
 import { X } from "lucide-react";
 import type { AppTabItemProps } from "../../types";
-import Icon from "@rap/components-ui/icon";
 
 export function TrapezoidTabItem({ tab, active, index, onItemClick, onClose }: AppTabItemProps) {
 	return (

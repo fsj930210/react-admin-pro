@@ -12,9 +12,9 @@ import {
 	DropdownMenuItem,
 	DropdownMenuTrigger,
 } from "@rap/components-base/dropdown-menu";
+import Icon from "@rap/components-ui/icon";
 import { ChevronDown } from "lucide-react";
 import type { BreadcrumbItemProps } from "../types";
-import Icon from "@rap/components-ui/icon";
 
 export function ClassicBreadcrumb({ data, onBreadcrumbItemClick, mode }: BreadcrumbItemProps) {
 	return (
@@ -60,7 +60,10 @@ export function ClassicBreadcrumb({ data, onBreadcrumbItemClick, mode }: Breadcr
 									</DropdownMenu>
 								) : (
 									<BreadcrumbLink className="leading-[2.15] cursor-pointer" asChild>
-										<span className="flex items-center gap-1" onClick={() => onBreadcrumbItemClick?.(item)}>
+										<span
+											className="flex items-center gap-1"
+											onClick={() => onBreadcrumbItemClick?.(item)}
+										>
 											{item.icon && <Icon icon={item.icon} />}
 											{item.title}
 										</span>

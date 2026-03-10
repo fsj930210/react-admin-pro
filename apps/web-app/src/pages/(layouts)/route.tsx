@@ -3,20 +3,20 @@ import { createFileRoute } from "@tanstack/react-router";
 import { LayoutProvider } from "@/layouts/context/layout-context";
 import { MenuService } from "@/layouts/service/menuService";
 import { DoubleColumnLayout } from "@/layouts/ui/double-column-layout";
-import { HorizontalLayout } from "@/layouts/ui/horizontal-layout";
-import { MixDoubleColumnLayout } from "@/layouts/ui/mix-double-column-layout";
-import { MixVerticalLayout } from "@/layouts/ui/mix-vertical-layout";
-import { SideLayout} from "@/layouts/ui/side-layout";
-import { VerticalLayout } from "@/layouts/ui/vertical-layout";
-import { FullscreenLayout } from "@/layouts/ui/fullscreen-layout";
-import { fetchUserInfo, fetchUserMenus } from "@/service/auth";
 import { DoubleColumnLayoutSkeleton } from "@/layouts/ui/double-column-layout/skeleton";
-import { VerticalLayoutSkeleton } from "@/layouts/ui/vertical-layout/skeleton";
-import { SideLayoutSkeleton } from "@/layouts/ui/side-layout/skeleton";
-import { HorizontalLayoutSkeleton } from "@/layouts/ui/horizontal-layout/skeleton";
+import { FullscreenLayout } from "@/layouts/ui/fullscreen-layout";
 import { FullscreenLayoutSkeleton } from "@/layouts/ui/fullscreen-layout/skeleton";
-import { MixVerticalLayoutSkeleton } from "@/layouts/ui/mix-vertical-layout/skeleton";
+import { HorizontalLayout } from "@/layouts/ui/horizontal-layout";
+import { HorizontalLayoutSkeleton } from "@/layouts/ui/horizontal-layout/skeleton";
+import { MixDoubleColumnLayout } from "@/layouts/ui/mix-double-column-layout";
 import { MixDoubleColumnLayoutSkeleton } from "@/layouts/ui/mix-double-column-layout/skeleton";
+import { MixVerticalLayout } from "@/layouts/ui/mix-vertical-layout";
+import { MixVerticalLayoutSkeleton } from "@/layouts/ui/mix-vertical-layout/skeleton";
+import { SideLayout } from "@/layouts/ui/side-layout";
+import { SideLayoutSkeleton } from "@/layouts/ui/side-layout/skeleton";
+import { VerticalLayout } from "@/layouts/ui/vertical-layout";
+import { VerticalLayoutSkeleton } from "@/layouts/ui/vertical-layout/skeleton";
+import { fetchUserInfo, fetchUserMenus } from "@/service/auth";
 
 export const Route = createFileRoute("/(layouts)")({
 	component: Layout,
@@ -74,11 +74,7 @@ function Layout({ type = "vertical" }: LayoutProps) {
 	const LayoutSkeleton = LayoutSkeletonStrategies[type] || LayoutSkeletonStrategies["vertical"];
 	return (
 		<LayoutProvider menuService={menuService} userMenus={menus} userInfo={userInfo}>
-			{loading ? (
-				<LayoutSkeleton />
-			) : (
-				<LayoutComponent />
-			)}
+			{loading ? <LayoutSkeleton /> : <LayoutComponent />}
 		</LayoutProvider>
 	);
 }

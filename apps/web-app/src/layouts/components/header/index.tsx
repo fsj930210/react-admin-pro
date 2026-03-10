@@ -1,14 +1,14 @@
 import { cn } from "@rap/utils";
 import type React from "react";
 import { AppLogo } from "@/components/app/logo";
-import { Breadcrumb } from "../breadcrumb";
 import { CollapseSidebarFeature } from "../../widget/collapse-sidebar";
 import { FullscreenFeature } from "../../widget/fullscreen";
-import { AppSearchFeature } from "./features/app-search";
 import { I18nFeature } from "../../widget/i18n";
-import { NotifyFeature } from "./features/notify";
 import { ReloadFeature } from "../../widget/reload";
 import { ThemeSwitchFeature } from "../../widget/theme-switch";
+import { Breadcrumb } from "../breadcrumb";
+import { AppSearchFeature } from "./features/app-search";
+import { NotifyFeature } from "./features/notify";
 import { UserCenterFeature } from "./features/user-center";
 
 type AppHeaderFeatures =
@@ -65,7 +65,9 @@ export function AppHeader({
 	};
 
 	return (
-		<header className={cn("flex items-center justify-between h-11 w-full px-2 bg-app-header", className)}>
+		<header
+			className={cn("flex items-center justify-between h-11 w-full px-2 bg-app-header", className)}
+		>
 			<div className="flex items-center gap-2">
 				{leftRender ?? leftFeatures.map((feature, index) => renderFeature(feature, index))}
 			</div>

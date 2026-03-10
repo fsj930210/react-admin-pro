@@ -1,4 +1,4 @@
-import { Slot } from "@radix-ui/react-slot";
+import { Slot as SlotPrimitive } from "radix-ui";
 import { useComposedRefs } from "@rap/lib/compose-refs";
 import * as React from "react";
 
@@ -1320,7 +1320,7 @@ const MasonryRoot = ({
     ]
   );
 
-  const RootPrimitive = asChild ? Slot : "div";
+  const RootPrimitive = asChild ? SlotPrimitive.Slot : "div";
 
   return (
     <MasonryContext value={contextValue}>
@@ -1538,7 +1538,7 @@ const MasonryItem = ({
 }: MasonryItemProps & { ref?: React.RefObject<HTMLDivElement | null> }) => {
   const { asChild, ...itemProps } = props;
 
-  const ItemPrimitive = asChild ? Slot : "div";
+  const ItemPrimitive = asChild ? SlotPrimitive.Slot : "div";
 
   return (
     <ItemPrimitive data-slot="masonry-item" {...itemProps} ref={forwardedRef} />

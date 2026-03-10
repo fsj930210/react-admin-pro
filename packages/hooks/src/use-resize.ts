@@ -13,12 +13,12 @@ export const Direction = {
   SE: "se" as const,
 };
 
-type Size = {
+export type Size = {
   width: number;
   height: number;
 };
 
-type Position = {
+export type Position = {
   x: number;
   y: number;
 };
@@ -30,7 +30,7 @@ export interface ResizeOptions {
   onResize?: (size: Size, position: Position) => void;
   onResizeStart?: (direction: ResizeDirection) => void;
   onResizeEnd?: () => void;
-  positionMode?: "translate" | "topLeft";
+  // positionMode?: "translate" | "topLeft";
   disabled?: boolean;
   enableEdgeResize?: boolean;
   edgeSize?: number;
@@ -91,12 +91,11 @@ const getResizeDirection = (
   allowedDirections?: ResizeDirection[]
 ): ResizeDirection | null => {
   const { left, top, right, bottom } = rect;
-  const isNearLeft = x - left < edgeSize;
-  const isNearRight = right - x < edgeSize;
-  const isNearTop = y - top < edgeSize;
-  const isNearBottom = bottom - y < edgeSize;
+  const isNearLeft = x >= left - edgeSize && x < left + edgeSize;
+  const isNearRight = x > right - edgeSize && x <= right + edgeSize;
+  const isNearTop = y >= top - edgeSize && y < top + edgeSize;
+  const isNearBottom = y > bottom - edgeSize && y <= bottom + edgeSize;
 
-  // 角落区域优先
   if (isNearTop && isNearLeft && isDirectionAllowed("nw", allowedDirections))
     return "nw";
   if (isNearTop && isNearRight && isDirectionAllowed("ne", allowedDirections))
@@ -110,7 +109,6 @@ const getResizeDirection = (
   )
     return "se";
 
-  // 边缘区域
   if (isNearTop && isDirectionAllowed("n", allowedDirections)) return "n";
   if (isNearBottom && isDirectionAllowed("s", allowedDirections)) return "s";
   if (isNearLeft && isDirectionAllowed("w", allowedDirections)) return "w";
@@ -127,8 +125,7 @@ const calculateResizeWithBoundary = (
   startSize: Size,
   startPosition: Position,
   minSize: Partial<Size>,
-  maxSize: Partial<Size>,
-  positionMode?: "translate" | "topLeft"
+  maxSize: Partial<Size>
 ): { size: Size; position: Position } => {
   const minWidth = minSize.width ?? 50;
   const minHeight = minSize.height ?? 50;
@@ -144,55 +141,37 @@ const calculateResizeWithBoundary = (
   switch (direction) {
     case "e":
       newWidth = startSize.width + dx;
-      // topLeft 模式下，东边调整时位置不变
       break;
     case "w":
       newWidth = startSize.width - dx;
-      // topLeft 模式下，西边调整时需要更新 x 位置以保持右边不动
-      if (positionMode === 'topLeft') {
-        newX = startPosition.x + dx;
-      }
+      newX = startPosition.x + dx;
       break;
     case "n":
       newHeight = startSize.height - dy;
-      // topLeft 模式下，北边调整时需要更新 y 位置以保持下边不动
-      if (positionMode === 'topLeft') {
-        newY = startPosition.y + dy;
-      }
+      newY = startPosition.y + dy;
       break;
     case "s":
       newHeight = startSize.height + dy;
-      // topLeft 模式下，南边调整时位置不变
       break;
     case "nw":
       newWidth = startSize.width - dx;
       newHeight = startSize.height - dy;
-      // topLeft 模式下，西北角调整时需要更新 x, y 位置以保持右下角不动
-      if (positionMode === 'topLeft') {
-        newX = startPosition.x + dx;
-        newY = startPosition.y + dy;
-      }
+      newX = startPosition.x + dx;
+      newY = startPosition.y + dy;
       break;
     case "ne":
       newWidth = startSize.width + dx;
       newHeight = startSize.height - dy;
-      // topLeft 模式下，东北角调整时需要更新 y 位置以保持下边不动
-      if (positionMode === 'topLeft') {
-        newY = startPosition.y + dy;
-      }
+      newY = startPosition.y + dy;
       break;
     case "sw":
       newWidth = startSize.width - dx;
       newHeight = startSize.height + dy;
-      // topLeft 模式下，西南角调整时需要更新 x 位置以保持右边不动
-      if (positionMode === 'topLeft') {
-        newX = startPosition.x + dx;
-      }
+      newX = startPosition.x + dx;
       break;
     case "se":
       newWidth = startSize.width + dx;
       newHeight = startSize.height + dy;
-      // topLeft 模式下，东南角调整时位置不变
       break;
   }
 
@@ -206,18 +185,13 @@ const calculateResizeWithBoundary = (
   if (newWidth < minWidth) {
     finalWidth = minWidth;
     if (direction.includes("w")) {
-      if (positionMode === 'topLeft') {
-        finalX = startPosition.x + (startSize.width - minWidth);
-      }
+      finalX = startPosition.x + (startSize.width - minWidth);
     }
   } else if (newWidth > maxWidth) {
     finalWidth = maxWidth;
     if (direction.includes("w")) {
-      if (positionMode === 'topLeft') {
-        finalX = startPosition.x + (startSize.width - maxWidth);
-      }
+      finalX = startPosition.x + (startSize.width - maxWidth);
     } else if (direction.includes("e")) {
-      // 向右拖动达到最大宽度时，保持位置不变
       finalX = startPosition.x;
     }
   }
@@ -226,18 +200,13 @@ const calculateResizeWithBoundary = (
   if (newHeight < minHeight) {
     finalHeight = minHeight;
     if (direction.includes("n")) {
-      if (positionMode === 'topLeft') {
-        finalY = startPosition.y + (startSize.height - minHeight);
-      }
+      finalY = startPosition.y + (startSize.height - minHeight);
     }
   } else if (newHeight > maxHeight) {
     finalHeight = maxHeight;
     if (direction.includes("n")) {
-      if (positionMode === 'topLeft') {
-        finalY = startPosition.y + (startSize.height - maxHeight);
-      }
+      finalY = startPosition.y + (startSize.height - maxHeight);
     } else if (direction.includes("s")) {
-      // 向下拖动达到最大高度时，保持位置不变
       finalY = startPosition.y;
     }
   }
@@ -311,13 +280,14 @@ function useResize<T extends HTMLElement>(options?: ResizeOptions) {
 
     if (!resizeDirection || !isDirectionAllowed(resizeDirection, directions))
       return;
-		const {positionMode} = optionsRef.current
+		// const {positionMode} = optionsRef.current
     const rect = resizeRef.current.getBoundingClientRect();
     const currentSize = { width: rect.width, height: rect.height };
-		const computedStyle = window.getComputedStyle(resizeRef.current);
-    const styleLeft = parseInt(computedStyle.left || "0", 10);
-    const styleTop = parseInt(computedStyle.top || "0", 10);
-    const currentPosition = latestPositionRef.current ||  positionMode === 'topLeft' ? { x: styleLeft, y: styleTop }: { x: 0, y: 0};
+		// const computedStyle = window.getComputedStyle(resizeRef.current);
+    // const styleLeft = parseInt(computedStyle.left || "0", 10);
+    // const styleTop = parseInt(computedStyle.top || "0", 10);
+    // const currentPosition = latestPositionRef.current ||  positionMode === 'topLeft' ? { x: styleLeft, y: styleTop }: { x: 0, y: 0};
+		const currentPosition = latestPositionRef.current || { x: 0, y: 0};
 
     const coord = getClientCoord(e);
 
@@ -354,15 +324,10 @@ function useResize<T extends HTMLElement>(options?: ResizeOptions) {
           directions
         );
         const newCursor = getCursor(direction);
-        if (cursor !== newCursor) {
-          setCursor(newCursor);
-        }
+        setCursor(newCursor);
       }
       return;
     }
-
-    if (!resizeStateRef.current.isResizing) return;
-
     cancelRaf();
     rafIdRef.current = requestAnimationFrame(() => {
       const { direction, startX, startY, startSize, startPosition } =
@@ -428,6 +393,7 @@ function useResize<T extends HTMLElement>(options?: ResizeOptions) {
   // 统一的事件绑定
   const bindEvent = () => {
     const el = resizeRef.current;
+		console.log(el);
     if (!el) return;
 
     // 鼠标按下事件（用于边缘resize）

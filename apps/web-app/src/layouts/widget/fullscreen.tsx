@@ -2,8 +2,6 @@ import { Button } from "@rap/components-base/button";
 import { Maximize, Minimize } from "lucide-react";
 import { useState } from "react";
 
-
-
 export function FullscreenFeature(props: React.ComponentProps<"button">) {
 	const [isFullscreen, setIsFullscreen] = useState(false);
 

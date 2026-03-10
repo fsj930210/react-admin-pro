@@ -1,6 +1,6 @@
 "use client";
 
-import { Slot } from "@radix-ui/react-slot";
+import { Slot as SlotPrimitive } from "radix-ui";
 import { type VariantProps, cva } from "class-variance-authority";
 import { PanelLeftOpen, PanelLeftClose } from "lucide-react";
 import * as React from "react";
@@ -557,7 +557,7 @@ const SidebarGroupLabel = ({
   asChild = false,
   ...props
 }: SidebarGroupLabelProps) => {
-  const Comp = asChild ? Slot : "div";
+  const Comp = asChild ? SlotPrimitive.Slot : "div";
 
   return (
     <Comp
@@ -585,7 +585,7 @@ const SidebarGroupAction = ({
   asChild = false,
   ...props
 }: SidebarGroupActionProps) => {
-  const Comp = asChild ? Slot : "button";
+  const Comp = asChild ? SlotPrimitive.Slot : "button";
 
   return (
     <Comp
@@ -696,7 +696,7 @@ const SidebarMenuButton = ({
   className,
   ...props
 }: SidebarMenuButtonProps) => {
-  const Comp = asChild ? Slot : "button";
+  const Comp = asChild ? SlotPrimitive.Slot : "button";
   const { isMobile, state } = useSidebar();
 
   const button = (
@@ -747,7 +747,7 @@ const SidebarMenuAction = ({
   showOnHover = false,
   ...props
 }: SidebarMenuActionProps) => {
-  const Comp = asChild ? Slot : "button";
+  const Comp = asChild ? SlotPrimitive.Slot : "button";
 
   return (
     <Comp
@@ -885,7 +885,7 @@ const SidebarMenuSubButton = ({
   className,
   ...props
 }: SidebarMenuSubButtonProps) => {
-  const Comp = asChild ? Slot : "a";
+  const Comp = asChild ? SlotPrimitive.Slot : "a";
 
   return (
     <Comp

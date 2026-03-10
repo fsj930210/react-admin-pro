@@ -1,7 +1,17 @@
-import { AppLogo } from "@/components/app/logo";
-import { ContentSkeleton, HeaderSkeleton, SidebarSkeleton, TabsSkeleton } from "@/layouts/components/skeleton";
-import { Sidebar, SidebarContent, SidebarInset, SidebarProvider } from "@rap/components-base/sidebar/index";
+import {
+	Sidebar,
+	SidebarContent,
+	SidebarInset,
+	SidebarProvider,
+} from "@rap/components-base/sidebar/index";
 import { Skeleton } from "@rap/components-base/skeleton";
+import { AppLogo } from "@/components/app/logo";
+import {
+	ContentSkeleton,
+	HeaderSkeleton,
+	SidebarSkeleton,
+	TabsSkeleton,
+} from "@/layouts/components/skeleton";
 
 export function MixVerticalLayoutSkeleton() {
 	return (
@@ -31,5 +41,5 @@ export function MixVerticalLayoutSkeleton() {
 				</SidebarInset>
 			</div>
 		</SidebarProvider>
-	)
+	);
 }

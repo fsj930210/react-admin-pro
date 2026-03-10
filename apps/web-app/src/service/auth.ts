@@ -50,4 +50,3 @@ export const fetchUserInfo = () => {
 export const fetchUserMenus = () => {
 	return request.get<IUserMenusResponseData>("/api/rap/user/menus");
 };
-

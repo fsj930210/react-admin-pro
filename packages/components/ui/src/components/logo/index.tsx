@@ -1,5 +1,3 @@
-import { cn } from "@rap/utils";
-
 export type LogoProps = {
   animate?: boolean;
   className?: string;
@@ -7,20 +5,19 @@ export type LogoProps = {
   showTitle?: boolean;
   url?: string;
   onClick?: () => void;
-};
+} &  React.ComponentProps<"div">;
 const Logo = ({
   animate,
-  className,
   url,
   title = "React Admin Pro",
   showTitle = true,
-  onClick,
+	...props
 }: LogoProps) => {
   return (
-    <div className={cn("flex items-center gap-2", className)} onClick={onClick}>
+    <div className="flex items-center gap-2" {...props}>
       <img
         src={url ?? '/logo.svg'}
-        alt="logo"
+        alt={title}
         className={`object-contain ${animate ? "animate-rotate" : ""}`}
       />
       {showTitle && <h2 className="truncate font-medium text-base">{title}</h2>}

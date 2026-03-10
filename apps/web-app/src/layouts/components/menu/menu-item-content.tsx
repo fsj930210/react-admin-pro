@@ -1,8 +1,8 @@
+import Icon from "@rap/components-ui/icon";
 import { cn } from "@rap/utils";
 import type { MenuItem } from "@/layouts/types";
 import { MenuItemBadge } from "./menu-item-badge";
 import { MenuItemHighlightText } from "./menu-item-highlight-text";
-import Icon from "@rap/components-ui/icon";
 
 interface MenuItemContentProps {
 	item: MenuItem;

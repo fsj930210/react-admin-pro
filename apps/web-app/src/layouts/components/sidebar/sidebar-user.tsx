@@ -12,8 +12,8 @@ import { SidebarMenu, SidebarMenuButton, SidebarMenuItem } from "@rap/components
 import { useIsMobile } from "@rap/hooks/use-mobile";
 import { cn } from "@rap/utils";
 import { BadgeCheck, Bell, ChevronsUpDown, CreditCard, LogOut, Sparkles } from "lucide-react";
-import { useAuth } from "@/pages/login/-hooks/useAuth";
 import { useLayout } from "@/layouts/context/layout-context";
+import { useAuth } from "@/pages/login/-hooks/useAuth";
 
 export function SidebarUser() {
 	return (

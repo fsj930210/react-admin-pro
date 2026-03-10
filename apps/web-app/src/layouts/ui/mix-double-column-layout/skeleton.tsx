@@ -1,11 +1,17 @@
-import { AppLogo } from "@/components/app/logo";
-import { HeaderSkeleton } from "@/layouts/components/skeleton";
-import { Sidebar, SidebarContent, SidebarProvider } from "@rap/components-base/sidebar/index";
-import { SidebarSkeleton } from "@/layouts/components/skeleton";
+import {
+	Sidebar,
+	SidebarContent,
+	SidebarInset,
+	SidebarProvider,
+} from "@rap/components-base/sidebar/index";
 import { Skeleton } from "@rap/components-base/skeleton";
-import { SidebarInset } from "@rap/components-base/sidebar/index";
-import { TabsSkeleton } from "@/layouts/components/skeleton";
-import { ContentSkeleton } from "@/layouts/components/skeleton";
+import { AppLogo } from "@/components/app/logo";
+import {
+	ContentSkeleton,
+	HeaderSkeleton,
+	SidebarSkeleton,
+	TabsSkeleton,
+} from "@/layouts/components/skeleton";
 
 export function MixDoubleColumnLayoutSkeleton() {
 	return (
@@ -35,7 +41,10 @@ export function MixDoubleColumnLayoutSkeleton() {
 						</ol>
 						<Skeleton className="h-12 w-18 mx-2 rounded-md" />
 					</div>
-					<Sidebar collapsible="icon" className="h-[calc(100%-var(--spacing)*11)] top-11 left-22 flex-1">
+					<Sidebar
+						collapsible="icon"
+						className="h-[calc(100%-var(--spacing)*11)] top-11 left-22 flex-1"
+					>
 						<SidebarContent className="p-2">
 							<SidebarSkeleton />
 						</SidebarContent>
@@ -47,5 +56,5 @@ export function MixDoubleColumnLayoutSkeleton() {
 				</div>
 			</SidebarInset>
 		</SidebarProvider>
-	)
+	);
 }
