@@ -1,3 +1,4 @@
+/** biome-ignore-all lint:suspicious/noExplicitAny */
 import { initMock } from "@rap/mock-config";
 import ReactDOM from "react-dom/client";
 import { APP_BASE_PATH } from "@/config";

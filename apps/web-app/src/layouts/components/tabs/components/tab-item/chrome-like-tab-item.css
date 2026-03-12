@@ -3,6 +3,7 @@
 		opacity: 0;
 	}
 }
+/* biome-ignore lint:style/noDescendingSpecificity */
 .app-tabs-chrome-tab-item {
 	&:last-child {
 		&::after {

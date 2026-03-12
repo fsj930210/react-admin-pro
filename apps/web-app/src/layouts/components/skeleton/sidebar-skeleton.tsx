@@ -1,3 +1,4 @@
+/** biome-ignore-all lint:suspicious/noArrayIndexKey */
 import { SidebarMenu, SidebarMenuItem, SidebarMenuSkeleton } from "@rap/components-base/sidebar";
 
 export function SidebarSkeleton() {

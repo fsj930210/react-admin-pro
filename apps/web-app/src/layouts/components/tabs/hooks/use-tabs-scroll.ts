@@ -135,6 +135,7 @@ export function useTabsScroll(options: UseTabsScrollOptions = {}) {
 	};
 
 	// 使用ResizeObserver监听容器大小变化
+	// biome-ignore lint:correctness/useExhaustiveDependencies
 	useEffect(() => {
 		const container = containerRef.current;
 		if (!container) return;

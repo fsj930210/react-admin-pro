@@ -45,7 +45,7 @@ export function DoubleColumnLayout() {
 				}
 			}
 		});
-	}, [pathname]);
+	}, [pathname, menuService]);
 
 	const handleMenuItemClick = (menu: MenuItem) => {
 		isMenuItemClickRef.current = true;
@@ -139,6 +139,7 @@ function DoubleColumnLayoutSidebar({
 						<button
 							className="flex-center size-6 rounded-xs cursor-pointer bg-muted"
 							onClick={toggleSidebar}
+							type="button"
 						>
 							{state === "collapsed" ? (
 								<ChevronsRight className="size-4" />

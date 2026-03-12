@@ -45,7 +45,7 @@ export function MixVerticalLayout() {
 				}
 			}
 		});
-	}, [pathname]);
+	}, [pathname, menuService]);
 
 	const handleMenuItemClick = (menu: MenuItem) => {
 		isMenuItemClickRef.current = true;
@@ -68,13 +68,13 @@ export function MixVerticalLayout() {
 			<AppHeader
 				className="border-b"
 				rightFeatures={[
-					"globalSearch",
-					"themeSwitch",
+					"app-search",
+					"theme-switch",
 					"i18n",
 					"fullscreen",
 					"reload",
 					"notify",
-					"userCenter",
+					"user-center",
 				]}
 				leftRender={
 					<div className="flex items-center w-full">
@@ -146,6 +146,7 @@ function MixVerticalLayoutSidebar({ menus }: MixVerticalLayoutSidebarProps) {
 				<button
 					className="flex-center size-6 rounded-xs cursor-pointer bg-muted"
 					onClick={toggleSidebar}
+					type="button"
 				>
 					{state === "collapsed" ? (
 						<ChevronsRight className="size-4" />

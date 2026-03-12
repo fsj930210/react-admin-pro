@@ -70,8 +70,8 @@ function Layout({ type = "vertical" }: LayoutProps) {
 	const userInfo = userInfoResult.data?.data ?? null;
 	const loading = queryResults.some((result) => result.isLoading);
 	const menuService = new MenuService(menus);
-	const LayoutComponent = LayoutComponentStrategies[type] || LayoutComponentStrategies["vertical"];
-	const LayoutSkeleton = LayoutSkeletonStrategies[type] || LayoutSkeletonStrategies["vertical"];
+	const LayoutComponent = LayoutComponentStrategies[type] || LayoutComponentStrategies.vertical;
+	const LayoutSkeleton = LayoutSkeletonStrategies[type] || LayoutSkeletonStrategies.vertical;
 	return (
 		<LayoutProvider menuService={menuService} userMenus={menus} userInfo={userInfo}>
 			{loading ? <LayoutSkeleton /> : <LayoutComponent />}

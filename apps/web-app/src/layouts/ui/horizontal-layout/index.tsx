@@ -21,13 +21,13 @@ export function HorizontalLayout() {
 		<SidebarInset className="overflow-hidden  min-w-0">
 			<AppHeader
 				rightFeatures={[
-					"globalSearch",
-					"themeSwitch",
+					"app-search",
+					"theme-switch",
 					"i18n",
 					"fullscreen",
 					"reload",
 					"notify",
-					"userCenter",
+					"user-center",
 				]}
 				leftRender={
 					<div className="flex items-center w-full">
@@ -69,9 +69,9 @@ interface HorizontalMenuItemProps {
 }
 
 function HorizontalMenuItem({ item, onMenuItemClick }: HorizontalMenuItemProps) {
+	const [isOpen, setIsOpen] = useState(false);
 	if (item.hidden || item.status !== "enabled" || item.type === "button") return null;
 	const { children } = item;
-	const [isOpen, setIsOpen] = useState(false);
 
 	return (
 		<div className="relative">

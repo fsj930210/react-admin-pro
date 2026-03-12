@@ -1,4 +1,4 @@
-/** biome-ignore-all lint/a11y/noStaticElementInteractions: <explanation> */
+/** biome-ignore-all lint:a11y/noStaticElementInteractions*/
 import { Button } from "@rap/components-base/button";
 import {
 	Card,

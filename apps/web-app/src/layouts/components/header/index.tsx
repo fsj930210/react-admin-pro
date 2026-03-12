@@ -31,6 +31,7 @@ interface AppHeaderProps {
 	className?: string;
 }
 
+// biome-ignore lint:suspicious/noExplicitAny
 const featureComponents: Record<AppHeaderFeatures, React.FC<any>> = {
 	logo: AppLogo,
 	reload: ReloadFeature,

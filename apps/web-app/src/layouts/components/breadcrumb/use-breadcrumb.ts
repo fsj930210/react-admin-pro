@@ -30,7 +30,7 @@ export function useBreadcrumb() {
 		console.log(item);
 		if (item.type === "dir") {
 			const firstMenu = findFirstMenuInternal(item);
-			if (firstMenu && firstMenu.url) {
+			if (firstMenu?.url) {
 				navigate({ to: firstMenu.url });
 			}
 		} else if (item.type === "menu") {
@@ -40,12 +40,12 @@ export function useBreadcrumb() {
 	useEffect(() => {
 		const selectedTab = menuService.findMenuByUrl(pathname);
 		if (selectedTab) {
-			const items = menuService.findMenuAncestor(selectedTab.id);
 			queueMicrotask(() => {
+				const items = menuService.findMenuAncestor(selectedTab.id);
 				setBreadcrumbList(items);
 			});
 		}
-	}, [pathname]);
+	}, [pathname, menuService]);
 	return {
 		breadcrumbList,
 		handleBreadcrumbItemClick,

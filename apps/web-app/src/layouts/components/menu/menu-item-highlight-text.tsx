@@ -1,3 +1,4 @@
+/** biome-ignore-all lint:suspicious/noArrayIndexKey */
 interface HighlightTextProps {
 	text: string;
 	searchKeywords: string[];

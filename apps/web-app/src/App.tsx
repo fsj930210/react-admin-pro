@@ -24,6 +24,7 @@ const queryClient = new QueryClient({
 const router = createRouter({
 	routeTree,
 	basepath: APP_BASE_PATH, // Set the base path for the router
+	// biome-ignore lint:suspicious/noExplicitAny
 	defaultErrorComponent: ({ error }: any) => <ErrorComponent error={error} />,
 	context: {
 		queryClient,

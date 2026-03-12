@@ -1,9 +1,9 @@
-import type { LayoutTabItem } from "../types";
+import type { AppTabItem } from "../types";
 
 interface UseTabsContextMenuProps {
-	updateTabs: React.Dispatch<React.SetStateAction<LayoutTabItem[]>>;
-	setActiveTab: React.Dispatch<React.SetStateAction<LayoutTabItem | null>>;
-	activeTab: LayoutTabItem | null;
+	updateTabs: React.Dispatch<React.SetStateAction<AppTabItem[]>>;
+	setActiveTab: React.Dispatch<React.SetStateAction<AppTabItem | null>>;
+	activeTab: AppTabItem | null;
 }
 
 // eslint-disable-next-line @eslint-react/no-unnecessary-use-prefix

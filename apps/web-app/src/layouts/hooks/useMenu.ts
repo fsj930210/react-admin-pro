@@ -21,7 +21,7 @@ export function useMenu({ menuService, multiOpen = false }: UseMenuServiceParams
 		if (!selectedMenu) return [];
 		const openKeys: string[] = [];
 		let current = selectedMenu;
-		while (current && current.parentId) {
+		while (current?.parentId) {
 			const parent = menuService.flatMenus.find((menu) => menu.id === current.parentId);
 			if (parent) {
 				openKeys.push(parent.id);
@@ -76,6 +76,7 @@ export function useMenu({ menuService, multiOpen = false }: UseMenuServiceParams
 			isMenuItemClickRef.current = true;
 		}
 	};
+	// biome-ignore lint:correctness/useExhaustiveDependencies
 	useEffect(() => {
 		if (isMenuItemClickRef.current) {
 			isMenuItemClickRef.current = false;
@@ -88,7 +89,7 @@ export function useMenu({ menuService, multiOpen = false }: UseMenuServiceParams
 				updateOpenKeysByMenu(selectedMenu);
 			}
 		});
-	}, [pathname]);
+	}, [pathname, menuService]);
 	return {
 		updateOpenKeysByMenu,
 		updateOpenKeys: setOpenKeys,

@@ -59,7 +59,8 @@ export class MenuService {
 		const textLower = sourceText.toLowerCase();
 		const keyLen = key.length;
 		let start = 0;
-		while ((start = textLower.indexOf(key, start)) > -1) {
+		start = textLower.indexOf(key, start);
+		while (start > -1) {
 			const realText = sourceText.substring(start, start + keyLen);
 			if (!matchTexts.includes(realText)) {
 				matchTexts.push(realText);

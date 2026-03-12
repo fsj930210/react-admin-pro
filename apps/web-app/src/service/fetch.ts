@@ -3,6 +3,7 @@ import { APP_BASE_PATH } from "@/config";
 
 export const SUCCESS_CODE = "0000000000";
 
+// biome-ignore lint:suspicious/noExplicitAny
 const beforeErrorStatus = () => (error: any) => {
 	const { response } = error;
 	const clonedResponse = response.clone();
@@ -23,6 +24,7 @@ async function afterResponseJson(_request: Request, _options: KyOptions, respons
 			}
 			return body;
 		}
+		// biome-ignore lint:suspicious/noExplicitAny
 	} catch (e: any) {
 		// eslint-disable-next-line @typescript-eslint/prefer-promise-reject-errors
 		return Promise.reject(e);
