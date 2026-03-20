@@ -3,101 +3,109 @@ import { Icon as IconifyIcon } from '@iconify/react';
 
 import type { IconProps as IconifyIconProps } from '@iconify/react';
 
-interface IconProps {
-  wrapClassName?: string;
-  title?: string;
-  children?: React.ReactNode;
-  icon?: string | IconifyIconProps['icon'];
-  type?: 'img' | 'iconify';
-  alt?: string;
-  width?: string | number;
-  height?: string | number;
+type IconProps = {
+
+	title?: string;
+	children?: React.ReactNode;
+	icon?: string | IconifyIconProps['icon'];
+	type?: 'image' | 'iconify';
 	size?: number;
-  loading?: 'eager' | 'lazy';
-  className?: string;
-  style?: React.CSSProperties;
-}
+	imageProps?: Omit<React.HTMLAttributes<HTMLImageElement>, 'src'>;
+	iconifyProps?: Omit<IconifyIconProps, 'icon'>;
+	width?: number;
+	height?: number;
+} & React.ComponentProps<'span'>
 
-const Icon = ({
-  wrapClassName,
-  title = '',
-  children,
-  icon,
-  type,
+export function Icon({
+	className,
+	title = '',
+	children,
+	icon,
+	type = 'iconify',
+	width = 16,
+	height = 16,
 	size = 16,
-  ...rest
-}: IconProps) => {
-  if (children) {
-    return (
-      <span
-        className={`text-[0px] leading-none align-top ${wrapClassName || ''}`}
-        title={title}
-        aria-label={title}
-      >
-        {children}
-      </span>
-    );
-  }
+	imageProps,
+	iconifyProps,
+	...rest
+}: IconProps) {
+	if (children) {
+		return (
+			<span
+				{...rest}
+				className={`text-[0px] leading-none align-top ${className || ''}`}
+				title={title}
+				aria-label={title}
+			>
+				{children}
+			</span>
+		);
+	}
 
-  if (type === 'img' && icon) {
-    return (
-      <span
-        className={`text-[0px] leading-none align-top ${wrapClassName || ''}`}
-        title={title}
-        aria-label={title}
-      >
-        <img src={icon as string} {...rest} />
-      </span>
-    );
-  }
+	if (type === 'image' && icon) {
+		return (
+			<span
+				{...rest}
+				className={`text-[0px] leading-none align-top ${className || ''}`}
+				title={title}
+				aria-label={title}
+			>
+				<img src={icon as string} {...imageProps} width={width} height={height} />
+			</span>
+		);
+	}
 
-  if (type === 'iconify' && icon) {
-    return (
-      <span
-        className={`text-[0px] leading-none align-top ${wrapClassName || ''}`}
-        title={title}
-        aria-label={title}
-      >
-        <IconifyIcon inline fontSize={size} icon={icon}  />
-      </span>
-    );
-  }
+	if (type === 'iconify' && icon) {
+		return (
+			<span
+				{...rest}
+				className={`text-[0px] leading-none align-top ${className || ''}`}
+				title={title}
+				aria-label={title}
+			>
+				<IconifyIcon inline fontSize={size} icon={icon} {...iconifyProps} />
+			</span>
+		);
+	}
 
-  if (typeof icon === 'string') {
-    if (/\.(png|jpg|jpeg|gif|webp|bmp|ico|svg)$/i.test(icon)) {
-      return (
-        <span
-          className={`text-[0px] leading-none align-top ${wrapClassName || ''}`}
-          title={title}
-          aria-label={title}
-        >
-          <img src={icon} {...rest} />
-        </span>
-      );
-    }
-    else {
-      return (
-        <span
-          className={`text-[0px] leading-none align-top ${wrapClassName || ''}`}
-          title={title}
-          aria-label={title}
-        >
-          <IconifyIcon inline fontSize={size} icon={icon} />
-        </span>
-      );
-    }
-  }
+	if (typeof icon === 'string') {
+		if (/\.(png|jpg|jpeg|gif|webp|bmp|ico|svg)$/i.test(icon)) {
+			return (
+				<span
+					{...rest}
+					className={`text-[0px] leading-none align-top ${className || ''}`}
+					title={title}
+					aria-label={title}
+				>
+					<img src={icon} {...imageProps} width={width} height={height} />
+				</span>
+			);
+		}
+		else {
+			return (
+				<span
+					{...rest}
+					className={`text-[0px] leading-none align-top ${className || ''}`}
+					title={title}
+					aria-label={title}
+				>
+					<IconifyIcon inline fontSize={size} icon={icon} {...iconifyProps} />
+				</span>
+			);
+		}
+	}
 
-  // 否则使用iconify icon
-  return icon && (
-    <span
-      className={`text-[0px] leading-none align-top ${wrapClassName || ''}`}
-      title={title}
-      aria-label={title}
-    >
-      <IconifyIcon inline fontSize={size} icon={icon} />
-    </span>
-  );
+	// 否则使用iconify icon
+	return icon && (
+		<span
+			{...rest}
+			className={`text-[0px] leading-none align-top ${className || ''}`}
+			title={title}
+			aria-label={title}
+		>
+			<IconifyIcon inline fontSize={size} icon={icon} {...iconifyProps} />
+		</span>
+	);
 };
 
-export default Icon;
+export { IconView } from './icon-view';

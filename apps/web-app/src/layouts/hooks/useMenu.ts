@@ -89,7 +89,7 @@ export function useMenu({ menuService, multiOpen = false }: UseMenuServiceParams
 				updateOpenKeysByMenu(selectedMenu);
 			}
 		});
-	}, [pathname, menuService]);
+	}, [pathname]);
 	return {
 		updateOpenKeysByMenu,
 		updateOpenKeys: setOpenKeys,

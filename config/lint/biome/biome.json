@@ -28,7 +28,6 @@
 			}
     },
     "domains": {
-      "next": "recommended",
       "react": "recommended"
     }
   },

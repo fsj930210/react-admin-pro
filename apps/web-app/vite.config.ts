@@ -14,10 +14,17 @@ export default ({ mode }: UserConfig) => {
 			allowedHosts: true,
 		},
 		build: {
-			rollupOptions: {
+			
+			rolldownOptions: {
 				output: {
-					manualChunks: {
-						react: ["react", "react-dom"],
+					codeSplitting: {
+						minSize: 20000,
+						groups: [
+							{
+								name: 'react',
+								test: /react|react-dom/,
+							},
+						],
 					},
 					chunkFileNames: "static/js/[name]-[hash].js",
 					entryFileNames: "static/js/[name]-[hash].js",

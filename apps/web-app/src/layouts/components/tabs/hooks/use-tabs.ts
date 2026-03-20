@@ -76,7 +76,7 @@ export function useTabs() {
 				addTab(selectedTab);
 			});
 		}
-	}, [pathname, menuService]);
+	}, [pathname]);
 
 	return {
 		activeTab,

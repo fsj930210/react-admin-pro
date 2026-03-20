@@ -6,15 +6,12 @@
 	"scripts": {
 		"dev": "turbo run dev",
 		"dev:web": "turbo run dev  --filter=@rap/web-app",
-		"dev:next": "turbo run dev  --filter=@rap/next-app",
 		"dev:web-vite": "turbo run dev:vite",
 		"preview": "turbo run preview",
 		"preview:web": "turbo run dev --filter=@rap/web-app",
-		"preview:next": "turbo run dev --filter=@rap/next-app",
 		"preview:web-vite": "turbo run preview:vite",
 		"build": "turbo run build",
 		"build:web": "turbo run dev --filter=@rap/web-app",
-		"build:next": "turbo run dev --filter=@rap/next-app",
 		"build:web-vite": "turbo run build:vite",
 		"lint": "turbo run lint",
 		"prepare": "husky"
@@ -31,14 +28,13 @@
 		"typescript",
 		"tailwindcss",
 		"vite",
-		"next.js",
 		"rsbuild",
 		"tanstack"
 	],
 	"author": "",
 	"license": "ISC",
 	"type": "module",
-	"packageManager": "pnpm@10.30.3",
+	"packageManager": "pnpm@10.32.1",
 	"devDependencies": {
 		"@biomejs/monorepo": "catalog:",
 		"@rap/commitlint-config": "workspace:*",

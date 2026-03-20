@@ -12,7 +12,7 @@ import {
 	DropdownMenuItem,
 	DropdownMenuTrigger,
 } from "@rap/components-base/dropdown-menu";
-import Icon from "@rap/components-ui/icon";
+import { Icon } from "@rap/components-ui/icon";
 import { ChevronDown } from "lucide-react";
 import type { BreadcrumbItemProps } from "../types";
 

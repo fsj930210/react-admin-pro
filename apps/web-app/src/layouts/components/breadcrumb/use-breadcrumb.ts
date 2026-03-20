@@ -37,6 +37,7 @@ export function useBreadcrumb() {
 			navigate({ to: item.url });
 		}
 	};
+	// biome-ignore lint:correctness/useExhaustiveDependencies
 	useEffect(() => {
 		const selectedTab = menuService.findMenuByUrl(pathname);
 		if (selectedTab) {
@@ -45,7 +46,7 @@ export function useBreadcrumb() {
 				setBreadcrumbList(items);
 			});
 		}
-	}, [pathname, menuService]);
+	}, [pathname]);
 	return {
 		breadcrumbList,
 		handleBreadcrumbItemClick,

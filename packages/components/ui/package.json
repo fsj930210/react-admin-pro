@@ -20,12 +20,16 @@
 		"@rap/components-base": "workspace:*",
 		"@rap/hooks": "workspace:*",
 		"@rap/utils": "workspace:*",
+		"@tanstack/react-router": "catalog:",
 		"@tanstack/react-virtual": "catalog:",
 		"ahooks": "catalog:",
 		"class-variance-authority": "catalog:",
+		"lodash-es": "catalog:",
+		"lru-cache": "catalog:",
 		"lucide-react": "catalog:",
 		"react": "catalog:",
-		"react-dom": "catalog:"
+		"react-dom": "catalog:",
+		"uuid": "catalog:"
 	},
 	"exports": {
 		"./loading": "./src/components/loading/index.tsx",
@@ -33,9 +37,8 @@
 		"./theme-provider": "./src/components/theme-provider/index.tsx",
 		"./input-with-clear": "./src/components/input-with-clear/index.tsx",
 		"./icon": "./src/components/icon/index.tsx",
-		"./icon-set-view": "./src/components/icon/icon-set-view.tsx",
-		"./icon-view": "./src/components/icon/icon-view.tsx",
-		"./dialog": "./src/components/dialog/index.tsx"
+		"./dialog": "./src/components/dialog/index.tsx",
+		"./keep-alive": "./src/components/keep-alive/index.ts"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "catalog:",
@@ -43,6 +46,7 @@
 		"@rap/eslint-config": "workspace:*",
 		"@rap/tailwindcss-config": "workspace:*",
 		"@rap/tsconfig": "workspace:*",
+		"@types/lodash-es": "catalog:",
 		"@types/node": "catalog:",
 		"@types/react": "catalog:",
 		"@types/react-dom": "catalog:",

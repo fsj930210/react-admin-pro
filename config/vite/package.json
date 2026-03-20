@@ -23,7 +23,7 @@
 		"@rap/tsconfig": "workspace:*",
 		"@tailwindcss/vite": "catalog:",
 		"@tanstack/router-plugin": "catalog:",
-		"@vitejs/plugin-react-swc": "catalog:",
+		"@vitejs/plugin-react": "catalog:",
 		"browserslist": "catalog:",
 		"code-inspector-plugin": "catalog:",
 		"lightningcss": "catalog:",

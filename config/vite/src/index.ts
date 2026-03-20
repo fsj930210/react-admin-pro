@@ -1,7 +1,7 @@
 import path from "node:path";
 import tailwindcss from "@tailwindcss/vite";
 import { tanstackRouter } from "@tanstack/router-plugin/vite";
-import react from "@vitejs/plugin-react-swc";
+import react from "@vitejs/plugin-react";
 import browserslist from "browserslist";
 import { browserslistToTargets } from "lightningcss";
 import { visualizer } from "rollup-plugin-visualizer";
@@ -25,6 +25,9 @@ export function defineViteConfig(config: UserConfig = {}) {
         quoteStyle: "double",
         semicolons: true,
       }),
+			codeInspectorPlugin({
+        bundler: 'vite',
+      }),
       react(),
       tailwindcss(),
       svgr(),
@@ -34,9 +37,6 @@ export function defineViteConfig(config: UserConfig = {}) {
       },
       visualizer({
         open: true,
-      }),
-      codeInspectorPlugin({
-        bundler: 'vite',
       }),
       pluginReactLocalIconify({
         resolver: '@iconify/react',

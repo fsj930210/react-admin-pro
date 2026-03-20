@@ -24,7 +24,9 @@ import { Route as layoutsFeaturesThemeIndexRouteImport } from "./pages/(layouts)
 import { Route as layoutsFeaturesResizeIndexRouteImport } from "./pages/(layouts)/features/resize/index";
 import { Route as layoutsFeaturesMoveIndexRouteImport } from "./pages/(layouts)/features/move/index";
 import { Route as layoutsFeaturesMinimaxIndexRouteImport } from "./pages/(layouts)/features/minimax/index";
+import { Route as layoutsFeaturesKeepAliveIndexRouteImport } from "./pages/(layouts)/features/keep-alive/index";
 import { Route as layoutsComponentsTreeIndexRouteImport } from "./pages/(layouts)/components/tree/index";
+import { Route as layoutsComponentsIconIndexRouteImport } from "./pages/(layouts)/components/icon/index";
 import { Route as layoutsNestedMenuNestedMenu2NestedMenu21RouteImport } from "./pages/(layouts)/nested-menu/nested-menu-2/nested-menu-2-1";
 import { Route as layoutsNestedMenuNestedMenu1NestedMenu13RouteImport } from "./pages/(layouts)/nested-menu/nested-menu-1/nested-menu-1-3";
 import { Route as layoutsNestedMenuNestedMenu1NestedMenu11RouteImport } from "./pages/(layouts)/nested-menu/nested-menu-1/nested-menu-1-1";
@@ -113,10 +115,22 @@ const layoutsFeaturesMinimaxIndexRoute =
     path: "/features/minimax/",
     getParentRoute: () => layoutsRouteRoute,
   } as any);
+const layoutsFeaturesKeepAliveIndexRoute =
+  layoutsFeaturesKeepAliveIndexRouteImport.update({
+    id: "/features/keep-alive/",
+    path: "/features/keep-alive/",
+    getParentRoute: () => layoutsRouteRoute,
+  } as any);
 const layoutsComponentsTreeIndexRoute =
   layoutsComponentsTreeIndexRouteImport.update({
     id: "/components/tree/",
     path: "/components/tree/",
+    getParentRoute: () => layoutsRouteRoute,
+  } as any);
+const layoutsComponentsIconIndexRoute =
+  layoutsComponentsIconIndexRouteImport.update({
+    id: "/components/icon/",
+    path: "/components/icon/",
     getParentRoute: () => layoutsRouteRoute,
   } as any);
 const layoutsNestedMenuNestedMenu2NestedMenu21Route =
@@ -168,7 +182,9 @@ export interface FileRoutesByFullPath {
   "/nested-menu/nested-menu-1/nested-menu-1-1": typeof layoutsNestedMenuNestedMenu1NestedMenu11Route;
   "/nested-menu/nested-menu-1/nested-menu-1-3": typeof layoutsNestedMenuNestedMenu1NestedMenu13Route;
   "/nested-menu/nested-menu-2/nested-menu-2-1": typeof layoutsNestedMenuNestedMenu2NestedMenu21Route;
+  "/components/icon/": typeof layoutsComponentsIconIndexRoute;
   "/components/tree/": typeof layoutsComponentsTreeIndexRoute;
+  "/features/keep-alive/": typeof layoutsFeaturesKeepAliveIndexRoute;
   "/features/minimax/": typeof layoutsFeaturesMinimaxIndexRoute;
   "/features/move/": typeof layoutsFeaturesMoveIndexRoute;
   "/features/resize/": typeof layoutsFeaturesResizeIndexRoute;
@@ -191,7 +207,9 @@ export interface FileRoutesByTo {
   "/nested-menu/nested-menu-1/nested-menu-1-1": typeof layoutsNestedMenuNestedMenu1NestedMenu11Route;
   "/nested-menu/nested-menu-1/nested-menu-1-3": typeof layoutsNestedMenuNestedMenu1NestedMenu13Route;
   "/nested-menu/nested-menu-2/nested-menu-2-1": typeof layoutsNestedMenuNestedMenu2NestedMenu21Route;
+  "/components/icon": typeof layoutsComponentsIconIndexRoute;
   "/components/tree": typeof layoutsComponentsTreeIndexRoute;
+  "/features/keep-alive": typeof layoutsFeaturesKeepAliveIndexRoute;
   "/features/minimax": typeof layoutsFeaturesMinimaxIndexRoute;
   "/features/move": typeof layoutsFeaturesMoveIndexRoute;
   "/features/resize": typeof layoutsFeaturesResizeIndexRoute;
@@ -216,7 +234,9 @@ export interface FileRoutesById {
   "/(layouts)/nested-menu/nested-menu-1/nested-menu-1-1": typeof layoutsNestedMenuNestedMenu1NestedMenu11Route;
   "/(layouts)/nested-menu/nested-menu-1/nested-menu-1-3": typeof layoutsNestedMenuNestedMenu1NestedMenu13Route;
   "/(layouts)/nested-menu/nested-menu-2/nested-menu-2-1": typeof layoutsNestedMenuNestedMenu2NestedMenu21Route;
+  "/(layouts)/components/icon/": typeof layoutsComponentsIconIndexRoute;
   "/(layouts)/components/tree/": typeof layoutsComponentsTreeIndexRoute;
+  "/(layouts)/features/keep-alive/": typeof layoutsFeaturesKeepAliveIndexRoute;
   "/(layouts)/features/minimax/": typeof layoutsFeaturesMinimaxIndexRoute;
   "/(layouts)/features/move/": typeof layoutsFeaturesMoveIndexRoute;
   "/(layouts)/features/resize/": typeof layoutsFeaturesResizeIndexRoute;
@@ -241,7 +261,9 @@ export interface FileRouteTypes {
     | "/nested-menu/nested-menu-1/nested-menu-1-1"
     | "/nested-menu/nested-menu-1/nested-menu-1-3"
     | "/nested-menu/nested-menu-2/nested-menu-2-1"
+    | "/components/icon/"
     | "/components/tree/"
+    | "/features/keep-alive/"
     | "/features/minimax/"
     | "/features/move/"
     | "/features/resize/"
@@ -264,7 +286,9 @@ export interface FileRouteTypes {
     | "/nested-menu/nested-menu-1/nested-menu-1-1"
     | "/nested-menu/nested-menu-1/nested-menu-1-3"
     | "/nested-menu/nested-menu-2/nested-menu-2-1"
+    | "/components/icon"
     | "/components/tree"
+    | "/features/keep-alive"
     | "/features/minimax"
     | "/features/move"
     | "/features/resize"
@@ -288,7 +312,9 @@ export interface FileRouteTypes {
     | "/(layouts)/nested-menu/nested-menu-1/nested-menu-1-1"
     | "/(layouts)/nested-menu/nested-menu-1/nested-menu-1-3"
     | "/(layouts)/nested-menu/nested-menu-2/nested-menu-2-1"
+    | "/(layouts)/components/icon/"
     | "/(layouts)/components/tree/"
+    | "/(layouts)/features/keep-alive/"
     | "/(layouts)/features/minimax/"
     | "/(layouts)/features/move/"
     | "/(layouts)/features/resize/"
@@ -413,11 +439,25 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof layoutsFeaturesMinimaxIndexRouteImport;
       parentRoute: typeof layoutsRouteRoute;
     };
+    "/(layouts)/features/keep-alive/": {
+      id: "/(layouts)/features/keep-alive/";
+      path: "/features/keep-alive";
+      fullPath: "/features/keep-alive/";
+      preLoaderRoute: typeof layoutsFeaturesKeepAliveIndexRouteImport;
+      parentRoute: typeof layoutsRouteRoute;
+    };
     "/(layouts)/components/tree/": {
       id: "/(layouts)/components/tree/";
       path: "/components/tree";
       fullPath: "/components/tree/";
       preLoaderRoute: typeof layoutsComponentsTreeIndexRouteImport;
+      parentRoute: typeof layoutsRouteRoute;
+    };
+    "/(layouts)/components/icon/": {
+      id: "/(layouts)/components/icon/";
+      path: "/components/icon";
+      fullPath: "/components/icon/";
+      preLoaderRoute: typeof layoutsComponentsIconIndexRouteImport;
       parentRoute: typeof layoutsRouteRoute;
     };
     "/(layouts)/nested-menu/nested-menu-2/nested-menu-2-1": {
@@ -475,7 +515,9 @@ interface layoutsRouteRouteChildren {
   layoutsNestedMenuNestedMenu1NestedMenu11Route: typeof layoutsNestedMenuNestedMenu1NestedMenu11Route;
   layoutsNestedMenuNestedMenu1NestedMenu13Route: typeof layoutsNestedMenuNestedMenu1NestedMenu13Route;
   layoutsNestedMenuNestedMenu2NestedMenu21Route: typeof layoutsNestedMenuNestedMenu2NestedMenu21Route;
+  layoutsComponentsIconIndexRoute: typeof layoutsComponentsIconIndexRoute;
   layoutsComponentsTreeIndexRoute: typeof layoutsComponentsTreeIndexRoute;
+  layoutsFeaturesKeepAliveIndexRoute: typeof layoutsFeaturesKeepAliveIndexRoute;
   layoutsFeaturesMinimaxIndexRoute: typeof layoutsFeaturesMinimaxIndexRoute;
   layoutsFeaturesMoveIndexRoute: typeof layoutsFeaturesMoveIndexRoute;
   layoutsFeaturesResizeIndexRoute: typeof layoutsFeaturesResizeIndexRoute;
@@ -500,7 +542,9 @@ const layoutsRouteRouteChildren: layoutsRouteRouteChildren = {
     layoutsNestedMenuNestedMenu1NestedMenu13Route,
   layoutsNestedMenuNestedMenu2NestedMenu21Route:
     layoutsNestedMenuNestedMenu2NestedMenu21Route,
+  layoutsComponentsIconIndexRoute: layoutsComponentsIconIndexRoute,
   layoutsComponentsTreeIndexRoute: layoutsComponentsTreeIndexRoute,
+  layoutsFeaturesKeepAliveIndexRoute: layoutsFeaturesKeepAliveIndexRoute,
   layoutsFeaturesMinimaxIndexRoute: layoutsFeaturesMinimaxIndexRoute,
   layoutsFeaturesMoveIndexRoute: layoutsFeaturesMoveIndexRoute,
   layoutsFeaturesResizeIndexRoute: layoutsFeaturesResizeIndexRoute,
