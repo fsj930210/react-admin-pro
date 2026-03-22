@@ -1,7 +1,13 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { KeepAlive } from '@rap/components-ui/keep-alive';
-import { useState } from "react";
-import { Checkbox } from "@rap/components-base/checkbox"
+import { Button } from "@rap/components-base/button";
+import { Checkbox } from "@rap/components-base/checkbox";
+import {
+	Dialog,
+	DialogContent,
+	DialogDescription,
+	DialogHeader,
+	DialogTitle,
+	DialogTrigger,
+} from "@rap/components-base/dialog";
 import {
 	Field,
 	FieldDescription,
@@ -10,19 +16,8 @@ import {
 	FieldLegend,
 	FieldSeparator,
 	FieldSet,
-} from "@rap/components-base/field"
-import {
-	Select,
-	SelectContent,
-	SelectGroup,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-} from "@rap/components-base/select"
-import { Textarea } from "@rap/components-base/textarea"
+} from "@rap/components-base/field";
 import { Input } from "@rap/components-base/input";
-import { Button } from "@rap/components-base/button";
-import { ScrollArea } from "@rap/components-base/scroll-area";
 import {
 	Pagination,
 	PaginationContent,
@@ -33,6 +28,24 @@ import {
 	PaginationPrevious,
 } from "@rap/components-base/pagination";
 import {
+	Popover,
+	PopoverContent,
+	PopoverDescription,
+	PopoverHeader,
+	PopoverTitle,
+	PopoverTrigger,
+} from "@rap/components-base/popover";
+import { ScrollArea } from "@rap/components-base/scroll-area";
+import {
+	Select,
+	SelectContent,
+	SelectGroup,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "@rap/components-base/select";
+import { Separator } from "@rap/components-base/separator";
+import {
 	Sheet,
 	SheetContent,
 	SheetDescription,
@@ -40,32 +53,14 @@ import {
 	SheetTitle,
 	SheetTrigger,
 } from "@rap/components-base/sheet";
-import {
-	Dialog,
-	DialogContent,
-	DialogDescription,
-	DialogHeader,
-	DialogTitle,
-	DialogTrigger,
-} from "@rap/components-base/dialog";
-import {
-	Popover,
-	PopoverContent,
-	PopoverTrigger,
-	PopoverHeader,
-	PopoverTitle,
-	PopoverDescription,
-} from "@rap/components-base/popover";
-import { Separator } from "@rap/components-base/separator";
-
+import { Textarea } from "@rap/components-base/textarea";
+import { KeepAlive } from "@rap/components-ui/keep-alive";
+import { createFileRoute } from "@tanstack/react-router";
+import { useState } from "react";
 
 export const Route = createFileRoute("/(layouts)/features/keep-alive/")({
 	component: KeepAliveFeaturePage,
 });
-
-
-
-
 
 function FormBlock() {
 	return (
@@ -74,38 +69,24 @@ function FormBlock() {
 				<FieldGroup>
 					<FieldSet>
 						<FieldLegend>Payment Method</FieldLegend>
-						<FieldDescription>
-							All transactions are secure and encrypted
-						</FieldDescription>
+						<FieldDescription>All transactions are secure and encrypted</FieldDescription>
 						<FieldGroup>
 							<Field>
-								<FieldLabel htmlFor="checkout-7j9-card-name-43j">
-									Name on Card
-								</FieldLabel>
-								<Input
-									id="checkout-7j9-card-name-43j"
-									placeholder="Evil Rabbit"
-									required
-								/>
+								<FieldLabel htmlFor="checkout-7j9-card-name-43j">Name on Card</FieldLabel>
+								<Input id="checkout-7j9-card-name-43j" placeholder="Evil Rabbit" required />
 							</Field>
 							<Field>
-								<FieldLabel htmlFor="checkout-7j9-card-number-uw1">
-									Card Number
-								</FieldLabel>
+								<FieldLabel htmlFor="checkout-7j9-card-number-uw1">Card Number</FieldLabel>
 								<Input
 									id="checkout-7j9-card-number-uw1"
 									placeholder="1234 5678 9012 3456"
 									required
 								/>
-								<FieldDescription>
-									Enter your 16-digit card number
-								</FieldDescription>
+								<FieldDescription>Enter your 16-digit card number</FieldDescription>
 							</Field>
 							<div className="grid grid-cols-3 gap-4">
 								<Field>
-									<FieldLabel htmlFor="checkout-exp-month-ts6">
-										Month
-									</FieldLabel>
+									<FieldLabel htmlFor="checkout-exp-month-ts6">Month</FieldLabel>
 									<Select defaultValue="">
 										<SelectTrigger id="checkout-exp-month-ts6">
 											<SelectValue placeholder="MM" />
@@ -129,9 +110,7 @@ function FormBlock() {
 									</Select>
 								</Field>
 								<Field>
-									<FieldLabel htmlFor="checkout-7j9-exp-year-f59">
-										Year
-									</FieldLabel>
+									<FieldLabel htmlFor="checkout-7j9-exp-year-f59">Year</FieldLabel>
 									<Select defaultValue="">
 										<SelectTrigger id="checkout-7j9-exp-year-f59">
 											<SelectValue placeholder="YYYY" />
@@ -163,14 +142,8 @@ function FormBlock() {
 						</FieldDescription>
 						<FieldGroup>
 							<Field orientation="horizontal">
-								<Checkbox
-									id="checkout-7j9-same-as-shipping-wgm"
-									defaultChecked
-								/>
-								<FieldLabel
-									htmlFor="checkout-7j9-same-as-shipping-wgm"
-									className="font-normal"
-								>
+								<Checkbox id="checkout-7j9-same-as-shipping-wgm" defaultChecked />
+								<FieldLabel htmlFor="checkout-7j9-same-as-shipping-wgm" className="font-normal">
 									Same as shipping address
 								</FieldLabel>
 							</Field>
@@ -179,9 +152,7 @@ function FormBlock() {
 					<FieldSet>
 						<FieldGroup>
 							<Field>
-								<FieldLabel htmlFor="checkout-7j9-optional-comments">
-									Comments
-								</FieldLabel>
+								<FieldLabel htmlFor="checkout-7j9-optional-comments">Comments</FieldLabel>
 								<Textarea
 									id="checkout-7j9-optional-comments"
 									placeholder="Add any additional comments"
@@ -199,7 +170,7 @@ function FormBlock() {
 				</FieldGroup>
 			</form>
 		</div>
-	)
+	);
 }
 
 function FormBlockInDialog() {
@@ -235,14 +206,14 @@ function FormBlockInDialog() {
 				</ScrollArea>
 			</DialogContent>
 		</Dialog>
-	)
+	);
 }
 
 function PaginationBlock() {
 	const [currentPage, setCurrentPage] = useState(1);
 	const [pageSize, setPageSize] = useState(10);
 	const [totalItems] = useState(100);
-	const [jumpPage, setJumpPage] = useState('');
+	const [jumpPage, setJumpPage] = useState("");
 
 	const totalPages = Math.ceil(totalItems / pageSize);
 
@@ -261,7 +232,7 @@ function PaginationBlock() {
 		const page = parseInt(jumpPage, 10);
 		if (!Number.isNaN(page)) {
 			handlePageChange(page);
-			setJumpPage('');
+			setJumpPage("");
 		}
 	};
 
@@ -282,9 +253,9 @@ function PaginationBlock() {
 						handlePageChange(currentPage - 1);
 					}}
 					aria-disabled={currentPage === 1}
-					className={currentPage === 1 ? 'pointer-events-none opacity-50' : ''}
+					className={currentPage === 1 ? "pointer-events-none opacity-50" : ""}
 				/>
-			</PaginationItem>
+			</PaginationItem>,
 		);
 
 		// First page if not in visible range
@@ -299,14 +270,14 @@ function PaginationBlock() {
 					>
 						1
 					</PaginationLink>
-				</PaginationItem>
+				</PaginationItem>,
 			);
 
 			if (startPage > 2) {
 				items.push(
 					<PaginationItem key="ellipsis-start">
 						<PaginationEllipsis />
-					</PaginationItem>
+					</PaginationItem>,
 				);
 			}
 		}
@@ -324,7 +295,7 @@ function PaginationBlock() {
 					>
 						{i}
 					</PaginationLink>
-				</PaginationItem>
+				</PaginationItem>,
 			);
 		}
 
@@ -334,7 +305,7 @@ function PaginationBlock() {
 				items.push(
 					<PaginationItem key="ellipsis-end">
 						<PaginationEllipsis />
-					</PaginationItem>
+					</PaginationItem>,
 				);
 			}
 
@@ -348,7 +319,7 @@ function PaginationBlock() {
 					>
 						{totalPages}
 					</PaginationLink>
-				</PaginationItem>
+				</PaginationItem>,
 			);
 		}
 
@@ -360,9 +331,8 @@ function PaginationBlock() {
 						e.preventDefault();
 						handlePageChange(currentPage + 1);
 					}}
-
 				/>
-			</PaginationItem>
+			</PaginationItem>,
 		);
 
 		return items;
@@ -397,9 +367,7 @@ function PaginationBlock() {
 
 				<div className="flex items-center gap-4">
 					<Pagination className="justify-start flex-1 w-auto">
-						<PaginationContent>
-							{generatePaginationItems()}
-						</PaginationContent>
+						<PaginationContent>{generatePaginationItems()}</PaginationContent>
 					</Pagination>
 
 					<div className="flex items-center gap-2 text-sm">
@@ -411,7 +379,7 @@ function PaginationBlock() {
 							value={jumpPage}
 							onChange={(e) => setJumpPage(e.target.value)}
 							onKeyDown={(e) => {
-								if (e.key === 'Enter') {
+								if (e.key === "Enter") {
 									handleJump();
 								}
 							}}
@@ -421,7 +389,7 @@ function PaginationBlock() {
 				</div>
 			</div>
 		</div>
-	)
+	);
 }
 
 function PaginationBlockInPopover() {
@@ -457,22 +425,20 @@ function PaginationBlockInPopover() {
 				</ScrollArea>
 			</PopoverContent>
 		</Popover>
-	)
+	);
 }
 
 function ScrollBlock() {
 	return (
 		<div className="w-100 h-100 overflow-auto bg-muted p-2">
-			{
-				Array.from({ length: 100 }, (_, index) => (
-					// biome-ignore lint:suspicious/noArrayIndexKey
-					<div key={index} className="h-10 bg-mute-200">
-						item-{index}
-					</div>
-				))
-			}
+			{Array.from({ length: 100 }, (_, index) => (
+				// biome-ignore lint:suspicious/noArrayIndexKey
+				<div key={index} className="h-10 bg-mute-200">
+					item-{index}
+				</div>
+			))}
 		</div>
-	)
+	);
 }
 
 function ScrollBlockInSheet() {
@@ -508,9 +474,8 @@ function ScrollBlockInSheet() {
 				</ScrollArea>
 			</SheetContent>
 		</Sheet>
-	)
+	);
 }
-
 
 function KeepAliveFeaturePage() {
 	return (
@@ -518,7 +483,8 @@ function KeepAliveFeaturePage() {
 			<div className="flex flex-col space-y-4">
 				<h1 className="text-2xl font-bold">Keep Alive Feature Demo</h1>
 				<p className="text-muted-foreground">
-					This page demonstrates the keep-alive feature with both standalone components and components in containers.
+					This page demonstrates the keep-alive feature with both standalone components and
+					components in containers.
 				</p>
 			</div>
 

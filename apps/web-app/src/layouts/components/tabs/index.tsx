@@ -26,8 +26,6 @@ const TabItemStrategies = {
 };
 
 export function AppTabs({ sortable = true, tabType = "chrome" }: AppTabsProps) {
-	const { tabs, activeTab, setTabs, handleTabItemClick, setActiveTab, handleCloseTab } = useTabs();
-
 	const {
 		containerRef,
 		canScrollLeft,
@@ -40,6 +38,8 @@ export function AppTabs({ sortable = true, tabType = "chrome" }: AppTabsProps) {
 		scrollRight,
 		scrollToTab,
 	} = useTabsScroll();
+	const { tabs, activeTab, setTabs, handleTabItemClick, setActiveTab, handleCloseTab } =
+		useTabs(scrollToTab);
 
 	const handleTabClick = (item: AppTabItem) => {
 		handleTabItemClick(item);

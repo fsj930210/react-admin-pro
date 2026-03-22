@@ -31,4 +31,5 @@ const { selector: useUserSelector } = createStore<User>(
 		name: "UserStore",
 	},
 );
+
 export { useUserSelector };

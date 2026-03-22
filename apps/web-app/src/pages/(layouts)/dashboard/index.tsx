@@ -8,10 +8,7 @@ export const Route = createFileRoute("/(layouts)/dashboard/")({
 });
 
 export function DashboardPage() {
-	const { count, setCount } = useAppConfigSelector([
-		"count",
-		"setCount",
-	]);
+	const { count, setCount } = useAppConfigSelector(["count", "setCount"]);
 
 	return (
 		<div className="size-full flex flex-col">

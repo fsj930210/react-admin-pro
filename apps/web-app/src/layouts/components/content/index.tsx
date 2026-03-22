@@ -1,6 +1,5 @@
-import { useRouterState } from '@tanstack/react-router';
-import { Outlet } from "@tanstack/react-router";
 import { KeepAliveRoute } from "@rap/components-ui/keep-alive";
+import { Outlet, useRouterState } from "@tanstack/react-router";
 import { Footer } from "../footer";
 import { AppTabs } from "../tabs";
 
@@ -16,11 +15,7 @@ export const AppContent = ({ className = "", showTabs = true }: AppContentProps)
 		<div className={`flex flex-col flex-1 bg-layout-content overflow-hidden ${className}`}>
 			{showTabs && <AppTabs />}
 			<main className="flex-1 overflow-hidden">
-				<KeepAliveRoute
-					className="overflow-y-auto"
-					cacheKey={cacheKey}
-					excludes={["/overview"]}
-				>
+				<KeepAliveRoute className="overflow-y-auto" cacheKey={cacheKey} excludes={["/overview"]}>
 					<Outlet />
 				</KeepAliveRoute>
 			</main>

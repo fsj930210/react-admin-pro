@@ -108,6 +108,7 @@ export function SortableTabs({
 						) : (
 							<SortableItem key={item.id} data-tab-key={item.id}>
 								<div
+									data-tab-key={item.id}
 									className={cn(
 										"group relative app-tabs-tab-item flex items-center h-full w-fit max-w-45",
 										{

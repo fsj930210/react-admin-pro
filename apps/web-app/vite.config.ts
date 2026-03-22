@@ -14,14 +14,13 @@ export default ({ mode }: UserConfig) => {
 			allowedHosts: true,
 		},
 		build: {
-			
 			rolldownOptions: {
 				output: {
 					codeSplitting: {
 						minSize: 20000,
 						groups: [
 							{
-								name: 'react',
+								name: "react",
 								test: /react|react-dom/,
 							},
 						],

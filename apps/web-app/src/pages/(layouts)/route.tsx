@@ -1,3 +1,4 @@
+import { KeepAliveRoot } from "@rap/components-ui/keep-alive";
 import { useQueries } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { LayoutProvider } from "@/layouts/context/layout-context";
@@ -17,7 +18,6 @@ import { SideLayoutSkeleton } from "@/layouts/ui/side-layout/skeleton";
 import { VerticalLayout } from "@/layouts/ui/vertical-layout";
 import { VerticalLayoutSkeleton } from "@/layouts/ui/vertical-layout/skeleton";
 import { fetchUserInfo, fetchUserMenus } from "@/service/auth";
-import { KeepAliveRoot } from "@rap/components-ui/keep-alive";
 
 export const Route = createFileRoute("/(layouts)")({
 	component: Layout,
@@ -75,7 +75,13 @@ function Layout({ type = "vertical" }: LayoutProps) {
 	const LayoutSkeleton = LayoutSkeletonStrategies[type] || LayoutSkeletonStrategies.vertical;
 	return (
 		<LayoutProvider menuService={menuService} userMenus={menus} userInfo={userInfo}>
-			{loading ? <LayoutSkeleton /> : <KeepAliveRoot max={10}><LayoutComponent /></KeepAliveRoot>}
+			{loading ? (
+				<LayoutSkeleton />
+			) : (
+				<KeepAliveRoot max={10}>
+					<LayoutComponent />
+				</KeepAliveRoot>
+			)}
 		</LayoutProvider>
 	);
 }

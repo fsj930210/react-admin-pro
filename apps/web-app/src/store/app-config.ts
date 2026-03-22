@@ -50,4 +50,5 @@ const { selector: useAppConfigSelector } = createStore<AppConfigStore>(
 		name: "AppConfigStore",
 	},
 );
+
 export { useAppConfigSelector };

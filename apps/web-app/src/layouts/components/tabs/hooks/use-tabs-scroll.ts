@@ -81,52 +81,72 @@ export function useTabsScroll(options: UseTabsScrollOptions = {}) {
 
 	// 滚动到指定的tab
 	const scrollToTab = (tabKey: string) => {
-		const tabElement = document.querySelector(`[data-tab-key="${tabKey}"]`);
-		const container = containerRef.current;
+		const checkAndScroll = () => {
+			const container = containerRef.current;
+			if (!container) return false;
 
-		if (!tabElement || !container) return;
+			const tabElement = document.querySelector(`[data-tab-key="${tabKey}"]`);
+			if (!tabElement) return false;
 
-		const containerRect = container.getBoundingClientRect();
-		const tabRect = tabElement.getBoundingClientRect();
+			const containerRect = container.getBoundingClientRect();
+			const tabRect = tabElement.getBoundingClientRect();
 
-		// 判断tab是否完全在可视区域内
-		const isFullyVisible =
-			tabRect.left >= containerRect.left && tabRect.right <= containerRect.right;
+			// 判断tab是否完全在可视区域内
+			const isFullyVisible =
+				tabRect.left >= containerRect.left && tabRect.right <= containerRect.right;
 
-		// 判断tab是否部分在可视区域内
-		const isPartiallyVisible =
-			tabRect.left < containerRect.right && tabRect.right > containerRect.left;
+			// 判断tab是否部分在可视区域内
+			const isPartiallyVisible =
+				tabRect.left < containerRect.right && tabRect.right > containerRect.left;
 
-		if (isFullyVisible) {
-			// 如果完全可见，不滚动
-			return;
-		} else if (isPartiallyVisible) {
-			// 如果部分可见，滚动到让它完全可见
-			if (tabRect.left < containerRect.left) {
-				// tab左侧超出容器，向左滚动
-				container.scrollTo({
-					left: container.scrollLeft + (tabRect.left - containerRect.left),
-					behavior: "smooth",
-				});
+			if (isFullyVisible) {
+				// 如果完全可见，不滚动
+				return true;
+			} else if (isPartiallyVisible) {
+				// 如果部分可见，滚动到让它完全可见
+				if (tabRect.left < containerRect.left) {
+					// tab左侧超出容器，向左滚动
+					container.scrollTo({
+						left: container.scrollLeft + (tabRect.left - containerRect.left),
+						behavior: "smooth",
+					});
+				} else {
+					// tab右侧超出容器，向右滚动
+					container.scrollTo({
+						left: container.scrollLeft + (tabRect.right - containerRect.right),
+						behavior: "smooth",
+					});
+				}
 			} else {
-				// tab右侧超出容器，向右滚动
-				container.scrollTo({
-					left: container.scrollLeft + (tabRect.right - containerRect.right),
+				// 如果完全不可见，滚动到中间
+				tabElement.scrollIntoView({
 					behavior: "smooth",
+					block: "nearest",
+					inline: "center",
 				});
 			}
-		} else {
-			// 如果完全不可见，滚动到中间
-			tabElement.scrollIntoView({
-				behavior: "smooth",
-				block: "nearest",
-				inline: "center",
-			});
-		}
 
-		requestAnimationFrame(() => {
-			checkScrollability();
-		});
+			requestAnimationFrame(() => {
+				checkScrollability();
+			});
+
+			return true;
+		};
+
+		// 立即尝试滚动
+		if (checkAndScroll()) return;
+
+		// 如果元素不存在，使用轮询方式等待DOM更新
+		let attempts = 0;
+		const maxAttempts = 20;
+		const interval = 100;
+
+		const pollInterval = setInterval(() => {
+			attempts++;
+			if (checkAndScroll() || attempts >= maxAttempts) {
+				clearInterval(pollInterval);
+			}
+		}, interval);
 	};
 
 	// 监听滚动事件

@@ -7,7 +7,7 @@ import type { AppTabItem } from "../types";
 const TABS_CACHE_KEY = "layout-tabs-data";
 const SELECTED_TAB_CACHE_KEY = "layout-selected-tab";
 
-export function useTabs() {
+export function useTabs(scrollToTab: (tabKey: string) => void) {
 	const navigate = useNavigate();
 	const { menuService } = useLayout();
 	const isTabItemClickRef = useRef(false);
@@ -54,6 +54,7 @@ export function useTabs() {
 			return [...prevTabs, tabItem];
 		});
 		setActiveTab(tabItem);
+		scrollToTab?.(tabItem.id);
 	};
 	const handleTabItemClick = (item: AppTabItem) => {
 		if (item.id === activeTab?.id) return;
