@@ -32,7 +32,6 @@ export function saveScrollPosition(
       position: { x: container.scrollLeft, y: container.scrollTop },
     });
   }
-
   return scrollNodes;
 }
 

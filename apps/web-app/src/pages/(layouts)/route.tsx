@@ -78,7 +78,7 @@ function Layout({ type = "vertical" }: LayoutProps) {
 			{loading ? (
 				<LayoutSkeleton />
 			) : (
-				<KeepAliveRoot max={10}>
+				<KeepAliveRoot max={20}>
 					<LayoutComponent />
 				</KeepAliveRoot>
 			)}

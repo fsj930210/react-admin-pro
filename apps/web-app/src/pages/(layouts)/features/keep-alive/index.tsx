@@ -134,7 +134,6 @@ function FormBlock() {
 							</div>
 						</FieldGroup>
 					</FieldSet>
-					<FieldSeparator />
 					<FieldSet>
 						<FieldLegend>Billing Address</FieldLegend>
 						<FieldDescription>
@@ -161,54 +160,23 @@ function FormBlock() {
 							</Field>
 						</FieldGroup>
 					</FieldSet>
-					<Field orientation="horizontal">
-						<Button type="submit">Submit</Button>
-						<Button variant="outline" type="button">
-							Cancel
-						</Button>
-					</Field>
 				</FieldGroup>
 			</form>
 		</div>
 	);
 }
-
-function FormBlockInDialog() {
+function ScrollBlock() {
 	return (
-		<Dialog>
-			<DialogTrigger asChild>
-				<Button>Open Dialog (Form + Pagination + Scroll)</Button>
-			</DialogTrigger>
-			<DialogContent className="sm:max-w-3xl max-h-[85vh] w-full">
-				<DialogHeader>
-					<DialogTitle>Dialog with All Components</DialogTitle>
-					<DialogDescription>
-						This dialog contains form, pagination, and scroll components
-					</DialogDescription>
-				</DialogHeader>
-				<ScrollArea className="h-[calc(85vh-140px)] pr-4">
-					<div className="space-y-8 pb-4">
-						<section>
-							<h3 className="text-lg font-semibold mb-4">Payment Form</h3>
-							<FormBlock />
-						</section>
-						<Separator className="my-6" />
-						<section>
-							<h3 className="text-lg font-semibold mb-4">Pagination</h3>
-							<PaginationBlock />
-						</section>
-						<Separator className="my-6" />
-						<section>
-							<h3 className="text-lg font-semibold mb-4">Scrollable Content</h3>
-							<ScrollBlock />
-						</section>
-					</div>
-				</ScrollArea>
-			</DialogContent>
-		</Dialog>
+		<div className="w-100 h-100 overflow-auto bg-muted p-2">
+			{Array.from({ length: 100 }, (_, index) => (
+				// biome-ignore lint:suspicious/noArrayIndexKey
+				<div key={index} className="h-10 bg-mute-200">
+					item-{index}
+				</div>
+			))}
+		</div>
 	);
 }
-
 function PaginationBlock() {
 	const [currentPage, setCurrentPage] = useState(1);
 	const [pageSize, setPageSize] = useState(10);
@@ -392,11 +360,49 @@ function PaginationBlock() {
 	);
 }
 
-function PaginationBlockInPopover() {
+function DialogBlock() {
+	return (
+		<KeepAlive cacheKey="dialog-block-components">
+			<Dialog>
+				<DialogTrigger asChild>
+					<Button>Open Dialog</Button>
+				</DialogTrigger>
+
+				<DialogContent className="w-250 max-w-250! overflow-hidden">
+					<DialogHeader>
+						<DialogTitle>Dialog with All Components</DialogTitle>
+						<DialogDescription>
+							This dialog contains form, pagination, and scroll components
+						</DialogDescription>
+					</DialogHeader>
+					<div className="space-y-8 h-150 overflow-y-auto">
+						<section className="flex flex-col items-center">
+							<h3 className="text-lg font-semibold mb-4">Payment Form</h3>
+							<FormBlock />
+						</section>
+						<Separator className="my-6" />
+						<section className="flex flex-col items-center">
+							<h3 className="text-lg font-semibold mb-4">Pagination</h3>
+							<PaginationBlock />
+						</section>
+						<Separator className="my-6" />
+						<section className="flex flex-col items-center">
+							<h3 className="text-lg font-semibold mb-4">Scrollable Content</h3>
+							<ScrollBlock />
+						</section>
+					</div>
+				</DialogContent>
+			</Dialog>
+		</KeepAlive>
+	);
+}
+
+
+function PopoverBlock() {
 	return (
 		<Popover>
 			<PopoverTrigger asChild>
-				<Button>Open Popover (Form + Pagination + Scroll)</Button>
+				<Button>Open Popover</Button>
 			</PopoverTrigger>
 			<PopoverContent className="w-[700px] h-[80vh]">
 				<PopoverHeader>
@@ -428,24 +434,12 @@ function PaginationBlockInPopover() {
 	);
 }
 
-function ScrollBlock() {
-	return (
-		<div className="w-100 h-100 overflow-auto bg-muted p-2">
-			{Array.from({ length: 100 }, (_, index) => (
-				// biome-ignore lint:suspicious/noArrayIndexKey
-				<div key={index} className="h-10 bg-mute-200">
-					item-{index}
-				</div>
-			))}
-		</div>
-	);
-}
 
-function ScrollBlockInSheet() {
+function SheetBlock() {
 	return (
 		<Sheet>
 			<SheetTrigger asChild>
-				<Button>Open Sheet (Form + Pagination + Scroll)</Button>
+				<Button>Open Sheet</Button>
 			</SheetTrigger>
 			<SheetContent className="w-[700px] h-[85vh]">
 				<SheetHeader>
@@ -481,13 +475,31 @@ function KeepAliveFeaturePage() {
 	return (
 		<div className="size-full p-6 space-y-8">
 			<div className="flex flex-col space-y-4">
-				<h1 className="text-2xl font-bold">Keep Alive Feature Demo</h1>
+				<h1 className="text-2xl font-bold">Keep Alive Feature</h1>
 				<p className="text-muted-foreground">
 					This page demonstrates the keep-alive feature with both standalone components and
 					components in containers.
 				</p>
 			</div>
+			<div className="border rounded-lg p-6">
+				<h2 className="text-xl font-semibold mb-6">Components in Containers</h2>
+				<div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+					<div className="border rounded-lg p-4">
+						<h3 className="text-lg font-semibold mb-4">Dialog</h3>
+						<DialogBlock />
+					</div>
 
+					<div className="border rounded-lg p-4">
+						<h3 className="text-lg font-semibold mb-4">Popover</h3>
+						<PopoverBlock />
+					</div>
+
+					<div className="border rounded-lg p-4">
+						<h3 className="text-lg font-semibold mb-4">Sheet</h3>
+						<SheetBlock />
+					</div>
+				</div>
+			</div>
 			<div className="border rounded-lg p-6">
 				<h2 className="text-xl font-semibold mb-6">Standalone Components</h2>
 				<div className="space-y-8">
@@ -496,26 +508,6 @@ function KeepAliveFeaturePage() {
 						<PaginationBlock />
 					</section>
 					<ScrollBlock />
-				</div>
-			</div>
-
-			<div className="border rounded-lg p-6">
-				<h2 className="text-xl font-semibold mb-6">Components in Containers</h2>
-				<div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-					<div className="border rounded-lg p-4">
-						<h3 className="text-lg font-semibold mb-4">Dialog</h3>
-						<FormBlockInDialog />
-					</div>
-
-					<div className="border rounded-lg p-4">
-						<h3 className="text-lg font-semibold mb-4">Popover</h3>
-						<PaginationBlockInPopover />
-					</div>
-
-					<div className="border rounded-lg p-4">
-						<h3 className="text-lg font-semibold mb-4">Sheet</h3>
-						<ScrollBlockInSheet />
-					</div>
 				</div>
 			</div>
 		</div>

@@ -1,11 +1,11 @@
 import { useRef } from "react";
+import type { CachedItem } from "./types";
+import { KeepAliveContext } from "./keep-alive-context";
 import { LRUCache } from "lru-cache";
 
-import type { CachedItem, KeepAliveOptions } from "./types";
-import { KeepAliveContext } from "./keep-alive-context";
-
-interface KeepAliveRootProps extends KeepAliveOptions {
+interface KeepAliveRootProps {
 	children: React.ReactNode;
+	max?: number;
 }
 
 export function KeepAliveRoot({ children, max = 20 }: KeepAliveRootProps) {

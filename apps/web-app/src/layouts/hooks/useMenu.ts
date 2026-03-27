@@ -11,7 +11,7 @@ export function useMenu({ menuService, multiOpen = false }: UseMenuServiceParams
 	const isMenuItemClickRef = useRef(false);
 	const navigate = useNavigate();
 	const pathname = useRouterState({
-		select: (state) => state.location.pathname,
+		select: (state) => state.location.pathname
 	});
 
 	const [selectedMenu, setSelectedMenu] = useState<MenuItem | null>(null);
@@ -68,9 +68,11 @@ export function useMenu({ menuService, multiOpen = false }: UseMenuServiceParams
 		}
 		if (menuItem.type === "menu" && menuItem.url) {
 			if (menuItem.openMode === "newBrowserTab") {
-				window.open(menuItem.url, "_blank");
-			} else {
+				window.open(menuItem.fullUrl ?? menuItem.url, "_blank");
+			} else if (menuItem.openMode === "iframe") {
 				navigate({ to: menuItem.url });
+			} else {
+				navigate({ to: menuItem.fullUrl ?? menuItem.url });
 			}
 			updateSelectedMenu(menuItem);
 			isMenuItemClickRef.current = true;
@@ -89,6 +91,7 @@ export function useMenu({ menuService, multiOpen = false }: UseMenuServiceParams
 				updateOpenKeysByMenu(selectedMenu);
 			}
 		});
+	// eslint-disable-next-line @eslint-react/exhaustive-deps
 	}, [pathname]);
 	return {
 		updateOpenKeysByMenu,

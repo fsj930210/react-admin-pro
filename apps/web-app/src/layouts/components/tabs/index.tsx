@@ -1,5 +1,5 @@
 import { cn } from "@rap/utils";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, RotateCw, LayoutGrid, Maximize, Minimize } from "lucide-react";
 import { TabsContextMenu } from "./components/context-menu";
 import { ScrollButton } from "./components/scroll-button";
 import { SortableTabs } from "./components/sortable-tabs";
@@ -11,10 +11,13 @@ import { VscodeLikeTabItem } from "./components/tab-item/vscode-like-tab-item";
 import { useTabs } from "./hooks/use-tabs";
 import { useTabsScroll } from "./hooks/use-tabs-scroll";
 import type { AppTabItem, TabType } from "./types";
+import { Button } from "@rap/components-base/button";
+import { useTabsContextMenu } from "./hooks/use-tabs-context-menu";
 
 export interface AppTabsProps {
 	sortable?: boolean;
 	tabType?: TabType;
+	isMaximized?: boolean;
 }
 
 const TabItemStrategies = {
@@ -25,7 +28,7 @@ const TabItemStrategies = {
 	trapezoid: TrapezoidTabItem,
 };
 
-export function AppTabs({ sortable = true, tabType = "chrome" }: AppTabsProps) {
+export function AppTabs({ sortable = true, tabType = "chrome", isMaximized = false }: AppTabsProps) {
 	const {
 		containerRef,
 		canScrollLeft,
@@ -38,8 +41,23 @@ export function AppTabs({ sortable = true, tabType = "chrome" }: AppTabsProps) {
 		scrollRight,
 		scrollToTab,
 	} = useTabsScroll();
-	const { tabs, activeTab, setTabs, handleTabItemClick, setActiveTab, handleCloseTab } =
-		useTabs(scrollToTab);
+	const {
+		tabs,
+		activeTab,
+		setTabs,
+		handleTabItemClick,
+		setActiveTab,
+	} = useTabs(scrollToTab);
+	const {
+		handleCloseTab,
+		handleReloadTab,
+		handleMaximizeTab,
+	} = useTabsContextMenu({
+		updateTabs: setTabs,
+		setActiveTab,
+		activeTab,
+	});
+
 
 	const handleTabClick = (item: AppTabItem) => {
 		handleTabItemClick(item);
@@ -132,9 +150,54 @@ export function AppTabs({ sortable = true, tabType = "chrome" }: AppTabsProps) {
 					</div>
 				)}
 			</div>
+			<div className="flex-center">
+				<TabsContextMenu
+					key={activeTab?.id ?? ""}
+					tab={activeTab}
+					tabs={tabs}
+					updateTabs={setTabs}
+					activeTab={activeTab}
+					setActiveTab={setActiveTab}
+					className="flex-center border-l-app-tabs-border border-l"
+				>
+					<Button
+						type="button"
+						variant="ghost"
+						size="icon"
+						className="cursor-pointer"
+						title="操作当前页"
+					>
+						<LayoutGrid className="size-4" />
+					</Button>
+				</TabsContextMenu>
+				<div className="border-l-app-tabs-border border-l">
+					<Button
+						type="button"
+						variant="ghost"
+						size="icon"
+						className="cursor-pointer"
+						onClick={() => handleReloadTab(activeTab)}
+						title="刷新"
+					>
+						<RotateCw className="size-4" />
+					</Button>
+				</div>
+				<div className="border-l-app-tabs-border border-l">
+					<Button
+						type="button"
+						variant="ghost"
+						size="icon"
+						className="cursor-pointer"
+						onClick={() => handleMaximizeTab(activeTab)}
+						title={isMaximized ? "向下还原" : "最大化"}
+					>
+						{isMaximized ? <Minimize className="size-4" /> : <Maximize className="size-4" />}
+					</Button>
+				</div>
+			</div>
 			<ScrollButton canScroll={canScrollRight} direction="right" scroll={scrollRight}>
 				<ChevronRight />
 			</ScrollButton>
-		</div>
+		</div >
 	);
 }

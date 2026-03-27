@@ -11,11 +11,11 @@ export type AppTabItemProps = {
 	tab: AppTabItem;
 	active: boolean;
 	index: number;
-	onClose?: (value: string) => void;
-	onPin?: (value: string) => void;
-	onReload?: (value: string) => void;
-	onOpenInNewTab?: (value: string) => void;
-	onMaximize?: (value: string) => void;
+	onClose?: (tabItem: AppTabItem) => void;
+	onPin?: (tabItem: AppTabItem) => void;
+	onReload?: (tabItem: AppTabItem) => void;
+	onOpenInNewTab?: (tabItem: AppTabItem) => void;
+	onMaximize?: (tabItem: AppTabItem) => void;
 	onItemClick?: (tabItem: AppTabItem) => void;
 } & RefAttributes<HTMLDivElement>;
 

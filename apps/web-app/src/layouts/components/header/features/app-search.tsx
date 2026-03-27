@@ -34,7 +34,7 @@ export function AppSearchFeature({ className }: GlobalSearchFeatureProps) {
 							className="w-64 mr-2"
 							autoFocus
 						/>
-						<Button type="submit" size="sm" variant="outline">
+						<Button type="button" size="sm" variant="outline">
 							<Search className="h-4 w-4" />
 						</Button>
 					</form>

@@ -1,22 +1,46 @@
-import { KeepAliveRoute } from "@rap/components-ui/keep-alive";
 import { Outlet, useRouterState } from "@tanstack/react-router";
+import { KeepAliveRoute } from "@rap/components-ui/keep-alive";
 import { Footer } from "../footer";
 import { AppTabs } from "../tabs";
+import { useRef } from "react";
+import { useAppContext } from "@/app-context";
+import type { AppEvent } from "@/app-context";
+import type { KeepAliveRef } from "@rap/components-ui/keep-alive";
+import { useMinimax } from "@rap/hooks/use-minimax";
 
 interface AppContentProps {
 	className?: string;
 	showTabs?: boolean;
 }
 export const AppContent = ({ className = "", showTabs = true }: AppContentProps) => {
+	const { eventBus } = useAppContext();
+	const { isMaximized, handleMaximize, handleRestore } = useMinimax();
+	const keepAliveRef = useRef<KeepAliveRef>(null);
 	const cacheKey = useRouterState({
-		select: (state) => state.location.pathname + state.location.searchStr,
+		select: (state) => state.location.pathname,
 	});
+
+
+	eventBus.useSubscription((event: AppEvent<string | string[]>) => {
+		if (event.type === "reload-tab") {
+			keepAliveRef.current?.handleRefreshCache(event.payload as string);
+		} else if (event.type === "remove-tab") {
+			keepAliveRef.current?.handleRemoveCache(event.payload as string[]);
+		} else if (event.type === "maximize-tab") {
+			if (isMaximized) {
+				handleRestore();
+			} else {
+				handleMaximize();
+			}
+		}
+	});
+
 	return (
-		<div className={`flex flex-col flex-1 bg-layout-content overflow-hidden ${className}`}>
-			{showTabs && <AppTabs />}
-			<main className="flex-1 overflow-hidden">
-				<KeepAliveRoute className="overflow-y-auto" cacheKey={cacheKey} excludes={["/overview"]}>
-					<Outlet />
+		<div className={`flex flex-col flex-1 bg-muted overflow-hidden ${isMaximized ? "fixed top-0 left-0 z-99 w-screen h-screen" : ""} ${className}`}>
+			{showTabs && <AppTabs isMaximized={isMaximized} />}
+			<main className="flex-1 overflow-hidden bg-app-content">
+				<KeepAliveRoute className="overflow-y-auto" cacheKey={cacheKey} ref={keepAliveRef}>
+					<Outlet></Outlet>
 				</KeepAliveRoute>
 			</main>
 			<Footer />

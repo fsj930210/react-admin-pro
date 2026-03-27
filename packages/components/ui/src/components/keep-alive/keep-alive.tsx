@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useImperativeHandle } from "react";
 import { Activity, Fragment } from "react";
 import type { CachedItem, KeepAliveProps } from "./types";
 import { useKeepAlive } from "./use-keep-alive";
@@ -12,35 +12,55 @@ export function KeepAlive({
 	cacheKey,
 	children,
 	saveScrollPosition,
+	refreshDelay,
+	refreshRender,
 	onActivate,
 	onDeactivate,
+	ref,
 }: KeepAliveProps) {
-	const { handleCache, excludeItems, cachedItems, containerRef } = useKeepAlive({
+	const {
+		handleAddCache,
+		handleRefreshCache,
+		handleRemoveCache,
+		excludeItems,
+		cachedItems,
+		containerRef,
+	} = useKeepAlive({
 		includes,
 		excludes,
+		saveScrollPosition,
 		cacheKey,
+		refreshDelay,
 		onActivate,
 		onDeactivate,
-		saveScrollPosition,
 	});
 
 	useEffect(() => {
 		const item: CachedItem = {
 			key: uuidv4(),
 			component: children,
-			cacheKey: cacheKey,
+			cacheKey,
 			refreshing: false,
 			cachedScrollNodes: [],
 			containerRef: containerRef.current,
 		}
-		handleCache(item);
+		handleAddCache(item);
 	}, [cacheKey]);
+
+	useImperativeHandle(ref, () => ({
+		handleRefreshCache,
+		handleRemoveCache,
+	}));
 
 	return (
 		<div ref={containerRef} className={cn("size-full", className)}>
 			{cachedItems?.map((item) =>
 				item.refreshing ? (
-					<Fragment key={item.key}>{item.component}</Fragment>
+					<Fragment key={item.key}>
+						{
+							refreshRender ? refreshRender?.(item) : null
+						}
+					</Fragment>
 				) : (
 					<Activity
 						key={item.key}

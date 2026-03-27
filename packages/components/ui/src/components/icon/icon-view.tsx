@@ -56,7 +56,7 @@ export function IconView(props: IconViewProps) {
 		setActiveKey(key);
 		props.onIconSetChange?.(key);
 	};
-	console.log(activeKey, '111111')
+
 	return (
 		<div className="size-full overflow-hidden">
 			<Tabs

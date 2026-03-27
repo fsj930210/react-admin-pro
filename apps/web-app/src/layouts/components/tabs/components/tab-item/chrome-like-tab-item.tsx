@@ -80,7 +80,7 @@ export function ChromeLikeTabItem({
 							className="flex-center size-4 hover:bg-app-tabs-close-accent rounded-full cursor-pointer transition-all duration-20"
 							onClick={(e) => {
 								e.stopPropagation();
-								onClose(tab.id);
+								onClose(tab);
 							}}
 							type="button"
 						>

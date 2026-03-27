@@ -1,20 +1,21 @@
+/** biome-ignore-all lint:suspicious/noExplicitAny */
 import type { EventEmitter } from "ahooks/lib/useEventEmitter";
 import { createContext, type ReactNode, use } from "react";
 
-export type AppEventType = "onMenuItemClick";
+export type AppEventType = "reload-tab" | 'remove-tab' | 'maximize-tab';
 export interface AppEvent<T> {
 	type: AppEventType;
 	payload: T;
 }
 export interface AppContextValue {
-	eventBus: EventEmitter<AppEvent<unknown>>;
+	eventBus: EventEmitter<AppEvent<any>>;
 }
 
 const AppContext = createContext<AppContextValue | undefined>(undefined);
 
 export interface AppProviderProps {
 	children: ReactNode;
-	eventBus: EventEmitter<AppEvent<unknown>>;
+	eventBus: EventEmitter<AppEvent<any>>;
 }
 
 export function AppProvider({ children, eventBus }: AppProviderProps) {

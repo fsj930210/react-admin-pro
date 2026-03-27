@@ -27,7 +27,7 @@ export function TrapezoidTabItem({ tab, active, index, onItemClick, onClose }: A
 					className="relative flex-center size-4 z-2 opacity-0 hover:bg-app-tabs-close-accent rounded-full cursor-pointer transition-all duration-200 ease-in-out group-hover:opacity-100"
 					onClick={(e) => {
 						e.stopPropagation();
-						onClose?.(tab.id);
+						onClose?.(tab);
 					}}
 				>
 					<X className="size-3.5" />

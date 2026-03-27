@@ -1,3 +1,4 @@
+/* eslint-disable @eslint-react/exhaustive-deps */
 import storage from "@rap/utils/storage";
 import { useNavigate, useRouterState } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
@@ -11,11 +12,16 @@ export function useTabs(scrollToTab: (tabKey: string) => void) {
 	const navigate = useNavigate();
 	const { menuService } = useLayout();
 	const isTabItemClickRef = useRef(false);
+	const fullUrl = useRouterState({
+		select: (state) => state.location.pathname + state.location.searchStr,
+	});
 	const pathname = useRouterState({
 		select: (state) => state.location.pathname,
 	});
+	// eslint-disable-next-line @eslint-react/use-state
 	const [tabs, _setTabs] = useState<AppTabItem[]>(storage.getItem(TABS_CACHE_KEY) ?? []);
 
+	// eslint-disable-next-line @eslint-react/use-state
 	const [activeTab, _setActiveTab] = useState<AppTabItem | null>(
 		storage.getItem(SELECTED_TAB_CACHE_KEY) ?? null,
 	);
@@ -37,17 +43,6 @@ export function useTabs(scrollToTab: (tabKey: string) => void) {
 		});
 	};
 
-	const handleCloseTab = (tabId: string) => {
-		setTabs((prevTabs) => {
-			if (prevTabs.length <= 1) return prevTabs;
-			const tabIndex = prevTabs.findIndex((tab) => tab.id === tabId);
-			if (activeTab?.id === tabId) {
-				const nextTabIndex = tabIndex < prevTabs.length - 1 ? tabIndex : tabIndex - 1;
-				setActiveTab(prevTabs[nextTabIndex]);
-			}
-			return prevTabs.filter((tab) => tab.id !== tabId);
-		});
-	};
 	const addTab = (tabItem: AppTabItem) => {
 		setTabs((prevTabs) => {
 			if (prevTabs.some((tab) => tab.id === tabItem.id)) return prevTabs;
@@ -71,13 +66,13 @@ export function useTabs(scrollToTab: (tabKey: string) => void) {
 			return;
 		}
 		const selectedTab = menuService.findMenuByUrl(pathname);
-
 		if (selectedTab) {
+			selectedTab.fullUrl = fullUrl;
 			queueMicrotask(() => {
 				addTab(selectedTab);
 			});
 		}
-	}, [pathname]);
+	}, [fullUrl, pathname]);
 
 	return {
 		activeTab,
@@ -85,6 +80,6 @@ export function useTabs(scrollToTab: (tabKey: string) => void) {
 		setActiveTab,
 		setTabs,
 		handleTabItemClick,
-		handleCloseTab,
+		// handleCloseTab,
 	};
 }

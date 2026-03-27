@@ -1,4 +1,4 @@
-export type MenuOpenMode = "currentSystemTab" | "newSystemTab" | "iframe" | "newBrowserTab";
+export type MenuOpenMode = "currentSystemTab" | "iframe" | "newBrowserTab";
 export type MenuType = "menu" | "dir" | "button";
 export type MenuStatus = "enabled" | "disabled";
 export type MenuBadgeType = "text" | "dot" | "badge";
@@ -43,6 +43,7 @@ export interface MenuItem {
 	status: MenuStatus;
 	children?: MenuItem[];
 	category?: MenuCategory;
+	fullUrl?: string;
 }
 
 export interface FlatMenuItem extends MenuItem {

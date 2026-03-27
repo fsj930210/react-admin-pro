@@ -22,6 +22,7 @@ export interface CachedItem{
   containerRef?: HTMLDivElement | null;
   cacheKey: string;
   refreshing?: boolean;
+  containerScrollPosition?: ScrollPosition;
 }
 
 export interface KeepAliveOptions {
@@ -29,26 +30,28 @@ export interface KeepAliveOptions {
   excludes?: MatchPatternList;
   max?: number;
   saveScrollPosition?: boolean;
-}
-
-export type KeepAliveProps = React.ComponentProps<"div"> & {
-  children: ReactNode;
-  excludes?: MatchPatternList;
-  includes?: MatchPatternList;
-  cacheKey: string;
-  saveScrollPosition?: boolean;
+  refreshDelay?: number;
+	cacheKey: string;
   onActivate?: (cacheKey: string) => void;
   onDeactivate?: (cacheKey: string) => void;
 }
 
-export interface KeepAliveRef<TCached = unknown> {
-  clearAllCache: () => void;
-  refreshCache: (key: string) => void;
-  removeCache: (key: string) => void;
-  removeCacheByKeys: (keys: string[]) => void;
-  updateCacheData: <TData extends TCached>(key: string, data: TData) => void;
-  getCacheData: <TData extends TCached>(key: string) => TData | undefined;
-  hasCache: (key: string) => boolean;
+export type KeepAliveProps = Omit<React.ComponentProps<"div">, 'ref'> & {
+  children: ReactNode;
+  excludes?: MatchPatternList;
+  includes?: MatchPatternList;
+  cacheKey: string;
+  refreshDelay?: number;
+  saveScrollPosition?: boolean;
+  refreshRender?: (item: CachedItem) => ReactNode;
+  onActivate?: (cacheKey: string) => void;
+  onDeactivate?: (cacheKey: string) => void;
+  ref?: React.RefObject<KeepAliveRef | null>;
+}
+
+export interface KeepAliveRef {
+  handleRefreshCache: (key: string) => void;
+  handleRemoveCache: (keys: string[]) => void;
 }
 
 

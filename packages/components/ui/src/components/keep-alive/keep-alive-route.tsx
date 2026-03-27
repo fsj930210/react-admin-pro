@@ -1,10 +1,11 @@
-import { useEffect } from "react";
+import { useEffect, useImperativeHandle } from "react";
 import { Activity, Fragment } from "react";
 import type { CachedItem, KeepAliveProps } from "./types";
 import { useKeepAlive } from "./use-keep-alive";
 import { v4 as uuidv4 } from "uuid";
 import { useRouter, useRouterState } from "@tanstack/react-router";
 import { cn } from "@rap/utils";
+import React from "react";
 
 export function KeepAliveRoute({
 	className,
@@ -12,15 +13,26 @@ export function KeepAliveRoute({
 	excludes,
 	includes,
 	cacheKey,
+	saveScrollPosition,
+	refreshDelay,
+	refreshRender,
 	onActivate,
 	onDeactivate,
-	saveScrollPosition
+	ref,
 }: KeepAliveProps) {
-	const { handleCache, excludeItems, cachedItems, containerRef } = useKeepAlive({
+	const {
+		handleAddCache,
+		handleRefreshCache,
+		handleRemoveCache,
+		excludeItems,
+		cachedItems,
+		containerRef,
+	} = useKeepAlive({
 		includes,
 		excludes,
-		cacheKey,
 		saveScrollPosition,
+		cacheKey,
+		refreshDelay,
 		onActivate,
 		onDeactivate,
 	})
@@ -34,20 +46,28 @@ export function KeepAliveRoute({
 	useEffect(() => {
 		const item: CachedItem = {
 			key: uuidv4(),
-			component: Component ? <Component /> : children || null,
+			component: Component ? <Component /> : children ?? null,
 			cacheKey: cacheKey,
 			refreshing: false,
 			cachedScrollNodes: [],
 			containerRef: containerRef.current,
 		}
-		handleCache(item);
+		handleAddCache(item);
 	}, [cacheKey]);
 
+	useImperativeHandle(ref, () => ({
+		handleRefreshCache,
+		handleRemoveCache,
+	}));
 	return (
 		<div ref={containerRef} className={cn("size-full", className)}>
 			{cachedItems.map((item) =>
 				item.refreshing ? (
-					<Fragment key={item.key}>{item.component}</Fragment>
+					<Fragment key={item.key}>
+						{
+							refreshRender ? refreshRender?.(item) : null
+						}
+					</Fragment>
 				) : (
 					<Activity
 						key={item.key}

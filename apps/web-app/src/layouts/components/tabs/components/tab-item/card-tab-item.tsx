@@ -29,7 +29,7 @@ export function CardTabItem({ tab, active, onClose, onItemClick, index }: AppTab
 					className="flex-center size-5 hover:bg-app-tabs-close-accent rounded-xs cursor-pointer transition-all duration-200 ease-in-out group-[.active]:opacity-100 group-hover:opacity-100"
 					onClick={(e) => {
 						e.stopPropagation();
-						onClose?.(tab.id);
+						onClose?.(tab);
 					}}
 					type="button"
 				>
