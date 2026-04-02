@@ -38,7 +38,8 @@
 		"./input-with-clear": "./src/components/input-with-clear/index.tsx",
 		"./icon": "./src/components/icon/index.tsx",
 		"./dialog": "./src/components/dialog/index.tsx",
-		"./keep-alive": "./src/components/keep-alive/index.ts"
+		"./keep-alive": "./src/components/keep-alive/index.ts",
+		"./anchor": "./src/components/anchor/index.tsx"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "catalog:",

@@ -1,28 +1,24 @@
-import { Button } from "@rap/components-base/button";
 
+import { StatCards } from "./-components/StatCards";
+import { LineChart } from "./-components/LineChart";
+import { PieChart } from "./-components/PieChart";
+import { RadarChart } from "./-components/RadarChart";
 import { createFileRoute } from "@tanstack/react-router";
-import { useAppConfigSelector } from "@/store/app-config";
 
 export const Route = createFileRoute("/(layouts)/dashboard/")({
 	component: DashboardPage,
 });
 
 export function DashboardPage() {
-	const { count, setCount } = useAppConfigSelector(["count", "setCount"]);
-
 	return (
-		<div className="size-full flex flex-col">
+		<div className="size-full flex flex-col gap-6 p-6 overflow-auto">
+			<StatCards />
 			<div>
-				<Button onClick={() => setCount(count + 1)}>{count} +</Button>
-				<Button
-					onClick={() =>
-						setCount((state) => {
-							return state.count - 1;
-						})
-					}
-				>
-					{count} -
-				</Button>
+				<LineChart />
+			</div>
+			<div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+				<PieChart />
+				<RadarChart />
 			</div>
 		</div>
 	);

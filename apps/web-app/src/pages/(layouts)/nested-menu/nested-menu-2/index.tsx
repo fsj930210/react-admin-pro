@@ -1,9 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/(layouts)/nested-menu/nested-menu-2/")({
-	component: RouteComponent,
+	beforeLoad: () => {
+		// eslint-disable-next-line @typescript-eslint/only-throw-error
+		throw Route.redirect({
+			to: './nested-menu-2-1',
+		})
+	},
 });
 
-function RouteComponent() {
-	return <div>嵌套菜单-2（二级菜单-2）</div>;
-}

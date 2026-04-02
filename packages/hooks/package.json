@@ -31,6 +31,18 @@
     "./use-minimax": {
       "types": "./src/use-minimax.ts",
       "default": "./src/use-minimax.ts"
+    },
+    "./use-isomorphic-layout-effect": {
+      "types": "./src/use-isomorphic-layout-effect.ts",
+      "default": "./src/use-isomorphic-layout-effect.ts"
+    },
+    "./use-lazy-ref": {
+      "types": "./src/use-lazy-ref.ts",
+      "default": "./src/use-lazy-ref.ts"
+    },
+    "./use-as-ref": {
+      "types": "./src/use-as-ref.ts",
+      "default": "./src/use-as-ref.ts"
     }
   },
   "devDependencies": {

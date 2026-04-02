@@ -1,9 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/(layouts)/components/")({
-	component: RouteComponent,
+	beforeLoad: () => {
+		// eslint-disable-next-line @typescript-eslint/only-throw-error
+		throw Route.redirect({
+			to: './icon',
+		})
+	},
 });
 
-function RouteComponent() {
-	return <div>组件列表</div>;
-}
+

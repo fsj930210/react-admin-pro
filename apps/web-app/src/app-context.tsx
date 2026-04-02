@@ -2,7 +2,7 @@
 import type { EventEmitter } from "ahooks/lib/useEventEmitter";
 import { createContext, type ReactNode, use } from "react";
 
-export type AppEventType = "reload-tab" | 'remove-tab' | 'maximize-tab';
+export type AppEventType = "reload-tab" | "remove-tab" | "maximize-tab";
 export interface AppEvent<T> {
 	type: AppEventType;
 	payload: T;

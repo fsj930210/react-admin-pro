@@ -37,7 +37,7 @@ export interface KeepAliveOptions {
 }
 
 export type KeepAliveProps = Omit<React.ComponentProps<"div">, 'ref'> & {
-  children: ReactNode;
+  children?: ReactNode;
   excludes?: MatchPatternList;
   includes?: MatchPatternList;
   cacheKey: string;

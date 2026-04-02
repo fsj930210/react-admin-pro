@@ -11,7 +11,7 @@ export function useMenu({ menuService, multiOpen = false }: UseMenuServiceParams
 	const isMenuItemClickRef = useRef(false);
 	const navigate = useNavigate();
 	const pathname = useRouterState({
-		select: (state) => state.location.pathname
+		select: (state) => state.location.pathname,
 	});
 
 	const [selectedMenu, setSelectedMenu] = useState<MenuItem | null>(null);
@@ -91,7 +91,7 @@ export function useMenu({ menuService, multiOpen = false }: UseMenuServiceParams
 				updateOpenKeysByMenu(selectedMenu);
 			}
 		});
-	// eslint-disable-next-line @eslint-react/exhaustive-deps
+		// eslint-disable-next-line @eslint-react/exhaustive-deps
 	}, [pathname]);
 	return {
 		updateOpenKeysByMenu,

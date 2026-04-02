@@ -1,9 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/(layouts)/outside/")({
-	component: OutsidePage,
+	beforeLoad: () => {
+		// eslint-disable-next-line @typescript-eslint/only-throw-error
+		throw Route.redirect({
+			to: './iframe',
+		})
+	},
 });
 
-function OutsidePage() {
-	return <div>外部页面</div>;
-}

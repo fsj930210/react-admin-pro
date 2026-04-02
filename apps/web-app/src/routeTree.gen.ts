@@ -12,16 +12,27 @@ import { Route as rootRouteImport } from "./pages/__root";
 import { Route as layoutsRouteRouteImport } from "./pages/(layouts)/route";
 import { Route as IndexRouteImport } from "./pages/index";
 import { Route as LoginIndexRouteImport } from "./pages/login/index";
+import { Route as layoutsSystemIndexRouteImport } from "./pages/(layouts)/system/index";
 import { Route as layoutsOverviewIndexRouteImport } from "./pages/(layouts)/overview/index";
 import { Route as layoutsOutsideIndexRouteImport } from "./pages/(layouts)/outside/index";
 import { Route as layoutsNestedMenuIndexRouteImport } from "./pages/(layouts)/nested-menu/index";
+import { Route as layoutsMessageIndexRouteImport } from "./pages/(layouts)/message/index";
 import { Route as layoutsFeaturesIndexRouteImport } from "./pages/(layouts)/features/index";
 import { Route as layoutsDashboardIndexRouteImport } from "./pages/(layouts)/dashboard/index";
 import { Route as layoutsComponentsIndexRouteImport } from "./pages/(layouts)/components/index";
+import { Route as layoutsAboutIndexRouteImport } from "./pages/(layouts)/about/index";
 import { Route as layoutsNestedMenuNestedMenu3RouteImport } from "./pages/(layouts)/nested-menu/nested-menu-3";
+import { Route as layoutsSystemUserIndexRouteImport } from "./pages/(layouts)/system/user/index";
+import { Route as layoutsSystemRoleIndexRouteImport } from "./pages/(layouts)/system/role/index";
+import { Route as layoutsSystemParamConfigIndexRouteImport } from "./pages/(layouts)/system/param-config/index";
+import { Route as layoutsSystemOrganizationIndexRouteImport } from "./pages/(layouts)/system/organization/index";
+import { Route as layoutsSystemMenuIndexRouteImport } from "./pages/(layouts)/system/menu/index";
+import { Route as layoutsSystemDictIndexRouteImport } from "./pages/(layouts)/system/dict/index";
 import { Route as layoutsOutsideIframeIndexRouteImport } from "./pages/(layouts)/outside/iframe/index";
 import { Route as layoutsNestedMenuNestedMenu2IndexRouteImport } from "./pages/(layouts)/nested-menu/nested-menu-2/index";
 import { Route as layoutsNestedMenuNestedMenu1IndexRouteImport } from "./pages/(layouts)/nested-menu/nested-menu-1/index";
+import { Route as layoutsMessageUnreadIndexRouteImport } from "./pages/(layouts)/message/unread/index";
+import { Route as layoutsMessageReadIndexRouteImport } from "./pages/(layouts)/message/read/index";
 import { Route as layoutsFeaturesThemeIndexRouteImport } from "./pages/(layouts)/features/theme/index";
 import { Route as layoutsFeaturesResizeIndexRouteImport } from "./pages/(layouts)/features/resize/index";
 import { Route as layoutsFeaturesMoveIndexRouteImport } from "./pages/(layouts)/features/move/index";
@@ -51,6 +62,11 @@ const LoginIndexRoute = LoginIndexRouteImport.update({
   path: "/login/",
   getParentRoute: () => rootRouteImport,
 } as any);
+const layoutsSystemIndexRoute = layoutsSystemIndexRouteImport.update({
+  id: "/system/",
+  path: "/system/",
+  getParentRoute: () => layoutsRouteRoute,
+} as any);
 const layoutsOverviewIndexRoute = layoutsOverviewIndexRouteImport.update({
   id: "/overview/",
   path: "/overview/",
@@ -64,6 +80,11 @@ const layoutsOutsideIndexRoute = layoutsOutsideIndexRouteImport.update({
 const layoutsNestedMenuIndexRoute = layoutsNestedMenuIndexRouteImport.update({
   id: "/nested-menu/",
   path: "/nested-menu/",
+  getParentRoute: () => layoutsRouteRoute,
+} as any);
+const layoutsMessageIndexRoute = layoutsMessageIndexRouteImport.update({
+  id: "/message/",
+  path: "/message/",
   getParentRoute: () => layoutsRouteRoute,
 } as any);
 const layoutsFeaturesIndexRoute = layoutsFeaturesIndexRouteImport.update({
@@ -81,12 +102,49 @@ const layoutsComponentsIndexRoute = layoutsComponentsIndexRouteImport.update({
   path: "/components/",
   getParentRoute: () => layoutsRouteRoute,
 } as any);
+const layoutsAboutIndexRoute = layoutsAboutIndexRouteImport.update({
+  id: "/about/",
+  path: "/about/",
+  getParentRoute: () => layoutsRouteRoute,
+} as any);
 const layoutsNestedMenuNestedMenu3Route =
   layoutsNestedMenuNestedMenu3RouteImport.update({
     id: "/nested-menu/nested-menu-3",
     path: "/nested-menu/nested-menu-3",
     getParentRoute: () => layoutsRouteRoute,
   } as any);
+const layoutsSystemUserIndexRoute = layoutsSystemUserIndexRouteImport.update({
+  id: "/system/user/",
+  path: "/system/user/",
+  getParentRoute: () => layoutsRouteRoute,
+} as any);
+const layoutsSystemRoleIndexRoute = layoutsSystemRoleIndexRouteImport.update({
+  id: "/system/role/",
+  path: "/system/role/",
+  getParentRoute: () => layoutsRouteRoute,
+} as any);
+const layoutsSystemParamConfigIndexRoute =
+  layoutsSystemParamConfigIndexRouteImport.update({
+    id: "/system/param-config/",
+    path: "/system/param-config/",
+    getParentRoute: () => layoutsRouteRoute,
+  } as any);
+const layoutsSystemOrganizationIndexRoute =
+  layoutsSystemOrganizationIndexRouteImport.update({
+    id: "/system/organization/",
+    path: "/system/organization/",
+    getParentRoute: () => layoutsRouteRoute,
+  } as any);
+const layoutsSystemMenuIndexRoute = layoutsSystemMenuIndexRouteImport.update({
+  id: "/system/menu/",
+  path: "/system/menu/",
+  getParentRoute: () => layoutsRouteRoute,
+} as any);
+const layoutsSystemDictIndexRoute = layoutsSystemDictIndexRouteImport.update({
+  id: "/system/dict/",
+  path: "/system/dict/",
+  getParentRoute: () => layoutsRouteRoute,
+} as any);
 const layoutsOutsideIframeIndexRoute =
   layoutsOutsideIframeIndexRouteImport.update({
     id: "/outside/iframe/",
@@ -105,6 +163,17 @@ const layoutsNestedMenuNestedMenu1IndexRoute =
     path: "/nested-menu/nested-menu-1/",
     getParentRoute: () => layoutsRouteRoute,
   } as any);
+const layoutsMessageUnreadIndexRoute =
+  layoutsMessageUnreadIndexRouteImport.update({
+    id: "/message/unread/",
+    path: "/message/unread/",
+    getParentRoute: () => layoutsRouteRoute,
+  } as any);
+const layoutsMessageReadIndexRoute = layoutsMessageReadIndexRouteImport.update({
+  id: "/message/read/",
+  path: "/message/read/",
+  getParentRoute: () => layoutsRouteRoute,
+} as any);
 const layoutsFeaturesThemeIndexRoute =
   layoutsFeaturesThemeIndexRouteImport.update({
     id: "/features/theme/",
@@ -194,12 +263,15 @@ export interface FileRoutesByFullPath {
   "/": typeof IndexRoute;
   "/login/": typeof LoginIndexRoute;
   "/nested-menu/nested-menu-3": typeof layoutsNestedMenuNestedMenu3Route;
+  "/about/": typeof layoutsAboutIndexRoute;
   "/components/": typeof layoutsComponentsIndexRoute;
   "/dashboard/": typeof layoutsDashboardIndexRoute;
   "/features/": typeof layoutsFeaturesIndexRoute;
+  "/message/": typeof layoutsMessageIndexRoute;
   "/nested-menu/": typeof layoutsNestedMenuIndexRoute;
   "/outside/": typeof layoutsOutsideIndexRoute;
   "/overview/": typeof layoutsOverviewIndexRoute;
+  "/system/": typeof layoutsSystemIndexRoute;
   "/nested-menu/nested-menu-1/nested-menu-1-1": typeof layoutsNestedMenuNestedMenu1NestedMenu11Route;
   "/nested-menu/nested-menu-1/nested-menu-1-3": typeof layoutsNestedMenuNestedMenu1NestedMenu13Route;
   "/nested-menu/nested-menu-2/nested-menu-2-1": typeof layoutsNestedMenuNestedMenu2NestedMenu21Route;
@@ -210,9 +282,17 @@ export interface FileRoutesByFullPath {
   "/features/move/": typeof layoutsFeaturesMoveIndexRoute;
   "/features/resize/": typeof layoutsFeaturesResizeIndexRoute;
   "/features/theme/": typeof layoutsFeaturesThemeIndexRoute;
+  "/message/read/": typeof layoutsMessageReadIndexRoute;
+  "/message/unread/": typeof layoutsMessageUnreadIndexRoute;
   "/nested-menu/nested-menu-1/": typeof layoutsNestedMenuNestedMenu1IndexRoute;
   "/nested-menu/nested-menu-2/": typeof layoutsNestedMenuNestedMenu2IndexRoute;
   "/outside/iframe/": typeof layoutsOutsideIframeIndexRoute;
+  "/system/dict/": typeof layoutsSystemDictIndexRoute;
+  "/system/menu/": typeof layoutsSystemMenuIndexRoute;
+  "/system/organization/": typeof layoutsSystemOrganizationIndexRoute;
+  "/system/param-config/": typeof layoutsSystemParamConfigIndexRoute;
+  "/system/role/": typeof layoutsSystemRoleIndexRoute;
+  "/system/user/": typeof layoutsSystemUserIndexRoute;
   "/nested-menu/nested-menu-1/nested-menu-1-2/nested-menu-1-2-1": typeof layoutsNestedMenuNestedMenu1NestedMenu12NestedMenu121Route;
   "/nested-menu/nested-menu-1/nested-menu-1-2/nested-menu-1-2-2": typeof layoutsNestedMenuNestedMenu1NestedMenu12NestedMenu122Route;
   "/nested-menu/nested-menu-1/nested-menu-1-2/": typeof layoutsNestedMenuNestedMenu1NestedMenu12IndexRoute;
@@ -222,12 +302,15 @@ export interface FileRoutesByTo {
   "/": typeof IndexRoute;
   "/login": typeof LoginIndexRoute;
   "/nested-menu/nested-menu-3": typeof layoutsNestedMenuNestedMenu3Route;
+  "/about": typeof layoutsAboutIndexRoute;
   "/components": typeof layoutsComponentsIndexRoute;
   "/dashboard": typeof layoutsDashboardIndexRoute;
   "/features": typeof layoutsFeaturesIndexRoute;
+  "/message": typeof layoutsMessageIndexRoute;
   "/nested-menu": typeof layoutsNestedMenuIndexRoute;
   "/outside": typeof layoutsOutsideIndexRoute;
   "/overview": typeof layoutsOverviewIndexRoute;
+  "/system": typeof layoutsSystemIndexRoute;
   "/nested-menu/nested-menu-1/nested-menu-1-1": typeof layoutsNestedMenuNestedMenu1NestedMenu11Route;
   "/nested-menu/nested-menu-1/nested-menu-1-3": typeof layoutsNestedMenuNestedMenu1NestedMenu13Route;
   "/nested-menu/nested-menu-2/nested-menu-2-1": typeof layoutsNestedMenuNestedMenu2NestedMenu21Route;
@@ -238,9 +321,17 @@ export interface FileRoutesByTo {
   "/features/move": typeof layoutsFeaturesMoveIndexRoute;
   "/features/resize": typeof layoutsFeaturesResizeIndexRoute;
   "/features/theme": typeof layoutsFeaturesThemeIndexRoute;
+  "/message/read": typeof layoutsMessageReadIndexRoute;
+  "/message/unread": typeof layoutsMessageUnreadIndexRoute;
   "/nested-menu/nested-menu-1": typeof layoutsNestedMenuNestedMenu1IndexRoute;
   "/nested-menu/nested-menu-2": typeof layoutsNestedMenuNestedMenu2IndexRoute;
   "/outside/iframe": typeof layoutsOutsideIframeIndexRoute;
+  "/system/dict": typeof layoutsSystemDictIndexRoute;
+  "/system/menu": typeof layoutsSystemMenuIndexRoute;
+  "/system/organization": typeof layoutsSystemOrganizationIndexRoute;
+  "/system/param-config": typeof layoutsSystemParamConfigIndexRoute;
+  "/system/role": typeof layoutsSystemRoleIndexRoute;
+  "/system/user": typeof layoutsSystemUserIndexRoute;
   "/nested-menu/nested-menu-1/nested-menu-1-2/nested-menu-1-2-1": typeof layoutsNestedMenuNestedMenu1NestedMenu12NestedMenu121Route;
   "/nested-menu/nested-menu-1/nested-menu-1-2/nested-menu-1-2-2": typeof layoutsNestedMenuNestedMenu1NestedMenu12NestedMenu122Route;
   "/nested-menu/nested-menu-1/nested-menu-1-2": typeof layoutsNestedMenuNestedMenu1NestedMenu12IndexRoute;
@@ -252,12 +343,15 @@ export interface FileRoutesById {
   "/(layouts)": typeof layoutsRouteRouteWithChildren;
   "/login/": typeof LoginIndexRoute;
   "/(layouts)/nested-menu/nested-menu-3": typeof layoutsNestedMenuNestedMenu3Route;
+  "/(layouts)/about/": typeof layoutsAboutIndexRoute;
   "/(layouts)/components/": typeof layoutsComponentsIndexRoute;
   "/(layouts)/dashboard/": typeof layoutsDashboardIndexRoute;
   "/(layouts)/features/": typeof layoutsFeaturesIndexRoute;
+  "/(layouts)/message/": typeof layoutsMessageIndexRoute;
   "/(layouts)/nested-menu/": typeof layoutsNestedMenuIndexRoute;
   "/(layouts)/outside/": typeof layoutsOutsideIndexRoute;
   "/(layouts)/overview/": typeof layoutsOverviewIndexRoute;
+  "/(layouts)/system/": typeof layoutsSystemIndexRoute;
   "/(layouts)/nested-menu/nested-menu-1/nested-menu-1-1": typeof layoutsNestedMenuNestedMenu1NestedMenu11Route;
   "/(layouts)/nested-menu/nested-menu-1/nested-menu-1-3": typeof layoutsNestedMenuNestedMenu1NestedMenu13Route;
   "/(layouts)/nested-menu/nested-menu-2/nested-menu-2-1": typeof layoutsNestedMenuNestedMenu2NestedMenu21Route;
@@ -268,9 +362,17 @@ export interface FileRoutesById {
   "/(layouts)/features/move/": typeof layoutsFeaturesMoveIndexRoute;
   "/(layouts)/features/resize/": typeof layoutsFeaturesResizeIndexRoute;
   "/(layouts)/features/theme/": typeof layoutsFeaturesThemeIndexRoute;
+  "/(layouts)/message/read/": typeof layoutsMessageReadIndexRoute;
+  "/(layouts)/message/unread/": typeof layoutsMessageUnreadIndexRoute;
   "/(layouts)/nested-menu/nested-menu-1/": typeof layoutsNestedMenuNestedMenu1IndexRoute;
   "/(layouts)/nested-menu/nested-menu-2/": typeof layoutsNestedMenuNestedMenu2IndexRoute;
   "/(layouts)/outside/iframe/": typeof layoutsOutsideIframeIndexRoute;
+  "/(layouts)/system/dict/": typeof layoutsSystemDictIndexRoute;
+  "/(layouts)/system/menu/": typeof layoutsSystemMenuIndexRoute;
+  "/(layouts)/system/organization/": typeof layoutsSystemOrganizationIndexRoute;
+  "/(layouts)/system/param-config/": typeof layoutsSystemParamConfigIndexRoute;
+  "/(layouts)/system/role/": typeof layoutsSystemRoleIndexRoute;
+  "/(layouts)/system/user/": typeof layoutsSystemUserIndexRoute;
   "/(layouts)/nested-menu/nested-menu-1/nested-menu-1-2/nested-menu-1-2-1": typeof layoutsNestedMenuNestedMenu1NestedMenu12NestedMenu121Route;
   "/(layouts)/nested-menu/nested-menu-1/nested-menu-1-2/nested-menu-1-2-2": typeof layoutsNestedMenuNestedMenu1NestedMenu12NestedMenu122Route;
   "/(layouts)/nested-menu/nested-menu-1/nested-menu-1-2/": typeof layoutsNestedMenuNestedMenu1NestedMenu12IndexRoute;
@@ -282,12 +384,15 @@ export interface FileRouteTypes {
     | "/"
     | "/login/"
     | "/nested-menu/nested-menu-3"
+    | "/about/"
     | "/components/"
     | "/dashboard/"
     | "/features/"
+    | "/message/"
     | "/nested-menu/"
     | "/outside/"
     | "/overview/"
+    | "/system/"
     | "/nested-menu/nested-menu-1/nested-menu-1-1"
     | "/nested-menu/nested-menu-1/nested-menu-1-3"
     | "/nested-menu/nested-menu-2/nested-menu-2-1"
@@ -298,9 +403,17 @@ export interface FileRouteTypes {
     | "/features/move/"
     | "/features/resize/"
     | "/features/theme/"
+    | "/message/read/"
+    | "/message/unread/"
     | "/nested-menu/nested-menu-1/"
     | "/nested-menu/nested-menu-2/"
     | "/outside/iframe/"
+    | "/system/dict/"
+    | "/system/menu/"
+    | "/system/organization/"
+    | "/system/param-config/"
+    | "/system/role/"
+    | "/system/user/"
     | "/nested-menu/nested-menu-1/nested-menu-1-2/nested-menu-1-2-1"
     | "/nested-menu/nested-menu-1/nested-menu-1-2/nested-menu-1-2-2"
     | "/nested-menu/nested-menu-1/nested-menu-1-2/"
@@ -310,12 +423,15 @@ export interface FileRouteTypes {
     | "/"
     | "/login"
     | "/nested-menu/nested-menu-3"
+    | "/about"
     | "/components"
     | "/dashboard"
     | "/features"
+    | "/message"
     | "/nested-menu"
     | "/outside"
     | "/overview"
+    | "/system"
     | "/nested-menu/nested-menu-1/nested-menu-1-1"
     | "/nested-menu/nested-menu-1/nested-menu-1-3"
     | "/nested-menu/nested-menu-2/nested-menu-2-1"
@@ -326,9 +442,17 @@ export interface FileRouteTypes {
     | "/features/move"
     | "/features/resize"
     | "/features/theme"
+    | "/message/read"
+    | "/message/unread"
     | "/nested-menu/nested-menu-1"
     | "/nested-menu/nested-menu-2"
     | "/outside/iframe"
+    | "/system/dict"
+    | "/system/menu"
+    | "/system/organization"
+    | "/system/param-config"
+    | "/system/role"
+    | "/system/user"
     | "/nested-menu/nested-menu-1/nested-menu-1-2/nested-menu-1-2-1"
     | "/nested-menu/nested-menu-1/nested-menu-1-2/nested-menu-1-2-2"
     | "/nested-menu/nested-menu-1/nested-menu-1-2"
@@ -339,12 +463,15 @@ export interface FileRouteTypes {
     | "/(layouts)"
     | "/login/"
     | "/(layouts)/nested-menu/nested-menu-3"
+    | "/(layouts)/about/"
     | "/(layouts)/components/"
     | "/(layouts)/dashboard/"
     | "/(layouts)/features/"
+    | "/(layouts)/message/"
     | "/(layouts)/nested-menu/"
     | "/(layouts)/outside/"
     | "/(layouts)/overview/"
+    | "/(layouts)/system/"
     | "/(layouts)/nested-menu/nested-menu-1/nested-menu-1-1"
     | "/(layouts)/nested-menu/nested-menu-1/nested-menu-1-3"
     | "/(layouts)/nested-menu/nested-menu-2/nested-menu-2-1"
@@ -355,9 +482,17 @@ export interface FileRouteTypes {
     | "/(layouts)/features/move/"
     | "/(layouts)/features/resize/"
     | "/(layouts)/features/theme/"
+    | "/(layouts)/message/read/"
+    | "/(layouts)/message/unread/"
     | "/(layouts)/nested-menu/nested-menu-1/"
     | "/(layouts)/nested-menu/nested-menu-2/"
     | "/(layouts)/outside/iframe/"
+    | "/(layouts)/system/dict/"
+    | "/(layouts)/system/menu/"
+    | "/(layouts)/system/organization/"
+    | "/(layouts)/system/param-config/"
+    | "/(layouts)/system/role/"
+    | "/(layouts)/system/user/"
     | "/(layouts)/nested-menu/nested-menu-1/nested-menu-1-2/nested-menu-1-2-1"
     | "/(layouts)/nested-menu/nested-menu-1/nested-menu-1-2/nested-menu-1-2-2"
     | "/(layouts)/nested-menu/nested-menu-1/nested-menu-1-2/"
@@ -393,6 +528,13 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof LoginIndexRouteImport;
       parentRoute: typeof rootRouteImport;
     };
+    "/(layouts)/system/": {
+      id: "/(layouts)/system/";
+      path: "/system";
+      fullPath: "/system/";
+      preLoaderRoute: typeof layoutsSystemIndexRouteImport;
+      parentRoute: typeof layoutsRouteRoute;
+    };
     "/(layouts)/overview/": {
       id: "/(layouts)/overview/";
       path: "/overview";
@@ -412,6 +554,13 @@ declare module "@tanstack/react-router" {
       path: "/nested-menu";
       fullPath: "/nested-menu/";
       preLoaderRoute: typeof layoutsNestedMenuIndexRouteImport;
+      parentRoute: typeof layoutsRouteRoute;
+    };
+    "/(layouts)/message/": {
+      id: "/(layouts)/message/";
+      path: "/message";
+      fullPath: "/message/";
+      preLoaderRoute: typeof layoutsMessageIndexRouteImport;
       parentRoute: typeof layoutsRouteRoute;
     };
     "/(layouts)/features/": {
@@ -435,11 +584,60 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof layoutsComponentsIndexRouteImport;
       parentRoute: typeof layoutsRouteRoute;
     };
+    "/(layouts)/about/": {
+      id: "/(layouts)/about/";
+      path: "/about";
+      fullPath: "/about/";
+      preLoaderRoute: typeof layoutsAboutIndexRouteImport;
+      parentRoute: typeof layoutsRouteRoute;
+    };
     "/(layouts)/nested-menu/nested-menu-3": {
       id: "/(layouts)/nested-menu/nested-menu-3";
       path: "/nested-menu/nested-menu-3";
       fullPath: "/nested-menu/nested-menu-3";
       preLoaderRoute: typeof layoutsNestedMenuNestedMenu3RouteImport;
+      parentRoute: typeof layoutsRouteRoute;
+    };
+    "/(layouts)/system/user/": {
+      id: "/(layouts)/system/user/";
+      path: "/system/user";
+      fullPath: "/system/user/";
+      preLoaderRoute: typeof layoutsSystemUserIndexRouteImport;
+      parentRoute: typeof layoutsRouteRoute;
+    };
+    "/(layouts)/system/role/": {
+      id: "/(layouts)/system/role/";
+      path: "/system/role";
+      fullPath: "/system/role/";
+      preLoaderRoute: typeof layoutsSystemRoleIndexRouteImport;
+      parentRoute: typeof layoutsRouteRoute;
+    };
+    "/(layouts)/system/param-config/": {
+      id: "/(layouts)/system/param-config/";
+      path: "/system/param-config";
+      fullPath: "/system/param-config/";
+      preLoaderRoute: typeof layoutsSystemParamConfigIndexRouteImport;
+      parentRoute: typeof layoutsRouteRoute;
+    };
+    "/(layouts)/system/organization/": {
+      id: "/(layouts)/system/organization/";
+      path: "/system/organization";
+      fullPath: "/system/organization/";
+      preLoaderRoute: typeof layoutsSystemOrganizationIndexRouteImport;
+      parentRoute: typeof layoutsRouteRoute;
+    };
+    "/(layouts)/system/menu/": {
+      id: "/(layouts)/system/menu/";
+      path: "/system/menu";
+      fullPath: "/system/menu/";
+      preLoaderRoute: typeof layoutsSystemMenuIndexRouteImport;
+      parentRoute: typeof layoutsRouteRoute;
+    };
+    "/(layouts)/system/dict/": {
+      id: "/(layouts)/system/dict/";
+      path: "/system/dict";
+      fullPath: "/system/dict/";
+      preLoaderRoute: typeof layoutsSystemDictIndexRouteImport;
       parentRoute: typeof layoutsRouteRoute;
     };
     "/(layouts)/outside/iframe/": {
@@ -461,6 +659,20 @@ declare module "@tanstack/react-router" {
       path: "/nested-menu/nested-menu-1";
       fullPath: "/nested-menu/nested-menu-1/";
       preLoaderRoute: typeof layoutsNestedMenuNestedMenu1IndexRouteImport;
+      parentRoute: typeof layoutsRouteRoute;
+    };
+    "/(layouts)/message/unread/": {
+      id: "/(layouts)/message/unread/";
+      path: "/message/unread";
+      fullPath: "/message/unread/";
+      preLoaderRoute: typeof layoutsMessageUnreadIndexRouteImport;
+      parentRoute: typeof layoutsRouteRoute;
+    };
+    "/(layouts)/message/read/": {
+      id: "/(layouts)/message/read/";
+      path: "/message/read";
+      fullPath: "/message/read/";
+      preLoaderRoute: typeof layoutsMessageReadIndexRouteImport;
       parentRoute: typeof layoutsRouteRoute;
     };
     "/(layouts)/features/theme/": {
@@ -566,12 +778,15 @@ declare module "@tanstack/react-router" {
 
 interface layoutsRouteRouteChildren {
   layoutsNestedMenuNestedMenu3Route: typeof layoutsNestedMenuNestedMenu3Route;
+  layoutsAboutIndexRoute: typeof layoutsAboutIndexRoute;
   layoutsComponentsIndexRoute: typeof layoutsComponentsIndexRoute;
   layoutsDashboardIndexRoute: typeof layoutsDashboardIndexRoute;
   layoutsFeaturesIndexRoute: typeof layoutsFeaturesIndexRoute;
+  layoutsMessageIndexRoute: typeof layoutsMessageIndexRoute;
   layoutsNestedMenuIndexRoute: typeof layoutsNestedMenuIndexRoute;
   layoutsOutsideIndexRoute: typeof layoutsOutsideIndexRoute;
   layoutsOverviewIndexRoute: typeof layoutsOverviewIndexRoute;
+  layoutsSystemIndexRoute: typeof layoutsSystemIndexRoute;
   layoutsNestedMenuNestedMenu1NestedMenu11Route: typeof layoutsNestedMenuNestedMenu1NestedMenu11Route;
   layoutsNestedMenuNestedMenu1NestedMenu13Route: typeof layoutsNestedMenuNestedMenu1NestedMenu13Route;
   layoutsNestedMenuNestedMenu2NestedMenu21Route: typeof layoutsNestedMenuNestedMenu2NestedMenu21Route;
@@ -582,9 +797,17 @@ interface layoutsRouteRouteChildren {
   layoutsFeaturesMoveIndexRoute: typeof layoutsFeaturesMoveIndexRoute;
   layoutsFeaturesResizeIndexRoute: typeof layoutsFeaturesResizeIndexRoute;
   layoutsFeaturesThemeIndexRoute: typeof layoutsFeaturesThemeIndexRoute;
+  layoutsMessageReadIndexRoute: typeof layoutsMessageReadIndexRoute;
+  layoutsMessageUnreadIndexRoute: typeof layoutsMessageUnreadIndexRoute;
   layoutsNestedMenuNestedMenu1IndexRoute: typeof layoutsNestedMenuNestedMenu1IndexRoute;
   layoutsNestedMenuNestedMenu2IndexRoute: typeof layoutsNestedMenuNestedMenu2IndexRoute;
   layoutsOutsideIframeIndexRoute: typeof layoutsOutsideIframeIndexRoute;
+  layoutsSystemDictIndexRoute: typeof layoutsSystemDictIndexRoute;
+  layoutsSystemMenuIndexRoute: typeof layoutsSystemMenuIndexRoute;
+  layoutsSystemOrganizationIndexRoute: typeof layoutsSystemOrganizationIndexRoute;
+  layoutsSystemParamConfigIndexRoute: typeof layoutsSystemParamConfigIndexRoute;
+  layoutsSystemRoleIndexRoute: typeof layoutsSystemRoleIndexRoute;
+  layoutsSystemUserIndexRoute: typeof layoutsSystemUserIndexRoute;
   layoutsNestedMenuNestedMenu1NestedMenu12NestedMenu121Route: typeof layoutsNestedMenuNestedMenu1NestedMenu12NestedMenu121Route;
   layoutsNestedMenuNestedMenu1NestedMenu12NestedMenu122Route: typeof layoutsNestedMenuNestedMenu1NestedMenu12NestedMenu122Route;
   layoutsNestedMenuNestedMenu1NestedMenu12IndexRoute: typeof layoutsNestedMenuNestedMenu1NestedMenu12IndexRoute;
@@ -593,12 +816,15 @@ interface layoutsRouteRouteChildren {
 
 const layoutsRouteRouteChildren: layoutsRouteRouteChildren = {
   layoutsNestedMenuNestedMenu3Route: layoutsNestedMenuNestedMenu3Route,
+  layoutsAboutIndexRoute: layoutsAboutIndexRoute,
   layoutsComponentsIndexRoute: layoutsComponentsIndexRoute,
   layoutsDashboardIndexRoute: layoutsDashboardIndexRoute,
   layoutsFeaturesIndexRoute: layoutsFeaturesIndexRoute,
+  layoutsMessageIndexRoute: layoutsMessageIndexRoute,
   layoutsNestedMenuIndexRoute: layoutsNestedMenuIndexRoute,
   layoutsOutsideIndexRoute: layoutsOutsideIndexRoute,
   layoutsOverviewIndexRoute: layoutsOverviewIndexRoute,
+  layoutsSystemIndexRoute: layoutsSystemIndexRoute,
   layoutsNestedMenuNestedMenu1NestedMenu11Route:
     layoutsNestedMenuNestedMenu1NestedMenu11Route,
   layoutsNestedMenuNestedMenu1NestedMenu13Route:
@@ -612,11 +838,19 @@ const layoutsRouteRouteChildren: layoutsRouteRouteChildren = {
   layoutsFeaturesMoveIndexRoute: layoutsFeaturesMoveIndexRoute,
   layoutsFeaturesResizeIndexRoute: layoutsFeaturesResizeIndexRoute,
   layoutsFeaturesThemeIndexRoute: layoutsFeaturesThemeIndexRoute,
+  layoutsMessageReadIndexRoute: layoutsMessageReadIndexRoute,
+  layoutsMessageUnreadIndexRoute: layoutsMessageUnreadIndexRoute,
   layoutsNestedMenuNestedMenu1IndexRoute:
     layoutsNestedMenuNestedMenu1IndexRoute,
   layoutsNestedMenuNestedMenu2IndexRoute:
     layoutsNestedMenuNestedMenu2IndexRoute,
   layoutsOutsideIframeIndexRoute: layoutsOutsideIframeIndexRoute,
+  layoutsSystemDictIndexRoute: layoutsSystemDictIndexRoute,
+  layoutsSystemMenuIndexRoute: layoutsSystemMenuIndexRoute,
+  layoutsSystemOrganizationIndexRoute: layoutsSystemOrganizationIndexRoute,
+  layoutsSystemParamConfigIndexRoute: layoutsSystemParamConfigIndexRoute,
+  layoutsSystemRoleIndexRoute: layoutsSystemRoleIndexRoute,
+  layoutsSystemUserIndexRoute: layoutsSystemUserIndexRoute,
   layoutsNestedMenuNestedMenu1NestedMenu12NestedMenu121Route:
     layoutsNestedMenuNestedMenu1NestedMenu12NestedMenu121Route,
   layoutsNestedMenuNestedMenu1NestedMenu12NestedMenu122Route:

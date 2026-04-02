@@ -1,20 +1,10 @@
-import { Button } from "@rap/components-base/button";
 import { Checkbox } from "@rap/components-base/checkbox";
-import {
-	Dialog,
-	DialogContent,
-	DialogDescription,
-	DialogHeader,
-	DialogTitle,
-	DialogTrigger,
-} from "@rap/components-base/dialog";
 import {
 	Field,
 	FieldDescription,
 	FieldGroup,
 	FieldLabel,
 	FieldLegend,
-	FieldSeparator,
 	FieldSet,
 } from "@rap/components-base/field";
 import { Input } from "@rap/components-base/input";
@@ -28,15 +18,6 @@ import {
 	PaginationPrevious,
 } from "@rap/components-base/pagination";
 import {
-	Popover,
-	PopoverContent,
-	PopoverDescription,
-	PopoverHeader,
-	PopoverTitle,
-	PopoverTrigger,
-} from "@rap/components-base/popover";
-import { ScrollArea } from "@rap/components-base/scroll-area";
-import {
 	Select,
 	SelectContent,
 	SelectGroup,
@@ -44,17 +25,34 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@rap/components-base/select";
-import { Separator } from "@rap/components-base/separator";
-import {
-	Sheet,
-	SheetContent,
-	SheetDescription,
-	SheetHeader,
-	SheetTitle,
-	SheetTrigger,
-} from "@rap/components-base/sheet";
+// import { Button } from "@rap/components-base/button";
+// import {
+// 	Dialog,
+// 	DialogContent,
+// 	DialogDescription,
+// 	DialogHeader,
+// 	DialogTitle,
+// 	DialogTrigger,
+// } from "@rap/components-base/dialog";
+// import {
+// 	Popover,
+// 	PopoverContent,
+// 	PopoverDescription,
+// 	PopoverHeader,
+// 	PopoverTitle,
+// 	PopoverTrigger,
+// } from "@rap/components-base/popover";
+// import { ScrollArea } from "@rap/components-base/scroll-area";
+// import { Separator } from "@rap/components-base/separator";
+// import {
+// 	Sheet,
+// 	SheetContent,
+// 	SheetDescription,
+// 	SheetHeader,
+// 	SheetTitle,
+// 	SheetTrigger,
+// } from "@rap/components-base/sheet";
 import { Textarea } from "@rap/components-base/textarea";
-import { KeepAlive } from "@rap/components-ui/keep-alive";
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 
@@ -360,119 +358,118 @@ function PaginationBlock() {
 	);
 }
 
-function DialogBlock() {
-	return (
-		<KeepAlive cacheKey="dialog-block-components">
-			<Dialog>
-				<DialogTrigger asChild>
-					<Button>Open Dialog</Button>
-				</DialogTrigger>
+// function DialogBlock() {
+// 	return (
+// 		<KeepAlive cacheKey="dialog-block-components">
+// 			<Dialog>
+// 				<DialogTrigger asChild>
+// 					<Button>Open Dialog</Button>
+// 				</DialogTrigger>
 
-				<DialogContent className="w-250 max-w-250! overflow-hidden">
-					<DialogHeader>
-						<DialogTitle>Dialog with All Components</DialogTitle>
-						<DialogDescription>
-							This dialog contains form, pagination, and scroll components
-						</DialogDescription>
-					</DialogHeader>
-					<div className="space-y-8 h-150 overflow-y-auto">
-						<section className="flex flex-col items-center">
-							<h3 className="text-lg font-semibold mb-4">Payment Form</h3>
-							<FormBlock />
-						</section>
-						<Separator className="my-6" />
-						<section className="flex flex-col items-center">
-							<h3 className="text-lg font-semibold mb-4">Pagination</h3>
-							<PaginationBlock />
-						</section>
-						<Separator className="my-6" />
-						<section className="flex flex-col items-center">
-							<h3 className="text-lg font-semibold mb-4">Scrollable Content</h3>
-							<ScrollBlock />
-						</section>
-					</div>
-				</DialogContent>
-			</Dialog>
-		</KeepAlive>
-	);
-}
+// 				<DialogContent className="w-250 max-w-250! overflow-hidden">
+// 					<DialogHeader>
+// 						<DialogTitle>Dialog with All Components</DialogTitle>
+// 						<DialogDescription>
+// 							This dialog contains form, pagination, and scroll components
+// 						</DialogDescription>
+// 					</DialogHeader>
+// 					<div className="space-y-8 h-150 overflow-y-auto">
+// 						<section className="flex flex-col items-center">
+// 							<h3 className="text-lg font-semibold mb-4">Payment Form</h3>
+// 							<FormBlock />
+// 						</section>
+// 						<Separator className="my-6" />
+// 						<section className="flex flex-col items-center">
+// 							<h3 className="text-lg font-semibold mb-4">Pagination</h3>
+// 							<PaginationBlock />
+// 						</section>
+// 						<Separator className="my-6" />
+// 						<section className="flex flex-col items-center">
+// 							<h3 className="text-lg font-semibold mb-4">Scrollable Content</h3>
+// 							<ScrollBlock />
+// 						</section>
+// 					</div>
+// 				</DialogContent>
+// 			</Dialog>
+// 		</KeepAlive>
+// 	);
+// }
 
+// function PopoverBlock() {
+// 	return (
+// 		<Popover>
+// 			<PopoverTrigger asChild>
+// 				<Button>Open Popover</Button>
+// 			</PopoverTrigger>
+// 			<PopoverContent className="w-175 h-[80vh]">
+// 				<PopoverHeader>
+// 					<PopoverTitle>Popover with All Components</PopoverTitle>
+// 					<PopoverDescription>
+// 						This popover contains form, pagination, and scroll components
+// 					</PopoverDescription>
+// 				</PopoverHeader>
+// 				<ScrollArea className="h-[calc(80vh-140px)] pr-4">
+// 					<div className="space-y-8 pb-4">
+// 						<section>
+// 							<h3 className="text-lg font-semibold mb-4">Payment Form</h3>
+// 							<FormBlock />
+// 						</section>
+// 						<Separator className="my-6" />
+// 						<section>
+// 							<h3 className="text-lg font-semibold mb-4">Pagination</h3>
+// 							<PaginationBlock />
+// 						</section>
+// 						<Separator className="my-6" />
+// 						<section>
+// 							<h3 className="text-lg font-semibold mb-4">Scrollable Content</h3>
+// 							<ScrollBlock />
+// 						</section>
+// 					</div>
+// 				</ScrollArea>
+// 			</PopoverContent>
+// 		</Popover>
+// 	);
+// }
 
-function PopoverBlock() {
-	return (
-		<Popover>
-			<PopoverTrigger asChild>
-				<Button>Open Popover</Button>
-			</PopoverTrigger>
-			<PopoverContent className="w-[700px] h-[80vh]">
-				<PopoverHeader>
-					<PopoverTitle>Popover with All Components</PopoverTitle>
-					<PopoverDescription>
-						This popover contains form, pagination, and scroll components
-					</PopoverDescription>
-				</PopoverHeader>
-				<ScrollArea className="h-[calc(80vh-140px)] pr-4">
-					<div className="space-y-8 pb-4">
-						<section>
-							<h3 className="text-lg font-semibold mb-4">Payment Form</h3>
-							<FormBlock />
-						</section>
-						<Separator className="my-6" />
-						<section>
-							<h3 className="text-lg font-semibold mb-4">Pagination</h3>
-							<PaginationBlock />
-						</section>
-						<Separator className="my-6" />
-						<section>
-							<h3 className="text-lg font-semibold mb-4">Scrollable Content</h3>
-							<ScrollBlock />
-						</section>
-					</div>
-				</ScrollArea>
-			</PopoverContent>
-		</Popover>
-	);
-}
-
-
-function SheetBlock() {
-	return (
-		<Sheet>
-			<SheetTrigger asChild>
-				<Button>Open Sheet</Button>
-			</SheetTrigger>
-			<SheetContent className="w-[700px] h-[85vh]">
-				<SheetHeader>
-					<SheetTitle>Sheet with All Components</SheetTitle>
-					<SheetDescription>
-						This sheet contains form, pagination, and scroll components
-					</SheetDescription>
-				</SheetHeader>
-				<ScrollArea className="h-[calc(85vh-140px)] pr-4">
-					<div className="space-y-8 pb-4">
-						<section>
-							<h3 className="text-lg font-semibold mb-4">Payment Form</h3>
-							<FormBlock />
-						</section>
-						<Separator className="my-6" />
-						<section>
-							<h3 className="text-lg font-semibold mb-4">Pagination</h3>
-							<PaginationBlock />
-						</section>
-						<Separator className="my-6" />
-						<section>
-							<h3 className="text-lg font-semibold mb-4">Scrollable Content</h3>
-							<ScrollBlock />
-						</section>
-					</div>
-				</ScrollArea>
-			</SheetContent>
-		</Sheet>
-	);
-}
+// function SheetBlock() {
+// 	return (
+// 		<Sheet>
+// 			<SheetTrigger asChild>
+// 				<Button>Open Sheet</Button>
+// 			</SheetTrigger>
+// 			<SheetContent className="w-175 h-[85vh]">
+// 				<SheetHeader>
+// 					<SheetTitle>Sheet with All Components</SheetTitle>
+// 					<SheetDescription>
+// 						This sheet contains form, pagination, and scroll components
+// 					</SheetDescription>
+// 				</SheetHeader>
+// 				<ScrollArea className="h-[calc(85vh-140px)] pr-4">
+// 					<div className="space-y-8 pb-4">
+// 						<section>
+// 							<h3 className="text-lg font-semibold mb-4">Payment Form</h3>
+// 							<FormBlock />
+// 						</section>
+// 						<Separator className="my-6" />
+// 						<section>
+// 							<h3 className="text-lg font-semibold mb-4">Pagination</h3>
+// 							<PaginationBlock />
+// 						</section>
+// 						<Separator className="my-6" />
+// 						<section>
+// 							<h3 className="text-lg font-semibold mb-4">Scrollable Content</h3>
+// 							<ScrollBlock />
+// 						</section>
+// 					</div>
+// 				</ScrollArea>
+// 			</SheetContent>
+// 		</Sheet>
+// 	);
+// }
 
 function KeepAliveFeaturePage() {
 	return (
+
 		<div className="size-full p-6 space-y-8">
 			<div className="flex flex-col space-y-4">
 				<h1 className="text-2xl font-bold">Keep Alive Feature</h1>
@@ -481,25 +478,25 @@ function KeepAliveFeaturePage() {
 					components in containers.
 				</p>
 			</div>
-			<div className="border rounded-lg p-6">
-				<h2 className="text-xl font-semibold mb-6">Components in Containers</h2>
-				<div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-					<div className="border rounded-lg p-4">
-						<h3 className="text-lg font-semibold mb-4">Dialog</h3>
-						<DialogBlock />
-					</div>
+			{/* <div className="border rounded-lg p-6">
+					<h2 className="text-xl font-semibold mb-6">Components in Containers</h2>
+					<div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+						<div className="border rounded-lg p-4">
+							<h3 className="text-lg font-semibold mb-4">Dialog</h3>
+							<DialogBlock />
+						</div>
 
-					<div className="border rounded-lg p-4">
-						<h3 className="text-lg font-semibold mb-4">Popover</h3>
-						<PopoverBlock />
-					</div>
+						<div className="border rounded-lg p-4">
+							<h3 className="text-lg font-semibold mb-4">Popover</h3>
+							<PopoverBlock />
+						</div>
 
-					<div className="border rounded-lg p-4">
-						<h3 className="text-lg font-semibold mb-4">Sheet</h3>
-						<SheetBlock />
+						<div className="border rounded-lg p-4">
+							<h3 className="text-lg font-semibold mb-4">Sheet</h3>
+							<SheetBlock />
+						</div>
 					</div>
-				</div>
-			</div>
+				</div> */}
 			<div className="border rounded-lg p-6">
 				<h2 className="text-xl font-semibold mb-6">Standalone Components</h2>
 				<div className="space-y-8">

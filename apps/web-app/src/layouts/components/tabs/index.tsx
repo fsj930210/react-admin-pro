@@ -1,5 +1,6 @@
+import { Button } from "@rap/components-base/button";
 import { cn } from "@rap/utils";
-import { ChevronLeft, ChevronRight, RotateCw, LayoutGrid, Maximize, Minimize } from "lucide-react";
+import { ChevronLeft, ChevronRight, LayoutGrid, Maximize, Minimize, RotateCw } from "lucide-react";
 import { TabsContextMenu } from "./components/context-menu";
 import { ScrollButton } from "./components/scroll-button";
 import { SortableTabs } from "./components/sortable-tabs";
@@ -9,10 +10,9 @@ import { ClassicTabItem } from "./components/tab-item/classic-tab-item";
 import { TrapezoidTabItem } from "./components/tab-item/trapezoid-tab-item";
 import { VscodeLikeTabItem } from "./components/tab-item/vscode-like-tab-item";
 import { useTabs } from "./hooks/use-tabs";
+import { useTabsContextMenu } from "./hooks/use-tabs-context-menu";
 import { useTabsScroll } from "./hooks/use-tabs-scroll";
 import type { AppTabItem, TabType } from "./types";
-import { Button } from "@rap/components-base/button";
-import { useTabsContextMenu } from "./hooks/use-tabs-context-menu";
 
 export interface AppTabsProps {
 	sortable?: boolean;
@@ -28,7 +28,11 @@ const TabItemStrategies = {
 	trapezoid: TrapezoidTabItem,
 };
 
-export function AppTabs({ sortable = true, tabType = "chrome", isMaximized = false }: AppTabsProps) {
+export function AppTabs({
+	sortable = true,
+	tabType = "chrome",
+	isMaximized = false,
+}: AppTabsProps) {
 	const {
 		containerRef,
 		canScrollLeft,
@@ -41,23 +45,12 @@ export function AppTabs({ sortable = true, tabType = "chrome", isMaximized = fal
 		scrollRight,
 		scrollToTab,
 	} = useTabsScroll();
-	const {
-		tabs,
-		activeTab,
-		setTabs,
-		handleTabItemClick,
-		setActiveTab,
-	} = useTabs(scrollToTab);
-	const {
-		handleCloseTab,
-		handleReloadTab,
-		handleMaximizeTab,
-	} = useTabsContextMenu({
+	const { tabs, activeTab, setTabs, handleTabItemClick, setActiveTab } = useTabs(scrollToTab);
+	const { handleCloseTab, handleReloadTab, handleMaximizeTab } = useTabsContextMenu({
 		updateTabs: setTabs,
 		setActiveTab,
 		activeTab,
 	});
-
 
 	const handleTabClick = (item: AppTabItem) => {
 		handleTabItemClick(item);
@@ -198,6 +191,6 @@ export function AppTabs({ sortable = true, tabType = "chrome", isMaximized = fal
 			<ScrollButton canScroll={canScrollRight} direction="right" scroll={scrollRight}>
 				<ChevronRight />
 			</ScrollButton>
-		</div >
+		</div>
 	);
 }

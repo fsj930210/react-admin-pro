@@ -16,7 +16,14 @@ export function RibbonBreadcrumb({ data, onBreadcrumbItemClick }: BreadcrumbItem
 				{data.map((item, index) => (
 					<BreadcrumbItem key={item.id}>
 						{index === data.length - 1 ? (
-							<BreadcrumbPage className="inline-flex items-center gap-0.5 px-4 py-0.5 text-sm leading-[1.75] bg-app-breadcrumb hover:bg-app-breadcrumb-accent transition-all duration-300 ribbon-breadcrumb-last">
+							<BreadcrumbPage
+								className={cn(
+									"inline-flex items-center gap-0.5 px-4 py-0.5 text-sm leading-[1.75] bg-app-breadcrumb hover:bg-app-breadcrumb-accent transition-all duration-300",
+									{
+										"ribbon-breadcrumb-last": data.length > 1,
+									}
+								)}
+							>
 								{item.icon && <Icon icon={item.icon} />}
 								{item.title}
 							</BreadcrumbPage>

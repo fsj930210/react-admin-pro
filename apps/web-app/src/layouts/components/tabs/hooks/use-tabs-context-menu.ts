@@ -1,4 +1,3 @@
-
 import { useAppContext } from "@/app-context";
 import type { AppTabItem } from "../types";
 
@@ -9,7 +8,6 @@ interface UseTabsContextMenuProps {
 	useRequestFullScreen?: boolean;
 }
 
- 
 export function useTabsContextMenu({
 	updateTabs,
 	setActiveTab,

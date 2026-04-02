@@ -3,7 +3,6 @@ import { createFileRoute, useNavigate, useParams } from "@tanstack/react-router"
 import { useLayout } from "@/layouts/context/layout-context";
 
 export const Route = createFileRoute("/(layouts)/outside/iframe/$id/")({
-
 	component: OutsideIframePage,
 });
 
@@ -11,10 +10,10 @@ function OutsideIframePage() {
 	const navigate = useNavigate();
 	const { menuService } = useLayout();
 	const id = useParams({
-		from: '/(layouts)/outside/iframe/$id/',
+		from: "/(layouts)/outside/iframe/$id/",
 		select: (params) => params.id,
-	})
-	const pathname = `/outside/iframe/${id as string}`
+	});
+	const pathname = `/outside/iframe/${id}`;
 	const selectedMenu = menuService.findMenuByUrl(pathname);
 
 	if (!selectedMenu) {
@@ -26,8 +25,8 @@ function OutsideIframePage() {
 					返回首页
 				</Button>
 			</div>
-		)
+		);
 	}
-	const fullUrl = selectedMenu?.fullUrl ?? '';
+	const fullUrl = selectedMenu?.fullUrl ?? "";
 	return <iframe src={fullUrl} title="外部Iframe" className="size-full border-0"></iframe>;
 }

@@ -1,5 +1,6 @@
 import { cn } from "@rap/utils";
 import type React from "react";
+import { memo } from "react";
 import { AppLogo } from "@/components/app/logo";
 import { CollapseSidebarFeature } from "../../widget/collapse-sidebar";
 import { FullscreenFeature } from "../../widget/fullscreen";
@@ -45,37 +46,42 @@ const featureComponents: Record<AppHeaderFeatures, React.FC<any>> = {
 	"theme-switch": ThemeSwitchFeature,
 };
 
-export function AppHeader({
-	leftFeatures = ["breadcrumb"],
-	rightFeatures = [
-		"app-search",
-		"theme-switch",
-		"i18n",
-		"fullscreen",
-		"reload",
-		"notify",
-		"user-center",
-	],
-	leftRender,
-	rightRender,
-	className,
-}: AppHeaderProps) {
-	const renderFeature = (feature: AppHeaderFeatures, index: number) => {
-		const Component = featureComponents[feature];
-		return Component ? <Component key={`${feature}-${index}`} /> : null;
-	};
+export const AppHeader = memo(
+	({
+		leftFeatures = ["breadcrumb"],
+		rightFeatures = [
+			"app-search",
+			"theme-switch",
+			"i18n",
+			"fullscreen",
+			"reload",
+			"notify",
+			"user-center",
+		],
+		leftRender,
+		rightRender,
+		className,
+	}: AppHeaderProps) => {
+		const renderFeature = (feature: AppHeaderFeatures, index: number) => {
+			const Component = featureComponents[feature];
+			return Component ? <Component key={`${feature}-${index}`} /> : null;
+		};
 
-	return (
-		<header
-			className={cn("flex items-center justify-between h-11 w-full px-2 bg-app-header", className)}
-		>
-			<div className="flex items-center gap-2">
-				{leftRender ?? leftFeatures.map((feature, index) => renderFeature(feature, index))}
-			</div>
+		return (
+			<header
+				className={cn(
+					"flex items-center justify-between h-11 w-full px-2 bg-app-header",
+					className,
+				)}
+			>
+				<div className="flex items-center gap-2">
+					{leftRender ?? leftFeatures.map((feature, index) => renderFeature(feature, index))}
+				</div>
 
-			<div className="flex items-center gap-2">
-				{rightRender ?? rightFeatures.map((feature, index) => renderFeature(feature, index))}
-			</div>
-		</header>
-	);
-}
+				<div className="flex items-center gap-2">
+					{rightRender ?? rightFeatures.map((feature, index) => renderFeature(feature, index))}
+				</div>
+			</header>
+		);
+	},
+);

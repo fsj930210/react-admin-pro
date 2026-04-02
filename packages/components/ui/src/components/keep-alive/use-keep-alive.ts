@@ -84,21 +84,17 @@ export function useKeepAlive(props: KeepAliveOptions) {
 		console.log("handleRefreshCache", cachedItem, cachedKey, lruCacheRef?.current?.size);
 		if (!cachedItem) return;
 
-		// 核心逻辑：更新 key 让缓存失效，触发重新渲染
 		const newKey = uuidv4();
 
 		if (refreshDelay > 0) {
-			// 设置刷新状态为 true，同时更新 key
 			cachedItem.refreshing = true;
 			cachedItem.key = newKey;
 			lruCacheRef?.current?.set(cachedKey, cachedItem);
 
-			// 更新本地缓存数组
 			setCachedItems(prev => prev.map(item => 
 				item.cacheKey === cachedKey ? { ...item, key: newKey, refreshing: true } : item
 			));
 
-			// 延迟后设置刷新状态为 false
 			setTimeout(() => {
 				const refreshedItem = lruCacheRef?.current?.get(cachedKey);
 				if (refreshedItem) {
@@ -110,11 +106,9 @@ export function useKeepAlive(props: KeepAliveOptions) {
 				));
 			}, refreshDelay);
 		} else {
-			// 无延迟，只更新 key，不设置 refreshing
 			cachedItem.key = newKey;
 			lruCacheRef?.current?.set(cachedKey, cachedItem);
 
-			// 更新本地缓存数组
 			setCachedItems(prev => prev.map(item => 
 				item.cacheKey === cachedKey ? { ...item, key: newKey } : item
 			));
@@ -124,12 +118,10 @@ export function useKeepAlive(props: KeepAliveOptions) {
 	const handleRemoveCache = (cachedKeys: string[]) => {
 		if (!lruCacheRef?.current) return;
 
-		// 批量删除缓存项
 		cachedKeys.forEach(key => {
 			lruCacheRef.current?.delete(key);
 		});
 
-		// 更新本地缓存数组，只保留未被删除的项
 		setCachedItems(prev => prev.filter(item => !cachedKeys.includes(item.cacheKey)));
 	};
 
@@ -172,16 +164,13 @@ export function useKeepAlive(props: KeepAliveOptions) {
 		}
 	}, []);
 
-	// 初始化防抖保存滚动位置函数并添加事件监听
 	useEffect(() => {
-		// 初始化防抖函数
 		debouncedSaveScrollPosition.current = debounce((key: string, container: HTMLElement | null) => {
 			saveScrollPosition(key, container);
 		}, 300);
 
 		const container = containerRef.current;
 		if (container) {
-			// 监听滚动和触摸事件
 			const handleScroll = () => {
 				debouncedSaveScrollPosition.current?.(cacheKey, container);
 			};
@@ -192,7 +181,6 @@ export function useKeepAlive(props: KeepAliveOptions) {
 			return () => {
 				container.removeEventListener('scroll', handleScroll, true);
 				container.removeEventListener('touchmove', handleScroll, true);
-				// 清理防抖函数
 				debouncedSaveScrollPosition.current?.cancel();
 			};
 		}

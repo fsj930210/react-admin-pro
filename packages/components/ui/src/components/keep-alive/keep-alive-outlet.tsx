@@ -3,11 +3,10 @@ import { Activity, Fragment } from "react";
 import type { CachedItem, KeepAliveProps } from "./types";
 import { useKeepAlive } from "./use-keep-alive";
 import { v4 as uuidv4 } from "uuid";
-import { useRouter, useRouterState } from "@tanstack/react-router";
+import { useLocation, useRouter } from "@tanstack/react-router";
 import { cn } from "@rap/utils";
-import React from "react";
 
-export function KeepAliveRoute({
+export function KeepAliveOutlet({
 	className,
 	children,
 	excludes,
@@ -37,9 +36,10 @@ export function KeepAliveRoute({
 		onDeactivate,
 	})
 	const router = useRouter();
-	const pathname = useRouterState({
-		select: (state) => state.location.pathname,
+	const pathname = useLocation({
+		select: (location) => location.pathname,
 	});
+
 	const matches = router.getMatchedRoutes(pathname);
 	const Component = matches?.foundRoute?.options.component || null;
 
@@ -85,3 +85,4 @@ export function KeepAliveRoute({
 		</div>
 	)
 }
+
