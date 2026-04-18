@@ -1,16 +1,19 @@
 import { Card } from "@rap/components-base/card";
 import { useTheme } from "@rap/components-ui/theme-provider";
 import { useQuery } from "@tanstack/react-query";
-import { Chart } from "./Chart";
-import { getPieChartOption } from "../-utils/chart-options";
 import { fetchPvUvData } from "@/service/dashboard";
+import { getPieChartOption } from "../-utils/chart-options";
+import { Chart } from "./Chart";
 
 interface PieChartProps {
 	title?: string;
 	height?: number;
 }
 
-export const PieChart: React.FC<PieChartProps> = ({ title = "PV/UV Distribution", height = 350 }) => {
+export const PieChart: React.FC<PieChartProps> = ({
+	title = "PV/UV Distribution",
+	height = 350,
+}) => {
 	const { theme } = useTheme();
 	const isDark = theme === "dark";
 
@@ -42,7 +45,7 @@ export const PieChart: React.FC<PieChartProps> = ({ title = "PV/UV Distribution"
 				<Chart
 					option={getPieChartOption(data.data, isDark)}
 					style={{ height: "100%", width: "100%" }}
-					opts={{ height, width: 'auto' }}
+					opts={{ height, width: "auto" }}
 				/>
 			</div>
 		</Card>

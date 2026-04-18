@@ -4,8 +4,7 @@ export const Route = createFileRoute("/(layouts)/nested-menu/nested-menu-2/")({
 	beforeLoad: () => {
 		// eslint-disable-next-line @typescript-eslint/only-throw-error
 		throw Route.redirect({
-			to: './nested-menu-2-1',
-		})
+			to: "./nested-menu-2-1",
+		});
 	},
 });
-

@@ -1,4 +1,4 @@
-import { type KeepAliveRef, KeepAliveOutlet } from "@rap/components-ui/keep-alive";
+import { KeepAliveOutlet, type KeepAliveRef } from "@rap/components-ui/keep-alive";
 import { useMinimax } from "@rap/hooks/use-minimax";
 import { useLocation } from "@tanstack/react-router";
 import { useRef } from "react";

@@ -1,8 +1,18 @@
-import ky, { type KyInstance, type Options as KyOptions, type KyResponse, type SearchParamsOption } from 'ky';
+import ky, { 
+	type KyInstance, 
+	type Options as KyOptions, 
+	type KyResponse, 
+	type SearchParamsOption,
+	type BeforeRequestHook,
+	type AfterResponseHook
+} from 'ky';
 import { toast } from 'sonner';
 
 
 export type {Options as KyOptions} from 'ky';
+export type { AfterResponseHook } from 'ky';
+export type { BeforeRequestHook } from 'ky';
+
 export const DEFAULT_SUCCESS_CODE = '0000000000';
 export const ContentType = {
   json: 'application/json',
@@ -87,8 +97,9 @@ function getDefaultAuthHeader(tokenStorageKey: string, defaultType: string): str
 
 function beforeRequestDefaultAuthorization(
   options: FetchOptions
-) {
-	return (request: Request) => {
+): BeforeRequestHook {
+	return (state) => {
+		const { request } = state;
 		const { 
 			enabled, 
 			tokenStorageKey = 'token', 
@@ -108,7 +119,8 @@ function beforeRequestDefaultAuthorization(
 /**
  * 请求前移除Content-Type头部
  */
-const beforeRequestRemoveContentType = (request: Request) => {
+const beforeRequestRemoveContentType: BeforeRequestHook = (state) => {
+  const { request } = state;
   if (request.headers.has('Content-Type')) {
     request.headers.delete('Content-Type');
   }
@@ -136,11 +148,11 @@ function beforeErrorToast({ silent = true }: FetchOptions) {
 }
 
 
-function afterResponseDefaultJson(options: FetchOptions) {
-	return async (_request: Request, _options:KyOptions, response: Response) => {
+function afterResponseDefaultJson(options: FetchOptions): AfterResponseHook {
+	return async ({ request: _request, options: _options, response}) => {
 		const { silent } = options
 		const { enabled, defaultSuccessCode = DEFAULT_SUCCESS_CODE } = options.defaultJsonConfig || {};
-		if (!enabled) return;
+		if (!enabled) return response;
 		try {
 			const clonedResponse =  response.clone();
 			if (clonedResponse.status >= 200 && clonedResponse.status < 300) {
@@ -369,3 +381,4 @@ export function createFetchClient(options?: FetchOptions): FetchClient {
  * 默认HTTP客户端实例
  */
 export const fetchClient = createFetchClient();
+

@@ -40,18 +40,44 @@ const statCardsData = [
 
 // 折线图数据 - 不同时间范围的数据
 const lineChartDataMap = {
-	'7d': {
+	"7d": {
 		dates: ["Apr 7", "Apr 13", "Apr 19", "Apr 26", "May 2", "May 8", "May 14"],
 		pv: [120, 200, 150, 80, 70, 110, 130],
 		uv: [60, 100, 75, 40, 35, 55, 65],
 	},
-	'30d': {
-		dates: ["Apr 7", "Apr 13", "Apr 19", "Apr 26", "May 2", "May 8", "May 14", "May 21", "May 28", "Jun 3"],
+	"30d": {
+		dates: [
+			"Apr 7",
+			"Apr 13",
+			"Apr 19",
+			"Apr 26",
+			"May 2",
+			"May 8",
+			"May 14",
+			"May 21",
+			"May 28",
+			"Jun 3",
+		],
 		pv: [120, 200, 150, 80, 70, 110, 130, 180, 160, 140],
 		uv: [60, 100, 75, 40, 35, 55, 65, 90, 80, 70],
 	},
-	'90d': {
-		dates: ["Apr 7", "Apr 13", "Apr 19", "Apr 26", "May 2", "May 8", "May 14", "May 21", "May 28", "Jun 3", "Jun 9", "Jun 15", "Jun 22", "Jun 30"],
+	"90d": {
+		dates: [
+			"Apr 7",
+			"Apr 13",
+			"Apr 19",
+			"Apr 26",
+			"May 2",
+			"May 8",
+			"May 14",
+			"May 21",
+			"May 28",
+			"Jun 3",
+			"Jun 9",
+			"Jun 15",
+			"Jun 22",
+			"Jun 30",
+		],
 		pv: [120, 200, 150, 80, 70, 110, 130, 180, 160, 140, 190, 230, 170, 210],
 		uv: [60, 100, 75, 40, 35, 55, 65, 90, 80, 70, 95, 115, 85, 105],
 	},
@@ -97,10 +123,10 @@ export default [
 				{ status: 401, statusText: "unauthorized" },
 			);
 		}
-		
+
 		return HttpResponse.json({ code: SUCCESS_CODE, message: "success", data: statCardsData });
 	}),
-	
+
 	// LineChart接口 - 支持不同时间范围
 	http.get("/api/rap/dashboard/linechart", ({ request }) => {
 		const token = request.headers.get("authorization") ?? "";
@@ -110,14 +136,15 @@ export default [
 				{ status: 401, statusText: "unauthorized" },
 			);
 		}
-		
+
 		const url = new URL(request.url);
 		const period = url.searchParams.get("period") || "30d";
-		const data = lineChartDataMap[period as keyof typeof lineChartDataMap] || lineChartDataMap['30d'];
-		
+		const data =
+			lineChartDataMap[period as keyof typeof lineChartDataMap] || lineChartDataMap["30d"];
+
 		return HttpResponse.json({ code: SUCCESS_CODE, message: "success", data });
 	}),
-	
+
 	// PV/UV 饼图接口
 	http.get("/api/rap/dashboard/pv-uv", ({ request }) => {
 		const token = request.headers.get("authorization") ?? "";
@@ -127,10 +154,10 @@ export default [
 				{ status: 401, statusText: "unauthorized" },
 			);
 		}
-		
+
 		return HttpResponse.json({ code: SUCCESS_CODE, message: "success", data: pieChartData });
 	}),
-	
+
 	// Radar图接口
 	http.get("/api/rap/dashboard/radar", ({ request }) => {
 		const token = request.headers.get("authorization") ?? "";
@@ -140,8 +167,7 @@ export default [
 				{ status: 401, statusText: "unauthorized" },
 			);
 		}
-		
+
 		return HttpResponse.json({ code: SUCCESS_CODE, message: "success", data: radarChartData });
 	}),
 ];
-

@@ -56,6 +56,7 @@ export function DropdownSubmenu({
 					onMouseEnter={() => handleOpenChange(true)}
 					onMouseLeave={() => handleOpenChange(false)}
 					onClick={() => onItemClick?.(item)}
+					asChild
 				>
 					{children}
 				</DropdownMenuTrigger>
@@ -103,7 +104,7 @@ function DropdownSubmenuContent({
 
 	return (
 		<DropdownMenuSub>
-			<DropdownMenuSubTrigger className="cursor-pointer bg-red">
+			<DropdownMenuSubTrigger className="cursor-pointer bg-red" asChild>
 				<MenuItemContent item={item} searchKeywords={searchKeywords} />
 			</DropdownMenuSubTrigger>
 			<DropdownMenuPortal>

@@ -228,13 +228,14 @@ export function searchFeature({
 			};
 
 			init();
-			tree.onRebuild = () => {
+			if (!tree.onRebuild) tree.onRebuild = [];
+			tree.onRebuild.push(() => {
 				init();
 				// 重建后重新执行搜索
 				if (currentKeyword.trim()) {
 					doSearch(currentKeyword);
 				}
-			};
+			});
 		},
 	};
 }

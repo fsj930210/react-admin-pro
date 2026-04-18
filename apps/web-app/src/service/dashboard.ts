@@ -26,17 +26,17 @@ export interface RadarChartData {
 }
 
 export const fetchStatData = () => {
-	return request.get<StatCardData[]>('/api/rap/dashboard/stat');
+	return request.get<StatCardData[]>("/api/rap/dashboard/stat");
 };
 
-export const fetchLineChartData = (period = '30d') => {
+export const fetchLineChartData = (period = "30d") => {
 	return request.get<LineChartData>(`/api/rap/dashboard/linechart?period=${period}`);
 };
 
 export const fetchPvUvData = () => {
-	return request.get<PieChartData[]>('/api/rap/dashboard/pv-uv');
+	return request.get<PieChartData[]>("/api/rap/dashboard/pv-uv");
 };
 
 export const fetchRadarData = () => {
-	return request.get<RadarChartData>('/api/rap/dashboard/radar');
+	return request.get<RadarChartData>("/api/rap/dashboard/radar");
 };

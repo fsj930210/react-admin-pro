@@ -469,7 +469,6 @@ function PaginationBlock() {
 
 function KeepAliveFeaturePage() {
 	return (
-
 		<div className="size-full p-6 space-y-8">
 			<div className="flex flex-col space-y-4">
 				<h1 className="text-2xl font-bold">Keep Alive Feature</h1>

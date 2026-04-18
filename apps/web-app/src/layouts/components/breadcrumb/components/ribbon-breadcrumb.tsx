@@ -21,7 +21,7 @@ export function RibbonBreadcrumb({ data, onBreadcrumbItemClick }: BreadcrumbItem
 									"inline-flex items-center gap-0.5 px-4 py-0.5 text-sm leading-[1.75] bg-app-breadcrumb hover:bg-app-breadcrumb-accent transition-all duration-300",
 									{
 										"ribbon-breadcrumb-last": data.length > 1,
-									}
+									},
 								)}
 							>
 								{item.icon && <Icon icon={item.icon} />}

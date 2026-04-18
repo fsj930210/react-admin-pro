@@ -43,6 +43,10 @@
     "./use-as-ref": {
       "types": "./src/use-as-ref.ts",
       "default": "./src/use-as-ref.ts"
+    },
+    "./use-copy-to-clipboard": {
+      "types": "./src/use-copy-to-clipboard.ts",
+      "default": "./src/use-copy-to-clipboard.ts"
     }
   },
   "devDependencies": {

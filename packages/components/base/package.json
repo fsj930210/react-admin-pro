@@ -32,11 +32,12 @@
   },
   "exports": {
     "./*": "./src/components/*.tsx",
-    "./tree": "./src/components/tree/index.tsx",
+    "./tree": "./src/components/tree",
     "./tree/*": "./src/components/tree/*",
-    "./tree/features": "./src/components/tree/features/index.ts",
-    "./tree/types": "./src/components/tree/types.ts",
-    "./sidebar": "./src/components/sidebar/index.tsx"
+    "./sidebar": "./src/components/sidebar/index.tsx",
+    "./minimal-tiptap": "./src/components/minimal-tiptap/index.ts",
+    "./data-table": "./src/components/data-table",
+    "./data-table/*": "./src/components/data-table/*"
   },
   "dependencies": {
     "@base-ui/react": "catalog:",
@@ -47,11 +48,13 @@
     "@dnd-kit/sortable": "catalog:",
     "@dnd-kit/utilities": "catalog:",
     "@floating-ui/react-dom": "catalog:",
+    "@hookform/resolvers": "catalog:",
     "@radix-ui/react-icons": "catalog:",
     "@rap/hooks": "workspace:*",
     "@rap/lib": "workspace:*",
     "@rap/styles": "workspace:*",
     "@rap/utils": "workspace:*",
+    "@tanstack/react-query": "catalog:",
     "@tanstack/react-table": "catalog:",
     "@tanstack/react-virtual": "catalog:",
     "@tiptap/extension-bubble-menu": "catalog:",
@@ -69,9 +72,12 @@
     "@tiptap/react": "catalog:",
     "@tiptap/starter-kit": "catalog:",
     "class-variance-authority": "catalog:",
+    "clsx": "catalog:",
     "cmdk": "catalog:",
     "date-fns": "catalog:",
+    "date-fns-tz": "catalog:",
     "embla-carousel-react": "catalog:",
+    "exceljs": "catalog:",
     "input-otp": "catalog:",
     "lowlight": "catalog:",
     "lucide-react": "catalog:",
@@ -86,6 +92,7 @@
     "react-medium-image-zoom": "catalog:",
     "react-resizable-panels": "catalog:",
     "sonner": "catalog:",
+    "tailwind-merge": "catalog:",
     "vaul": "catalog:",
     "zod": "catalog:"
   }

@@ -1,9 +1,8 @@
-
-import { StatCards } from "./-components/StatCards";
+import { createFileRoute } from "@tanstack/react-router";
 import { LineChart } from "./-components/LineChart";
 import { PieChart } from "./-components/PieChart";
 import { RadarChart } from "./-components/RadarChart";
-import { createFileRoute } from "@tanstack/react-router";
+import { StatCards } from "./-components/StatCards";
 
 export const Route = createFileRoute("/(layouts)/dashboard/")({
 	component: DashboardPage,

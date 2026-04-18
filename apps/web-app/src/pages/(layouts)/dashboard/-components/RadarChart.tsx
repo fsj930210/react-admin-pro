@@ -1,16 +1,19 @@
 import { Card } from "@rap/components-base/card";
 import { useTheme } from "@rap/components-ui/theme-provider";
 import { useQuery } from "@tanstack/react-query";
-import { Chart } from "./Chart";
-import { getRadarChartOption } from "../-utils/chart-options";
 import { fetchRadarData } from "@/service/dashboard";
+import { getRadarChartOption } from "../-utils/chart-options";
+import { Chart } from "./Chart";
 
 interface RadarChartProps {
 	title?: string;
 	height?: number;
 }
 
-export const RadarChart: React.FC<RadarChartProps> = ({ title = "PV/UV Analysis", height = 350 }) => {
+export const RadarChart: React.FC<RadarChartProps> = ({
+	title = "PV/UV Analysis",
+	height = 350,
+}) => {
 	const { theme } = useTheme();
 	const isDark = theme === "dark";
 
@@ -42,7 +45,7 @@ export const RadarChart: React.FC<RadarChartProps> = ({ title = "PV/UV Analysis"
 				<Chart
 					option={getRadarChartOption(data.data, isDark)}
 					style={{ height: "100%", width: "100%" }}
-					opts={{ height, width: 'auto' }}
+					opts={{ height, width: "auto" }}
 				/>
 			</div>
 		</Card>

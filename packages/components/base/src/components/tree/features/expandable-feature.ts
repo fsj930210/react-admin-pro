@@ -84,9 +84,10 @@ export function expandableFeature({
 				});
 			};
 			init();
-			tree.onRebuild = () => {
+			if (!tree.onRebuild) tree.onRebuild = [];
+			tree.onRebuild.push(() => {
 				init();
-			};
+			});
 		},
 	};
 }

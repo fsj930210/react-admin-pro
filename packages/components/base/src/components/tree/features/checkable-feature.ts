@@ -155,16 +155,25 @@ export function checkableFeature({
 				tree.notify();
 			};
 			const init = () => {
-				tree.items.forEach((item) => {
-					updateItemState(item);
-					item.check = () => updateChecked(item, true);
-					item.uncheck = () => updateChecked(item, false);
-				});
-			};
+			tree.items.forEach((item) => {
+				updateItemState(item);
+				item.check = () => {
+					if (!item.disabled) {
+						updateChecked(item, true);
+					}
+				};
+				item.uncheck = () => {
+					if (!item.disabled) {
+						updateChecked(item, false);
+					}
+				};
+			});
+		};
 			init();
-			tree.onRebuild = () => {
+			if (!tree.onRebuild) tree.onRebuild = [];
+			tree.onRebuild.push(() => {
 				init();
-			};
+			});
 		},
 	};
 }

@@ -57,19 +57,28 @@ export function selectableFeature({
 				);
 				tree.notify();
 			};
-			const init = () => {
-				tree.items.forEach((item) => {
-					defineProperty(item, "selected", {
-						get: () => selectedKeys.has(item.key),
-					});
-					item.select = () => updateSelectedState(item.key, true);
-					item.unselect = () => updateSelectedState(item.key, false);
+		const init = () => {
+			tree.items.forEach((item) => {
+				defineProperty(item, "selected", {
+					get: () => selectedKeys.has(item.key),
 				});
-			};
+				item.select = () => {
+					if (!item.disabled) {
+						updateSelectedState(item.key, true);
+					}
+				};
+				item.unselect = () => {
+					if (!item.disabled) {
+						updateSelectedState(item.key, false);
+					}
+				};
+			});
+		};
 			init();
-			tree.onRebuild = () => {
+			if (!tree.onRebuild) tree.onRebuild = [];
+			tree.onRebuild.push(() => {
 				init();
-			};
+			});
 		},
 	};
 }

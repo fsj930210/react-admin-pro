@@ -4,8 +4,7 @@ export const Route = createFileRoute("/(layouts)/outside/")({
 	beforeLoad: () => {
 		// eslint-disable-next-line @typescript-eslint/only-throw-error
 		throw Route.redirect({
-			to: './iframe',
-		})
+			to: "./iframe",
+		});
 	},
 });
-

@@ -1,45 +1,45 @@
 import * as React from "react"
-import type { TooltipContentProps } from "@radix-ui/react-tooltip"
+import { Tooltip as TooltipPrimitive } from "radix-ui"
 import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@rap/components/ui/tooltip"
-import { Toggle } from "@rap/components/ui/toggle"
+	Tooltip,
+	TooltipContent,
+	TooltipTrigger,
+} from "@rap/components-base/tooltip"
+import { Toggle } from "@rap/components-base/toggle"
 import { cn } from "@rap/utils"
 
 interface ToolbarButtonProps extends React.ComponentProps<typeof Toggle> {
-  isActive?: boolean
-  tooltip?: string
-  tooltipOptions?: TooltipContentProps
+	isActive?: boolean
+	tooltip?: string
+	tooltipOptions?: React.ComponentProps<typeof TooltipPrimitive.Content>
 }
 
 export const ToolbarButton = ({
-  isActive,
-  children,
-  tooltip,
-  className,
-  tooltipOptions,
-  ...props
+	isActive,
+	children,
+	tooltip,
+	className,
+	tooltipOptions,
+	...props
 }: ToolbarButtonProps) => {
-  const toggleButton = (
-    <Toggle className={cn({ "bg-accent": isActive }, className)} {...props}>
-      {children}
-    </Toggle>
-  )
+	const toggleButton = (
+		<Toggle className={cn({ "bg-accent": isActive }, className)} {...props}>
+			{children}
+		</Toggle>
+	)
 
-  if (!tooltip) {
-    return toggleButton
-  }
+	if (!tooltip) {
+		return toggleButton
+	}
 
-  return (
-    <Tooltip>
-      <TooltipTrigger asChild>{toggleButton}</TooltipTrigger>
-      <TooltipContent {...tooltipOptions}>
-        <div className="flex flex-col items-center text-center">{tooltip}</div>
-      </TooltipContent>
-    </Tooltip>
-  )
+	return (
+		<Tooltip>
+			<TooltipTrigger asChild>{toggleButton}</TooltipTrigger>
+			<TooltipContent {...tooltipOptions}>
+				<div className="flex flex-col items-center text-center">{tooltip}</div>
+			</TooltipContent>
+		</Tooltip>
+	)
 }
 
 ToolbarButton.displayName = "ToolbarButton"

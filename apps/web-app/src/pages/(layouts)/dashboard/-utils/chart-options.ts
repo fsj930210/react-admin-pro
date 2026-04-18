@@ -1,7 +1,6 @@
 import type { EChartsOption } from "echarts";
 import type { LineChartData, PieChartData, RadarChartData } from "@/service/dashboard";
 
-
 const getThemeColors = (isDark: boolean) => {
 	return {
 		pvColor: isDark ? "rgba(139, 92, 246, 0.5)" : "rgba(84, 112, 198, 0.5)",

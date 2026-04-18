@@ -1,20 +1,37 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { useLayout } from "@/layouts/context/layout-context";
-import { useState } from "react";
-import { useNavigate } from "@tanstack/react-router";
 import { Button } from "@rap/components-base/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@rap/components-base/dialog";
-import { Icon } from "@rap/components-ui/icon";
+import {
+	Dialog,
+	DialogContent,
+	DialogFooter,
+	DialogHeader,
+	DialogTitle,
+	DialogTrigger,
+} from "@rap/components-base/dialog";
 import { Anchor } from "@rap/components-ui/anchor";
+import { Icon } from "@rap/components-ui/icon";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useState } from "react";
 import { toast } from "sonner";
+import { useLayout } from "@/layouts/context/layout-context";
 import type { MenuItem } from "@/layouts/types";
 
 export const Route = createFileRoute("/(layouts)/overview/")({
 	component: OverviewPage,
 });
 
-
-function MenuCard({ menu, className = "", iconSize = 24, textSize = "text-sm", onClick }: { menu: MenuItem; className?: string; iconSize?: number; textSize?: string; onClick?: () => void }) {
+function MenuCard({
+	menu,
+	className = "",
+	iconSize = 24,
+	textSize = "text-sm",
+	onClick,
+}: {
+	menu: MenuItem;
+	className?: string;
+	iconSize?: number;
+	textSize?: string;
+	onClick?: () => void;
+}) {
 	return (
 		<div
 			className={`size-30 bg-muted p-4 rounded-lg hover:shadow-md transition-shadow flex-col-center cursor-pointer ${className}`}
@@ -32,7 +49,15 @@ function MenuCard({ menu, className = "", iconSize = 24, textSize = "text-sm", o
 	);
 }
 
-function MenuCategory({ category, menus, onMenuClick }: { category: string; menus: MenuItem[]; onMenuClick: (menu: MenuItem) => void }) {
+function MenuCategory({
+	category,
+	menus,
+	onMenuClick,
+}: {
+	category: string;
+	menus: MenuItem[];
+	onMenuClick: (menu: MenuItem) => void;
+}) {
 	return (
 		<div key={category} id={category} className="mb-8">
 			<div className="flex items-center justify-between mb-4">
@@ -47,7 +72,19 @@ function MenuCategory({ category, menus, onMenuClick }: { category: string; menu
 	);
 }
 
-function AddMenuModal({ categories, groupedMenus, onAdd, quickMenus, maxQuickMenus }: { categories: string[]; groupedMenus: Record<string, MenuItem[]>; onAdd: (menus: MenuItem[]) => void; quickMenus: MenuItem[]; maxQuickMenus: number }) {
+function AddMenuModal({
+	categories,
+	groupedMenus,
+	onAdd,
+	quickMenus,
+	maxQuickMenus,
+}: {
+	categories: string[];
+	groupedMenus: Record<string, MenuItem[]>;
+	onAdd: (menus: MenuItem[]) => void;
+	quickMenus: MenuItem[];
+	maxQuickMenus: number;
+}) {
 	const [selectedMenus, setSelectedMenus] = useState<MenuItem[]>([]);
 	const [open, setOpen] = useState(false);
 
@@ -59,9 +96,9 @@ function AddMenuModal({ categories, groupedMenus, onAdd, quickMenus, maxQuickMen
 	};
 
 	const handleToggleMenu = (menu: MenuItem) => {
-		const isSelected = selectedMenus.some(m => m.id === menu.id);
+		const isSelected = selectedMenus.some((m) => m.id === menu.id);
 		if (isSelected) {
-			setSelectedMenus(selectedMenus.filter(m => m.id !== menu.id));
+			setSelectedMenus(selectedMenus.filter((m) => m.id !== menu.id));
 		} else {
 			if (selectedMenus.length >= maxQuickMenus) {
 				// Show alert or toast here
@@ -73,7 +110,7 @@ function AddMenuModal({ categories, groupedMenus, onAdd, quickMenus, maxQuickMen
 	};
 
 	const handleRemoveSelected = (menuId: string) => {
-		setSelectedMenus(selectedMenus.filter(m => m.id !== menuId));
+		setSelectedMenus(selectedMenus.filter((m) => m.id !== menuId));
 	};
 
 	const handleConfirm = () => {
@@ -97,7 +134,10 @@ function AddMenuModal({ categories, groupedMenus, onAdd, quickMenus, maxQuickMen
 					<div className="text-center text-sm">添加</div>
 				</div>
 			</DialogTrigger>
-			<DialogContent className="max-w-250 max-h-[80vh] flex flex-col" style={{ maxWidth: '1000px' }}>
+			<DialogContent
+				className="max-w-250 max-h-[80vh] flex flex-col"
+				style={{ maxWidth: "1000px" }}
+			>
 				<DialogHeader>
 					<DialogTitle>添加快捷菜单</DialogTitle>
 					<p className="text-sm text-gray-500 dark:text-gray-400 mb-3">
@@ -108,7 +148,10 @@ function AddMenuModal({ categories, groupedMenus, onAdd, quickMenus, maxQuickMen
 							<p className="text-sm font-medium">已选中 ({selectedMenus.length})：</p>
 							<div className="flex flex-wrap gap-2">
 								{selectedMenus.map((menu) => (
-									<div className="flex items-center p-2 border border-primary rounded" key={menu.id}>
+									<div
+										className="flex items-center p-2 border border-primary rounded"
+										key={menu.id}
+									>
 										{menu.icon ? (
 											<Icon icon={menu.icon} size={16} className="mr-2" />
 										) : (
@@ -134,12 +177,12 @@ function AddMenuModal({ categories, groupedMenus, onAdd, quickMenus, maxQuickMen
 							<h3 className="font-medium mb-2">{category}</h3>
 							<div className="flex flex-wrap gap-2">
 								{groupedMenus[category].map((menu: MenuItem) => {
-									const isSelected = selectedMenus.some(m => m.id === menu.id);
+									const isSelected = selectedMenus.some((m) => m.id === menu.id);
 									return (
 										<MenuCard
 											key={menu.id}
 											menu={menu}
-											className={`border ${isSelected ? 'border-primary' : 'hover:bg-gray-100 dark:hover:bg-gray-700'}`}
+											className={`border ${isSelected ? "border-primary" : "hover:bg-gray-100 dark:hover:bg-gray-700"}`}
 											iconSize={16}
 											textSize="text-xs"
 											onClick={() => handleToggleMenu(menu)}
@@ -154,10 +197,7 @@ function AddMenuModal({ categories, groupedMenus, onAdd, quickMenus, maxQuickMen
 					<Button variant="ghost" onClick={handleCancel}>
 						取消
 					</Button>
-					<Button
-						onClick={handleConfirm}
-						disabled={selectedMenus.length === 0}
-					>
+					<Button onClick={handleConfirm} disabled={selectedMenus.length === 0}>
 						确定 ({selectedMenus.length})
 					</Button>
 				</DialogFooter>
@@ -184,22 +224,25 @@ export function OverviewPage() {
 		}
 	};
 
-	const groupedMenus = userMenus.reduce((acc, menu) => {
-		if (menu.children && menu.children.length > 0) {
-			const category = menu.title || "其他";
-			if (!acc[category]) {
-				acc[category] = [];
+	const groupedMenus = userMenus.reduce(
+		(acc, menu) => {
+			if (menu.children && menu.children.length > 0) {
+				const category = menu.title || "其他";
+				if (!acc[category]) {
+					acc[category] = [];
+				}
+				acc[category].push(...menu.children);
+			} else if (menu.type === "menu") {
+				const category = menu.title;
+				if (!acc[category]) {
+					acc[category] = [];
+				}
+				acc[category].push(menu);
 			}
-			acc[category].push(...menu.children);
-		} else if (menu.type === "menu") {
-			const category = menu.title;
-			if (!acc[category]) {
-				acc[category] = [];
-			}
-			acc[category].push(menu);
-		}
-		return acc;
-	}, {} as Record<string, MenuItem[]>);
+			return acc;
+		},
+		{} as Record<string, MenuItem[]>,
+	);
 
 	const categories = Object.keys(groupedMenus);
 
@@ -207,7 +250,6 @@ export function OverviewPage() {
 	const handleAddQuickMenu = (menus: MenuItem[]) => {
 		setQuickMenus(menus);
 	};
-
 
 	return (
 		<div className="p-6">
@@ -222,7 +264,9 @@ export function OverviewPage() {
 				</div>
 				<div className="bg-muted p-4 rounded-lg shadow flex-col-center">
 					<div className="text-sm">快捷菜单</div>
-					<div className="text-2xl font-bold">{quickMenus.length}/{MAX_QUICK_MENUS}</div>
+					<div className="text-2xl font-bold">
+						{quickMenus.length}/{MAX_QUICK_MENUS}
+					</div>
 				</div>
 				<div className="bg-muted p-4 rounded-lg shadow flex-col-center">
 					<div className="text-sm">系统状态</div>
@@ -261,9 +305,7 @@ export function OverviewPage() {
 				))}
 			</div>
 
-			<Anchor
-				items={categories.map((category) => ({ id: category, label: category }))}
-			/>
+			<Anchor items={categories.map((category) => ({ id: category, label: category }))} />
 		</div>
 	);
 }

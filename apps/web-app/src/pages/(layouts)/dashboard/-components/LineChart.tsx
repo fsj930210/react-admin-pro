@@ -1,11 +1,11 @@
-import { useState } from "react";
 import { Card } from "@rap/components-base/card";
 import { ToggleGroup, ToggleGroupItem } from "@rap/components-base/toggle-group";
 import { useTheme } from "@rap/components-ui/theme-provider";
 import { useQuery } from "@tanstack/react-query";
-import { Chart } from "./Chart";
-import { getLineChartOption } from "../-utils/chart-options";
+import { useState } from "react";
 import { fetchLineChartData } from "@/service/dashboard";
+import { getLineChartOption } from "../-utils/chart-options";
+import { Chart } from "./Chart";
 
 interface LineChartProps {
 	height?: number;
@@ -45,16 +45,22 @@ export const LineChart: React.FC<LineChartProps> = ({ height = 400 }) => {
 					<p className="text-sm text-muted-foreground">Total for the last 3 months</p>
 				</div>
 				<ToggleGroup type="single" value={period} onValueChange={(value) => setPeriod(value)}>
-					<ToggleGroupItem value="90d" className="cursor-pointer">Last 3 months</ToggleGroupItem>
-					<ToggleGroupItem value="30d" className="cursor-pointer">Last 30 days</ToggleGroupItem>
-					<ToggleGroupItem value="7d" className="cursor-pointer">Last 7 days</ToggleGroupItem>
+					<ToggleGroupItem value="90d" className="cursor-pointer">
+						Last 3 months
+					</ToggleGroupItem>
+					<ToggleGroupItem value="30d" className="cursor-pointer">
+						Last 30 days
+					</ToggleGroupItem>
+					<ToggleGroupItem value="7d" className="cursor-pointer">
+						Last 7 days
+					</ToggleGroupItem>
 				</ToggleGroup>
 			</div>
 			<div className="w-full" style={{ height: `${height}px` }}>
 				<Chart
 					option={getLineChartOption(data.data, isDark)}
 					style={{ height: "100%", width: "100%" }}
-					opts={{ height, width: 'auto' }}
+					opts={{ height, width: "auto" }}
 				/>
 			</div>
 		</Card>

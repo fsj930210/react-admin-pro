@@ -1,7 +1,7 @@
 /* eslint-disable @eslint-react/no-array-index-key */
 import { useQuery } from "@tanstack/react-query";
-import { StatCard } from "./StatCard";
 import { fetchStatData } from "@/service/dashboard";
+import { StatCard } from "./StatCard";
 
 export const StatCards: React.FC = () => {
 	const { data, isLoading, error } = useQuery({
@@ -23,7 +23,10 @@ export const StatCards: React.FC = () => {
 		return (
 			<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
 				{[1, 2, 3, 4].map((index) => (
-					<div key={index} className="h-40 bg-white rounded-lg shadow flex items-center justify-center text-red-500">
+					<div
+						key={index}
+						className="h-40 bg-white rounded-lg shadow flex items-center justify-center text-red-500"
+					>
 						Failed to load data
 					</div>
 				))}

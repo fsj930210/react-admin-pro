@@ -1,8 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
 import rehypeHighlight from "rehype-highlight";
 import rehypeRaw from "rehype-raw";
+import remarkGfm from "remark-gfm";
 import "highlight.js/styles/github.css";
 
 export const Route = createFileRoute("/(layouts)/about/")({
@@ -260,8 +260,8 @@ function AboutPage() {
 					rehypePlugins={[rehypeHighlight, rehypeRaw]}
 					components={{
 						code: ({ className, children, ...props }) => {
-							const match = /language-(\w+)/.exec(className ?? '');
-							const isInline = !className?.includes('language-');
+							const match = /language-(\w+)/.exec(className ?? "");
+							const isInline = !className?.includes("language-");
 							return !isInline && match ? (
 								<pre className="bg-card text-card-foreground p-4 rounded-md overflow-x-auto border border-border">
 									<code className={className} {...props}>
@@ -269,71 +269,34 @@ function AboutPage() {
 									</code>
 								</pre>
 							) : (
-								<code className="bg-muted text-muted-foreground px-1 py-0.5 rounded text-sm" {...props}>
+								<code
+									className="bg-muted text-muted-foreground px-1 py-0.5 rounded text-sm"
+									{...props}
+								>
 									{children}
 								</code>
 							);
 						},
-						pre: ({ children }) => (
-							<div className="rounded-md overflow-hidden">
-								{children}
-							</div>
-						),
+						pre: ({ children }) => <div className="rounded-md overflow-hidden">{children}</div>,
 						blockquote: ({ children }) => (
 							<blockquote className="border-l-4 border-primary pl-4 italic text-muted-foreground">
 								{children}
 							</blockquote>
 						),
 						table: ({ children }) => (
-							<table className="min-w-full border-collapse border border-border">
-								{children}
-							</table>
+							<table className="min-w-full border-collapse border border-border">{children}</table>
 						),
 						th: ({ children }) => (
-							<th className="border border-border px-4 py-2 bg-muted">
-								{children}
-							</th>
+							<th className="border border-border px-4 py-2 bg-muted">{children}</th>
 						),
-						td: ({ children }) => (
-							<td className="border border-border px-4 py-2">
-								{children}
-							</td>
-						),
-						ul: ({ children }) => (
-							<ul className="list-disc pl-5 space-y-1">
-								{children}
-							</ul>
-						),
-						ol: ({ children }) => (
-							<ol className="list-decimal pl-5 space-y-1">
-								{children}
-							</ol>
-						),
-						h1: ({ children }) => (
-							<h1 className="text-3xl font-bold mb-4">
-								{children}
-							</h1>
-						),
-						h2: ({ children }) => (
-							<h2 className="text-2xl font-bold mb-3 mt-8">
-								{children}
-							</h2>
-						),
-						h3: ({ children }) => (
-							<h3 className="text-xl font-bold mb-2 mt-6">
-								{children}
-							</h3>
-						),
-						h4: ({ children }) => (
-							<h4 className="text-lg font-bold mb-1 mt-4">
-								{children}
-							</h4>
-						),
-						p: ({ children }) => (
-							<p className="mb-4">
-								{children}
-							</p>
-						),
+						td: ({ children }) => <td className="border border-border px-4 py-2">{children}</td>,
+						ul: ({ children }) => <ul className="list-disc pl-5 space-y-1">{children}</ul>,
+						ol: ({ children }) => <ol className="list-decimal pl-5 space-y-1">{children}</ol>,
+						h1: ({ children }) => <h1 className="text-3xl font-bold mb-4">{children}</h1>,
+						h2: ({ children }) => <h2 className="text-2xl font-bold mb-3 mt-8">{children}</h2>,
+						h3: ({ children }) => <h3 className="text-xl font-bold mb-2 mt-6">{children}</h3>,
+						h4: ({ children }) => <h4 className="text-lg font-bold mb-1 mt-4">{children}</h4>,
+						p: ({ children }) => <p className="mb-4">{children}</p>,
 						a: ({ children, href }) => (
 							<a
 								href={href}

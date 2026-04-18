@@ -6,7 +6,7 @@ export const Route = createFileRoute("/(layouts)/outside/iframe/")({
 		throw Route.redirect({
 			// biome-ignore lint:suspicious/noTsIgnore
 			// @ts-ignore
-			to: '/outside/iframe/react',
-		})
+			to: "/outside/iframe/react",
+		});
 	},
 });

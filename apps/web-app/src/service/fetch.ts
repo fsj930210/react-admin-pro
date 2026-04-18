@@ -1,4 +1,5 @@
-import { createFetchClient, type KyOptions } from "@rap/utils/fetch";
+import type { AfterResponseHook } from "@rap/utils/fetch";
+import { createFetchClient } from "@rap/utils/fetch";
 import { APP_BASE_PATH } from "@/config";
 
 export const SUCCESS_CODE = "0000000000";
@@ -14,7 +15,11 @@ const beforeErrorStatus = () => (error: any) => {
 	}
 	return error;
 };
-async function afterResponseJson(_request: Request, _options: KyOptions, response: Response) {
+const afterResponseJson: AfterResponseHook = async ({
+	request: _request,
+	options: _options,
+	response,
+}) => {
 	try {
 		const clonedResponse = response.clone();
 		if (clonedResponse.status >= 200 && clonedResponse.status < 300) {
@@ -24,12 +29,13 @@ async function afterResponseJson(_request: Request, _options: KyOptions, respons
 			}
 			return body;
 		}
+		return response;
 		// biome-ignore lint:suspicious/noExplicitAny
 	} catch (e: any) {
 		// eslint-disable-next-line @typescript-eslint/prefer-promise-reject-errors
 		return Promise.reject(e);
 	}
-}
+};
 const request = createFetchClient({
 	silent: false,
 	retry: 0,

@@ -1,18 +1,18 @@
-import type { FC, CSSProperties } from "react";
-import ReactECharts from "echarts-for-react";
-import * as echarts from "echarts/core";
-import { BarChart, LineChart, PieChart } from "echarts/charts";
-import {
-	GridComponent,
-	TooltipComponent,
-	TitleComponent,
-	DatasetComponent,
-	LegendComponent,
-	RadarComponent
-} from "echarts/components";
-import { CanvasRenderer } from "echarts/renderers";
 import { useTheme } from "@rap/components-ui/theme-provider";
 import type { EChartsOption } from "echarts";
+import { BarChart, LineChart, PieChart } from "echarts/charts";
+import {
+	DatasetComponent,
+	GridComponent,
+	LegendComponent,
+	RadarComponent,
+	TitleComponent,
+	TooltipComponent,
+} from "echarts/components";
+import * as echarts from "echarts/core";
+import { CanvasRenderer } from "echarts/renderers";
+import ReactECharts from "echarts-for-react";
+import type { CSSProperties, FC } from "react";
 
 echarts.use([
 	TitleComponent,
@@ -24,14 +24,14 @@ echarts.use([
 	LineChart,
 	PieChart,
 	CanvasRenderer,
-	DatasetComponent
+	DatasetComponent,
 ]);
 
 interface EChartsOpts {
 	readonly devicePixelRatio?: number;
-	readonly renderer?: 'canvas' | 'svg';
-	readonly width?: number | null | undefined | 'auto';
-	readonly height?: number | null | undefined | 'auto';
+	readonly renderer?: "canvas" | "svg";
+	readonly width?: number | null | undefined | "auto";
+	readonly height?: number | null | undefined | "auto";
 	readonly locale?: string;
 }
 

@@ -46,16 +46,22 @@ export function createTree(nodes: TreeNode[], options: CreateTreeOptions) {
 
 	function buildItems(nodes: TreeNode[], parentKey?: string, depth = 0) {
 		nodes.forEach((node) => {
+			let isLeaf = true;
+			if (options.isLeafCondition !== undefined) {
+				isLeaf = options.isLeafCondition(node);
+			} else if (node.isLeaf !== undefined) {
+				isLeaf = node.isLeaf;
+			} else if (node.children && node.children.length > 0) {
+				isLeaf = false;
+			}
 			const item: TreeItemInstance = {
 				key: node.key,
 				tree: tree as TreeInstance,
 				parentKey,
 				node,
 				depth,
-				isLeaf:
-					options.isLeafCondition?.(node) ||
-					!node.children ||
-					node.children.length === 0,
+				disabled: node.disabled || false,
+				isLeaf
 			} as TreeItemInstance;
 			items.set(node.key, item);
 			if (node.children) buildItems(node.children, node.key, depth + 1);
@@ -69,8 +75,10 @@ export function createTree(nodes: TreeNode[], options: CreateTreeOptions) {
 
 	const tree: TreeInstance = {
 		nodes,
+		indent: options.indent,
 		items,
 		_count,
+		onRebuild: [],
 		buildItems,
 		updateTree(newNodes: TreeNode[]) {
 			this.nodes = newNodes;
@@ -80,8 +88,9 @@ export function createTree(nodes: TreeNode[], options: CreateTreeOptions) {
 			items.clear();
 			buildItems(this.nodes);
 			this._count = this._count++;
-			installFeatures(tree);
-			if (typeof this.onRebuild === "function") this.onRebuild();
+			if (Array.isArray(this.onRebuild)) {
+				this.onRebuild.forEach(callback => callback());
+			}
 			this.notify();
 		},
 		getItem(key: string) {
