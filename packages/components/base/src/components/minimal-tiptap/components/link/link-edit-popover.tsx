@@ -7,7 +7,7 @@ import {
 	PopoverContent,
 	PopoverTrigger,
 } from "@rap/components-base/popover"
-import { Link2Icon } from "@radix-ui/react-icons"
+import { Link2 } from "lucide-react"
 import { ToolbarButton } from "../toolbar-button"
 import { LinkEditBlock } from "./link-edit-block"
 
@@ -59,7 +59,7 @@ const LinkEditPopover = ({ editor, size, variant }: LinkEditPopoverProps) => {
 					size={size}
 					variant={variant}
 				>
-					<Link2Icon className="size-5" />
+					<Link2 className="size-5" />
 				</ToolbarButton>
 			</PopoverTrigger>
 			<PopoverContent align="end" side="bottom">

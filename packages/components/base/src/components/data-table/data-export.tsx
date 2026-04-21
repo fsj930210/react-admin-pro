@@ -8,7 +8,7 @@ import type { TableConfig } from "./utils/table-config";
 
 // ** import core packages
 import { useState } from "react";
-import { DownloadIcon, Loader2 } from "lucide-react";
+import { Download, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
 // ** import components
@@ -499,7 +499,7 @@ export function DataTableExport<TData extends ExportableData>({
 					</>
 				) : (
 					<>
-						<DownloadIcon className="mr-2 h-4 w-4" />
+						<Download className="mr-2 h-4 w-4" />
 						{buttonText}
 					</>
 				)}
@@ -518,7 +518,7 @@ export function DataTableExport<TData extends ExportableData>({
 						</>
 					) : (
 						<>
-							<DownloadIcon className="mr-2 h-4 w-4" />
+							<Download className="mr-2 h-4 w-4" />
 							Export
 							{hasSelection && subRowsConfig?.enabled && (
 								<span className="ml-1">({parentCount + subrowCount})</span>

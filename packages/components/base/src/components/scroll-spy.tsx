@@ -1,5 +1,5 @@
 "use client";
-
+// 文档地址 https://www.diceui.com/docs/components/radix/scroll-spy
 import {
 	Direction as DirectionPrimitive,
 	Slot as SlotPrimitive,

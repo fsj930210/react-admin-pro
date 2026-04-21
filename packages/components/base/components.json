@@ -10,10 +10,15 @@
     "cssVariables": true,
     "prefix": ""
   },
+  "iconLibrary": "lucide",
   "aliases": {
     "components": "@rap/components-base/components",
+    "utils": "@rap/utils",
     "ui": "@rap/components-base/components",
-    "utils": "@rap/utils"
+    "hooks": "@rap/hooks",
+    "lib": "@rap/lib"
   },
-  "iconLibrary": "lucide"
+  "registries": {
+    "@diceui": "https://diceui.com/r/{name}.json"
+  }
 }

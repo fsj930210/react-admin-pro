@@ -1,9 +1,9 @@
 "use client";
 
-import { Cross2Icon } from "@radix-ui/react-icons";
+
 import type { Table } from "@tanstack/react-table";
 import { useEffect, useState, useRef, useCallback } from "react";
-import { Settings, Undo2, EyeOff, CheckSquare, MoveHorizontal } from "lucide-react";
+import { Settings, Undo2, EyeOff, CheckSquare, MoveHorizontal, X } from "lucide-react";
 
 import { Button } from "../button";
 import { Input } from "../input";
@@ -385,7 +385,7 @@ export function DataTableToolbar<TData extends ExportableData>({
 						className={getButtonSizeClass(config.size)}
 					>
 						Reset
-						<Cross2Icon className="ml-2 h-4 w-4" />
+						<X className="ml-2 h-4 w-4" />
 					</Button>
 				)}
 			</div>

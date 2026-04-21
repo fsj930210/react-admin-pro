@@ -1,7 +1,6 @@
 "use client";
 
 import * as React from "react";
-import { CalendarIcon } from "lucide-react";
 import {
   startOfWeek,
   endOfWeek,
@@ -14,24 +13,24 @@ import {
   endOfDay
 } from "date-fns";
 import { toDate, formatInTimeZone } from "date-fns-tz";
-import { DateRange } from "react-day-picker";
-import { cva, VariantProps } from "class-variance-authority";
+import { type DateRange } from "react-day-picker";
+import { cva, type VariantProps } from "class-variance-authority";
 
 import { cn } from "@rap/utils";
-import { Button } from "@rap/components/ui/button";
+import { Button } from "./button";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger
-} from "@rap/components/ui/popover";
+} from "./popover";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue
-} from "@rap/components/ui/select";
-import { Calendar } from "@rap/components/ui/calendar";
+} from "./select";
+import { Calendar } from "./calendar";
 
 const months = [
   "January",
@@ -72,7 +71,7 @@ const multiSelectVariants = cva(
 
 interface CalendarDatePickerProps
   extends React.HTMLAttributes<HTMLButtonElement>,
-    VariantProps<typeof multiSelectVariants> {
+  VariantProps<typeof multiSelectVariants> {
   id?: string;
   className?: string;
   date: DateRange;
@@ -169,12 +168,12 @@ export const CalendarDatePicker = React.forwardRef<
             numberOfMonths === 2
               ? startOfMonth(toDate(newMonth, { timeZone }))
               : date?.from
-              ? new Date(
+                ? new Date(
                   date.from.getFullYear(),
                   newMonth.getMonth(),
                   date.from.getDate()
                 )
-              : newMonth;
+                : newMonth;
           const to =
             numberOfMonths === 2
               ? date.to
@@ -218,8 +217,8 @@ export const CalendarDatePicker = React.forwardRef<
             numberOfMonths === 2
               ? startOfMonth(toDate(newMonth, { timeZone }))
               : date.from
-              ? new Date(newYear, newMonth.getMonth(), date.from.getDate())
-              : newMonth;
+                ? new Date(newYear, newMonth.getMonth(), date.from.getDate())
+                : newMonth;
           const to =
             numberOfMonths === 2
               ? date.to
@@ -414,7 +413,7 @@ export const CalendarDatePicker = React.forwardRef<
               onClick={handleTogglePopover}
               suppressHydrationWarning
             >
-              <CalendarIcon className="mr-2 h-4 w-4" />
+              <Calendar className="mr-2 h-4 w-4" />
               <span>
                 {date?.from ? (
                   date.to ? (
@@ -424,7 +423,7 @@ export const CalendarDatePicker = React.forwardRef<
                         className={cn(
                           "date-part",
                           highlightedPart === "firstDay" &&
-                            "underline font-bold"
+                          "underline font-bold"
                         )}
                         onMouseOver={() => handleMouseOver("firstDay")}
                         onMouseLeave={handleMouseLeave}
@@ -436,7 +435,7 @@ export const CalendarDatePicker = React.forwardRef<
                         className={cn(
                           "date-part",
                           highlightedPart === "firstMonth" &&
-                            "underline font-bold"
+                          "underline font-bold"
                         )}
                         onMouseOver={() => handleMouseOver("firstMonth")}
                         onMouseLeave={handleMouseLeave}
@@ -449,7 +448,7 @@ export const CalendarDatePicker = React.forwardRef<
                         className={cn(
                           "date-part",
                           highlightedPart === "firstYear" &&
-                            "underline font-bold"
+                          "underline font-bold"
                         )}
                         onMouseOver={() => handleMouseOver("firstYear")}
                         onMouseLeave={handleMouseLeave}
@@ -464,7 +463,7 @@ export const CalendarDatePicker = React.forwardRef<
                             className={cn(
                               "date-part",
                               highlightedPart === "secondDay" &&
-                                "underline font-bold"
+                              "underline font-bold"
                             )}
                             onMouseOver={() => handleMouseOver("secondDay")}
                             onMouseLeave={handleMouseLeave}
@@ -476,7 +475,7 @@ export const CalendarDatePicker = React.forwardRef<
                             className={cn(
                               "date-part",
                               highlightedPart === "secondMonth" &&
-                                "underline font-bold"
+                              "underline font-bold"
                             )}
                             onMouseOver={() => handleMouseOver("secondMonth")}
                             onMouseLeave={handleMouseLeave}
@@ -489,7 +488,7 @@ export const CalendarDatePicker = React.forwardRef<
                             className={cn(
                               "date-part",
                               highlightedPart === "secondYear" &&
-                                "underline font-bold"
+                              "underline font-bold"
                             )}
                             onMouseOver={() => handleMouseOver("secondYear")}
                             onMouseLeave={handleMouseLeave}
@@ -566,7 +565,7 @@ export const CalendarDatePicker = React.forwardRef<
                         className={cn(
                           "justify-start hover:bg-primary/90 hover:text-background",
                           selectedRange === label &&
-                            "bg-primary text-background hover:bg-primary/90 hover:text-background"
+                          "bg-primary text-background hover:bg-primary/90 hover:text-background"
                         )}
                         onClick={() => {
                           selectDateRange(start, end, label);

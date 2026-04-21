@@ -1,5 +1,5 @@
 "use client";
-
+// 文档地址 https://www.diceui.com/docs/components/radix/qr-code
 import { Slot as SlotPrimitive } from "radix-ui";
 import * as React from "react";
 import { useComposedRefs } from "@rap/lib/compose-refs";

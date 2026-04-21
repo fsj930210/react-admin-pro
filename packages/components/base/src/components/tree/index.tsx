@@ -1,7 +1,7 @@
 import { Slot as SlotPrimitive } from "radix-ui";
 import { cn } from "@rap/utils";
 import { useVirtualizer } from "@tanstack/react-virtual";
-import { ChevronDownIcon } from "lucide-react";
+import { ChevronDown } from "lucide-react";
 import { type ReactNode, useRef } from "react";
 import { Checkbox } from "../checkbox";
 import { TreeContext, useTreeContext } from "./tree-context";
@@ -375,7 +375,7 @@ function TreeExpandIcon({ children, item, className, ...props }: TreeExpandIconP
 					props.onClick?.(e);
 				}}
 			>
-				{children || <ChevronDownIcon className="size-4" />}
+				{children || <ChevronDown className="size-4" />}
 			</span>
 		)
 	);

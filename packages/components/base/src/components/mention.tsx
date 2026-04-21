@@ -1,3 +1,4 @@
+// 文档地址 https://www.diceui.com/docs/components/radix/mention
 import * as MentionPrimitive from "@diceui/mention";
 import type * as React from "react";
 

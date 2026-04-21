@@ -2,15 +2,15 @@ import * as React from "react"
 import type { Editor } from "@tiptap/react"
 import type { FormatAction } from "../types"
 import type { VariantProps } from "class-variance-authority"
-import type { toggleVariants } from "@rap/components-base/toggle"
+import type { toggleVariants } from "../../toggle"
 import { cn } from "@rap/utils"
-import { CaretDownIcon } from "@radix-ui/react-icons"
+import { ChevronDown } from "lucide-react"
 import {
 	DropdownMenu,
 	DropdownMenuContent,
 	DropdownMenuItem,
 	DropdownMenuTrigger,
-} from "@rap/components-base/dropdown-menu"
+} from "../../dropdown-menu"
 import { ToolbarButton } from "./toolbar-button"
 import { ShortcutKey } from "./shortcut-key"
 import { getShortcutKey } from "../utils"
@@ -104,7 +104,7 @@ export const ToolbarSection: React.FC<ToolbarSectionProps> = ({
 							size={size}
 							variant={variant}
 						>
-							{dropdownIcon || <CaretDownIcon className="size-5" />}
+							{dropdownIcon || <ChevronDown className="size-5" />}
 						</ToolbarButton>
 					</DropdownMenuTrigger>
 					<DropdownMenuContent align="start" className="w-full">

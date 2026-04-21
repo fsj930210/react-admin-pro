@@ -1,5 +1,5 @@
 "use client";
-
+// 文档地址 https://www.diceui.com/docs/components/radix/circular-progress
 import { Slot as SlotPrimitive } from "radix-ui";
 import * as React from "react";
 import { cn } from "@rap/utils";

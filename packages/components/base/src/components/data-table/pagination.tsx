@@ -1,11 +1,6 @@
 "use client";
 
-import {
-	ChevronLeftIcon,
-	ChevronRightIcon,
-	DoubleArrowLeftIcon,
-	DoubleArrowRightIcon,
-} from "@radix-ui/react-icons";
+import { ChevronLeft, ChevronRight, ChevronDoubleLeft, ChevronDoubleRight } from "lucide-react";
 import type { Table } from "@tanstack/react-table";
 import { Button } from "../button";
 import {
@@ -105,7 +100,7 @@ export function DataTablePagination<TData>({
 						onClick={() => table.setPagination({ pageIndex: 0, pageSize: table.getState().pagination.pageSize })}
 						disabled={!table.getCanPreviousPage()}
 					>
-						<DoubleArrowLeftIcon className="h-4 w-4" aria-hidden="true" />
+						<ChevronDoubleLeft className="h-4 w-4" aria-hidden="true" />
 					</Button>
 					<Button
 						aria-label="Go to previous page"
@@ -117,7 +112,7 @@ export function DataTablePagination<TData>({
 						})}
 						disabled={!table.getCanPreviousPage()}
 					>
-						<ChevronLeftIcon className="h-4 w-4" aria-hidden="true" />
+						<ChevronLeft className="h-4 w-4" aria-hidden="true" />
 					</Button>
 					<Button
 						aria-label="Go to next page"
@@ -129,7 +124,7 @@ export function DataTablePagination<TData>({
 						})}
 						disabled={!table.getCanNextPage()}
 					>
-						<ChevronRightIcon className="h-4 w-4" aria-hidden="true" />
+						<ChevronRight className="h-4 w-4" aria-hidden="true" />
 					</Button>
 					<Button
 						aria-label="Go to last page"
@@ -141,7 +136,7 @@ export function DataTablePagination<TData>({
 						})}
 						disabled={!table.getCanNextPage()}
 					>
-						<DoubleArrowRightIcon className="h-4 w-4" aria-hidden="true" />
+						<ChevronDoubleRight className="h-4 w-4" aria-hidden="true" />
 					</Button>
 				</div>
 			</div>

@@ -1,7 +1,7 @@
 "use client";
-
+// 文档地址 https://www.diceui.com/docs/components/radix/color-picker
 import { cva, type VariantProps } from "class-variance-authority";
-import { PipetteIcon } from "lucide-react";
+import { Pipette } from "lucide-react";
 import {
 	Direction as DirectionPrimitive,
 	Slider as SliderPrimitive,
@@ -1114,7 +1114,7 @@ function ColorPickerEyeDropper(props: React.ComponentProps<typeof Button>) {
 			onClick={onEyeDropper}
 			disabled={isDisabled}
 		>
-			{children ?? <PipetteIcon />}
+			{children ?? <Pipette />}
 		</Button>
 	);
 }

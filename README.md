@@ -6,7 +6,7 @@
 
 - **前端框架**: React 19
 - **构建工具**: Vite, Rsbuild, Turbopack
-- **路由**: @tanstack/react-router (web-app), Next.js App Router (next-app)
+- **路由**: @tanstack/react-router (web-app)
 - **状态管理**: @tanstack/react-query
 - **UI 组件**: 基于 Radix UI 的自定义组件库
 - **样式方案**: Tailwind CSS
@@ -15,7 +15,7 @@
 
 ## 特性
 
-- 支持两种应用模式：基于 Vite/Rsbuild 的 SPA 应用和基于 Next.js 的 SSR 应用
+- 基于 Vite/Rsbuild 的 SPA 应用
 - 统一的组件库和工具库，提高代码复用性
 - 完善的 TypeScript 类型支持
 - 现代化的构建工具链，支持快速开发和高效构建
@@ -26,7 +26,6 @@
 ```bash
 ├── apps/                # 应用目录
 │   ├── web-app/         # 基于Vite/Rsbuild的SPA应用
-│   └── next-app/        # 基于Next.js的SSR应用
 ├── packages/            # 共享包目录
 │   ├── components/      # 组件库
 │   ├── hooks/           # React Hooks
@@ -52,6 +51,8 @@ pnpm install
 # 启动所有应用
 pnpm dev
 
+# 使用vite作为构建工具
+pnpm dev:web-vite
 
 # 构建所有应用
 pnpm build
@@ -59,4 +60,4 @@ pnpm build
 
 ## 许可证
 
-ISC
+MIT License

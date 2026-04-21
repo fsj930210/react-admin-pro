@@ -2,15 +2,15 @@ import * as React from "react"
 import type { Editor } from "@tiptap/react"
 import type { FormatAction } from "../../types"
 import type { VariantProps } from "class-variance-authority"
-import type { toggleVariants } from "@rap/components-base/toggle"
+import type { toggleVariants } from "../../../toggle"
 import { cn } from "@rap/utils"
-import { CaretDownIcon, LetterCaseCapitalizeIcon } from "@radix-ui/react-icons"
+import { ChevronDown, Type } from "lucide-react"
 import {
 	DropdownMenu,
 	DropdownMenuContent,
 	DropdownMenuItem,
 	DropdownMenuTrigger,
-} from "@rap/components-base/dropdown-menu"
+} from "../../../dropdown-menu"
 import { ToolbarButton } from "../toolbar-button"
 import { ShortcutKey } from "../shortcut-key"
 
@@ -138,8 +138,8 @@ export const SectionOne: React.FC<SectionOneProps> = ({
 					variant={variant}
 					className="gap-0"
 				>
-					<LetterCaseCapitalizeIcon className="size-5" />
-					<CaretDownIcon className="size-5" />
+					<Type className="size-5" />
+					<ChevronDown className="size-5" />
 				</ToolbarButton>
 			</DropdownMenuTrigger>
 			<DropdownMenuContent align="start" className="w-full">

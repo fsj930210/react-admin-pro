@@ -5,20 +5,14 @@ import {
 	TooltipTrigger,
 } from "@rap/components-base/tooltip"
 import { cn } from "@rap/utils"
-import { Button } from "@rap/components-base/button"
+import { Button } from "../../../../button"
 import {
 	DropdownMenu,
 	DropdownMenuContent,
 	DropdownMenuItem,
 	DropdownMenuTrigger,
-} from "@rap/components-base/dropdown-menu"
-import {
-	ClipboardCopyIcon,
-	DotsHorizontalIcon,
-	DownloadIcon,
-	Link2Icon,
-	SizeIcon,
-} from "@radix-ui/react-icons"
+} from "../../../../dropdown-menu"
+import { ClipboardCopy, MoreHorizontal, Download, Link, Maximize } from "lucide-react"
 
 interface ImageActionsProps {
 	shouldMerge?: boolean
@@ -89,22 +83,22 @@ const ActionItems: Array<{
 }> = [
 		{
 			key: "onView",
-			icon: <SizeIcon />,
+			icon: <Maximize />,
 			tooltip: "View image",
 		},
 		{
 			key: "onDownload",
-			icon: <DownloadIcon />,
+			icon: <Download />,
 			tooltip: "Download image",
 		},
 		{
 			key: "onCopy",
-			icon: <ClipboardCopyIcon />,
+			icon: <ClipboardCopy />,
 			tooltip: "Copy image to clipboard",
 		},
 		{
 			key: "onCopyLink",
-			icon: <Link2Icon />,
+			icon: <Link />,
 			tooltip: "Copy image link",
 			isLink: true,
 		},
@@ -137,7 +131,7 @@ export const ImageActions: React.FC<ImageActionsProps> = ({
 				<DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
 					<DropdownMenuTrigger asChild>
 						<ActionButton
-							icon={<DotsHorizontalIcon />}
+							icon={<MoreHorizontal />}
 							tooltip="Open menu"
 							onClick={(e) => e.preventDefault()}
 						/>

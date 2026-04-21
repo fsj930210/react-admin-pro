@@ -1,5 +1,5 @@
-// 文档地址 https://www.diceui.com/docs/components/radix/masonry
 "use client";
+// 文档地址 https://www.diceui.com/docs/components/radix/masonry
 
 import { Slot as SlotPrimitive } from "radix-ui";
 import * as React from "react";

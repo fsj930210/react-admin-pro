@@ -8,6 +8,7 @@ import { ThemeProvider } from "@rap/components-ui/theme-provider";
 import { useEventEmitter } from "ahooks";
 import { APP_BASE_PATH } from "@/config";
 import { type AppEvent, AppProvider } from "./app-context";
+import { TooltipProvider } from "@rap/components-base/tooltip";
 
 const queryClient = new QueryClient({
 	defaultOptions: {
@@ -71,12 +72,14 @@ const App = () => {
 			defaultTheme="dark"
 		>
 			<div className="size-full overflow-x-hidden">
-				<AppProvider eventBus={eventBus}>
-					<QueryClientProvider client={queryClient}>
-						<RouterProvider router={router} />
-					</QueryClientProvider>
-					<Toaster />
-				</AppProvider>
+				<TooltipProvider>
+					<AppProvider eventBus={eventBus}>
+						<QueryClientProvider client={queryClient}>
+							<RouterProvider router={router} />
+						</QueryClientProvider>
+						<Toaster />
+					</AppProvider>
+				</TooltipProvider>
 			</div>
 		</ThemeProvider>
 	);

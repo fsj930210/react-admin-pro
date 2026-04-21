@@ -2,27 +2,27 @@
 "use client";
 
 import {
-	AlertTriangleIcon,
-	CaptionsOffIcon,
-	CheckIcon,
-	DownloadIcon,
-	FastForwardIcon,
-	Loader2Icon,
-	Maximize2Icon,
-	Minimize2Icon,
-	PauseIcon,
-	PictureInPicture2Icon,
-	PictureInPictureIcon,
-	PlayIcon,
-	RefreshCcwIcon,
-	RepeatIcon,
-	RewindIcon,
-	RotateCcwIcon,
-	SettingsIcon,
-	SubtitlesIcon,
-	Volume1Icon,
-	Volume2Icon,
-	VolumeXIcon,
+	AlertTriangle,
+	CaptionsOff,
+	Check,
+	Download,
+	FastForward,
+	Loader2,
+	Maximize2,
+	Minimize2,
+	Pause,
+	PictureInPicture2,
+	PictureInPicture,
+	Play,
+	RefreshCcw,
+	Repeat,
+	Rewind,
+	RotateCcw,
+	Settings,
+	Subtitles,
+	Volume1,
+	Volume2,
+	VolumeX,
 } from "lucide-react";
 import {
 	MediaActionTypes,
@@ -941,7 +941,7 @@ function MediaPlayerLoading(props: MediaPlayerLoadingProps) {
 			)}
 		>
 			{children ?? (
-				<Loader2Icon className="size-20 animate-spin stroke-[.0938rem] text-primary" />
+				<Loader2 className="size-20 animate-spin stroke-[.0938rem] text-primary" />
 			)}
 		</LoadingPrimitive>
 	);
@@ -1076,7 +1076,7 @@ function MediaPlayerError(props: MediaPlayerErrorProps) {
 		>
 			{children ?? (
 				<div className="flex max-w-md flex-col items-center gap-4 px-6 py-8 text-center">
-					<AlertTriangleIcon className="size-12 text-destructive" />
+					<AlertTriangle className="size-12 text-destructive" />
 					<div className="flex flex-col gap-px text-center">
 						<h3 className="font-semibold text-xl tracking-tight">
 							{errorLabel}
@@ -1093,9 +1093,9 @@ function MediaPlayerError(props: MediaPlayerErrorProps) {
 							disabled={actionState.retryPending}
 						>
 							{actionState.retryPending ? (
-								<Loader2Icon className="animate-spin" />
+								<Loader2 className="animate-spin" />
 							) : (
-								<RefreshCcwIcon />
+								<RefreshCcw />
 							)}
 							Try again
 						</Button>
@@ -1106,9 +1106,9 @@ function MediaPlayerError(props: MediaPlayerErrorProps) {
 							disabled={actionState.reloadPending}
 						>
 							{actionState.reloadPending ? (
-								<Loader2Icon className="animate-spin" />
+								<Loader2 className="animate-spin" />
 							) : (
-								<RotateCcwIcon />
+								<RotateCcw />
 							)}
 							Reload page
 						</Button>
@@ -1155,11 +1155,11 @@ function MediaPlayerVolumeIndicator(props: DivProps) {
 			<div className="fade-in-0 zoom-in-95 flex animate-in flex-col items-center gap-3 rounded-lg bg-black/30 px-6 py-4 text-white backdrop-blur-xs duration-200">
 				<div className="flex items-center gap-2">
 					{mediaVolumeLevel === "off" || mediaMuted ? (
-						<VolumeXIcon className="size-6" />
+						<VolumeX className="size-6" />
 					) : mediaVolumeLevel === "high" ? (
-						<Volume2Icon className="size-6" />
+						<Volume2 className="size-6" />
 					) : (
-						<Volume1Icon className="size-6" />
+						<Volume1 className="size-6" />
 					)}
 					<span className="font-medium text-sm tabular-nums">
 						{mediaMuted ? "Muted" : `${volumePercentage}%`}
@@ -1258,7 +1258,7 @@ function MediaPlayerPlay(props: React.ComponentProps<typeof Button>) {
 				)}
 				onClick={onPlayToggle}
 			>
-				{children ?? (mediaPaused ? <PlayIcon /> : <PauseIcon />)}
+				{children ?? (mediaPaused ? <Play /> : <Pause />)}
 			</Button>
 		</MediaPlayerTooltip>
 	);
@@ -1318,7 +1318,7 @@ function MediaPlayerSeekBackward(props: MediaPlayerSeekBackwardProps) {
 				className={cn("size-8", className)}
 				onClick={onSeekBackward}
 			>
-				{children ?? <RewindIcon />}
+				{children ?? <Rewind />}
 			</Button>
 		</MediaPlayerTooltip>
 	);
@@ -1383,7 +1383,7 @@ function MediaPlayerSeekForward(props: MediaPlayerSeekForwardProps) {
 				className={cn("size-8", className)}
 				onClick={onSeekForward}
 			>
-				{children ?? <FastForwardIcon />}
+				{children ?? <FastForward />}
 			</Button>
 		</MediaPlayerTooltip>
 	);
@@ -2256,11 +2256,11 @@ function MediaPlayerVolume(props: MediaPlayerVolumeProps) {
 					onClick={onMute}
 				>
 					{mediaVolumeLevel === "off" || mediaMuted ? (
-						<VolumeXIcon />
+						<VolumeX />
 					) : mediaVolumeLevel === "high" ? (
-						<Volume2Icon />
+						<Volume2 />
 					) : (
-						<Volume1Icon />
+						<Volume1 />
 					)}
 				</Button>
 			</MediaPlayerTooltip>
@@ -2451,7 +2451,7 @@ function MediaPlayerPlaybackSpeed(props: MediaPlayerPlaybackSpeedProps) {
 						className="justify-between"
 						onSelect={() => onPlaybackRateChange(speed)}
 					>
-						{speed}x{mediaPlaybackRate === speed && <CheckIcon />}
+						{speed}x{mediaPlaybackRate === speed && <Check />}
 					</DropdownMenuItem>
 				))}
 			</DropdownMenuContent>
@@ -2525,9 +2525,9 @@ function MediaPlayerLoop(props: MediaPlayerLoopProps) {
 			>
 				{children ??
 					(isLooping ? (
-						<RepeatIcon className="text-muted-foreground" />
+						<Repeat className="text-muted-foreground" />
 					) : (
-						<RepeatIcon />
+						<Repeat />
 					))}
 			</Button>
 		</MediaPlayerTooltip>
@@ -2578,7 +2578,7 @@ function MediaPlayerFullscreen(props: MediaPlayerFullscreenProps) {
 				className={cn("size-8", className)}
 				onClick={onFullscreen}
 			>
-				{children ?? (isFullscreen ? <Minimize2Icon /> : <Maximize2Icon />)}
+				{children ?? (isFullscreen ? <Minimize2 /> : <Maximize2 />)}
 			</Button>
 		</MediaPlayerTooltip>
 	);
@@ -2653,9 +2653,9 @@ function MediaPlayerPiP(props: MediaPlayerPiPProps) {
 					? children(isPictureInPicture)
 					: (children ??
 						(isPictureInPicture ? (
-							<PictureInPicture2Icon />
+							<PictureInPicture2 />
 						) : (
-							<PictureInPictureIcon />
+							<PictureInPicture />
 						)))}
 			</Button>
 		</MediaPlayerTooltip>
@@ -2703,7 +2703,7 @@ function MediaPlayerCaptions(props: React.ComponentProps<typeof Button>) {
 				onClick={onCaptionsToggle}
 			>
 				{children ??
-					(isSubtitlesActive ? <SubtitlesIcon /> : <CaptionsOffIcon />)}
+					(isSubtitlesActive ? <Subtitles /> : <CaptionsOff />)}
 			</Button>
 		</MediaPlayerTooltip>
 	);
@@ -2751,7 +2751,7 @@ function MediaPlayerDownload(props: React.ComponentProps<typeof Button>) {
 				className={cn("size-8", className)}
 				onClick={onDownload}
 			>
-				{children ?? <DownloadIcon />}
+				{children ?? <Download />}
 			</Button>
 		</MediaPlayerTooltip>
 	);
@@ -2886,7 +2886,7 @@ function MediaPlayerSettings(props: MediaPlayerSettingsProps) {
 						size="icon"
 						className={cn("size-8 aria-expanded:bg-accent/50", className)}
 					>
-						<SettingsIcon />
+						<Settings />
 					</Button>
 				</DropdownMenuTrigger>
 			</MediaPlayerTooltip>
@@ -2912,7 +2912,7 @@ function MediaPlayerSettings(props: MediaPlayerSettingsProps) {
 								className="justify-between"
 								onSelect={() => onPlaybackRateChange(speed)}
 							>
-								{speed}x{mediaPlaybackRate === speed && <CheckIcon />}
+								{speed}x{mediaPlaybackRate === speed && <Check />}
 							</DropdownMenuItem>
 						))}
 					</DropdownMenuSubContent>
@@ -2931,7 +2931,7 @@ function MediaPlayerSettings(props: MediaPlayerSettingsProps) {
 								onSelect={() => onRenditionChange("auto")}
 							>
 								Auto
-								{!selectedRenditionId && <CheckIcon />}
+								{!selectedRenditionId && <Check />}
 							</DropdownMenuItem>
 							{mediaRenditionList
 								.slice()
@@ -2956,7 +2956,7 @@ function MediaPlayerSettings(props: MediaPlayerSettingsProps) {
 											onSelect={() => onRenditionChange(rendition.id ?? "")}
 										>
 											{label}
-											{selected && <CheckIcon />}
+											{selected && <Check />}
 										</DropdownMenuItem>
 									);
 								})}
@@ -2976,7 +2976,7 @@ function MediaPlayerSettings(props: MediaPlayerSettingsProps) {
 							onSelect={onSubtitlesToggle}
 						>
 							Off
-							{!isSubtitlesActive && <CheckIcon />}
+							{!isSubtitlesActive && <Check />}
 						</DropdownMenuItem>
 						{mediaSubtitlesList.map((subtitleTrack) => {
 							const isSelected = mediaSubtitlesShowing.some(
@@ -2990,7 +2990,7 @@ function MediaPlayerSettings(props: MediaPlayerSettingsProps) {
 									onSelect={() => onShowSubtitleTrack(subtitleTrack)}
 								>
 									{subtitleTrack.label}
-									{isSelected && <CheckIcon />}
+									{isSelected && <Check />}
 								</DropdownMenuItem>
 							);
 						})}

@@ -1,20 +1,20 @@
 import * as React from "react"
 import type { Editor } from "@tiptap/react"
-import type { toggleVariants } from "@rap/components-base/toggle"
+import type { toggleVariants } from "../../../toggle"
 import type { VariantProps } from "class-variance-authority"
-import { CaretDownIcon, CheckIcon } from "@radix-ui/react-icons"
+import { ChevronDown, Check } from "lucide-react"
 import { ToolbarButton } from "../toolbar-button"
 import {
 	Popover,
 	PopoverTrigger,
 	PopoverContent,
-} from "@rap/components-base/popover"
-import { ToggleGroup, ToggleGroupItem } from "@rap/components-base/toggle-group"
+} from "../../../popover"
+import { ToggleGroup, ToggleGroupItem } from "../../../toggle-group"
 import {
 	Tooltip,
 	TooltipContent,
 	TooltipTrigger,
-} from "@rap/components-base/tooltip"
+} from "../../../tooltip"
 import { useTheme } from "../../hooks/use-theme"
 
 interface ColorItem {
@@ -95,7 +95,7 @@ const MemoizedColorButton = React.memo<{
 					}}
 				>
 					{isSelected && (
-						<CheckIcon
+						<Check
 							className="absolute inset-0 m-auto size-6"
 							style={{ color: inverse }}
 						/>
@@ -202,7 +202,7 @@ export const SectionThree: React.FC<SectionThreeProps> = ({
 						<path d="m6 16 6-12 6 12" />
 						<path d="M8 12h8" />
 					</svg>
-					<CaretDownIcon className="size-5" />
+					<ChevronDown className="size-5" />
 				</ToolbarButton>
 			</PopoverTrigger>
 			<PopoverContent align="start" className="w-full">

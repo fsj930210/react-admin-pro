@@ -1,8 +1,8 @@
 import * as React from "react"
-import { Button } from "@rap/components-base/button"
-import { Label } from "@rap/components-base/label"
-import { Switch } from "@rap/components-base/switch"
-import { Input } from "@rap/components-base/input"
+import { Button } from "../../../button"
+import { Label } from "../../../label"
+import { Switch } from "../../../switch"
+import { Input } from "../../../input"
 import { cn } from "@rap/utils"
 
 export interface LinkEditorProps extends React.ComponentProps<"div"> {

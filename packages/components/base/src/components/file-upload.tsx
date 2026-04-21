@@ -1,5 +1,5 @@
-// 文档地址 https://www.diceui.com/docs/components/radix/file-upload
 "use client";
+// 文档地址 https://www.diceui.com/docs/components/radix/file-upload
 
 import {
 	FileArchiveIcon,

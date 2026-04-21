@@ -1,5 +1,5 @@
-// 文档地址 https://www.diceui.com/docs/components/radix/timeline
 "use client";
+// 文档地址 https://www.diceui.com/docs/components/radix/timeline
 
 import { cva } from "class-variance-authority";
 import {

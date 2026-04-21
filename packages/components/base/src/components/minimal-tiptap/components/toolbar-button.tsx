@@ -4,8 +4,8 @@ import {
 	Tooltip,
 	TooltipContent,
 	TooltipTrigger,
-} from "@rap/components-base/tooltip"
-import { Toggle } from "@rap/components-base/toggle"
+} from "../../tooltip"
+import { Toggle } from "../../toggle"
 import { cn } from "@rap/utils"
 
 interface ToolbarButtonProps extends React.ComponentProps<typeof Toggle> {
