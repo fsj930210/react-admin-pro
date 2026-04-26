@@ -1,9 +1,8 @@
-import { Listbox, ListboxItem, ListboxItemIndicator } from "./listbox";
 import { Checkbox } from "./checkbox";
 import { Label } from "./label";
 import { cn } from "@rap/utils";
 import { useState, useEffect, createContext, use, useMemo, useRef, useCallback } from 'react'
-import { Inbox, SearchIcon } from 'lucide-react'
+import { Inbox, SearchIcon, Check } from 'lucide-react'
 import { InputGroup, InputGroupAddon, InputGroupInput } from "./input-group";
 import { useVirtualizer } from "@tanstack/react-virtual";
 
@@ -31,17 +30,17 @@ interface SelectorContextValue {
 const SelectorContext = createContext<SelectorContextValue | undefined>(undefined);
 
 
-export function useListSelector() {
+export function useSelector() {
 	const context = use(SelectorContext);
 	if (!context) {
-		throw new Error("useListSelector must be used within a ListSelectorRoot");
+		throw new Error("useSelector must be used within a Selector");
 	}
 	return context;
 }
 
-interface SelectorProps {
+export interface SelectorProps {
 	dataSource: SelectorItem[];
-	children: React.ReactNode | ((props: {
+	children?: React.ReactNode | ((props: {
 		filteredItems: SelectorItem[];
 		selectedValues: string[];
 		selectedItems: SelectorItem[];
@@ -50,8 +49,6 @@ interface SelectorProps {
 		onItemsSelect: (values: string[], selected: boolean) => void;
 		onItemSelectAll: (selected: boolean) => void;
 	}) => React.ReactNode);
-	height?: number;
-	className?: string;
 	defaultValue?: string[];
 	value?: string[];
 	onChange?: (value: string[], selectedItems: SelectorItem[]) => void;
@@ -61,9 +58,7 @@ export function Selector({
 	dataSource,
 	defaultValue,
 	value,
-	className,
 	children,
-	height = 400,
 	onChange,
 }: SelectorProps) {
 	const [filteredItems, setFilteredItems] = useState<SelectorItem[]>([]);
@@ -72,7 +67,7 @@ export function Selector({
 
 	const isControlled = value !== undefined;
 	const selectedValues = isControlled ? value : internalSelectedValues;
-	console.log(value, isControlled, selectedValues, 'selectedValues');
+
 	const selectedItems = useMemo(() => {
 		return dataSource.filter(item => selectedValues.includes(item.value));
 	}, [dataSource, selectedValues]);
@@ -88,12 +83,11 @@ export function Selector({
 	}, [defaultValue, isControlled]);
 
 	const handleValueChange = useCallback((newValues: string[]) => {
-		console.log(newValues, 'handleValueChange');
 		if (!isControlled) {
 			setInternalSelectedValues(newValues);
 		}
 		onChange?.(newValues, dataSource.filter(item => newValues.includes(item.value)));
-	}, []);
+	}, [isControlled, onChange, dataSource]);
 
 	const selectItem = useCallback((value: string, selected: boolean) => {
 		let newValues: string[];
@@ -103,7 +97,8 @@ export function Selector({
 			newValues = [...selectedValues, value];
 		}
 		handleValueChange(newValues);
-	}, []);
+	}, [selectedValues, handleValueChange]);
+
 	const selectItems = useCallback((values: string[], selected: boolean) => {
 		let newValues: string[];
 		if (selected) {
@@ -112,7 +107,8 @@ export function Selector({
 			newValues = selectedValues.filter(v => !values.includes(v));
 		}
 		handleValueChange(newValues);
-	}, []);
+	}, [selectedValues, handleValueChange]);
+
 	const selectAll = useCallback((selected: boolean) => {
 		let newValues: string[];
 		if (selected) {
@@ -121,7 +117,7 @@ export function Selector({
 			newValues = [];
 		}
 		handleValueChange(newValues);
-	}, []);
+	}, [filteredItems, handleValueChange]);
 
 	const contextValue: SelectorContextValue = useMemo(() => ({
 		dataSource,
@@ -161,16 +157,21 @@ export function Selector({
 				onItemSelectAll: selectAll,
 			});
 		}
-		return children;
+		if (children) {
+			return children;
+		}
+		return (
+			<SelectorContent>
+				{({ item }) => (
+					<SelectorContentItem item={item} />
+				)}
+			</SelectorContent>
+		);
 	};
 
 	return (
 		<SelectorContext value={contextValue}>
-			<div className={cn("w-full", className)} style={{ height }}>
-				<div className="flex flex-col h-full">
-					{renderChildren()}
-				</div>
-			</div>
+			{renderChildren()}
 		</SelectorContext>
 	);
 }
@@ -200,8 +201,7 @@ export function SelectorContent({ children, className, itemSize = 48, onScroll }
 		selectItem,
 		selectAll,
 		selectItems,
-		handleValueChange,
-	} = useListSelector();
+	} = useSelector();
 	const parentRef = useRef<HTMLDivElement>(null);
 
 	const virtualizer = useVirtualizer({
@@ -214,54 +214,45 @@ export function SelectorContent({ children, className, itemSize = 48, onScroll }
 	return (
 		<div
 			ref={parentRef}
-			className={cn("flex-1 overflow-auto", className)}
+			className={cn("h-100 flex-1 overflow-auto", className)}
 			onScroll={onScroll}
 		>
-			<Listbox
-				multiple
-				orientation="vertical"
-				value={selectedValues}
-				onValueChange={(values) => {
-					handleValueChange(values as string[]);
+			<div
+				style={{
+					height: `${virtualizer.getTotalSize()}px`,
+					width: '100%',
+					position: 'relative',
 				}}
 			>
-				<div
-					style={{
-						height: `${virtualizer.getTotalSize()}px`,
-						width: '100%',
-						position: 'relative',
-					}}
-				>
-					{virtualizer.getVirtualItems().map((virtualItem) => {
-						const item = filteredItems[virtualItem.index];
-						return (
-							<div
-								key={item.value}
-								style={{
-									position: 'absolute',
-									width: '100%',
-									top: 0,
-									left: 0,
-									transform: `translateY(${virtualItem.start}px)`,
-								}}
-							>
-								{
-									children({
-										item,
-										selectedValues,
-										selectedItems,
-										searchValue,
-										index: virtualItem.index,
-										selectItem,
-										selectItems,
-										selectAll,
-									})
-								}
-							</div>
-						);
-					})}
-				</div>
-			</Listbox>
+				{virtualizer.getVirtualItems().map((virtualItem) => {
+					const item = filteredItems[virtualItem.index];
+					return (
+						<div
+							key={item.value}
+							style={{
+								position: 'absolute',
+								width: '100%',
+								top: 0,
+								left: 0,
+								transform: `translateY(${virtualItem.start}px)`,
+							}}
+						>
+							{
+								children({
+									item,
+									selectedValues,
+									selectedItems,
+									searchValue,
+									index: virtualItem.index,
+									selectItem,
+									selectItems,
+									selectAll,
+								})
+							}
+						</div>
+					);
+				})}
+			</div>
 		</div>
 	);
 }
@@ -279,7 +270,7 @@ export function SelectorSearch({
 	onSearch,
 	asyncSearch = false,
 }: SelectorSearchProps) {
-	const { dataSource, setFilteredItems, searchValue, setSearchValue } = useListSelector();
+	const { dataSource, setFilteredItems, searchValue, setSearchValue } = useSelector();
 
 	function handleSearch(value: string) {
 		onSearch?.(value);
@@ -327,7 +318,7 @@ interface SelectorSelectAllProps {
 }
 
 export function SelectorSelectAll({ className }: SelectorSelectAllProps) {
-	const { filteredItems, selectedValues, selectAll } = useListSelector();
+	const { filteredItems, selectedValues, selectAll } = useSelector();
 
 	const isAllSelected = filteredItems.length > 0 && filteredItems.every(item => selectedValues.includes(item.value));
 	const isSomeSelected = filteredItems.some(item => selectedValues.includes(item.value));
@@ -362,14 +353,19 @@ export function SelectorContentItem({
 	className,
 	onSelect,
 }: SelectorContentItemProps) {
-	const { selectedItems, selectedValues, selectItem, searchValue } = useListSelector();
+	const { selectedItems, selectedValues, selectItem, searchValue } = useSelector();
 
-	const handleSelect = (value: string) => {
-
+	const handleSelect = () => {
 		if (item.disabled) return;
-		const selected = selectedValues.includes(value);
-		// selectItem(value, selected);
+		const selected = selectedValues.includes(item.value);
+		selectItem(item.value, selected);
 		onSelect?.(selected, item, { selectedItems, selectedValues });
+	};
+
+	const handleCheckboxChange = () => {
+		if (item.disabled) return;
+		const selected = selectedValues.includes(item.value);
+		selectItem(item.value, selected);
 	};
 
 	const highlightSearchKeyword = (text: string) => {
@@ -389,41 +385,47 @@ export function SelectorContentItem({
 		);
 	};
 
+	const isSelected = selectedValues.includes(item.value);
 
 	if (children) {
 		return (
-			<ListboxItem
-				asChild
-				key={item.value}
-				value={item.value}
-				disabled={item.disabled}
-				onSelect={handleSelect}
-				className={cn("ring-0 p-2", className)}
+			<div
+				className={cn(
+					"flex w-full cursor-pointer select-none items-center justify-between gap-2 rounded-md p-4 outline-hidden focus-visible:ring-ring data-disabled:pointer-events-none data-disabled:opacity-50 data-highlighted:bg-accent data-highlighted:text-accent-foreground hover:bg-accent",
+					item.disabled && "opacity-50 pointer-events-none cursor-not-allowed",
+					className
+				)}
+				onClick={handleSelect}
 			>
 				{children}
-			</ListboxItem>
+			</div>
 		);
 	}
 
 	return (
-		<ListboxItem
-			key={item.value}
-			value={item.value}
-			disabled={item.disabled}
-			onSelect={handleSelect}
-			className={cn("ring-0 p-2", className)}
+		<div
+			className={cn(
+				"flex w-full cursor-pointer select-none items-center justify-between gap-2 rounded-md p-2 outline-hidden focus-visible:ring-ring data-disabled:pointer-events-none data-disabled:opacity-50 hover:bg-accent",
+				item.disabled && "opacity-50 pointer-events-none cursor-not-allowed",
+				isSelected && "bg-accent/50",
+				className
+			)}
+			onClick={handleSelect}
 		>
 			<div className="flex items-center overflow-hidden">
-				<Checkbox
-					checked={selectedValues.includes(item.value)}
-					onCheckedChange={() => handleSelect(item.value)}
-					disabled={item.disabled}
-					className="mr-2"
-				/>
+				<div onClick={(e) => e.stopPropagation()} className="mr-2">
+					<Checkbox
+						checked={isSelected}
+						onCheckedChange={handleCheckboxChange}
+						disabled={item.disabled}
+					/>
+				</div>
 				<span className="flex-1 truncate">{highlightSearchKeyword(item.label)}</span>
 			</div>
-			{selectedValues.includes(item.value) && <ListboxItemIndicator />}
-		</ListboxItem>
+			{isSelected && (
+				<Check className="size-4 text-green-500" />
+			)}
+		</div>
 	);
 }
 
@@ -439,7 +441,7 @@ export function SelectorEmpty({
 	emptyText = "暂无数据",
 	emptyIcon,
 }: SelectorEmptyProps) {
-	const { filteredItems } = useListSelector();
+	const { filteredItems } = useSelector();
 	return filteredItems.length === 0 ? (
 		<div className={cn("h-full text-muted-foreground", className)}>
 			{children || (
@@ -451,4 +453,3 @@ export function SelectorEmpty({
 		</div>
 	) : null;
 }
-

@@ -120,10 +120,10 @@ const allMenus = [
 				status: "enabled" as const,
 			},
 			{
-				id: "list-selector",
-				code: "list-selector",
+				id: "selector",
+				code: "selector",
 				title: "列表选择组件",
-				url: "/components/list-selector",
+				url: "/components/selector",
 				type: "menu" as const,
 				icon: "lucide:list",
 				parentId: "components",

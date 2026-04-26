@@ -149,7 +149,7 @@ function BasicUsage() {
 			</CardHeader>
 			<CardContent>
 				<div className="space-y-4">
-					<Selector dataSource={data} height={400} onChange={setValue} value={value}>
+					<Selector dataSource={data} onChange={setValue} value={value}>
 						<SelectorSearch placeholder="搜索选项..." />
 						<SelectorSelectAll />
 						<SelectorContent>{({ item }) => <SelectorContentItem item={item} />}</SelectorContent>
@@ -211,7 +211,7 @@ function InfiniteScroll() {
 			</CardHeader>
 			<CardContent>
 				<div className="space-y-4">
-					<Selector dataSource={data} value={value} onChange={setValue} height={400}>
+					<Selector dataSource={data} value={value} onChange={setValue}>
 						<SelectorSearch placeholder="搜索选项..." />
 						<SelectorSelectAll />
 						<SelectorContent onScroll={handleScroll}>
@@ -267,7 +267,7 @@ function PaginationExample() {
 			</CardHeader>
 			<CardContent>
 				<div className="space-y-4">
-					<Selector dataSource={data} value={value} onChange={setValue} height={400}>
+					<Selector dataSource={data} value={value} onChange={setValue}>
 						<SelectorSearch placeholder="搜索选项..." />
 						<SelectorSelectAll />
 						<SelectorContent>{({ item }) => <SelectorContentItem item={item} />}</SelectorContent>
@@ -376,7 +376,7 @@ function TreeRendering() {
 			</CardHeader>
 			<CardContent>
 				<div className="space-y-4">
-					<Selector dataSource={data} height={400} onChange={setValue} value={value}>
+					<Selector dataSource={data} onChange={setValue} value={value}>
 						{({ onItemsSelect }) => (
 							<BasicTree
 								treeData={treeData}
@@ -444,7 +444,6 @@ function FormIntegration() {
 								return (
 									<FormItem>
 										<FormLabel>选择项目</FormLabel>
-										<FormLabel>选择项目</FormLabel>
 										<FormControl>
 											<Selector
 												dataSource={data}
@@ -453,7 +452,6 @@ function FormIntegration() {
 													console.log(values, "form change");
 													field.onChange(values);
 												}}
-												height={300}
 											>
 												{/* <ListSelectorSearch placeholder="搜索选项..." /> */}
 												<SelectorSelectAll />
@@ -483,10 +481,10 @@ function RouteComponent() {
 			<h1 className="text-3xl font-bold mb-8">Selector 组件示例</h1>
 
 			<div className="space-y-8">
-				{/* <BasicUsage />
+				<BasicUsage />
 				<InfiniteScroll />
 				<PaginationExample />
-				<TreeRendering /> */}
+				<TreeRendering />
 				<FormIntegration />
 			</div>
 		</div>
