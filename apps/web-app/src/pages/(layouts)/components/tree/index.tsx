@@ -2,7 +2,6 @@ import { Button } from "@rap/components-base/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@rap/components-base/tabs";
 import {
 	DraggableTree as DraggableTreeComponent,
-	DropIndicator,
 	Tree,
 	TreeCheckbox,
 	TreeExpandIcon,
@@ -13,21 +12,14 @@ import {
 import {
 	asyncLoaderFeature,
 	checkableFeature,
-	dndFeature,
 	expandableFeature,
 	selectableFeature,
 } from "@rap/components-base/tree/features";
-import type {
-	DropInfo,
-	TreeInstance,
-	TreeItemInstance,
-	TreeNode,
-} from "@rap/components-base/tree/types";
-import { moveNode } from "@rap/components-base/tree/utils.js";
+import type { TreeItemInstance, TreeNode } from "@rap/components-base/tree/types";
 import { useCopyToClipboard } from "@rap/hooks/use-copy-to-clipboard";
 import { createFileRoute } from "@tanstack/react-router";
 import { Check, Copy } from "lucide-react";
-import { useRef, useState } from "react";
+import { useState } from "react";
 
 export const Route = createFileRoute("/(layouts)/components/tree/")({
 	component: TreeComponentPage,

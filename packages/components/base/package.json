@@ -32,8 +32,9 @@
   },
   "exports": {
     "./*": "./src/components/*.tsx",
-    "./tree": "./src/components/tree",
-    "./tree/*": "./src/components/tree/*",
+    "./tree": "./src/components/tree/index.tsx",
+    "./tree/features": "./src/components/tree/features/index.ts",
+    "./tree/types": "./src/components/tree/types.ts",
     "./sidebar": "./src/components/sidebar/index.tsx",
     "./minimal-tiptap": "./src/components/minimal-tiptap/index.ts"
   },
@@ -42,6 +43,7 @@
     "@diceui/checkbox-group": "catalog:",
     "@diceui/listbox": "catalog:",
     "@diceui/mention": "catalog:",
+    "@diceui/tags-input": "catalog:",
     "@dnd-kit/core": "catalog:",
     "@dnd-kit/modifiers": "catalog:",
     "@dnd-kit/sortable": "catalog:",
@@ -82,7 +84,7 @@
     "qrcode": "catalog:",
     "radix-ui": "catalog:",
     "react": "catalog:",
-    "react-day-picker": "^9.14.0",
+    "react-day-picker": "catalog:",
     "react-dom": "catalog:",
     "react-hook-form": "catalog:",
     "react-medium-image-zoom": "catalog:",

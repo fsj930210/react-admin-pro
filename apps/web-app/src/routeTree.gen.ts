@@ -39,7 +39,9 @@ import { Route as layoutsFeaturesMoveIndexRouteImport } from "./pages/(layouts)/
 import { Route as layoutsFeaturesMinimaxIndexRouteImport } from "./pages/(layouts)/features/minimax/index";
 import { Route as layoutsFeaturesKeepAliveIndexRouteImport } from "./pages/(layouts)/features/keep-alive/index";
 import { Route as layoutsComponentsTreeIndexRouteImport } from "./pages/(layouts)/components/tree/index";
+import { Route as layoutsComponentsTransferIndexRouteImport } from "./pages/(layouts)/components/transfer/index";
 import { Route as layoutsComponentsTableIndexRouteImport } from "./pages/(layouts)/components/table/index";
+import { Route as layoutsComponentsSelectorIndexRouteImport } from "./pages/(layouts)/components/selector/index";
 import { Route as layoutsComponentsRichTextIndexRouteImport } from "./pages/(layouts)/components/rich-text/index";
 import { Route as layoutsComponentsIconIndexRouteImport } from "./pages/(layouts)/components/icon/index";
 import { Route as layoutsNestedMenuNestedMenu2NestedMenu21RouteImport } from "./pages/(layouts)/nested-menu/nested-menu-2/nested-menu-2-1";
@@ -212,10 +214,22 @@ const layoutsComponentsTreeIndexRoute =
     path: "/components/tree/",
     getParentRoute: () => layoutsRouteRoute,
   } as any);
+const layoutsComponentsTransferIndexRoute =
+  layoutsComponentsTransferIndexRouteImport.update({
+    id: "/components/transfer/",
+    path: "/components/transfer/",
+    getParentRoute: () => layoutsRouteRoute,
+  } as any);
 const layoutsComponentsTableIndexRoute =
   layoutsComponentsTableIndexRouteImport.update({
     id: "/components/table/",
     path: "/components/table/",
+    getParentRoute: () => layoutsRouteRoute,
+  } as any);
+const layoutsComponentsSelectorIndexRoute =
+  layoutsComponentsSelectorIndexRouteImport.update({
+    id: "/components/selector/",
+    path: "/components/selector/",
     getParentRoute: () => layoutsRouteRoute,
   } as any);
 const layoutsComponentsRichTextIndexRoute =
@@ -291,7 +305,9 @@ export interface FileRoutesByFullPath {
   "/nested-menu/nested-menu-2/nested-menu-2-1": typeof layoutsNestedMenuNestedMenu2NestedMenu21Route;
   "/components/icon/": typeof layoutsComponentsIconIndexRoute;
   "/components/rich-text/": typeof layoutsComponentsRichTextIndexRoute;
+  "/components/selector/": typeof layoutsComponentsSelectorIndexRoute;
   "/components/table/": typeof layoutsComponentsTableIndexRoute;
+  "/components/transfer/": typeof layoutsComponentsTransferIndexRoute;
   "/components/tree/": typeof layoutsComponentsTreeIndexRoute;
   "/features/keep-alive/": typeof layoutsFeaturesKeepAliveIndexRoute;
   "/features/minimax/": typeof layoutsFeaturesMinimaxIndexRoute;
@@ -332,7 +348,9 @@ export interface FileRoutesByTo {
   "/nested-menu/nested-menu-2/nested-menu-2-1": typeof layoutsNestedMenuNestedMenu2NestedMenu21Route;
   "/components/icon": typeof layoutsComponentsIconIndexRoute;
   "/components/rich-text": typeof layoutsComponentsRichTextIndexRoute;
+  "/components/selector": typeof layoutsComponentsSelectorIndexRoute;
   "/components/table": typeof layoutsComponentsTableIndexRoute;
+  "/components/transfer": typeof layoutsComponentsTransferIndexRoute;
   "/components/tree": typeof layoutsComponentsTreeIndexRoute;
   "/features/keep-alive": typeof layoutsFeaturesKeepAliveIndexRoute;
   "/features/minimax": typeof layoutsFeaturesMinimaxIndexRoute;
@@ -375,7 +393,9 @@ export interface FileRoutesById {
   "/(layouts)/nested-menu/nested-menu-2/nested-menu-2-1": typeof layoutsNestedMenuNestedMenu2NestedMenu21Route;
   "/(layouts)/components/icon/": typeof layoutsComponentsIconIndexRoute;
   "/(layouts)/components/rich-text/": typeof layoutsComponentsRichTextIndexRoute;
+  "/(layouts)/components/selector/": typeof layoutsComponentsSelectorIndexRoute;
   "/(layouts)/components/table/": typeof layoutsComponentsTableIndexRoute;
+  "/(layouts)/components/transfer/": typeof layoutsComponentsTransferIndexRoute;
   "/(layouts)/components/tree/": typeof layoutsComponentsTreeIndexRoute;
   "/(layouts)/features/keep-alive/": typeof layoutsFeaturesKeepAliveIndexRoute;
   "/(layouts)/features/minimax/": typeof layoutsFeaturesMinimaxIndexRoute;
@@ -418,7 +438,9 @@ export interface FileRouteTypes {
     | "/nested-menu/nested-menu-2/nested-menu-2-1"
     | "/components/icon/"
     | "/components/rich-text/"
+    | "/components/selector/"
     | "/components/table/"
+    | "/components/transfer/"
     | "/components/tree/"
     | "/features/keep-alive/"
     | "/features/minimax/"
@@ -459,7 +481,9 @@ export interface FileRouteTypes {
     | "/nested-menu/nested-menu-2/nested-menu-2-1"
     | "/components/icon"
     | "/components/rich-text"
+    | "/components/selector"
     | "/components/table"
+    | "/components/transfer"
     | "/components/tree"
     | "/features/keep-alive"
     | "/features/minimax"
@@ -501,7 +525,9 @@ export interface FileRouteTypes {
     | "/(layouts)/nested-menu/nested-menu-2/nested-menu-2-1"
     | "/(layouts)/components/icon/"
     | "/(layouts)/components/rich-text/"
+    | "/(layouts)/components/selector/"
     | "/(layouts)/components/table/"
+    | "/(layouts)/components/transfer/"
     | "/(layouts)/components/tree/"
     | "/(layouts)/features/keep-alive/"
     | "/(layouts)/features/minimax/"
@@ -743,11 +769,25 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof layoutsComponentsTreeIndexRouteImport;
       parentRoute: typeof layoutsRouteRoute;
     };
+    "/(layouts)/components/transfer/": {
+      id: "/(layouts)/components/transfer/";
+      path: "/components/transfer";
+      fullPath: "/components/transfer/";
+      preLoaderRoute: typeof layoutsComponentsTransferIndexRouteImport;
+      parentRoute: typeof layoutsRouteRoute;
+    };
     "/(layouts)/components/table/": {
       id: "/(layouts)/components/table/";
       path: "/components/table";
       fullPath: "/components/table/";
       preLoaderRoute: typeof layoutsComponentsTableIndexRouteImport;
+      parentRoute: typeof layoutsRouteRoute;
+    };
+    "/(layouts)/components/selector/": {
+      id: "/(layouts)/components/selector/";
+      path: "/components/selector";
+      fullPath: "/components/selector/";
+      preLoaderRoute: typeof layoutsComponentsSelectorIndexRouteImport;
       parentRoute: typeof layoutsRouteRoute;
     };
     "/(layouts)/components/rich-text/": {
@@ -832,7 +872,9 @@ interface layoutsRouteRouteChildren {
   layoutsNestedMenuNestedMenu2NestedMenu21Route: typeof layoutsNestedMenuNestedMenu2NestedMenu21Route;
   layoutsComponentsIconIndexRoute: typeof layoutsComponentsIconIndexRoute;
   layoutsComponentsRichTextIndexRoute: typeof layoutsComponentsRichTextIndexRoute;
+  layoutsComponentsSelectorIndexRoute: typeof layoutsComponentsSelectorIndexRoute;
   layoutsComponentsTableIndexRoute: typeof layoutsComponentsTableIndexRoute;
+  layoutsComponentsTransferIndexRoute: typeof layoutsComponentsTransferIndexRoute;
   layoutsComponentsTreeIndexRoute: typeof layoutsComponentsTreeIndexRoute;
   layoutsFeaturesKeepAliveIndexRoute: typeof layoutsFeaturesKeepAliveIndexRoute;
   layoutsFeaturesMinimaxIndexRoute: typeof layoutsFeaturesMinimaxIndexRoute;
@@ -875,7 +917,9 @@ const layoutsRouteRouteChildren: layoutsRouteRouteChildren = {
     layoutsNestedMenuNestedMenu2NestedMenu21Route,
   layoutsComponentsIconIndexRoute: layoutsComponentsIconIndexRoute,
   layoutsComponentsRichTextIndexRoute: layoutsComponentsRichTextIndexRoute,
+  layoutsComponentsSelectorIndexRoute: layoutsComponentsSelectorIndexRoute,
   layoutsComponentsTableIndexRoute: layoutsComponentsTableIndexRoute,
+  layoutsComponentsTransferIndexRoute: layoutsComponentsTransferIndexRoute,
   layoutsComponentsTreeIndexRoute: layoutsComponentsTreeIndexRoute,
   layoutsFeaturesKeepAliveIndexRoute: layoutsFeaturesKeepAliveIndexRoute,
   layoutsFeaturesMinimaxIndexRoute: layoutsFeaturesMinimaxIndexRoute,

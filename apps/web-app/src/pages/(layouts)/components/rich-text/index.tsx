@@ -1,8 +1,22 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { MinimalTiptapEditor } from "@rap/components-base/minimal-tiptap";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@rap/components-base/card";
+import {
+	Card,
+	CardContent,
+	CardDescription,
+	CardHeader,
+	CardTitle,
+} from "@rap/components-base/card";
 import { Label } from "@rap/components-base/label";
-import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@rap/components-base/table";
+import { MinimalTiptapEditor } from "@rap/components-base/minimal-tiptap";
+import {
+	Table,
+	TableBody,
+	TableCaption,
+	TableCell,
+	TableHead,
+	TableHeader,
+	TableRow,
+} from "@rap/components-base/table";
+import { createFileRoute } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/(layouts)/components/rich-text/")({
 	component: RouteComponent,
@@ -43,16 +57,14 @@ function RouteComponent() {
 			<Card>
 				<CardHeader>
 					<CardTitle>基本使用</CardTitle>
-					<CardDescription>
-						最基础的富文本编辑器使用示例
-					</CardDescription>
+					<CardDescription>最基础的富文本编辑器使用示例</CardDescription>
 				</CardHeader>
 				<CardContent>
 					<div className="space-y-4">
 						<div className="min-h-[300px]">
 							<MinimalTiptapEditor
 								value={defaultContent}
-								onChange={(content) => console.log('Content changed:', content)}
+								onChange={(content) => console.log("Content changed:", content)}
 								placeholder="开始输入内容..."
 								className="min-h-[300px]"
 							/>
@@ -75,9 +87,7 @@ function RouteComponent() {
 			<Card>
 				<CardHeader>
 					<CardTitle>输出格式参数</CardTitle>
-					<CardDescription>
-						通过 output 参数指定不同的输出格式
-					</CardDescription>
+					<CardDescription>通过 output 参数指定不同的输出格式</CardDescription>
 				</CardHeader>
 				<CardContent>
 					<Table>
@@ -92,27 +102,43 @@ function RouteComponent() {
 						</TableHeader>
 						<TableBody>
 							<TableRow>
-								<TableCell><code>"html"</code></TableCell>
+								<TableCell>
+									<code>"html"</code>
+								</TableCell>
 								<TableCell>HTML</TableCell>
-								<TableCell><code>string</code></TableCell>
+								<TableCell>
+									<code>string</code>
+								</TableCell>
 								<TableCell>标准的 HTML 格式，包含所有标签和属性</TableCell>
 							</TableRow>
 							<TableRow>
-								<TableCell><code>"json"</code></TableCell>
+								<TableCell>
+									<code>"json"</code>
+								</TableCell>
 								<TableCell>JSON</TableCell>
-								<TableCell><code>object</code></TableCell>
+								<TableCell>
+									<code>object</code>
+								</TableCell>
 								<TableCell>JSON 格式的编辑器内容，适合程序化处理</TableCell>
 							</TableRow>
 							<TableRow>
-								<TableCell><code>"text"</code></TableCell>
+								<TableCell>
+									<code>"text"</code>
+								</TableCell>
 								<TableCell>纯文本</TableCell>
-								<TableCell><code>string</code></TableCell>
+								<TableCell>
+									<code>string</code>
+								</TableCell>
 								<TableCell>去除所有格式的纯文本内容</TableCell>
 							</TableRow>
 							<TableRow>
-								<TableCell><code>"markdown"</code></TableCell>
+								<TableCell>
+									<code>"markdown"</code>
+								</TableCell>
 								<TableCell>Markdown</TableCell>
-								<TableCell><code>string</code></TableCell>
+								<TableCell>
+									<code>string</code>
+								</TableCell>
 								<TableCell>Markdown 格式，支持表格和任务列表</TableCell>
 							</TableRow>
 						</TableBody>
@@ -162,9 +188,7 @@ function RouteComponent() {
 			<Card>
 				<CardHeader>
 					<CardTitle>其他参数</CardTitle>
-					<CardDescription>
-						常用的配置参数说明
-					</CardDescription>
+					<CardDescription>常用的配置参数说明</CardDescription>
 				</CardHeader>
 				<CardContent>
 					<Table>
@@ -179,45 +203,87 @@ function RouteComponent() {
 						</TableHeader>
 						<TableBody>
 							<TableRow>
-								<TableCell><code>value</code></TableCell>
-								<TableCell><code>Content</code></TableCell>
-								<TableCell><code>undefined</code></TableCell>
+								<TableCell>
+									<code>value</code>
+								</TableCell>
+								<TableCell>
+									<code>Content</code>
+								</TableCell>
+								<TableCell>
+									<code>undefined</code>
+								</TableCell>
 								<TableCell>编辑器的初始内容</TableCell>
 							</TableRow>
 							<TableRow>
-								<TableCell><code>onChange</code></TableCell>
-								<TableCell><code>{`(content: Content) => void`}</code></TableCell>
-								<TableCell><code>undefined</code></TableCell>
+								<TableCell>
+									<code>onChange</code>
+								</TableCell>
+								<TableCell>
+									<code>{`(content: Content) => void`}</code>
+								</TableCell>
+								<TableCell>
+									<code>undefined</code>
+								</TableCell>
 								<TableCell>内容变化时的回调函数</TableCell>
 							</TableRow>
 							<TableRow>
-								<TableCell><code>placeholder</code></TableCell>
-								<TableCell><code>string</code></TableCell>
-								<TableCell><code>""</code></TableCell>
+								<TableCell>
+									<code>placeholder</code>
+								</TableCell>
+								<TableCell>
+									<code>string</code>
+								</TableCell>
+								<TableCell>
+									<code>""</code>
+								</TableCell>
 								<TableCell>编辑器为空时显示的占位文本</TableCell>
 							</TableRow>
 							<TableRow>
-								<TableCell><code>className</code></TableCell>
-								<TableCell><code>string</code></TableCell>
-								<TableCell><code>undefined</code></TableCell>
+								<TableCell>
+									<code>className</code>
+								</TableCell>
+								<TableCell>
+									<code>string</code>
+								</TableCell>
+								<TableCell>
+									<code>undefined</code>
+								</TableCell>
 								<TableCell>编辑器容器的 CSS 类名</TableCell>
 							</TableRow>
 							<TableRow>
-								<TableCell><code>editorContentClassName</code></TableCell>
-								<TableCell><code>string</code></TableCell>
-								<TableCell><code>undefined</code></TableCell>
+								<TableCell>
+									<code>editorContentClassName</code>
+								</TableCell>
+								<TableCell>
+									<code>string</code>
+								</TableCell>
+								<TableCell>
+									<code>undefined</code>
+								</TableCell>
 								<TableCell>编辑器内容区域的 CSS 类名</TableCell>
 							</TableRow>
 							<TableRow>
-								<TableCell><code>throttleDelay</code></TableCell>
-								<TableCell><code>number</code></TableCell>
-								<TableCell><code>0</code></TableCell>
+								<TableCell>
+									<code>throttleDelay</code>
+								</TableCell>
+								<TableCell>
+									<code>number</code>
+								</TableCell>
+								<TableCell>
+									<code>0</code>
+								</TableCell>
 								<TableCell>onChange 回调的节流延迟（毫秒）</TableCell>
 							</TableRow>
 							<TableRow>
-								<TableCell><code>uploader</code></TableCell>
-								<TableCell><code>{`(file: File) => Promise<string>`}</code></TableCell>
-								<TableCell><code>undefined</code></TableCell>
+								<TableCell>
+									<code>uploader</code>
+								</TableCell>
+								<TableCell>
+									<code>{`(file: File) => Promise<string>`}</code>
+								</TableCell>
+								<TableCell>
+									<code>undefined</code>
+								</TableCell>
 								<TableCell>自定义图片上传函数</TableCell>
 							</TableRow>
 						</TableBody>
@@ -254,9 +320,7 @@ function RouteComponent() {
 			<Card>
 				<CardHeader>
 					<CardTitle>功能说明</CardTitle>
-					<CardDescription>
-						编辑器支持的所有功能
-					</CardDescription>
+					<CardDescription>编辑器支持的所有功能</CardDescription>
 				</CardHeader>
 				<CardContent>
 					<div className="grid gap-4 md:grid-cols-2">

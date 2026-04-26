@@ -49,3 +49,13 @@ const request = createFetchClient({
 });
 
 export default request;
+
+export interface Pagination {
+	page: number;
+	page_size: number;
+	total: number;
+}
+export interface BasePaginationResponse<T> {
+	data: T[];
+	pagination: Pagination;
+}
