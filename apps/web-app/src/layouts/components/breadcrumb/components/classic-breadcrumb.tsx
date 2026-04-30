@@ -5,14 +5,14 @@ import {
 	BreadcrumbList,
 	BreadcrumbPage,
 	BreadcrumbSeparator,
-} from "@rap/components-base/breadcrumb";
+} from "@rap/components-ui/breadcrumb";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
 	DropdownMenuItem,
 	DropdownMenuTrigger,
-} from "@rap/components-base/dropdown-menu";
-import { Icon } from "@rap/components-ui/icon";
+} from "@rap/components-ui/dropdown-menu";
+import { Icon } from "@rap/components-pro/icon";
 import { ChevronDown } from "lucide-react";
 import type { BreadcrumbItemProps } from "../types";
 

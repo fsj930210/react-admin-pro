@@ -1,5 +1,5 @@
-import { Avatar, AvatarFallback, AvatarImage } from "@rap/components-base/avatar";
-import { Button } from "@rap/components-base/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@rap/components-ui/avatar";
+import { Button } from "@rap/components-ui/button";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -8,7 +8,7 @@ import {
 	DropdownMenuLabel,
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
-} from "@rap/components-base/dropdown-menu";
+} from "@rap/components-ui/dropdown-menu";
 import { BadgeCheck, CreditCard, LogOut, Settings, User } from "lucide-react";
 
 interface UserCenterFeatureProps {

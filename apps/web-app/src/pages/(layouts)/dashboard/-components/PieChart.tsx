@@ -1,4 +1,4 @@
-import { Card } from "@rap/components-base/card";
+import { Card } from "@rap/components-ui/card";
 import { useTheme } from "@rap/components-ui/theme-provider";
 import { useQuery } from "@tanstack/react-query";
 import { fetchPvUvData } from "@/service/dashboard";

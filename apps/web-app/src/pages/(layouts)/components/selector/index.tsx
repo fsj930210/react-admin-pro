@@ -1,17 +1,16 @@
-/* eslint-disable react-hooks/set-state-in-effect */
+
 /** biome-ignore-all lint:correctness/useExhaustiveDependencies */
 
-import { Button } from "@rap/components-base/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@rap/components-base/card";
+import { Button } from "@rap/components-ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@rap/components-ui/card";
 import {
-	Form,
-	FormControl,
-	FormField,
-	FormItem,
-	FormLabel,
-	FormMessage,
-} from "@rap/components-base/form";
-import { Input } from "@rap/components-base/input";
+	FieldGroup,
+	FieldLabel,
+} from "@rap/components-ui/field";
+import { Form, FormField } from "@rap/components-ui/form";
+import { Input } from "@rap/components-ui/input";
+import { useForm } from "@tanstack/react-form";
+import { z } from "zod";
 import {
 	Pagination,
 	PaginationContent,
@@ -20,7 +19,7 @@ import {
 	PaginationLink,
 	PaginationNext,
 	PaginationPrevious,
-} from "@rap/components-base/pagination";
+} from "@rap/components-ui/pagination";
 import {
 	Selector,
 	SelectorContent,
@@ -29,19 +28,18 @@ import {
 	type SelectorItem,
 	SelectorSearch,
 	SelectorSelectAll,
-} from "@rap/components-base/selector";
-import { Tree, TreeCheckbox, TreeExpandIcon, TreeItem, TreeLabel } from "@rap/components-base/tree";
+} from "@rap/components-ui/selector";
+import { Tree, TreeCheckbox, TreeExpandIcon, TreeItem, TreeLabel } from "@rap/components-ui/tree";
 import {
 	checkableFeature,
 	expandableFeature,
 	selectableFeature,
-} from "@rap/components-base/tree/features";
-import type { TreeItemInstance, TreeNode } from "@rap/components-base/tree/types";
+} from "@rap/components-ui/tree/features";
+import type { TreeItemInstance, TreeNode } from "@rap/components-ui/tree/types";
 import { traverseTree } from "@rap/utils";
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemoizedFn } from "ahooks";
 import { useEffect, useMemo, useState } from "react";
-import { useForm } from "react-hook-form";
 import { fetchSelectorItems } from "@/service/selector";
 
 export const Route = createFileRoute("/(layouts)/components/selector/")({
@@ -257,8 +255,9 @@ function PaginationExample() {
 	};
 
 	useEffect(() => {
+		// eslint-disable-next-line react-hooks/set-state-in-effect
 		loadPageData();
-	}, [currentPage]);
+	}, [currentPage, pageSize]);
 
 	return (
 		<Card>
@@ -404,15 +403,23 @@ function FormIntegration() {
 	const [data] = useState(() => generateData(20));
 	const form = useForm({
 		defaultValues: {
-			selectedItems: [],
+			selectedItems: [] as string[],
 			name: "",
 		},
+		validators: {
+			onChange: z.object({
+				name: z.string().min(1, "名称不能为空"),
+				selectedItems: z.array(z.string()),
+			}),
+			onSubmit: z.object({
+				name: z.string(),
+				selectedItems: z.array(z.string()),
+			}),
+		},
+		onSubmit: ({ value }) => {
+			console.log("表单提交:", value);
+		},
 	});
-
-	const onSubmit = (values: any) => {
-		console.log("表单提交:", values);
-		alert(`表单提交成功！已选择 ${values.selectedItems.length} 项`);
-	};
 
 	return (
 		<Card>
@@ -420,55 +427,57 @@ function FormIntegration() {
 				<CardTitle>结合表单</CardTitle>
 			</CardHeader>
 			<CardContent>
-				<Form {...form}>
-					<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+				<Form
+					form={form}
+					onSubmit={(e) => {
+						e.preventDefault();
+						form.handleSubmit();
+					}}
+					className="space-y-4"
+				>
+					<FieldGroup>
 						<FormField
-							control={form.control}
 							name="name"
-							render={({ field }) => (
-								<FormItem>
-									<FormLabel>名称</FormLabel>
-									<FormControl>
-										<Input {...field} placeholder="请输入名称" />
-									</FormControl>
-									<FormMessage />
-								</FormItem>
+							render={({ field, isInvalid }) => (
+								<>
+									<FieldLabel htmlFor="name">名称</FieldLabel>
+									<Input
+										placeholder="请输入名称"
+										id="name"
+										name={field.name}
+										value={field.state.value}
+										onBlur={field.handleBlur}
+										onChange={(e) => field.handleChange(e.target.value)}
+										aria-invalid={isInvalid}
+									/>
+								</>
 							)}
 						/>
-
 						<FormField
-							control={form.control}
 							name="selectedItems"
-							render={({ field }) => {
-								console.log(field.value, "form render");
-								return (
-									<FormItem>
-										<FormLabel>选择项目</FormLabel>
-										<FormControl>
-											<Selector
-												dataSource={data}
-												value={field.value}
-												onChange={(values) => {
-													console.log(values, "form change");
-													field.onChange(values);
-												}}
-											>
-												{/* <ListSelectorSearch placeholder="搜索选项..." /> */}
-												<SelectorSelectAll />
-												<SelectorContent>
-													{({ item }) => <SelectorContentItem item={item} />}
-												</SelectorContent>
-												<SelectorEmpty />
-											</Selector>
-										</FormControl>
-										<FormMessage />
-									</FormItem>
-								);
-							}}
+							render={({ field }) => (
+								<>
+									<FieldLabel>选择项目</FieldLabel>
+									<Selector
+										dataSource={data}
+										value={field.state.value}
+										onChange={(values) => {
+											field.handleChange(values);
+										}}
+									>
+										<SelectorSearch placeholder="搜索选项..." />
+										<SelectorSelectAll />
+										<SelectorContent>
+											{({ item }) => <SelectorContentItem item={item} />}
+										</SelectorContent>
+										<SelectorEmpty />
+									</Selector>
+								</>
+							)}
 						/>
+					</FieldGroup>
 
-						<Button type="submit">提交</Button>
-					</form>
+					<Button type="submit">提交</Button>
 				</Form>
 			</CardContent>
 		</Card>

@@ -1,4 +1,4 @@
-import { Avatar, AvatarFallback, AvatarImage } from "@rap/components-base/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@rap/components-ui/avatar";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -7,8 +7,8 @@ import {
 	DropdownMenuLabel,
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
-} from "@rap/components-base/dropdown-menu";
-import { SidebarMenu, SidebarMenuButton, SidebarMenuItem } from "@rap/components-base/sidebar";
+} from "@rap/components-ui/dropdown-menu";
+import { SidebarMenu, SidebarMenuButton, SidebarMenuItem } from "@rap/components-ui/sidebar";
 import { useIsMobile } from "@rap/hooks/use-mobile";
 import { cn } from "@rap/utils";
 import { BadgeCheck, Bell, ChevronsUpDown, CreditCard, LogOut, Sparkles } from "lucide-react";

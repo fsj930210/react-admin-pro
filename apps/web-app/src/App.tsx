@@ -1,10 +1,10 @@
-import { Toaster } from "@rap/components-base/sonner";
+import { Toaster } from "@rap/components-ui/sonner";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { createRouter, ErrorComponent, RouterProvider } from "@tanstack/react-router";
 import { routeTree } from "./routeTree.gen";
 import "@bprogress/core/css";
 import { BProgress } from "@bprogress/core";
-import { TooltipProvider } from "@rap/components-base/tooltip";
+import { TooltipProvider } from "@rap/components-ui/tooltip";
 import { ThemeProvider } from "@rap/components-ui/theme-provider";
 import { useEventEmitter } from "ahooks";
 import { APP_BASE_PATH } from "@/config";

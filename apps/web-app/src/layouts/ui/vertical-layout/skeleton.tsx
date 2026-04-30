@@ -3,8 +3,8 @@ import {
 	SidebarContent,
 	SidebarInset,
 	SidebarProvider,
-} from "@rap/components-base/sidebar/index";
-import { Skeleton } from "@rap/components-base/skeleton";
+} from "@rap/components-ui/sidebar/index";
+import { Skeleton } from "@rap/components-ui/skeleton";
 import { SidebarHeader } from "@/layouts/components/sidebar/sidebar-header";
 import {
 	ContentSkeleton,

@@ -66,7 +66,7 @@ const projectMarkdown = `
 - **Keep-Alive**: 页面缓存功能，保持页面状态
 
 ### 组件库
-#### 基础组件 (@rap/components-base)
+#### 基础组件 (@rap/components-ui)
 - Accordion, Alert Dialog, Avatar, Badge
 - Button, Calendar, Card, Carousel
 - Checkbox, Combobox, Command
@@ -77,7 +77,7 @@ const projectMarkdown = `
 - Tabs, Toast, Tooltip
 - 以及更多...
 
-#### 高级组件 (@rap/components-ui)
+#### 高级组件 (@rap/components-pro)
 - **富文本编辑器**: 基于 Tiptap 的 Markdown 编辑器
 - **树形组件**: 支持异步加载、勾选、拖拽、搜索
 - **图标组件**: 图标选择器、图标查看器

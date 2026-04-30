@@ -1,0 +1,50 @@
+{
+	"name": "@rap/components-pro",
+	"version": "0.0.1",
+	"description": "High-level UI components for React Admin Pro built on top of base components",
+	"keywords": [
+		"react",
+		"ui-components",
+		"admin-ui",
+		"layouts",
+		"dashboard",
+		"tailwindcss"
+	],
+	"type": "module",
+	"dependencies": {
+		"@iconify-json/carbon": "catalog:",
+		"@iconify-json/lucide": "catalog:",
+		"@iconify-json/ri": "catalog:",
+		"@iconify/react": "catalog:",
+		"@rap/components-ui": "workspace:*",
+		"@rap/hooks": "workspace:*",
+		"@rap/utils": "workspace:*",
+		"@tanstack/react-virtual": "catalog:",
+		"ahooks": "catalog:",
+		"class-variance-authority": "catalog:",
+		"lodash-es": "catalog:",
+		"lru-cache": "catalog:",
+		"lucide-react": "catalog:",
+		"react": "catalog:",
+		"react-dom": "catalog:"
+	},
+	"exports": {
+		"./input": "./src/components/input/index.tsx",
+		"./icon": "./src/components/icon/index.tsx",
+		"./dialog": "./src/components/dialog/index.tsx"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "catalog:",
+		"@rap/biome-config": "workspace:*",
+		"@rap/eslint-config": "workspace:*",
+		"@rap/tailwindcss-config": "workspace:*",
+		"@rap/tsconfig": "workspace:*",
+		"@types/lodash-es": "catalog:",
+		"@types/node": "catalog:",
+		"@types/react": "catalog:",
+		"@types/react-dom": "catalog:",
+		"eslint": "catalog:",
+		"eslint-config-biome": "catalog:",
+		"typescript": "catalog:"
+	}
+}

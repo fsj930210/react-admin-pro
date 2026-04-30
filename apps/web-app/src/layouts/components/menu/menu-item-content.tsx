@@ -1,4 +1,4 @@
-import { Icon } from "@rap/components-ui/icon";
+import { Icon } from "@rap/components-pro/icon";
 import { cn } from "@rap/utils";
 import type { MenuItem } from "@/layouts/types";
 import { MenuItemBadge } from "./menu-item-badge";

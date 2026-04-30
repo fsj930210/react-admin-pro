@@ -1,14 +1,14 @@
 /** biome-ignore-all lint:a11y/noStaticElementInteractions*/
-import { Button } from "@rap/components-base/button";
+import { Button } from "@rap/components-ui/button";
 import {
 	Card,
 	CardContent,
 	CardDescription,
 	CardHeader,
 	CardTitle,
-} from "@rap/components-base/card";
-import { DialogDescription, DialogTitle } from "@rap/components-base/dialog";
-import { MovableDialog } from "@rap/components-ui/dialog";
+} from "@rap/components-ui/card";
+import { DialogDescription, DialogTitle } from "@rap/components-ui/dialog";
+import { MovableDialog } from "@rap/components-pro/dialog";
 import { useMove } from "@rap/hooks/use-move";
 import { createFileRoute } from "@tanstack/react-router";
 import { useRef, useState } from "react";
@@ -38,9 +38,9 @@ function ContainerExample() {
 					style={
 						position
 							? {
-									transform: `translate(${position.x}px, ${position.y}px)`,
-									willChange: "transform",
-								}
+								transform: `translate(${position.x}px, ${position.y}px)`,
+								willChange: "transform",
+							}
 							: undefined
 					}
 					className="absolute top-10 left-15 w-32 h-32 bg-blue-600 text-white rounded-lg shadow-lg flex flex-col items-center justify-center p-4"
@@ -67,8 +67,8 @@ function ScreenExample() {
 				style={
 					position
 						? {
-								transform: `translate(${position.x}px, ${position.y}px)`,
-							}
+							transform: `translate(${position.x}px, ${position.y}px)`,
+						}
 						: undefined
 				}
 				className="fixed top-25 left-25 z-10 w-32 h-32 bg-purple-600 text-white rounded-lg shadow-lg flex flex-col items-center justify-center p-4"
@@ -100,9 +100,9 @@ function OffsetExample() {
 					style={
 						position
 							? {
-									transform: `translate(${position.x}px, ${position.y}px)`,
-									willChange: "transform",
-								}
+								transform: `translate(${position.x}px, ${position.y}px)`,
+								willChange: "transform",
+							}
 							: undefined
 					}
 					className="absolute top-10 left-15 w-32 h-32 bg-blue-600 text-white rounded-lg shadow-lg flex flex-col items-center justify-center p-4"
@@ -133,9 +133,9 @@ function AxisExample() {
 					style={
 						xPosition
 							? {
-									transform: `translateX(${xPosition.x}px)`,
-									willChange: "transfrom",
-								}
+								transform: `translateX(${xPosition.x}px)`,
+								willChange: "transfrom",
+							}
 							: undefined
 					}
 					className="w-32 h-20 bg-green-600 text-white rounded-lg shadow-lg flex flex-col items-center justify-center p-4"
@@ -147,9 +147,9 @@ function AxisExample() {
 					style={
 						yPosition
 							? {
-									transform: `translateY(${yPosition.y}px)`,
-									willChange: "transfrom",
-								}
+								transform: `translateY(${yPosition.y}px)`,
+								willChange: "transfrom",
+							}
 							: undefined
 					}
 					className="w-20 h-32 bg-teal-600 text-white rounded-lg shadow-lg flex flex-col items-center justify-center p-4"
@@ -173,9 +173,9 @@ function DraggableCard() {
 			style={
 				position
 					? {
-							transform: `translate(${position.x}px, ${position.y}px)`,
-							willChange: "transfrom",
-						}
+						transform: `translate(${position.x}px, ${position.y}px)`,
+						willChange: "transfrom",
+					}
 					: undefined
 			}
 			className={`absolute w-75 shadow-xl`}

@@ -2,7 +2,7 @@ import {
 	SidebarHeader as BaseSidebarHeader,
 	SidebarTrigger,
 	useSidebar,
-} from "@rap/components-base/sidebar";
+} from "@rap/components-ui/sidebar";
 import type { LogoProps } from "@rap/components-ui/logo";
 import { cn } from "@rap/utils";
 import { AppLogo } from "@/components/app/logo";

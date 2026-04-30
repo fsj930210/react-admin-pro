@@ -1,4 +1,4 @@
-import type { SelectorItem } from "@rap/components-base/selector";
+import type { SelectorItem } from "@rap/components-ui/selector";
 import {
 	Transfer,
 	TransferPanel,
@@ -6,7 +6,7 @@ import {
 	MoveToSourceAction,
 	MoveAllToSourceAction,
 	MoveAllToTargetAction,
-} from "@rap/components-base/transfer";
+} from "@rap/components-ui/transfer";
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 

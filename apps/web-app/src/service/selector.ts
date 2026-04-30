@@ -1,4 +1,4 @@
-import type { SelectorItem } from "@rap/components-base/selector";
+import type { SelectorItem } from "@rap/components-ui/selector";
 import type { BasePaginationResponse } from "@/service/fetch";
 import request from "@/service/fetch";
 

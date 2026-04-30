@@ -4,9 +4,9 @@ import {
 	CardDescription,
 	CardHeader,
 	CardTitle,
-} from "@rap/components-base/card";
-import { Label } from "@rap/components-base/label";
-import { MinimalTiptapEditor } from "@rap/components-base/minimal-tiptap";
+} from "@rap/components-ui/card";
+import { Label } from "@rap/components-ui/label";
+import { MinimalTiptapEditor } from "@rap/components-ui/minimal-tiptap";
 import {
 	Table,
 	TableBody,
@@ -15,7 +15,7 @@ import {
 	TableHead,
 	TableHeader,
 	TableRow,
-} from "@rap/components-base/table";
+} from "@rap/components-ui/table";
 import { createFileRoute } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/(layouts)/components/rich-text/")({

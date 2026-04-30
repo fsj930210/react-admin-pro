@@ -1,4 +1,4 @@
-import { Button } from "@rap/components-base/button";
+import { Button } from "@rap/components-ui/button";
 import { cn } from "@rap/utils";
 import Github from "@/assets/icons/github.svg?react";
 import Google from "@/assets/icons/google.svg?react";

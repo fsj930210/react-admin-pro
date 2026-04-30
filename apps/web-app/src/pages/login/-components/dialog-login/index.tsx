@@ -1,4 +1,4 @@
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@rap/components-base/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@rap/components-ui/dialog";
 import { useState } from "react";
 import { LoginForm } from "../login-form";
 

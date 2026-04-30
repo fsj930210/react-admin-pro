@@ -1,4 +1,4 @@
-import { Button } from "@rap/components-base/button";
+import { Button } from "@rap/components-ui/button";
 import { cn } from "@rap/utils";
 import { ChevronLeft, ChevronRight, LayoutGrid, Maximize, Minimize, RotateCw } from "lucide-react";
 import { TabsContextMenu } from "./components/context-menu";

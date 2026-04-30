@@ -1,4 +1,4 @@
-import { Skeleton } from "@rap/components-base/skeleton";
+import { Skeleton } from "@rap/components-ui/skeleton";
 
 export function BreadcrumbSkeleton() {
 	return (

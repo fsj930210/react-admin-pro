@@ -1,11 +1,11 @@
-import { Badge } from "@rap/components-base/badge";
-import { Button } from "@rap/components-base/button";
+import { Badge } from "@rap/components-ui/badge";
+import { Button } from "@rap/components-ui/button";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
 	DropdownMenuItem,
 	DropdownMenuTrigger,
-} from "@rap/components-base/dropdown-menu";
+} from "@rap/components-ui/dropdown-menu";
 import { Bell } from "lucide-react";
 
 interface NotifyFeatureProps {

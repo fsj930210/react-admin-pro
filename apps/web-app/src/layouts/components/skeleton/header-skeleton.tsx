@@ -1,4 +1,4 @@
-import { Skeleton } from "@rap/components-base/skeleton";
+import { Skeleton } from "@rap/components-ui/skeleton";
 import type { ReactNode } from "react";
 import { BreadcrumbSkeleton } from "./breadcrumb-skeleton";
 

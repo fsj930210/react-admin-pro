@@ -1,20 +1,20 @@
 # @rap/components-ui
 
-React Admin Pro 的高级 UI 组件库，基于@rap/components-base 构建，提供了更多业务场景下的复合组件。
+React Admin Pro 的基础组件库，提供了一套基于 Radix UI 的可访问性和可定制性强的 UI 组件。
 
 ## 关键字
 
 - React
 - UI 组件
-- 业务组件
-- 复合组件
-- 高级组件
+- Radix UI
+- 可访问性
+- 主题定制
 
 ## 特性
 
-- 基于@rap/components-base 构建的高级组件
-- 针对常见业务场景优化
-- 提供布局组件、导航组件等复合组件
+- 基于 Radix UI 的无样式组件，提供最大的样式自由度
+- 完全支持键盘导航和屏幕阅读器
+- 支持深色模式和主题定制
 - 完善的 TypeScript 类型支持
 - 与 Tailwind CSS 无缝集成
 
@@ -22,32 +22,40 @@ React Admin Pro 的高级 UI 组件库，基于@rap/components-base 构建，提
 
 包含但不限于以下组件：
 
-- 布局组件 (Layouts)
-  - Dashboard Layout
-  - Auth Layout
-  - Settings Layout
-- 标签页组件 (Tabs)
-  - 自定义标签页
-  - 卡片标签页
-- 加载组件 (Loading)
-  - Spinner
-  - Skeleton
+- Accordion
+- Alert Dialog
+- Avatar
+- Button
+- Checkbox
+- Dialog
+- Dropdown Menu
+- Form
+- Input
+- Label
+- Navigation Menu
+- Popover
+- Progress
+- Radio Group
+- Select
+- Slider
+- Switch
+- Tabs
+- Toast
+- Tooltip
 
 ## 使用方法
 
 ```tsx
-import { DashboardLayout } from "@rap/components-ui/layouts";
+import { Button } from "@rap/components-ui/button";
 
-export default function Dashboard() {
-  return <DashboardLayout>{/* 内容 */}</DashboardLayout>;
+export default function MyComponent() {
+  return <Button variant="default">Click me</Button>;
 }
 ```
 
 ## 依赖
 
 - React 19+
-- @rap/components-base
-- @rap/hooks
-- @rap/utils
+- Radix UI 组件
 - class-variance-authority
-- lucide-react
+- tailwind-merge

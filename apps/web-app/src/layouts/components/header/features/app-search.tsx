@@ -1,5 +1,5 @@
-import { Button } from "@rap/components-base/button";
-import { Input } from "@rap/components-base/input";
+import { Button } from "@rap/components-ui/button";
+import { Input } from "@rap/components-ui/input";
 import { Search, X } from "lucide-react";
 import { useState } from "react";
 

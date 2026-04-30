@@ -1,4 +1,4 @@
-import { Button } from "@rap/components-base/button";
+import { Button } from "@rap/components-ui/button";
 import { createFileRoute, useNavigate, useParams } from "@tanstack/react-router";
 import { useLayout } from "@/layouts/context/layout-context";
 

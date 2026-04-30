@@ -1,4 +1,4 @@
-import { SidebarMenuBadge } from "@rap/components-base/sidebar";
+import { SidebarMenuBadge } from "@rap/components-ui/sidebar";
 import { cn } from "@rap/utils";
 import type { MenuBadge, MenuBadgeColor } from "@/layouts/types";
 

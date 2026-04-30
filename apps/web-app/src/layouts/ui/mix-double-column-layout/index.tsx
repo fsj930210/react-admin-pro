@@ -6,7 +6,7 @@ import {
 	SidebarProvider,
 	SidebarRail,
 	useSidebar,
-} from "@rap/components-base/sidebar";
+} from "@rap/components-ui/sidebar";
 import { cn } from "@rap/utils";
 import { useNavigate, useRouterState } from "@tanstack/react-router";
 import { ChevronsLeft, ChevronsRight } from "lucide-react";

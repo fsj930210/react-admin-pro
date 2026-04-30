@@ -1,14 +1,14 @@
-import { Button } from "@rap/components-base/button";
+import { Button } from "@rap/components-ui/button";
 import {
 	Card,
 	CardContent,
 	CardDescription,
 	CardHeader,
 	CardTitle,
-} from "@rap/components-base/card";
-import { DialogTitle } from "@rap/components-base/dialog";
+} from "@rap/components-ui/card";
+import { DialogTitle } from "@rap/components-ui/dialog";
 
-import { ResizableDialog } from "@rap/components-ui/dialog";
+import { ResizableDialog } from "@rap/components-pro/dialog";
 import { useResize } from "@rap/hooks/use-resize";
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
@@ -39,11 +39,11 @@ function ResizableBlock() {
 			style={
 				size && position
 					? {
-							width: `${size.width}px`,
-							height: `${size.height}px`,
-							transform: `translate(${position.x}px, ${position.y}px)`,
-							willChange: "transform",
-						}
+						width: `${size.width}px`,
+						height: `${size.height}px`,
+						transform: `translate(${position.x}px, ${position.y}px)`,
+						willChange: "transform",
+					}
 					: { width: "250px", height: "250px", cursor: cursor }
 			}
 			className="bg-background border-2 border-border rounded-lg shadow-md"
@@ -91,11 +91,11 @@ function ResizableCard() {
 			style={
 				size && position
 					? {
-							width: `${size.width}px`,
-							height: `${size.height}px`,
-							transform: `translate(${position.x}px, ${position.y}px)`,
-							willChange: "transform",
-						}
+						width: `${size.width}px`,
+						height: `${size.height}px`,
+						transform: `translate(${position.x}px, ${position.y}px)`,
+						willChange: "transform",
+					}
 					: { width: "300px", cursor: cursor }
 			}
 		>

@@ -1,4 +1,4 @@
-import { SidebarInset } from "@rap/components-base/sidebar/index";
+import { SidebarInset } from "@rap/components-ui/sidebar/index";
 import { AppContent } from "@/layouts/components/content";
 
 export function FullscreenLayout() {

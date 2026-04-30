@@ -1,4 +1,4 @@
-import { Button } from "@rap/components-base/button";
+import { Button } from "@rap/components-ui/button";
 import type { QueryClient } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { createRootRouteWithContext, Outlet, useNavigate } from "@tanstack/react-router";

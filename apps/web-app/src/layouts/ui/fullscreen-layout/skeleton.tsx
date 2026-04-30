@@ -1,4 +1,4 @@
-import { SidebarInset } from "@rap/components-base/sidebar/index";
+import { SidebarInset } from "@rap/components-ui/sidebar/index";
 import { ContentSkeleton } from "@/layouts/components/skeleton/content-skeleton";
 
 export function FullscreenLayoutSkeleton() {

@@ -1,4 +1,4 @@
-import { Button } from "@rap/components-base/button";
+import { Button } from "@rap/components-ui/button";
 import {
 	Card,
 	CardContent,
@@ -6,8 +6,8 @@ import {
 	CardFooter,
 	CardHeader,
 	CardTitle,
-} from "@rap/components-base/card";
-import { MinimaxDialog } from "@rap/components-ui/dialog";
+} from "@rap/components-ui/card";
+import { MinimaxDialog } from "@rap/components-pro/dialog";
 import { createFileRoute } from "@tanstack/react-router";
 import { Plus } from "lucide-react";
 

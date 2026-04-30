@@ -1,5 +1,5 @@
-import { useSidebar } from "@rap/components-base/sidebar";
-import { InputWithClear } from "@rap/components-ui/input-with-clear";
+import { useSidebar } from "@rap/components-ui/sidebar";
+import { InputWithClear } from "@rap/components-pro/input";
 import { cn } from "@rap/utils";
 import { Search } from "lucide-react";
 import { useRef, useState } from "react";

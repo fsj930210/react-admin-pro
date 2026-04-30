@@ -4,7 +4,7 @@ import {
 	SidebarInset,
 	SidebarProvider,
 	SidebarRail,
-} from "@rap/components-base/sidebar";
+} from "@rap/components-ui/sidebar";
 import { AppContent } from "@/layouts/components/content";
 import { AppHeader } from "@/layouts/components/header";
 import { SidebarFooter } from "@/layouts/components/sidebar/sidebar-footer";

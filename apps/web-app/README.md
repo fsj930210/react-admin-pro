@@ -8,7 +8,7 @@
 - **构建工具**: Rsbuild, Vite
 - **路由**: @tanstack/react-router
 - **状态管理**: @tanstack/react-query
-- **UI 组件**: @rap/components-base, @rap/components-ui
+- **UI 组件**: @rap/components-ui, @rap/components-pro
 - **表单**: react-hook-form + zod
 - **样式方案**: Tailwind CSS
 - **代码规范**: ESLint, Stylelint, Biome

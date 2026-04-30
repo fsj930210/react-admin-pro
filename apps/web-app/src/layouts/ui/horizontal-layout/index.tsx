@@ -1,4 +1,4 @@
-import { SidebarInset } from "@rap/components-base/sidebar/index";
+import { SidebarInset } from "@rap/components-ui/sidebar/index";
 import { cn } from "@rap/utils";
 import { ChevronDown } from "lucide-react";
 import { useState } from "react";

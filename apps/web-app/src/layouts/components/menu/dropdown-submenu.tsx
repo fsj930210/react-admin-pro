@@ -7,7 +7,7 @@ import {
 	DropdownMenuSubContent,
 	DropdownMenuSubTrigger,
 	DropdownMenuTrigger,
-} from "@rap/components-base/dropdown-menu";
+} from "@rap/components-ui/dropdown-menu";
 import { type ReactNode, useState } from "react";
 import type { MenuItem } from "@/layouts/types";
 import { MenuItemContent } from "./menu-item-content";

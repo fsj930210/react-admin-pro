@@ -20,8 +20,10 @@ export const AppContent = ({ className = "", showTabs = true }: AppContentProps)
 	});
 	eventBus.useSubscription((event: AppEvent<string | string[]>) => {
 		if (event.type === "reload-tab") {
+			// eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
 			keepAliveRef.current?.handleRefreshCache(event.payload as string);
 		} else if (event.type === "remove-tab") {
+			// eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
 			keepAliveRef.current?.handleRemoveCache(event.payload as string[]);
 		} else if (event.type === "maximize-tab") {
 			if (isMaximized) {

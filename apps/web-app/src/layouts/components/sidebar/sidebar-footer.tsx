@@ -1,4 +1,4 @@
-import { SidebarFooter as BaseSidebarFooter } from "@rap/components-base/sidebar";
+import { SidebarFooter as BaseSidebarFooter } from "@rap/components-ui/sidebar";
 import { SidebarUser } from "./sidebar-user";
 
 export function SidebarFooter({ className }: { className?: string }) {

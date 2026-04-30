@@ -4,7 +4,7 @@ import {
 	ContextMenuItem,
 	ContextMenuSeparator,
 	ContextMenuTrigger,
-} from "@rap/components-base/context-menu";
+} from "@rap/components-ui/context-menu";
 import { cn } from "@rap/utils";
 import { ExternalLink, Maximize2, Pin, RefreshCw, X } from "lucide-react";
 import type * as React from "react";

@@ -1,4 +1,4 @@
-import { Button } from "@rap/components-base/button";
+import { Button } from "@rap/components-ui/button";
 import { Maximize, Minimize } from "lucide-react";
 import { useState } from "react";
 

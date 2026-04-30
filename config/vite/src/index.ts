@@ -61,12 +61,12 @@ export function defineViteConfig(config: UserConfig = {}) {
         "jsx",
       ],
     },
-    css: {
-      transformer: "lightningcss",
-      lightningcss: {
-        targets: browserslistToTargets(browserslist(">= 0.25%")),
-      },
-    },
+    // css: {
+    //   transformer: "lightningcss",
+    //   lightningcss: {
+    //     targets: browserslistToTargets(browserslist(">= 0.25%")),
+    //   },
+    // },
     build: {
       cssCodeSplit: true,
       cssMinify: "lightningcss",

@@ -1,4 +1,4 @@
-import { Checkbox } from "@rap/components-base/checkbox";
+import { Checkbox } from "@rap/components-ui/checkbox";
 import {
 	Field,
 	FieldDescription,
@@ -6,8 +6,8 @@ import {
 	FieldLabel,
 	FieldLegend,
 	FieldSet,
-} from "@rap/components-base/field";
-import { Input } from "@rap/components-base/input";
+} from "@rap/components-ui/field";
+import { Input } from "@rap/components-ui/input";
 import {
 	Pagination,
 	PaginationContent,
@@ -16,7 +16,7 @@ import {
 	PaginationLink,
 	PaginationNext,
 	PaginationPrevious,
-} from "@rap/components-base/pagination";
+} from "@rap/components-ui/pagination";
 import {
 	Select,
 	SelectContent,
@@ -24,8 +24,8 @@ import {
 	SelectItem,
 	SelectTrigger,
 	SelectValue,
-} from "@rap/components-base/select";
-// import { Button } from "@rap/components-base/button";
+} from "@rap/components-ui/select";
+// import { Button } from "@rap/components-ui/button";
 // import {
 // 	Dialog,
 // 	DialogContent,
@@ -33,7 +33,7 @@ import {
 // 	DialogHeader,
 // 	DialogTitle,
 // 	DialogTrigger,
-// } from "@rap/components-base/dialog";
+// } from "@rap/components-ui/dialog";
 // import {
 // 	Popover,
 // 	PopoverContent,
@@ -41,9 +41,9 @@ import {
 // 	PopoverHeader,
 // 	PopoverTitle,
 // 	PopoverTrigger,
-// } from "@rap/components-base/popover";
-// import { ScrollArea } from "@rap/components-base/scroll-area";
-// import { Separator } from "@rap/components-base/separator";
+// } from "@rap/components-ui/popover";
+// import { ScrollArea } from "@rap/components-ui/scroll-area";
+// import { Separator } from "@rap/components-ui/separator";
 // import {
 // 	Sheet,
 // 	SheetContent,
@@ -51,8 +51,8 @@ import {
 // 	SheetHeader,
 // 	SheetTitle,
 // 	SheetTrigger,
-// } from "@rap/components-base/sheet";
-import { Textarea } from "@rap/components-base/textarea";
+// } from "@rap/components-ui/sheet";
+import { Textarea } from "@rap/components-ui/textarea";
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 

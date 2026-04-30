@@ -1,10 +1,10 @@
-import { Button } from "@rap/components-base/button";
+import { Button } from "@rap/components-ui/button";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
 	DropdownMenuItem,
 	DropdownMenuTrigger,
-} from "@rap/components-base/dropdown-menu";
+} from "@rap/components-ui/dropdown-menu";
 import { useTheme } from "@rap/components-ui/theme-provider";
 import { Moon, Sun } from "lucide-react";
 

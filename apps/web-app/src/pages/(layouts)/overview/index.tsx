@@ -1,4 +1,4 @@
-import { Button } from "@rap/components-base/button";
+import { Button } from "@rap/components-ui/button";
 import {
 	Dialog,
 	DialogContent,
@@ -6,9 +6,9 @@ import {
 	DialogHeader,
 	DialogTitle,
 	DialogTrigger,
-} from "@rap/components-base/dialog";
+} from "@rap/components-ui/dialog";
 import { Anchor } from "@rap/components-ui/anchor";
-import { Icon } from "@rap/components-ui/icon";
+import { Icon } from "@rap/components-pro/icon";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -39,9 +39,9 @@ function MenuCard({
 		>
 			<div className="text-2xl mb-2">
 				{menu.icon ? (
-					<Icon icon={menu.icon} size={iconSize} />
+					<Icon icon={menu.icon} wrapperClassName="text-2xl" />
 				) : (
-					<Icon icon="lucide:menu" size={iconSize} />
+					<Icon icon="lucide:menu" wrapperClassName="text-2xl" />
 				)}
 			</div>
 			<div className={`text-center ${textSize}`}>{menu.title}</div>
@@ -129,7 +129,7 @@ function AddMenuModal({
 			<DialogTrigger asChild>
 				<div className="size-30 bg-muted p-4 rounded-lg hover:shadow-md transition-shadow cursor-pointer flex-col-center">
 					<div className="text-2xl mb-2">
-						<Icon icon="lucide:plus" size={24} />
+						<Icon icon="lucide:plus" />
 					</div>
 					<div className="text-center text-sm">添加</div>
 				</div>
@@ -153,9 +153,9 @@ function AddMenuModal({
 										key={menu.id}
 									>
 										{menu.icon ? (
-											<Icon icon={menu.icon} size={16} className="mr-2" />
+											<Icon icon={menu.icon} wrapperClassName="mr-2" />
 										) : (
-											<Icon icon="lucide:menu" size={16} className="mr-2" />
+											<Icon icon="lucide:menu" wrapperClassName="mr-2" />
 										)}
 										<span>{menu.title}</span>
 										<button
@@ -163,7 +163,7 @@ function AddMenuModal({
 											className="ml-2 rounded-xs opacity-70 transition-opacity hover:opacity-100 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4"
 											onClick={() => handleRemoveSelected(menu.id)}
 										>
-											<Icon icon="lucide:x" size={16} />
+											<Icon icon="lucide:x" />
 										</button>
 									</div>
 								))}

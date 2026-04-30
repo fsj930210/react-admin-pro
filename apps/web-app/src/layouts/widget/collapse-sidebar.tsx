@@ -1,5 +1,5 @@
-import { Button } from "@rap/components-base/button";
-import { useSidebar } from "@rap/components-base/sidebar";
+import { Button } from "@rap/components-ui/button";
+import { useSidebar } from "@rap/components-ui/sidebar";
 import { PanelLeft, PanelRight } from "lucide-react";
 
 export function CollapseSidebarFeature(props: React.ComponentProps<"button">) {

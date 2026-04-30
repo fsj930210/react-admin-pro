@@ -1,4 +1,4 @@
-import { Button } from "@rap/components-base/button";
+import { Button } from "@rap/components-ui/button";
 import { RefreshCw } from "lucide-react";
 
 export function ReloadFeature(props: React.ComponentProps<"button">) {

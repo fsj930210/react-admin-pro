@@ -1,11 +1,16 @@
 {
-  "extends": "@rap/tsconfig/web.json",
-  "compilerOptions": {
-    "baseUrl": ".",
-    "paths": {
-      "@rap/components-ui/*": ["./src/*"]
-    }
-  },
-  "include": ["."],
-  "exclude": ["node_modules"]
+	"extends": "@rap/tsconfig/web.json",
+	"compilerOptions": {
+		"baseUrl": ".",
+		"paths": {
+			"@rap/components-ui/*": ["./src/*"]
+		},
+		"plugins": [
+			{
+				"name": "next"
+			}
+		]
+	},
+	"include": ["."],
+	"exclude": ["node_modules", "dist"]
 }

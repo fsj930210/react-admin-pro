@@ -2,14 +2,14 @@ import {
 	Collapsible,
 	CollapsibleContent,
 	CollapsibleTrigger,
-} from "@rap/components-base/collapsible";
+} from "@rap/components-ui/collapsible";
 import {
 	SidebarMenu,
 	SidebarMenuButton,
 	SidebarMenuItem,
 	SidebarMenuSub,
 	useSidebar,
-} from "@rap/components-base/sidebar";
+} from "@rap/components-ui/sidebar";
 import { cn } from "@rap/utils";
 import { ChevronRight } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -50,7 +50,7 @@ export function SidebarMain({
 		}
 	};
 	useEffect(() => {
-		// eslint-disable-next-line @eslint-react/set-state-in-effect
+		// eslint-disable-next-line @eslint-react/set-state-in-effect, react-hooks/set-state-in-effect
 		setDisplayMenus(menus);
 	}, [menus]);
 

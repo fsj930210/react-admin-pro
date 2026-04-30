@@ -1,4 +1,4 @@
-import { Card } from "@rap/components-base/card";
+import { Card } from "@rap/components-ui/card";
 import { TrendingDown, TrendingUp } from "lucide-react";
 import type { StatCardData } from "@/service/dashboard";
 
@@ -12,9 +12,8 @@ export const StatCard: React.FC<StatCardProps> = ({ data }) => {
 			<div className="flex justify-between items-start mb-4">
 				<h3 className="text-sm font-medium text-muted-foreground">{data.title}</h3>
 				<div
-					className={`flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${
-						data.trend === "up" ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"
-					}`}
+					className={`flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${data.trend === "up" ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"
+						}`}
 				>
 					{data.trend === "up" ? (
 						<TrendingUp className="w-3 h-3" />

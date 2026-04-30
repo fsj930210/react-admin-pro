@@ -1,4 +1,4 @@
-import { Icon, IconView } from "@rap/components-ui/icon";
+import { Icon, IconView } from "@rap/components-pro/icon";
 import { createFileRoute } from "@tanstack/react-router";
 import logoImage from "@/assets/images/logo.svg";
 import shadcnImage from "@/assets/images/shadcn.jpg";

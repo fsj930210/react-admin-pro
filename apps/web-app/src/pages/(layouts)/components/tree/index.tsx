@@ -1,5 +1,5 @@
-import { Button } from "@rap/components-base/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@rap/components-base/tabs";
+import { Button } from "@rap/components-ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@rap/components-ui/tabs";
 import {
 	DraggableTree as DraggableTreeComponent,
 	Tree,
@@ -8,14 +8,14 @@ import {
 	TreeItem,
 	TreeLabel,
 	VirtualizedTree,
-} from "@rap/components-base/tree";
+} from "@rap/components-ui/tree";
 import {
 	asyncLoaderFeature,
 	checkableFeature,
 	expandableFeature,
 	selectableFeature,
-} from "@rap/components-base/tree/features";
-import type { TreeItemInstance, TreeNode } from "@rap/components-base/tree/types";
+} from "@rap/components-ui/tree/features";
+import type { TreeItemInstance, TreeNode } from "@rap/components-ui/tree/types";
 import { useCopyToClipboard } from "@rap/hooks/use-copy-to-clipboard";
 import { createFileRoute } from "@tanstack/react-router";
 import { Check, Copy } from "lucide-react";
@@ -297,8 +297,8 @@ function TreeComponentPage() {
 				<ExampleContainer
 					title="1. Basic Tree"
 					preview={<BasicTree />}
-					code={`import { Tree, TreeCheckbox, TreeExpandIcon, TreeItem, TreeLabel } from "@rap/components-base/tree";
-import { checkableFeature, expandableFeature, selectableFeature } from "@rap/components-base/tree/features";
+					code={`import { Tree, TreeCheckbox, TreeExpandIcon, TreeItem, TreeLabel } from "@rap/components-ui/tree";
+import { checkableFeature, expandableFeature, selectableFeature } from "@rap/components-ui/tree/features";
 import { useState } from "react";
 
 function BasicTree() {
@@ -338,8 +338,8 @@ function BasicTree() {
 				<ExampleContainer
 					title="2. Virtual Scrolling Tree"
 					preview={<VirtualTree />}
-					code={`import { VirtualizedTree, TreeCheckbox, TreeExpandIcon, TreeItem, TreeLabel } from "@rap/components-base/tree";
-import { checkableFeature, expandableFeature, selectableFeature } from "@rap/components-base/tree/features";
+					code={`import { VirtualizedTree, TreeCheckbox, TreeExpandIcon, TreeItem, TreeLabel } from "@rap/components-ui/tree";
+import { checkableFeature, expandableFeature, selectableFeature } from "@rap/components-ui/tree/features";
 import { useState } from "react";
 
 const dig = (path = "0", level = 2) => {
@@ -390,11 +390,11 @@ function VirtualTree() {
 				<ExampleContainer
 					title="3. Draggable Tree"
 					preview={<DraggableTree />}
-					code={`import { VirtualizedTree, TreeCheckbox, TreeExpandIcon, TreeItem, TreeLabel, DropIndicator } from "@rap/components-base/tree";
-import { checkableFeature, dndFeature, expandableFeature, selectableFeature } from "@rap/components-base/tree/features";
-import { moveNode } from "@rap/components-base/tree/utils.js";
+					code={`import { VirtualizedTree, TreeCheckbox, TreeExpandIcon, TreeItem, TreeLabel, DropIndicator } from "@rap/components-ui/tree";
+import { checkableFeature, dndFeature, expandableFeature, selectableFeature } from "@rap/components-ui/tree/features";
+import { moveNode } from "@rap/components-ui/tree/utils.js";
 import { useRef, useState } from "react";
-import type { DropInfo, TreeInstance, TreeItemInstance, TreeNode } from "@rap/components-base/tree/types";
+import type { DropInfo, TreeInstance, TreeItemInstance, TreeNode } from "@rap/components-ui/tree/types";
 
 const dig = (path = "0", level = 1) => {
   const list = [];
@@ -514,11 +514,11 @@ function DraggableTree() {
 				<ExampleContainer
 					title="4. Async Loading Tree"
 					preview={<AsyncLoadingTree />}
-					code={`import { Tree, TreeCheckbox, TreeItem, TreeLabel } from "@rap/components-base/tree";
-import { checkableFeature, expandableFeature, selectableFeature } from "@rap/components-base/tree/features";
+					code={`import { Tree, TreeCheckbox, TreeItem, TreeLabel } from "@rap/components-ui/tree";
+import { checkableFeature, expandableFeature, selectableFeature } from "@rap/components-ui/tree/features";
 import { useState } from "react";
 import { ChevronDownIcon } from "lucide-react";
-import type { TreeNode } from "@rap/components-base/tree/types";
+import type { TreeNode } from "@rap/components-ui/tree/types";
 
 // Helper function to generate tree nodes
 const dig = (path = "0", level = 1) => {

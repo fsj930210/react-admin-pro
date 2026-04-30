@@ -1,6 +1,6 @@
-import { SidebarInset } from "@rap/components-base/sidebar/index";
+import { SidebarInset } from "@rap/components-ui/sidebar/index";
 
-import { Skeleton } from "@rap/components-base/skeleton";
+import { Skeleton } from "@rap/components-ui/skeleton";
 import { AppLogo } from "@/components/app/logo";
 import { ContentSkeleton, HeaderSkeleton, TabsSkeleton } from "@/layouts/components/skeleton";
 
