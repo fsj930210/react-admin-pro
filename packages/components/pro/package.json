@@ -19,6 +19,7 @@
 		"@rap/components-ui": "workspace:*",
 		"@rap/hooks": "workspace:*",
 		"@rap/utils": "workspace:*",
+		"@tanstack/react-table": "catalog:",
 		"@tanstack/react-virtual": "catalog:",
 		"ahooks": "catalog:",
 		"class-variance-authority": "catalog:",
@@ -31,7 +32,9 @@
 	"exports": {
 		"./input": "./src/components/input/index.tsx",
 		"./icon": "./src/components/icon/index.tsx",
-		"./dialog": "./src/components/dialog/index.tsx"
+		"./dialog": "./src/components/dialog/index.tsx",
+		"./pagination": "./src/components/pagination/index.tsx",
+		"./table": "./src/components/table/index.tsx"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "catalog:",
