@@ -14,7 +14,7 @@ function Pagination({ className, ...props }: React.ComponentProps<"nav">) {
 			role="navigation"
 			aria-label="pagination"
 			data-slot="pagination"
-			className={cn("mx-auto flex w-full justify-center", className)}
+			className={cn("mx-auto flex-center w-full", className)}
 			{...props}
 		/>
 	)
@@ -58,11 +58,12 @@ function PaginationLink({
 			data-disabled={disabled}
 			aria-disabled={disabled}
 			className={cn(
+				'cursor-pointer',
 				buttonVariants({
 					variant: isActive ? "outline" : "ghost",
 					size,
 				}),
-				disabled && "pointer-events-none opacity-50",
+				disabled && "pointer-events-none opacity-50 cursor-not-allowed",
 				className
 			)}
 			{...props}
@@ -82,7 +83,7 @@ function PaginationPrevious({
 			{...props}
 		>
 			<ChevronLeft />
-			<span className="hidden sm:block">Previous</span>
+			<span className="hidden sm:block">上一页</span>
 		</PaginationLink>
 	)
 }
@@ -98,7 +99,7 @@ function PaginationNext({
 			className={cn("gap-1 px-2.5 sm:pr-2.5", className)}
 			{...props}
 		>
-			<span className="hidden sm:block">Next</span>
+			<span className="hidden sm:block">下一页</span>
 			<ChevronRight />
 		</PaginationLink>
 	)

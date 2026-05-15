@@ -1,11 +1,11 @@
 import type { SelectorItem } from "@rap/components-ui/selector";
 import {
-	Transfer,
-	TransferPanel,
-	MoveToTargetAction,
-	MoveToSourceAction,
 	MoveAllToSourceAction,
 	MoveAllToTargetAction,
+	MoveToSourceAction,
+	MoveToTargetAction,
+	Transfer,
+	TransferPanel,
 } from "@rap/components-ui/transfer";
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
@@ -47,16 +47,9 @@ function TransferDemo() {
 		<div className="p-6">
 			<h1 className="text-2xl font-bold mb-6">穿梭框组件演示</h1>
 
-			<Transfer
-				dataSource={allDataSource}
-				value={selectedValues}
-				onChange={setSelectedValues}
-			>
+			<Transfer dataSource={allDataSource} value={selectedValues} onChange={setSelectedValues}>
 				<div className="flex gap-4">
-					<TransferPanel
-						type="source"
-						className="flex-1 border rounded-lg overflow-hidden"
-					/>
+					<TransferPanel type="source" className="flex-1 border rounded-lg overflow-hidden" />
 					<div className="flex flex-col gap-2 pt-20">
 						<MoveToTargetAction />
 
@@ -64,12 +57,8 @@ function TransferDemo() {
 
 						<MoveAllToSourceAction />
 						<MoveAllToTargetAction />
-
 					</div>
-					<TransferPanel
-						type="target"
-						className="flex-1 border rounded-lg overflow-hidden"
-					/>
+					<TransferPanel type="target" className="flex-1 border rounded-lg overflow-hidden" />
 				</div>
 			</Transfer>
 		</div>

@@ -1,14 +1,11 @@
-import { useForm } from "@tanstack/react-form";
-import { z } from "zod";
 import { Button } from "@rap/components-ui/button";
 import { Checkbox } from "@rap/components-ui/checkbox";
-import { Input } from "@rap/components-ui/input";
-import {
-	FieldGroup,
-	FieldLabel,
-} from "@rap/components-ui/field";
+import { FieldGroup, FieldLabel } from "@rap/components-ui/field";
 import { Form, FormField } from "@rap/components-ui/form";
+import { Input } from "@rap/components-ui/input";
 import { cn } from "@rap/utils";
+import { useForm } from "@tanstack/react-form";
+import { z } from "zod";
 import { useAuth } from "../../-hooks/useAuth";
 import { QuickLogForm } from "../quick-login";
 
@@ -39,18 +36,17 @@ export function LoginForm({ className, quickLoginStyle = "inline" }: LoginFormPr
 			onSubmit: formSchema,
 		},
 		onSubmit: ({ value }) => {
-			console.log(value)
+			console.log(value);
 			loginMutation.mutate(value);
-		}
+		},
 	});
-
 
 	return (
 		<Form
 			form={form}
 			onSubmit={(e) => {
-				e.preventDefault()
-				form.handleSubmit()
+				e.preventDefault();
+				form.handleSubmit();
 			}}
 			className={cn("space-y-4", className)}
 		>
@@ -59,9 +55,7 @@ export function LoginForm({ className, quickLoginStyle = "inline" }: LoginFormPr
 					name="username"
 					render={({ field, isInvalid }) => (
 						<>
-							<FieldLabel htmlFor="username">
-								Username
-							</FieldLabel>
+							<FieldLabel htmlFor="username">Username</FieldLabel>
 							<Input
 								placeholder="username"
 								id="username"
@@ -78,9 +72,7 @@ export function LoginForm({ className, quickLoginStyle = "inline" }: LoginFormPr
 					name="password"
 					render={({ field, isInvalid }) => (
 						<>
-							<FieldLabel htmlFor="password">
-								Password
-							</FieldLabel>
+							<FieldLabel htmlFor="password">Password</FieldLabel>
 							<Input
 								type="password"
 								placeholder="password"
@@ -108,9 +100,7 @@ export function LoginForm({ className, quickLoginStyle = "inline" }: LoginFormPr
 								id="remember"
 								name={field.name}
 								checked={field.state.value}
-								onCheckedChange={(checked) =>
-									field.handleChange(checked === true)
-								}
+								onCheckedChange={(checked) => field.handleChange(checked === true)}
 							/>
 							<FieldLabel>Remember me</FieldLabel>
 						</div>

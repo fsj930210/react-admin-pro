@@ -1,5 +1,5 @@
-import { ToggleGroup, ToggleGroupItem } from "@rap/components-ui/toggle-group";
 import { ThemeProvider, useTheme } from "@rap/components-ui/theme-provider";
+import { ToggleGroup, ToggleGroupItem } from "@rap/components-ui/toggle-group";
 import { createFileRoute } from "@tanstack/react-router";
 import type React from "react";
 

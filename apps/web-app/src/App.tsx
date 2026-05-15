@@ -4,8 +4,8 @@ import { createRouter, ErrorComponent, RouterProvider } from "@tanstack/react-ro
 import { routeTree } from "./routeTree.gen";
 import "@bprogress/core/css";
 import { BProgress } from "@bprogress/core";
-import { TooltipProvider } from "@rap/components-ui/tooltip";
 import { ThemeProvider } from "@rap/components-ui/theme-provider";
+import { TooltipProvider } from "@rap/components-ui/tooltip";
 import { useEventEmitter } from "ahooks";
 import { APP_BASE_PATH } from "@/config";
 import { type AppEvent, AppProvider } from "./app-context";

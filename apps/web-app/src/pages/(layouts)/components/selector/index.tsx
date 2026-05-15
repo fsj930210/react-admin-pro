@@ -1,16 +1,10 @@
-
 /** biome-ignore-all lint:correctness/useExhaustiveDependencies */
 
 import { Button } from "@rap/components-ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@rap/components-ui/card";
-import {
-	FieldGroup,
-	FieldLabel,
-} from "@rap/components-ui/field";
+import { FieldGroup, FieldLabel } from "@rap/components-ui/field";
 import { Form, FormField } from "@rap/components-ui/form";
 import { Input } from "@rap/components-ui/input";
-import { useForm } from "@tanstack/react-form";
-import { z } from "zod";
 import {
 	Pagination,
 	PaginationContent,
@@ -37,9 +31,11 @@ import {
 } from "@rap/components-ui/tree/features";
 import type { TreeItemInstance, TreeNode } from "@rap/components-ui/tree/types";
 import { traverseTree } from "@rap/utils";
+import { useForm } from "@tanstack/react-form";
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemoizedFn } from "ahooks";
 import { useEffect, useMemo, useState } from "react";
+import { z } from "zod";
 import { fetchSelectorItems } from "@/service/selector";
 
 export const Route = createFileRoute("/(layouts)/components/selector/")({

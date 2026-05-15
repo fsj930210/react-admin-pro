@@ -1,3 +1,5 @@
+import { Icon } from "@rap/components-pro/icon";
+import { Anchor } from "@rap/components-ui/anchor";
 import { Button } from "@rap/components-ui/button";
 import {
 	Dialog,
@@ -7,8 +9,6 @@ import {
 	DialogTitle,
 	DialogTrigger,
 } from "@rap/components-ui/dialog";
-import { Anchor } from "@rap/components-ui/anchor";
-import { Icon } from "@rap/components-pro/icon";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { toast } from "sonner";

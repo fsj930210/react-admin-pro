@@ -61,6 +61,7 @@
 	--anchor-border: oklch(0.8 0 0);
 	--anchor-foreground: oklch(0.556 0 0);
 	--anchor-foreground-hover: oklch(0.145 0 0);
+	--table-filter-active: #1890ff;
 }
 
 .dark {
@@ -112,6 +113,7 @@
 	--anchor-border: oklch(0.4 0 0);
 	--anchor-foreground: oklch(0.6 0 0);
 	--anchor-foreground-hover: oklch(0.985 0 0);
+	--table-filter-active: oklch(0.7 0.08 220);
 }
 
 @theme inline {
@@ -166,6 +168,7 @@
 	--color-anchor-border: var(--anchor-border);
 	--color-anchor-foreground: var(--anchor-foreground);
 	--color-anchor-foreground-hover: var(--anchor-foreground-hover);
+	--color-table-filter-active: var(--table-filter-active);
 	--animate-marquee-left: marquee-left var(--marquee-duration) linear var(--marquee-loop-count);
 	--animate-marquee-right: marquee-right var(--marquee-duration) linear var(--marquee-loop-count);
 	--animate-marquee-left-rtl: marquee-left-rtl var(--marquee-duration) linear var(--marquee-loop-count);

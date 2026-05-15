@@ -1,3 +1,4 @@
+import { Icon } from "@rap/components-pro/icon";
 import {
 	Breadcrumb as BreadcrumbBase,
 	BreadcrumbItem,
@@ -5,7 +6,6 @@ import {
 	BreadcrumbList,
 	BreadcrumbPage,
 } from "@rap/components-ui/breadcrumb";
-import { Icon } from "@rap/components-pro/icon";
 import type { BreadcrumbItemProps } from "../types";
 
 export function ParallelogramBreadcrumb({ data, onBreadcrumbItemClick }: BreadcrumbItemProps) {

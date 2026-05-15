@@ -1,10 +1,4 @@
-import {
-	Card,
-	CardContent,
-	CardDescription,
-	CardHeader,
-	CardTitle,
-} from "@rap/components-ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@rap/components-ui/card";
 import { Label } from "@rap/components-ui/label";
 import { MinimalTiptapEditor } from "@rap/components-ui/minimal-tiptap";
 import {

@@ -1,3 +1,4 @@
+import { MinimaxDialog } from "@rap/components-pro/dialog";
 import { Button } from "@rap/components-ui/button";
 import {
 	Card,
@@ -7,7 +8,6 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@rap/components-ui/card";
-import { MinimaxDialog } from "@rap/components-pro/dialog";
 import { createFileRoute } from "@tanstack/react-router";
 import { Plus } from "lucide-react";
 
