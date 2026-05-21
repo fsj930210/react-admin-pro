@@ -355,10 +355,23 @@ export function BasicDataGrid() {
 			}}
 			columnResizing={{
 				enable: true,
+				onChange: (sizing) => {
+					console.log("列大小改变了:", sizing);
+				}
 			}}
 			columnOrder={{
 				enable: true,
-				enableDragOrder: true,
+				enableDrag: true,
+				onChange: (order) => {
+					console.log("列顺序改变了:", order);
+				}
+			}}
+			rowOrder={{
+				enable: true,
+				enableDrag: true,
+				onChange: (order) => {
+					console.log("行顺序改变了:", order);
+				}
 			}}
 		/>
 	);

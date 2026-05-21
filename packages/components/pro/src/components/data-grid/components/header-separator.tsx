@@ -1,5 +1,6 @@
 import { cn } from "@rap/utils";
 import type { Header } from "@tanstack/react-table";
+import type { MouseEvent, TouchEvent } from "react";
 
 interface HeaderSeparatorProps<TData> {
 	header: Header<TData, unknown>;
@@ -8,11 +9,22 @@ interface HeaderSeparatorProps<TData> {
 export function HeaderSeparator<TData>({ header, border }: HeaderSeparatorProps<TData>) {
 	const isResizing = header.column.getIsResizing();
 	const canResize = header.column.getCanResize();
+	const resizeHandler = header.getResizeHandler();
+
+	const handleResizeMouseDown = (event: MouseEvent<HTMLDivElement>) => {
+		event.stopPropagation();
+		resizeHandler(event);
+	};
+
+	const handleResizeTouchStart = (event: TouchEvent<HTMLDivElement>) => {
+		event.stopPropagation();
+		resizeHandler(event);
+	};
 
 	return (
 		<div
-			onMouseDown={canResize ? header.getResizeHandler() : undefined}
-			onTouchStart={canResize ? header.getResizeHandler() : undefined}
+			onMouseDown={canResize ? handleResizeMouseDown : undefined}
+			onTouchStart={canResize ? handleResizeTouchStart : undefined}
 			className={cn(
 				"absolute right-0 top-0 h-full z-2 w-2",
 				"after:absolute after:h-1/2 after:w-0.5 after:top-1/2 after:-translate-y-1/2 after:left-1/2 after:translate-x-1/2 after:bg-border transition-all",

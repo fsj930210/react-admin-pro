@@ -1,4 +1,4 @@
-import type { ColumnOrderConfig, ColumnResizingConfig } from "../types";
+import type { ColumnOrderConfig, ColumnResizingConfig, RowOrderConfig } from "../types";
 
 
 
@@ -10,5 +10,8 @@ export const defaultColumnResizingConfig: ColumnResizingConfig = {
 	defaultSize: 120,
 }
 export const defaultColumnOrderConfig: ColumnOrderConfig = {
+	enable: false,
+}
+export const defaultRowOrderConfig: RowOrderConfig = {
 	enable: false,
 }

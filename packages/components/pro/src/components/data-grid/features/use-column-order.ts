@@ -1,4 +1,4 @@
-import { useMemo, useRef } from "react";
+import { useMemo, useRef, useState } from "react";
 import type {
   ColumnDef,
   ColumnOrderState,
@@ -41,7 +41,10 @@ export function useColumnOrder<TData>(
   );
 
   const safeColumnOrder = normalizeColumnOrder(columnOrder, model, fallbackOrder);
+  const [activeColumnId, setActiveColumnId] = useState<string | undefined>();
+  const [previewColumnOrder, setPreviewColumnOrder] = useState<string[]>(safeColumnOrder);
   const initialOrderRef = useRef(safeColumnOrder);
+  const previewColumnOrderRef = useRef(safeColumnOrder);
   const lastDragTargetRef = useRef<string | undefined>(undefined);
 
   const setColumnOrder: OnChangeFn<ColumnOrderState> = (updater) => {
@@ -56,8 +59,19 @@ export function useColumnOrder<TData>(
     }
   };
 
-  const handleDragStart = (_: DragStartEvent) => {
+  const handleDragStart = (event: DragStartEvent) => {
+    const source = event.operation.source;
+
+    if (source?.type !== "column") return;
+
+    const sourceId = source.id == null
+      ? undefined
+      : String(source.id);
+
     initialOrderRef.current = safeColumnOrder;
+    previewColumnOrderRef.current = safeColumnOrder;
+    setPreviewColumnOrder(safeColumnOrder);
+    setActiveColumnId(sourceId);
     lastDragTargetRef.current = undefined;
   };
 
@@ -74,15 +88,39 @@ export function useColumnOrder<TData>(
     }
 
     lastDragTargetRef.current = targetId;
-    setColumnOrder((order) => moveColumnByTarget(order, sourceId, targetId, model));
+    const nextOrder = moveColumnByTarget(
+      previewColumnOrderRef.current,
+      sourceId,
+      targetId,
+      model
+    );
+
+    previewColumnOrderRef.current = nextOrder;
+    setPreviewColumnOrder(nextOrder);
   };
 
   const handleDragEnd = (event: DragEndEvent) => {
+    if (event.operation.source?.type !== "column") return;
+
+    const nextOrder = previewColumnOrderRef.current;
+
     lastDragTargetRef.current = undefined;
 
     if (event.canceled) {
       setColumnOrder(initialOrderRef.current);
+      previewColumnOrderRef.current = initialOrderRef.current;
+      setPreviewColumnOrder(initialOrderRef.current);
+      setActiveColumnId(undefined);
+      return;
     }
+
+    if (!isSameOrder(safeColumnOrder, nextOrder)) {
+      setColumnOrder(nextOrder);
+    }
+
+    previewColumnOrderRef.current = nextOrder;
+    setPreviewColumnOrder(nextOrder);
+    setActiveColumnId(undefined);
   };
 
   const moveColumns = (columnIds: string[], toIndex: number) => {
@@ -114,6 +152,14 @@ export function useColumnOrder<TData>(
           onDragStart: handleDragStart,
           onDragOver: handleDragOver,
           onDragEnd: handleDragEnd,
+        }
+      : undefined,
+    columnOrderDrag: enabled && enableDrag
+      ? {
+          activeColumnId,
+          columnOrder: safeColumnOrder,
+          previewColumnOrder: activeColumnId == null ? safeColumnOrder : previewColumnOrder,
+          isDragging: activeColumnId != null,
         }
       : undefined,
     enableDrag: enabled && enableDrag,

@@ -1,9 +1,17 @@
-import { DragDropProvider } from "@dnd-kit/react";
-import type { ComponentProps } from "react";
+import { DragDropProvider, DragOverlay } from "@dnd-kit/react";
+import type { ComponentProps, ReactNode } from "react";
 
-export function DndContainer(props: ComponentProps<typeof DragDropProvider>) {
+interface DndContainerProps extends ComponentProps<typeof DragDropProvider> {
+	overlay?: ReactNode;
+}
+
+export function DndContainer({ children, overlay, ...props }: DndContainerProps) {
   return (
-    <DragDropProvider {...props}
-    />
+    <DragDropProvider {...props}>
+      {children}
+      <DragOverlay>
+        {overlay}
+      </DragOverlay>
+    </DragDropProvider>
   );
 }

@@ -1,24 +1,32 @@
 import type { ColumnDef, RowData, TableState } from "@tanstack/react-table";
-import type { DataGridFeature, ColumnOrderConfig, DataGridConfig } from "../types";
+import type { DataGridFeature, ColumnOrderConfig, ColumnResizingConfig, DataGridConfig, DataGridFeatureContext, RowOrderConfig } from "../types";
 import type { DragEndEvent, DragOverEvent, DragStartEvent } from "@dnd-kit/abstract";
 import { useColumnOrder } from "./use-column-order";
+import { useColumnResizing } from "./use-column-resizing";
+import { useRowOrder } from "./use-row-order";
 
 type FeatureHook<TData, TConfig = unknown> = (
 	columns: ColumnDef<TData>[],
-	config?: TConfig
-) => ReturnType<typeof useColumnOrder<TData>>;
+	config?: TConfig,
+	context?: DataGridFeatureContext<TData>
+) => DataGridFeature;
 
 interface FeatureHooks {
+	columnResizing: FeatureHook<RowData, ColumnResizingConfig>;
 	columnOrder: FeatureHook<RowData, ColumnOrderConfig>;
+	rowOrder: FeatureHook<RowData, RowOrderConfig>;
 }
 
 const featureHooks: FeatureHooks = {
+	columnResizing: useColumnResizing,
 	columnOrder: useColumnOrder,
+	rowOrder: useRowOrder,
 };
 
 export function useComposeFeatures<TData>(
 	columns: ColumnDef<TData>[],
-	features: DataGridConfig
+	features: DataGridConfig,
+	context: DataGridFeatureContext<TData>
 ): DataGridFeature {
 	const composedState: Partial<TableState> = {};
 	const composedCallbacks: Record<string, (...args: any[]) => any> = {};
@@ -26,6 +34,8 @@ export function useComposeFeatures<TData>(
 	const dndCallbacksList: Array<ReturnType<FeatureHook<TData>>["dndCallbacks"]> = [];
 	let composedEnableDrag = false;
 	let composedDragType: 'column' | 'row' | undefined = undefined;
+	let composedColumnOrderDrag: DataGridFeature["columnOrderDrag"] = undefined;
+	let composedRowOrderDrag: DataGridFeature["rowOrderDrag"] = undefined;
 
 	for (const [featureName, config] of Object.entries(features)) {
 		if (config === false) {
@@ -37,7 +47,7 @@ export function useComposeFeatures<TData>(
 			continue;
 		}
 
-		const { state, callbacks, api, enableDrag, dndCallbacks, dragType } = hook(columns, config === true ? undefined : config);
+		const { state, callbacks, api, enableDrag, dndCallbacks, dragType, columnOrderDrag, rowOrderDrag } = hook(columns, config === true ? undefined : config, context);
 
 		Object.assign(composedState, state);
 		Object.assign(composedCallbacks, callbacks);
@@ -46,6 +56,14 @@ export function useComposeFeatures<TData>(
 		if (enableDrag) {
 			composedEnableDrag = true;
 			composedDragType = dragType;
+		}
+
+		if (columnOrderDrag) {
+			composedColumnOrderDrag = columnOrderDrag;
+		}
+
+		if (rowOrderDrag) {
+			composedRowOrderDrag = rowOrderDrag;
 		}
 
 		if (dndCallbacks) {
@@ -77,6 +95,8 @@ export function useComposeFeatures<TData>(
 		api: composedApi,
 		enableDrag: composedEnableDrag,
 		dndCallbacks: composedDndCallbacks,
+		columnOrderDrag: composedColumnOrderDrag,
+		rowOrderDrag: composedRowOrderDrag,
 		dragType: composedDragType,
 	};
 }

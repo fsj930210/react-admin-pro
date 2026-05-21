@@ -23,8 +23,8 @@ export function useControllableState<T>(
   });
 
   useEffect(() => {
-    if(propsValue === undefined && !isFirstRender.current) {
-      setStateValue(propsValue!);
+    if(propsValue !== undefined && !isFirstRender.current) {
+      setStateValue(propsValue);
     }
 
     isFirstRender.current = false;
@@ -43,7 +43,7 @@ export function useControllableState<T>(
       setStateValue(res);
     }
     onChange?.(res);
-  }, [stateValue]);
+  }, [onChange, propsValue, stateValue]);
 
   return [mergedValue, setState]
 }

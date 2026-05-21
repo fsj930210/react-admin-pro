@@ -4,14 +4,21 @@ import type {
 	ColumnOrderState,
 	ColumnSizingState,
 	OnChangeFn,
+	Row,
 	RowData,
 	TableState
 } from "@tanstack/react-table";
+
+export type DataUpdater<TData> = TData[] | ((prev: TData[]) => TData[]);
 
 
 declare module "@tanstack/react-table" {
 	export interface ColumnMeta<TData extends RowData, TValue = unknown> {
 		parentId: string | undefined;
+	}
+	export interface TableMeta<TData extends RowData> {
+		updateData?: (updater: DataUpdater<TData>) => void;
+		updateCellData?: (rowIndex: number, columnId: string, value: unknown) => void;
 	}
 }
 export interface DataGridRef {
@@ -36,9 +43,16 @@ export interface ColumnOrderConfig {
 	enableDrag?: boolean;
 	onChange?: (columnOrder: string[]) => void;
 }
+
+export interface RowOrderConfig {
+	enable?: boolean;
+	enableDrag?: boolean;
+	onChange?: (rowOrder: string[]) => void;
+}
 export interface DataGridConfig {
 	columnResizing?: ColumnResizingConfig;
 	columnOrder?: ColumnOrderConfig;
+	rowOrder?: RowOrderConfig;
 }
 
 export interface DndCallbacks {
@@ -46,8 +60,24 @@ export interface DndCallbacks {
 	onDragEnd?: (e: DragEndEvent) => void;
 	onDragOver?: (e: DragOverEvent) => void;
 }
+export interface ColumnOrderDragState {
+	activeColumnId?: string;
+	columnOrder: string[];
+	previewColumnOrder: string[];
+	isDragging: boolean;
+}
+export interface RowOrderDragState {
+	activeRowId?: string;
+	isDragging: boolean;
+}
+export interface DataGridFeatureContext<TData> {
+	data: TData[];
+	getRowId: (row: TData, index: number, parentRow?: Row<TData>) => string;
+	updateData?: (updater: DataUpdater<TData>) => void;
+}
 export interface Callbacks {
 	onColumnOrderChange?: OnChangeFn<ColumnOrderState>
+	onColumnSizingChange?: OnChangeFn<ColumnSizingState>
 	onPaginationChange?: OnChangeFn<TableState["pagination"]>
 	onSortingChange?: OnChangeFn<TableState["sorting"]>
 	onColumnFiltersChange?: OnChangeFn<TableState["columnFilters"]>
@@ -64,10 +94,13 @@ export interface DataGridFeature{
 	callbacks?: Partial<Callbacks>;
 	api?: Record<string, unknown>;
 	dndCallbacks?: DndCallbacks;
+	columnOrderDrag?: ColumnOrderDragState;
+	rowOrderDrag?: RowOrderDragState;
 	enableDrag?: boolean;
 	dragType?: 'column' | 'row';
 }
 export type DataTableFeatureHook<TData, TConfig = DataGridConfig> = (
 	columns: ColumnDef<TData>[],
-	config?: TConfig
+	config?: TConfig,
+	context?: DataGridFeatureContext<TData>
 ) => DataGridFeature
