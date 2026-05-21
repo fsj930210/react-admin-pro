@@ -14,13 +14,6 @@ interface User {
 	createdAt: string
 }
 
-const users: User[] = [
-	{ id: "1", name: "张三", email: "zhangsan@example.com", role: "管理员", createdAt: "2024-01-15" },
-	{ id: "2", name: "李四", email: "lisi@example.com", role: "编辑", createdAt: "2024-02-20" },
-	{ id: "3", name: "王五", email: "wangwu@example.com", role: "用户", createdAt: "2024-03-10" },
-	{ id: "4", name: "赵六", email: "zhaoliu@example.com", role: "编辑", createdAt: "2024-04-05" },
-	{ id: "5", name: "钱七", email: "qianqi@example.com", role: "用户", createdAt: "2024-05-18" },
-]
 
 export function BasicDataGrid() {
 	const [users, setUsers] = useState<User[]>([]);
@@ -362,6 +355,10 @@ export function BasicDataGrid() {
 			}}
 			columnResizing={{
 				enable: true,
+			}}
+			columnOrder={{
+				enable: true,
+				enableDragOrder: true,
 			}}
 		/>
 	);

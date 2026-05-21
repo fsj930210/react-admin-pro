@@ -37,6 +37,10 @@ function normalizeColumns<TData>(
 		return {
 			...column,
 			id,
+			meta: {
+				...column.meta,
+				parentId,
+			},
 			...(nestedColumns !== undefined && { columns: nestedColumns }),
 		};
 	});

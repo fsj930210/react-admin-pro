@@ -20,13 +20,12 @@ interface DataGridHeaderProps<TData> {
 export function DataGridHeader<TData>({ table, enableDrag, dragType, border, config }: DataGridHeaderProps<TData>) {
 
 	return (
-		<div className="bg-muted" >
+		<div className="bg-muted w-full" >
 			{table.getHeaderGroups().map((headerGroup) => {
 				return (
 					<GridRow key={headerGroup.id}>
 						{headerGroup.headers.map((header, index) => {
-							if (header.isPlaceholder) return null;
-							return enableDrag && dragType === 'column' ? (
+							return enableDrag && dragType === 'column' && !header.isPlaceholder ? (
 								<SortableHeaderCell
 									key={header.id}
 									header={header}

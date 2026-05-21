@@ -26,7 +26,7 @@ export function DataGridBody<TData>({
 }: DataGridBodyProps<TData>) {
 	const rows = table.getRowModel().rows
 	return (
-		<div className="w-max">
+		<div className="w-full">
 			{rows.map((row, index) => (
 				enableDrag && dragType === 'row' ? (
 					<SortableRow<TData>

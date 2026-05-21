@@ -11,6 +11,4 @@ export const defaultColumnResizingConfig: ColumnResizingConfig = {
 }
 export const defaultColumnOrderConfig: ColumnOrderConfig = {
 	enable: false,
-	defaultColumnOrder: [],
-	columnOrder: [],
 }

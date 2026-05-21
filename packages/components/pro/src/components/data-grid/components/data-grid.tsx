@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { useImperativeHandle, type ReactNode, type Ref } from "react";
 
 import { getCoreRowModel, useReactTable, type ColumnDef, type Row, type Table, } from "@tanstack/react-table";
 import { OverlayScrollbarsComponent } from 'overlayscrollbars-react';
@@ -7,9 +7,11 @@ import { DataGridHeader } from "./grid-header";
 import { DataGridBody } from "./grid-body";
 import { useNormalizeColumns } from "../hooks/use-normalize-columns";
 import { Grid } from "./grid";
-import type { ColumnOrderConfig, ColumnResizingConfig, DataGridConfig } from "../types";
+import type { ColumnOrderConfig, ColumnResizingConfig, DataGridConfig, DataGridRef } from "../types";
 import { useMergedValue } from "../hooks/use-merged-value";
 import { defaultColumnOrderConfig, defaultColumnResizingConfig } from "../utils/default-config";
+import { useComposeFeatures } from "../features/use-compose-features";
+import { DndContainer } from "./dnd-container";
 
 
 export interface DataGridProps<TData> {
@@ -21,6 +23,7 @@ export interface DataGridProps<TData> {
 	footer?: ReactNode | ((table: Table<TData>, config: DataGridConfig) => ReactNode);
 	columnResizing?: ColumnResizingConfig;
 	columnOrder?: ColumnOrderConfig;
+	ref?: Ref<DataGridRef>;
 }
 
 export function DataGrid<TData>({
@@ -30,6 +33,7 @@ export function DataGrid<TData>({
 	border = false,
 	scroll,
 	footer,
+	ref,
 	columnResizing: userColumnResizingConfig,
 	columnOrder: userColumnOrderConfig,
 }: DataGridProps<TData>) {
@@ -41,7 +45,17 @@ export function DataGrid<TData>({
 		columnResizing: userColumnResizingConfig,
 		columnOrder: userColumnOrderConfig,
 	});
-	const { columnResizing, columnOrder } = config;
+	const { columnResizing } = config;
+
+	const {
+		state,
+		callbacks,
+		dndCallbacks,
+		enableDrag,
+		dragType,
+		api
+	} = useComposeFeatures(columns, config);
+
 
 	const coreRowModel = getCoreRowModel();
 	const table = useReactTable({
@@ -54,42 +68,60 @@ export function DataGrid<TData>({
 			minSize: columnResizing.minSize,
 			maxSize: columnResizing.maxSize,
 		},
+		onColumnSizingChange: columnResizing.onChange,
+		state,
+		...callbacks,
 	});
 
+	useImperativeHandle(ref, () => ({
+		...api,
+	}));
 
+	const content = (
+		<OverlayScrollbarsComponent
+			style={{ maxHeight: scroll?.y || 'auto', maxWidth: scroll?.x || 'auto' }}
+			options={{ scrollbars: { theme: 'os-theme-dark' } }}
+			events={{
+				initialized: () => console.log('initialized'),
+				destroyed: () => console.log('destroyed'),
+				updated: () => console.log('updated'),
+				scroll: () => console.log('scroll'),
+			}}
+			defer
+		>
+			<div
+				className="w-max"
+				style={{ width: columnResizing.enable ? table.getTotalSize() : 'max-content' }}
+			>
+				<DataGridHeader<TData>
+					table={table}
+					border={border}
+					config={config}
+					dragType={dragType}
+					enableDrag={enableDrag}
+				/>
+				<DataGridBody<TData>
+					table={table}
+					border={border}
+					rowKey={rowKey}
+					config={config}
+					dragType={dragType}
+					enableDrag={enableDrag}
+				/>
+				{typeof footer === 'function' ? footer(table, config) : footer}
+			</div>
 
+		</OverlayScrollbarsComponent>
+	)
 	return (
 		<Grid>
-			<OverlayScrollbarsComponent
-				style={{ maxHeight: scroll?.y || 'auto', maxWidth: scroll?.x || 'auto' }}
-				options={{ scrollbars: { theme: 'os-theme-dark' } }}
-				events={{
-					initialized: () => console.log('initialized'),
-					destroyed: () => console.log('destroyed'),
-					updated: () => console.log('updated'),
-					scroll: () => console.log('scroll'),
-				}}
-				defer
-			>
-				<div
-					className="w-max"
-					style={{ width: columnResizing.enable ? table.getTotalSize() : 'max-content' }}
-				>
-					<DataGridHeader<TData>
-						table={table}
-						border={border}
-						config={config}
-					/>
-					<DataGridBody<TData>
-						table={table}
-						border={border}
-						rowKey={rowKey}
-						config={config}
-					/>
-					{typeof footer === 'function' ? footer(table, config) : footer}
-				</div>
-
-			</OverlayScrollbarsComponent>
+			{
+				enableDrag ? (
+					<DndContainer {...dndCallbacks}>
+						{content}
+					</DndContainer>
+				) : content
+			}
 		</Grid>
 
 	);
