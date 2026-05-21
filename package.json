@@ -41,5 +41,8 @@
 		"commitlint": "catalog:",
 		"husky": "catalog:",
 		"turbo": "catalog:"
+	},
+	"dependencies": {
+		"@dnd-kit/sortable": "catalog:"
 	}
 }

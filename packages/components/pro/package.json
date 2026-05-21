@@ -15,6 +15,7 @@
 		"@dnd-kit/abstract": "catalog:",
 		"@dnd-kit/helpers": "catalog:",
 		"@dnd-kit/react": "catalog:",
+		"@dnd-kit/sortable": "catalog:",
 		"@iconify-json/carbon": "catalog:",
 		"@iconify-json/lucide": "catalog:",
 		"@iconify-json/ri": "catalog:",
