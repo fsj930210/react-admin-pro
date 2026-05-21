@@ -8,12 +8,12 @@ import { getPinningStyles } from "./utils/pinned-styles"
 import { ROW_SORT_COLUMN } from "./utils/constants"
 import { useDataTable } from "./data-table"
 
-interface DataTableBodyProps<TData> {
+interface DataGridBodyProps<TData> {
 	table: Table<TData>
 	rowKey: string | ((row: TData, index: number, parentRow?: Row<TData>) => string)
 }
 
-export function DataTableBody<TData>({ table, rowKey }: DataTableBodyProps<TData>) {
+export function DataGridBody<TData>({ table, rowKey }: DataGridBodyProps<TData>) {
 	return (
 		<TableBody>
 			{table.getRowModel().rows.map((row, index) => (

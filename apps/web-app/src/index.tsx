@@ -1,11 +1,17 @@
 /** biome-ignore-all lint:suspicious/noExplicitAny */
+
 import { initMock } from "@rap/mock-config";
+import { OverlayScrollbars, ClickScrollPlugin } from 'overlayscrollbars';
 import ReactDOM from "react-dom/client";
 import { APP_BASE_PATH } from "@/config";
 import App from "./App";
 import "virtual-react-local-iconify";
 import "@rap/styles/globals.css";
 import "./styles/global.css";
+
+import 'overlayscrollbars/overlayscrollbars.css';
+
+OverlayScrollbars.plugin(ClickScrollPlugin);
 
 const getHandelers = () => {
 	const modules = (() => {

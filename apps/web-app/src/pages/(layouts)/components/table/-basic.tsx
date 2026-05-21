@@ -1,23 +1,19 @@
-import {
-	DataTable,
-	DataTableColumnHeader,
-} from "@rap/components-pro/table";
+import { DataGrid } from "@rap/components-pro/data-grid";
 import { Button } from "@rap/components-ui/button";
-
 import type { ColumnDef, ColumnFiltersState, SortingState, Column, Table } from "@tanstack/react-table";
 import { Minus, Edit, Eye } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { fetchUsers, type User } from "@/service/table";
 import { Input } from "@rap/components-ui/input";
 
 
 
-export function BasicTable() {
+export function BasicDataGrid() {
 	const [users, setUsers] = useState<User[]>([]);
 	const [total, setTotal] = useState(0);
 	const [loading, setLoading] = useState(false);
 	const [currentPage, setCurrentPage] = useState(1);
-	const [currentPageSize, setCurrentPageSize] = useState(10);
+	const [currentPageSize, setCurrentPageSize] = useState(50);
 	const [localSearchValue] = useState("");
 
 	// 薪资范围自定义筛选状态
@@ -81,56 +77,66 @@ export function BasicTable() {
 		);
 	};
 
-	const columns: ColumnDef<User>[] = [
+	// biome-ignore lint:correctness/useExhaustiveDependencies
+	const columns: ColumnDef<User>[] = useMemo(() => [
 		{
-			accessorKey: "id",
-			header: ({ column }) => <DataTableColumnHeader<User, unknown> column={column} title="ID" />,
+			accessorKey: "user_id",
+			header: "ID",
 			meta: { title: "ID", },
 			enableSorting: false,
 		},
 		{
-			accessorKey: "name",
-			header: ({ column }) => <DataTableColumnHeader<User, unknown> column={column} title="姓名" />,
-			meta: {
-				title: "姓名",
-				filterType: "input" as const,
-				enableLocalFilter: false, // 远程搜索
-				pinning: 'left',
-			},
-			enableColumnFilter: true,
-			enableResizing: true,
-			size: 150,
+			id: 'hello',
+			header: () => <span>信息</span>,
+			columns: [
+
+				{
+					accessorKey: "name",
+					header: "姓名",
+					meta: {
+						title: "姓名",
+						filterType: "input" as const,
+						enableLocalFilter: false, // 远程搜索
+						pinning: 'left',
+					},
+					enableColumnFilter: true,
+					enableResizing: true,
+					size: 150,
+				},
+				{
+					accessorKey: "email",
+					header: "邮箱",
+					meta: {
+						title: "邮箱",
+						filterType: "input" as const,
+						enableLocalFilter: false, // 远程搜索
+					},
+					enableColumnFilter: true,
+					enableSorting: false,
+				},
+				{
+					accessorKey: "age",
+					header: "年龄",
+					meta: {
+						title: "年龄",
+						filterType: "radio" as const,
+						enableLocalFilter: false, // 远程搜索
+						filterOptions: [
+							{ label: "18-25", value: "young" },
+							{ label: "26-35", value: "middle" },
+							{ label: "36-50", value: "old" },
+							{ label: "50+", value: "senior" },
+						],
+					},
+					enableColumnFilter: true,
+				},
+			],
 		},
-		{
-			accessorKey: "email",
-			header: ({ column }) => <DataTableColumnHeader<User, unknown> column={column} title="邮箱" />,
-			meta: {
-				title: "邮箱",
-				filterType: "input" as const,
-				enableLocalFilter: false, // 远程搜索
-			},
-			enableColumnFilter: true,
-			enableSorting: false,
-		},
-		{
-			accessorKey: "age",
-			header: ({ column }) => <DataTableColumnHeader<User, unknown> column={column} title="年龄" />,
-			meta: {
-				title: "年龄",
-				filterType: "radio" as const,
-				enableLocalFilter: false, // 远程搜索
-				filterOptions: [
-					{ label: "18-25", value: "young" },
-					{ label: "26-35", value: "middle" },
-					{ label: "36-50", value: "old" },
-					{ label: "50+", value: "senior" },
-				],
-			},
-			enableColumnFilter: true,
-		},
+
+
 		{
 			accessorKey: "department",
-			header: ({ column }) => <DataTableColumnHeader<User, unknown> column={column} title="部门" />,
+			header: "部门",
 			meta: {
 				title: "部门",
 				filterType: "radio" as const,
@@ -148,7 +154,7 @@ export function BasicTable() {
 		},
 		{
 			accessorKey: "position",
-			header: ({ column }) => <DataTableColumnHeader<User, unknown> column={column} title="职位" />,
+			header: "职位",
 			meta: {
 				title: "职位",
 				filterType: "input" as const,
@@ -158,31 +164,25 @@ export function BasicTable() {
 		},
 		{
 			accessorKey: "phone",
-			header: ({ column }) => <DataTableColumnHeader<User, unknown> column={column} title="电话" />,
+			header: "电话",
 			meta: { title: "电话" },
 			enableSorting: false,
 			enableResizing: true,
 		},
 		{
 			accessorKey: "address",
-			header: ({ column }) => <DataTableColumnHeader<User, unknown> column={column} title="地址" />,
+			header: "地址",
 			meta: { title: "地址" },
 			enableSorting: false,
 		},
 		{
 			accessorKey: "joinDate",
-			header: ({ column }) => <DataTableColumnHeader<User, unknown> column={column} title="入职日期" />,
+			header: "入职日期",
 			meta: { title: "入职日期" },
 		},
 		{
 			accessorKey: "salary",
-			header: ({ column }) => (
-				<DataTableColumnHeader<User, unknown>
-					column={column}
-					title="薪资"
-					filterProps={{ column, customRender: renderSalaryFilter }}
-				/>
-			),
+			header: "薪资",
 			meta: {
 				title: "薪资",
 				filterType: "custom" as const,
@@ -192,7 +192,7 @@ export function BasicTable() {
 		},
 		{
 			accessorKey: "status",
-			header: ({ column }) => <DataTableColumnHeader<User, unknown> column={column} title="状态" />,
+			header: "状态",
 			meta: {
 				title: "状态",
 				filterType: "checkbox" as const,
@@ -208,7 +208,7 @@ export function BasicTable() {
 		},
 		{
 			accessorKey: "score",
-			header: ({ column }) => <DataTableColumnHeader<User, unknown> column={column} title="评分" />,
+			header: "评分",
 			meta: {
 				title: "评分",
 				enableLocalSort: true,
@@ -247,7 +247,7 @@ export function BasicTable() {
 			enableSorting: false,
 			enableColumnFilter: false,
 		},
-	];
+	], []);
 
 	const loadData = async (
 		page = currentPage,
@@ -337,101 +337,17 @@ export function BasicTable() {
 	};
 
 	return (
-		<DataTable
+		<DataGrid
+			// border
 			rowKey="user_id"
 			columns={columns}
 			data={localSearchValue ? filteredUsers : users}
-			columnConfig={{
-				sorting: {
-					enableMultiSort: true,
-					maxMultiSortColCount: 3,
-					enableSortingRemoval: true,
-					onChange: handleSortChange,
-				},
-				order: {
-					enable: true,
-				},
-				filter: {
-					onChange: handleFilterChange,
-				},
-				rowSelection: {
-					enable: true,
-					type: 'checkbox',
-					title: '',
-					pinning: 'left',
-					onChange: (selectedKeys, selectedRows) => {
-						console.log('选中的行:', selectedKeys, selectedRows);
-					},
-					onSelect: (row, selected, selectedRows) => {
-						console.log('选择行:', row, selected, selectedRows);
-					},
-					onSelectAll: (selected, selectedRows, changeRows) => {
-						console.log('全选:', selected, selectedRows, changeRows);
-					},
-				},
-
+			scroll={{
+				x: 1200,
+				y: 500,
 			}}
-			rowConfig={{
-				order: {
-					enable: true,
-				}
-			}}
-			loading={loading}
-			getSubRowData={(user) => {
-				const userId = parseInt(user.id);
-				const types = ["日志", "操作", "通知", "警告"];
-				const contents = [
-					`${user.name} 登录系统`,
-					`${user.name} 更新了个人资料`,
-					`${user.name} 查看了报表`,
-					`${user.name} 导出了数据`,
-					`${user.name} 修改了密码`,
-					`系统消息已发送给 ${user.name}`,
-					`${user.name} 密码即将过期`,
-					`${user.name} 的账户已登录新设备`,
-				];
-				const times = ["09:15", "10:30", "11:45", "14:20", "15:30", "16:45", "17:00", "18:30"];
-
-				const subRows: { id: string; type: string; content: string; time: string }[] = [];
-				const count = userId % 4 + 2;
-
-				for (let i = 0; i < count; i++) {
-					subRows.push({
-						id: `${user.id}-${i}`,
-						type: types[(userId + i) % types.length],
-						content: contents[(userId + i) % contents.length],
-						time: times[(userId + i) % times.length],
-					});
-				}
-
-				return subRows;
-			}}
-			renderSubRow={(user, subRowData) => (
-				<div className="bg-muted/30 p-4">
-					<div className="text-sm font-medium text-muted-foreground mb-2">{user.name} 的活动记录</div>
-					<div className="space-y-2">
-						{(subRowData as { id: string; type: string; content: string; time: string }[]).map((item) => (
-							<div key={item.id} className="flex items-center gap-3 text-sm">
-								<span className={`px-2 py-0.5 rounded text-xs ${item.type === "日志" ? "bg-blue-100 text-blue-700" :
-									item.type === "操作" ? "bg-green-100 text-green-700" :
-										item.type === "通知" ? "bg-orange-100 text-orange-700" :
-											"bg-red-100 text-red-700"
-									}`}>
-									{item.type}
-								</span>
-								<span className="flex-1">{item.content}</span>
-								<span className="text-muted-foreground">{item.time}</span>
-							</div>
-						))}
-					</div>
-				</div>
-			)}
-			pagination={{
-				total: localSearchValue ? filteredUsers.length : total,
-				onChange: (page, pageSize) => {
-					console.log(page, pageSize, 'web-app table pagination');
-					handlePageChange(page, pageSize);
-				},
+			columnResizing={{
+				enable: true,
 			}}
 		/>
 	);

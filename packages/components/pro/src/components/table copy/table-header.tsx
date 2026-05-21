@@ -64,7 +64,7 @@ interface SortableHeaderProps<TData> {
 
 function SortableHead<TData>({ header, index, style, className, isPinned }: SortableHeaderProps<TData>) {
 	const { enableColumnOrder } = useDataTable()
-	const { ref, isDragging } = useSortable({
+	const { ref, isDragging, sourceRef } = useSortable({
 		id: header.column.id,
 		index,
 		type: 'column',
@@ -72,7 +72,7 @@ function SortableHead<TData>({ header, index, style, className, isPinned }: Sort
 		disabled: isPinned || !enableColumnOrder,
 		modifiers: [RestrictToHorizontalAxis],
 	});
-
+	console.log(sourceRef)
 	return (
 		<TableHead
 			ref={ref}

@@ -46,6 +46,7 @@
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
   --scrollbar-thumb: oklch(0 0 0 / 10%);
+	--scrollbar-width: 6px;
   --app-tabs: oklch(0.97 0 0);
   --app-tabs-foreground: oklch(0.4979 0.0094 253.91);
   --app-tabs-primary: oklch(1 0 0);
@@ -98,6 +99,7 @@
   --sidebar-border: oklch(0.269 0 0);
   --sidebar-ring: oklch(0.439 0 0);
   --scrollbar-thumb: oklch(1 0 0 / 10%);
+	--scrollbar-width: 6px;
   --app-tabs: oklch(0.269 0 0);
   --app-tabs-foreground: oklch(0.708 0 0);
   --app-tabs-primary: oklch(0.145 0 0);
@@ -145,6 +147,8 @@
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
+	--scrollbar-thumb: var(--scrollbar-thumb);
+	--scrollbar-width: var(--scrollbar-width);
   --color-sidebar: var(--sidebar);
   --color-sidebar-foreground: var(--sidebar-foreground);
   --color-sidebar-primary: var(--sidebar-primary);
@@ -230,8 +234,8 @@
     @apply border-border outline-ring/50 m-0 p-0;
   }
   ::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
+    width: var(--scrollbar-width);
+    height: var(--scrollbar-width);
   }
 
   ::-webkit-scrollbar-corner {

@@ -29,6 +29,8 @@
 		"lodash-es": "catalog:",
 		"lru-cache": "catalog:",
 		"lucide-react": "catalog:",
+		"overlayscrollbars": "catalog:",
+		"overlayscrollbars-react": "catalog:",
 		"react": "catalog:",
 		"react-dom": "catalog:"
 	},
@@ -37,7 +39,7 @@
 		"./icon": "./src/components/icon/index.tsx",
 		"./dialog": "./src/components/dialog/index.tsx",
 		"./pagination": "./src/components/pagination/index.tsx",
-		"./table": "./src/components/table/index.tsx"
+		"./data-grid": "./src/components/data-grid/index.ts"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "catalog:",

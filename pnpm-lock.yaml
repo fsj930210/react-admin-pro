@@ -291,6 +291,12 @@ catalogs:
     next-themes:
       specifier: ^0.4.6
       version: 0.4.6
+    overlayscrollbars:
+      specifier: ^2.16.0
+      version: 2.16.0
+    overlayscrollbars-react:
+      specifier: ^0.5.6
+      version: 0.5.6
     pinyin-pro:
       specifier: ^3.28.1
       version: 3.28.1
@@ -485,6 +491,9 @@ importers:
       lucide-react:
         specifier: 'catalog:'
         version: 1.14.0(react@19.2.5)
+      overlayscrollbars:
+        specifier: 'catalog:'
+        version: 2.16.0
       pinyin-pro:
         specifier: 'catalog:'
         version: 3.28.1
@@ -790,6 +799,12 @@ importers:
       lucide-react:
         specifier: 'catalog:'
         version: 1.14.0(react@19.2.5)
+      overlayscrollbars:
+        specifier: 'catalog:'
+        version: 2.16.0
+      overlayscrollbars-react:
+        specifier: 'catalog:'
+        version: 0.5.6(overlayscrollbars@2.16.0)(react@19.2.5)
       react:
         specifier: 'catalog:'
         version: 19.2.5
@@ -5181,6 +5196,15 @@ packages:
 
   outvariant@1.4.3:
     resolution: {integrity: sha512-+Sl2UErvtsoajRDKCE5/dBz4DIvHXQQnAxtQTF04OJxY0+DyZXSo5P5Bb7XYWOh81syohlYL24hbDwxedPUJCA==}
+
+  overlayscrollbars-react@0.5.6:
+    resolution: {integrity: sha512-E5To04bL5brn9GVCZ36SnfGanxa2I2MDkWoa4Cjo5wol7l+diAgi4DBc983V7l2nOk/OLJ6Feg4kySspQEGDBw==}
+    peerDependencies:
+      overlayscrollbars: ^2.0.0
+      react: '>=16.8.0'
+
+  overlayscrollbars@2.16.0:
+    resolution: {integrity: sha512-N03oje/q7j93D0aLZtoCdsDSYLmhheSsv8H7oSLE7HhdV9P/bmCURtLV/KbPye7P/bpfyt/obSfDpGUYoJ0OWg==}
 
   p-limit@2.3.0:
     resolution: {integrity: sha512-//88mFWSJx8lxCzwdAABTJL2MyWB12+eIY7MDL2SqLmAkeKU9qxRvWuSyTjm3FUmpBEMuFfckAIqEaVGUDxb6w==}
@@ -10437,6 +10461,13 @@ snapshots:
   orderedmap@2.1.1: {}
 
   outvariant@1.4.3: {}
+
+  overlayscrollbars-react@0.5.6(overlayscrollbars@2.16.0)(react@19.2.5):
+    dependencies:
+      overlayscrollbars: 2.16.0
+      react: 19.2.5
+
+  overlayscrollbars@2.16.0: {}
 
   p-limit@2.3.0:
     dependencies:

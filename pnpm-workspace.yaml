@@ -105,6 +105,8 @@ catalog:
   media-chrome: ^4.19.0
   msw: 2.14.3
   next-themes: ^0.4.6
+  overlayscrollbars: ^2.16.0
+  overlayscrollbars-react: ^0.5.6
   pinyin-pro: ^3.28.1
   qrcode: ^1.5.4
   radix-ui: ^1.4.3
