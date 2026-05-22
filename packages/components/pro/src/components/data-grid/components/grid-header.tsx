@@ -12,14 +12,21 @@ import { getColumnDragTransforms } from "../utils/column-drag-transform";
 
 interface DataGridHeaderProps<TData> {
 	table: Table<TData>;
-	enableDrag?: boolean;
 	dragType?: 'row' | 'column';
 	border?: boolean;
-	config: DataGridConfig;
+	config: DataGridConfig<TData>;
 	columnOrderDrag?: ColumnOrderDragState;
 }
 
-export function DataGridHeader<TData>({ table, enableDrag, dragType, border, config, columnOrderDrag }: DataGridHeaderProps<TData>) {
+export function DataGridHeader<TData>({
+	table,
+
+	dragType,
+	border,
+	config,
+	columnOrderDrag
+}: DataGridHeaderProps<TData>) {
+	const enableDrag = config?.columnOrder?.enable ?? false;
 	const leafColumns = table.getAllLeafColumns();
 	const columnTransforms = getColumnDragTransforms(
 		leafColumns.map((column) => ({
@@ -49,6 +56,7 @@ export function DataGridHeader<TData>({ table, enableDrag, dragType, border, con
 									isDragSource={columnOrderDrag?.activeColumnId === header.column.id}
 									transform={columnTransforms.get(header.column.id)}
 									isColumnDragging={columnOrderDrag?.isDragging}
+									enableDrag={enableDrag}
 								/>
 							) : (
 								<HeaderCell
@@ -71,19 +79,29 @@ interface SortableCellProps<TData> {
 	header: Header<TData, unknown>;
 	index: number;
 	border?: boolean;
-	config: DataGridConfig;
+	config: DataGridConfig<TData>;
 	isDragSource?: boolean;
 	transform?: number;
 	isColumnDragging?: boolean;
+	enableDrag?: boolean;
 }
 
-function SortableHeaderCell<TData>({ header, index, border, config, isDragSource, transform, isColumnDragging }: SortableCellProps<TData>) {
+function SortableHeaderCell<TData>({
+	header,
+	index,
+	border,
+	config,
+	isDragSource,
+	transform,
+	isColumnDragging,
+	enableDrag
+}: SortableCellProps<TData>) {
 	const { ref: sortableRef, handleRef: dragHandleRef } = useSortable({
 		id: header.column.id,
 		index,
 		type: 'column',
 		accept: 'column',
-		disabled: false,
+		disabled: !enableDrag,
 		modifiers: [RestrictToHorizontalAxis],
 	});
 	return (
@@ -103,7 +121,7 @@ function SortableHeaderCell<TData>({ header, index, border, config, isDragSource
 interface HeaderCellProps<TData> {
 	header: Header<TData, unknown>;
 	border?: boolean;
-	config: DataGridConfig;
+	config: DataGridConfig<TData>;
 	sortableRef?: (element: Element | null) => void;
 	dragHandleRef?: (element: HTMLDivElement | null) => void;
 	isDragSource?: boolean;
@@ -111,13 +129,22 @@ interface HeaderCellProps<TData> {
 	isColumnDragging?: boolean;
 }
 
-function HeaderCell<TData>({ header, border, config, sortableRef, dragHandleRef, isDragSource, transform, isColumnDragging }: HeaderCellProps<TData>) {
+function HeaderCell<TData>({
+	header,
+	border,
+	config,
+	sortableRef,
+	dragHandleRef,
+	isDragSource,
+	transform,
+	isColumnDragging
+}: HeaderCellProps<TData>) {
 	const enableResizing = config?.columnResizing?.enable;
 	return (
 		<GridCell
 			ref={sortableRef}
 			className={cn(
-				"relative group/th",
+				"relative group/th truncate",
 				isDragSource && "opacity-30",
 				border && !(header.colSpan && header.colSpan > 1) ? 'border-r' : ''
 			)}

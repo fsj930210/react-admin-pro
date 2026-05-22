@@ -7,14 +7,15 @@ import { useSortable } from "@dnd-kit/react/sortable"
 import { GridCell, GridRow } from "./grid"
 import type { ColumnOrderDragState, DataGridConfig, RowOrderDragState } from "../types"
 import { getColumnDragTransforms } from "../utils/column-drag-transform"
+import { ROW_ORDER_HANDLE_COLUMN } from "../utils/constants"
+import { cn } from "@rap/utils"
 
 interface DataGridBodyProps<TData> {
 	table: Table<TData>
 	rowKey: string | ((row: TData, index: number, parentRow?: Row<TData>) => string)
-	enableDrag?: boolean;
 	dragType?: 'row' | 'column';
 	border?: boolean;
-	config: DataGridConfig;
+	config: DataGridConfig<TData>;
 	columnOrderDrag?: ColumnOrderDragState;
 	rowOrderDrag?: RowOrderDragState;
 }
@@ -22,14 +23,15 @@ interface DataGridBodyProps<TData> {
 export function DataGridBody<TData>({
 	table,
 	rowKey,
-	enableDrag,
+
 	dragType,
 	border = false,
 	config,
 	columnOrderDrag,
 	rowOrderDrag,
 }: DataGridBodyProps<TData>) {
-	const rows = table.getRowModel().rows
+	const rows = table.getRowModel().rows;
+	const enableDrag = config.rowOrder?.enable ?? false;
 	return (
 		<>
 			{rows.map((row, index) => (
@@ -44,9 +46,17 @@ export function DataGridBody<TData>({
 						config={config}
 						columnOrderDrag={columnOrderDrag}
 						rowOrderDrag={rowOrderDrag}
+						enableDrag={enableDrag}
 					/>
 				) : (
-					<BodyRow<TData> key={row.id} row={row} border={border} isLast={index === rows.length - 1} config={config} columnOrderDrag={columnOrderDrag} />
+					<BodyRow<TData>
+						key={row.id}
+						row={row}
+						border={border}
+						isLast={index === rows.length - 1}
+						config={config}
+						columnOrderDrag={columnOrderDrag}
+					/>
 				)
 			))}
 		</>
@@ -60,9 +70,10 @@ interface SortableRowProps<TData> {
 	border?: boolean;
 	isLast?: boolean;
 	className?: string;
-	config: DataGridConfig;
+	config: DataGridConfig<TData>;
 	columnOrderDrag?: ColumnOrderDragState;
 	rowOrderDrag?: RowOrderDragState;
+	enableDrag?: boolean;
 }
 
 function SortableRow<TData>({
@@ -75,17 +86,18 @@ function SortableRow<TData>({
 	config,
 	columnOrderDrag,
 	rowOrderDrag,
+	enableDrag,
 }: SortableRowProps<TData>) {
 	const computedId = typeof rowKey === 'function'
 		? rowKey(row.original as TData, index)
 		: String((row.original as Record<string, unknown>)[rowKey]);
 
-	const { ref, isDragging } = useSortable({
+	const { ref, isDragging, handleRef } = useSortable({
 		id: computedId,
 		index,
 		type: 'row',
 		accept: 'row',
-		disabled: false,
+		disabled: !enableDrag,
 	});
 	const style = {
 		boxShadow: isDragging
@@ -103,6 +115,8 @@ function SortableRow<TData>({
 			className={className}
 			config={config}
 			columnOrderDrag={columnOrderDrag}
+			handleRef={handleRef}
+			enableDrag={enableDrag}
 		/>
 	);
 }
@@ -113,11 +127,24 @@ interface BodyRowProps<TData> {
 	isLast?: boolean;
 	style?: React.CSSProperties;
 	className?: string;
-	config: DataGridConfig;
+	config: DataGridConfig<TData>;
 	columnOrderDrag?: ColumnOrderDragState;
+	enableDrag?: boolean;
 	ref?: (element: Element | null) => void;
+	handleRef?: (element: Element | null) => void;
 }
-function BodyRow<TData>({ row, border, isLast, ref, style, className, config, columnOrderDrag }: BodyRowProps<TData>) {
+function BodyRow<TData>({
+	row,
+	border,
+	isLast,
+	ref,
+	handleRef,
+	style,
+	className,
+	config,
+	enableDrag,
+	columnOrderDrag
+}: BodyRowProps<TData>) {
 	const enableResizing = config?.columnResizing?.enable;
 	const cells = row.getVisibleCells();
 	const columnTransforms = getColumnDragTransforms(
@@ -144,7 +171,7 @@ function BodyRow<TData>({ row, border, isLast, ref, style, className, config, co
 				return (
 					<GridCell
 						key={cell.id}
-						className={border ? 'border-r truncate' : ''}
+						className={cn(border ? 'border-r' : '', 'truncate')}
 						style={{
 							width: enableResizing ? cell.column.getSize() : undefined,
 							transform: transform ? `translateX(${transform}px)` : undefined,
@@ -153,6 +180,7 @@ function BodyRow<TData>({ row, border, isLast, ref, style, className, config, co
 					>
 						{flexRender(cell.column.columnDef.cell, {
 							...context,
+							handleRef: cell.column.id === ROW_ORDER_HANDLE_COLUMN && enableDrag ? handleRef : undefined,
 						})}
 					</GridCell>
 				)

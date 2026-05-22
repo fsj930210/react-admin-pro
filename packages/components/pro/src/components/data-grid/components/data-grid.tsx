@@ -12,15 +12,35 @@ import { DataGridHeader } from "./grid-header";
 import { DataGridBody } from "./grid-body";
 import { useNormalizeColumns } from "../hooks/use-normalize-columns";
 import { Grid } from "./grid";
-import type { ColumnOrderConfig, ColumnResizingConfig, DataGridConfig, DataGridRef, DataUpdater, RowOrderConfig } from "../types";
+import type {
+	ColumnOrderConfig,
+	ColumnPinningConfig,
+	ColumnResizingConfig,
+	DataGridConfig,
+	DataGridRef,
+	DataUpdater,
+	RowOrderConfig,
+	RowPinningConfig,
+	RowSelectionConfig
+} from "../types";
 import { useMergedValue } from "../hooks/use-merged-value";
-import { defaultColumnOrderConfig, defaultColumnResizingConfig, defaultRowOrderConfig } from "../utils/default-config";
+import {
+	getDefaultColumnResizingConfig,
+	getDefaultColumnOrderConfig,
+	getDefaultRowOrderConfig,
+	getDefaultRowSelectionConfig,
+	getDefaultColumnPinningConfig,
+	getDefaultRowPinningConfig
+} from "../utils/default-config";
 import { useComposeFeatures } from "../features/use-compose-features";
 import { DndContainer } from "./dnd-container";
 import { useDataGridScrollArea } from "../hooks/use-scroll-area";
 import { ColumnDragOverlay } from "./column-drag-overlay";
 import { RowDragOverlay } from "./row-drag-overlay";
 import { useDataGridData } from "../hooks/use-data-grid-data";
+import { buildColumnsFromFactories } from "../utils/column-create-factory";
+import { createRowSelectionColumnFactory } from "../columns/row-selection-column";
+import { createRowOrderHandleColumnFactory } from "../columns/row-order-handle-column";
 
 
 export interface DataGridProps<TData> {
@@ -29,10 +49,13 @@ export interface DataGridProps<TData> {
 	rowKey: string | ((row: TData, index: number, parentRow?: Row<TData>) => string);
 	border?: boolean;
 	scroll?: { x?: number | string; y?: number | string };
-	footer?: ReactNode | ((table: Table<TData>, config: DataGridConfig) => ReactNode);
+	footer?: ReactNode | ((table: Table<TData>, config: DataGridConfig<TData>) => ReactNode);
 	columnResizing?: ColumnResizingConfig;
 	columnOrder?: ColumnOrderConfig;
 	rowOrder?: RowOrderConfig;
+	rowSelection?: RowSelectionConfig<TData>;
+	columnPinning?: ColumnPinningConfig;
+	rowPinning?: RowPinningConfig;
 	onDataChange?: (updater: DataUpdater<TData>) => void;
 	ref?: Ref<DataGridRef>;
 }
@@ -48,21 +71,37 @@ export function DataGrid<TData>({
 	columnResizing: userColumnResizingConfig,
 	columnOrder: userColumnOrderConfig,
 	rowOrder: userRowOrderConfig,
+	rowSelection: userRowSelectionConfig,
+	columnPinning: userColumnPinningConfig,
+	rowPinning: userRowPinningConfig,
 	onDataChange,
 }: DataGridProps<TData>) {
-	const columns = useNormalizeColumns(userColumns);
+
 	const config = useMergedValue({
-		columnResizing: defaultColumnResizingConfig,
-		columnOrder: defaultColumnOrderConfig,
-		rowOrder: defaultRowOrderConfig,
+		columnResizing: getDefaultColumnResizingConfig(),
+		columnOrder: getDefaultColumnOrderConfig(),
+		rowOrder: getDefaultRowOrderConfig(),
+		rowSelection: getDefaultRowSelectionConfig<TData>(),
+		columnPinning: getDefaultColumnPinningConfig(),
+		rowPinning: getDefaultRowPinningConfig(),
 	}, {
 		columnResizing: userColumnResizingConfig,
 		columnOrder: userColumnOrderConfig,
 		rowOrder: userRowOrderConfig,
+		rowSelection: userRowSelectionConfig,
+		columnPinning: userColumnPinningConfig,
+		rowPinning: userRowPinningConfig,
 	});
 	const { columnResizing } = config;
-	const enableColumnDrag = (config.columnOrder?.enable ?? false) && (config.columnOrder?.enableDrag ?? false);
-	const enableRowDrag = (config.rowOrder?.enable ?? false) && (config.rowOrder?.enableDrag ?? false);
+
+	const { prependColumns, appendColumns } = buildColumnsFromFactories<TData>(config,
+		[
+			createRowOrderHandleColumnFactory<TData>(),
+			createRowSelectionColumnFactory<TData>()
+		]
+	);
+
+	const columns = useNormalizeColumns([...prependColumns, ...userColumns, ...appendColumns]);
 	const {
 		data: tableData,
 		getRowId,
@@ -78,18 +117,16 @@ export function DataGrid<TData>({
 	const {
 		state,
 		callbacks,
-		dndCallbacks,
-		enableDrag,
-		columnOrderDrag,
-		rowOrderDrag,
+		dndConfig,
+		fearureReturn,
 		api
-	} = useComposeFeatures(columns, config, featureContext);
-
-
+	} = useComposeFeatures<TData>(columns, config, featureContext);
+	const { columnOrderDrag, rowOrderDrag } = fearureReturn ?? {};
+	const { enable: enableDrag, callbacks: dndCallbacks } = dndConfig ?? {};
 	const coreRowModel = getCoreRowModel();
 	const table = useReactTable({
 		data: tableData,
-		columns: columns,
+		columns,
 		columnResizeMode: columnResizing.columnResizeMode,
 		getRowId,
 		getCoreRowModel: coreRowModel,
@@ -116,6 +153,7 @@ export function DataGrid<TData>({
 		scrollAreaStyle,
 	} = useDataGridScrollArea({ scroll });
 
+
 	const content = (
 		<OverlayScrollbarsComponent
 			className={scrollAreaClassName}
@@ -139,7 +177,6 @@ export function DataGrid<TData>({
 						border={border}
 						config={config}
 						dragType="column"
-						enableDrag={enableColumnDrag}
 						columnOrderDrag={columnOrderDrag}
 					/>
 				</div>
@@ -150,7 +187,6 @@ export function DataGrid<TData>({
 						rowKey={rowKey}
 						config={config}
 						dragType="row"
-						enableDrag={enableRowDrag}
 						columnOrderDrag={columnOrderDrag}
 						rowOrderDrag={rowOrderDrag}
 					/>
@@ -185,6 +221,5 @@ export function DataGrid<TData>({
 				) : content
 			}
 		</Grid>
-
 	);
 }

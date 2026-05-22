@@ -19,7 +19,7 @@ interface ColumnOrderModel {
 export function useColumnOrder<TData>(
   columns: ColumnDef<TData>[],
   config?: ColumnOrderConfig
-): DataGridFeature {
+): DataGridFeature<TData> {
   const model = useMemo(() => createColumnOrderModel(columns), [columns]);
   const fallbackOrder = model.leafIds;
   const defaultColumnOrder = normalizeColumnOrder(
@@ -147,14 +147,16 @@ export function useColumnOrder<TData>(
       moveColumnByIndex,
       resetColumnOrder,
     },
-    dndCallbacks: enabled && enableDrag
-      ? {
-          onDragStart: handleDragStart,
-          onDragOver: handleDragOver,
-          onDragEnd: handleDragEnd,
-        }
-      : undefined,
-    columnOrderDrag: enabled && enableDrag
+		dndConfig: {
+			enable: enabled && enableDrag,
+			callbacks: enabled && enableDrag ? {
+				onDragStart: handleDragStart,
+				onDragOver: handleDragOver,
+				onDragEnd: handleDragEnd,
+			} : undefined,
+		},
+		fearureReturn: {
+			columnOrderDrag: enabled && enableDrag
       ? {
           activeColumnId,
           columnOrder: safeColumnOrder,
@@ -162,9 +164,8 @@ export function useColumnOrder<TData>(
           isDragging: activeColumnId != null,
         }
       : undefined,
-    enableDrag: enabled && enableDrag,
-    dragType: "column",
-  };
+		}
+  }
 }
 
 function createColumnOrderModel<TData>(columns: ColumnDef<TData>[]): ColumnOrderModel {

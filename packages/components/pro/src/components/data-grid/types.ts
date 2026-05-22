@@ -2,10 +2,13 @@ import type { DragEndEvent, DragOverEvent, DragStartEvent } from "@dnd-kit/abstr
 import type {
 	ColumnDef,
 	ColumnOrderState,
+	ColumnPinningPosition,
+	ColumnPinningState,
 	ColumnSizingState,
 	OnChangeFn,
 	Row,
 	RowData,
+	RowPinningState,
 	TableState
 } from "@tanstack/react-table";
 
@@ -25,6 +28,12 @@ export interface DataGridRef {
 	moveColumns?: (columnIds: string[], toIndex: number) => void
 	moveColumnByIndex?: (fromIndex: number, toIndex: number) => void
 	resetColumnOrder?: () => void
+	pinColumn?: (columnId: string, position: "left" | "right" | false) => void
+	unpinColumn?: (columnId: string) => void
+	resetColumnPinning?: () => void
+	pinRow?: (rowId: string, position: "top" | "bottom" | false) => void
+	unpinRow?: (rowId: string) => void
+	resetRowPinning?: () => void
 }
 
 export interface ColumnResizingConfig {
@@ -47,12 +56,51 @@ export interface ColumnOrderConfig {
 export interface RowOrderConfig {
 	enable?: boolean;
 	enableDrag?: boolean;
+	handleColumn?: {
+		enable?: boolean;
+		size?: number;
+		title?: string;
+	};
 	onChange?: (rowOrder: string[]) => void;
 }
-export interface DataGridConfig {
+
+export interface RowSelectionConfig<TData> {
+	enable?: boolean;
+	type?: 'checkbox' | 'radio';
+	title?: string;
+	size?: number;
+	pinning?: ColumnPinningPosition;
+	enableSelectAll?: boolean;
+	defaultSelectedRowKeys?: string[];
+	selectedRowKeys?: string[];
+	enableRowSelection?: (row: Row<TData>) => boolean;
+	enableSubRowSelection?: (row: Row<TData>) => boolean | boolean;
+	onChange?: (selectedRowKeys: string[], selectedRows: RowData[]) => void;
+	onSelectAll?: (selected: boolean, selectedRows: RowData[], changeRows: RowData[]) => void;
+	onSelect?: (row: RowData, selected: boolean, selectedRows: RowData[]) => void;
+}
+
+export interface ColumnPinningConfig {
+	enable?: boolean;
+	defaultPinningState?: ColumnPinningState;
+	columnPinningState?: ColumnPinningState;
+	onChange?: (pinningState: ColumnPinningState) => void;
+}
+
+export interface RowPinningConfig {
+	enable?: boolean;
+	defaultPinningState?: RowPinningState;
+	rowPinningState?: RowPinningState;
+	onChange?: (pinningState: RowPinningState) => void;
+}
+
+export interface DataGridConfig<TData> {
 	columnResizing?: ColumnResizingConfig;
 	columnOrder?: ColumnOrderConfig;
+	columnPinning?: ColumnPinningConfig;
 	rowOrder?: RowOrderConfig;
+	rowSelection?: RowSelectionConfig<TData>;
+	rowPinning?: RowPinningConfig;
 }
 
 export interface DndCallbacks {
@@ -75,6 +123,16 @@ export interface DataGridFeatureContext<TData> {
 	getRowId: (row: TData, index: number, parentRow?: Row<TData>) => string;
 	updateData?: (updater: DataUpdater<TData>) => void;
 }
+export interface DndConfig {
+	enable?: boolean;
+	callbacks?: DndCallbacks;
+}
+export interface FearureReturn<TData> {
+	columnOrderDrag?: ColumnOrderDragState;
+	rowOrderDrag?: RowOrderDragState;
+	rowSelectionColumn?: ColumnDef<TData>;
+	[key: string]: any;
+}
 export interface Callbacks {
 	onColumnOrderChange?: OnChangeFn<ColumnOrderState>
 	onColumnSizingChange?: OnChangeFn<ColumnSizingState>
@@ -89,18 +147,21 @@ export interface Callbacks {
 	onColumnVisibilityChange?: OnChangeFn<TableState["columnVisibility"]>
 	onRowSelectionChange?: OnChangeFn<TableState["rowSelection"]>
 }
-export interface DataGridFeature{
+export interface DataGridFeature<TData>{
 	state?: Partial<TableState>;
 	callbacks?: Partial<Callbacks>;
 	api?: Record<string, unknown>;
-	dndCallbacks?: DndCallbacks;
-	columnOrderDrag?: ColumnOrderDragState;
-	rowOrderDrag?: RowOrderDragState;
-	enableDrag?: boolean;
-	dragType?: 'column' | 'row';
+	dndConfig?: DndConfig;
+	fearureReturn?: FearureReturn<TData>;
 }
-export type DataTableFeatureHook<TData, TConfig = DataGridConfig> = (
+export type DataTableFeatureHook<TData, TConfig = DataGridConfig<TData>> = (
 	columns: ColumnDef<TData>[],
 	config?: TConfig,
 	context?: DataGridFeatureContext<TData>
-) => DataGridFeature
+) => DataGridFeature<TData>
+
+export interface CreateColumnFactory<TData> {
+	shouldCreate: (config: DataGridConfig<TData>) => boolean;
+	create: (config: DataGridConfig<TData>) => ColumnDef<TData>;
+	position: "prepend" | "append";
+}

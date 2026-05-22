@@ -5,7 +5,7 @@ import type { ColumnResizingConfig, DataGridFeature } from "../types";
 export function useColumnResizing<TData>(
 	_: ColumnDef<TData>[],
 	config?: ColumnResizingConfig
-): DataGridFeature {
+): DataGridFeature<TData> {
 	const [columnSizing, setColumnSizingState] = useState<ColumnSizingState>({});
 	const columnSizingRef = useRef(columnSizing);
 

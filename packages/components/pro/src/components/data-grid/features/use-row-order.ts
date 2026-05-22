@@ -7,7 +7,7 @@ export function useRowOrder<TData extends RowData>(
 	_: ColumnDef<TData>[],
 	config?: RowOrderConfig,
 	context?: DataGridFeatureContext<TData>
-): DataGridFeature {
+): DataGridFeature<TData> {
 	const [activeRowId, setActiveRowId] = useState<string | undefined>();
 	const enabled = config?.enable ?? false;
 	const enableDrag = config?.enableDrag ?? false;
@@ -44,21 +44,23 @@ export function useRowOrder<TData extends RowData>(
 	};
 
 	return {
-		dndCallbacks: enabled && enableDrag
-			? {
+		dndConfig: {
+			enable: enabled && enableDrag,
+			callbacks: enabled && enableDrag ? {
 					onDragStart: handleDragStart,
 					onDragEnd: handleDragEnd,
 				}
+			: undefined
+		},
+		fearureReturn: {
+			rowOrderDrag: enabled && enableDrag
+				? {
+						activeRowId,
+						isDragging: activeRowId != null,
+					}
 			: undefined,
-		rowOrderDrag: enabled && enableDrag
-			? {
-					activeRowId,
-					isDragging: activeRowId != null,
-				}
-			: undefined,
-		enableDrag: enabled && enableDrag,
-		dragType: "row",
-	};
+		}
+	}
 }
 
 function moveRowById<TData>(

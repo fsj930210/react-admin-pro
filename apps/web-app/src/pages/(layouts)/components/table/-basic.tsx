@@ -1,7 +1,7 @@
 import { DataGrid } from "@rap/components-pro/data-grid";
 import { Button } from "@rap/components-ui/button";
-import type { ColumnDef, ColumnFiltersState, SortingState, Column, Table } from "@tanstack/react-table";
-import { Minus, Edit, Eye } from "lucide-react";
+import type { ColumnDef, ColumnFiltersState, ColumnPinningState, RowPinningState, SortingState, Column, Table } from "@tanstack/react-table";
+import { Minus, Edit, Eye, Pin, PinOff } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { fetchUsers, type User } from "@/service/table";
 import { Input } from "@rap/components-ui/input";
@@ -22,6 +22,18 @@ export function BasicDataGrid() {
 	const [currentPage, setCurrentPage] = useState(1);
 	const [currentPageSize, setCurrentPageSize] = useState(50);
 	const [localSearchValue] = useState("");
+
+	// 列固定状态
+	const [columnPinning, setColumnPinning] = useState<ColumnPinningState>({
+		left: ["name"],
+		right: ["action"],
+	});
+
+	// 行固定状态
+	const [rowPinning, setRowPinning] = useState<RowPinningState>({
+		top: [],
+		bottom: [],
+	});
 
 	// 薪资范围自定义筛选状态
 	const [salaryMin, setSalaryMin] = useState("");
@@ -169,84 +181,130 @@ export function BasicDataGrid() {
 			},
 			enableColumnFilter: true,
 		},
-		{
-			accessorKey: "phone",
-			header: "电话",
-			meta: { title: "电话" },
-			enableSorting: false,
-			enableResizing: true,
-		},
-		{
-			accessorKey: "address",
-			header: "地址",
-			meta: { title: "地址" },
-			enableSorting: false,
-		},
-		{
-			accessorKey: "joinDate",
-			header: "入职日期",
-			meta: { title: "入职日期" },
-		},
-		{
-			accessorKey: "salary",
-			header: "薪资",
-			meta: {
-				title: "薪资",
-				filterType: "custom" as const,
-				enableLocalFilter: false, // 远程搜索
-			},
-			enableColumnFilter: true,
-		},
-		{
-			accessorKey: "status",
-			header: "状态",
-			meta: {
-				title: "状态",
-				filterType: "checkbox" as const,
-				enableLocalFilter: false, // 远程搜索
-				filterOptions: [
-					{ label: "在职", value: "active" },
-					{ label: "休假", value: "vacation" },
-					{ label: "离职", value: "left" },
-					{ label: "试用期", value: "probation" },
-				],
-			},
-			enableColumnFilter: true,
-		},
-		{
-			accessorKey: "score",
-			header: "评分",
-			meta: {
-				title: "评分",
-				enableLocalSort: true,
-				enableLocalFilter: true, // 本地搜索，不调用接口
-				filterType: "input" as const,
-			},
-			enableColumnFilter: true,
-			sortingFn: (rowA, rowB) => {
-				const scoreA = rowA.original.score;
-				const scoreB = rowB.original.score;
-				return scoreA - scoreB;
-			},
-			filterFn: (row, _, filterValue) => {
-				const score = row.original.score;
-				const filter = parseFloat(filterValue as string);
-				return !isNaN(filter) && score >= filter;
-			},
-		},
+		// {
+		// 	accessorKey: "phone",
+		// 	header: "电话",
+		// 	meta: { title: "电话" },
+		// 	enableSorting: false,
+		// 	enableResizing: true,
+		// },
+		// {
+		// 	accessorKey: "address",
+		// 	header: "地址",
+		// 	meta: { title: "地址" },
+		// 	enableSorting: false,
+		// },
+		// {
+		// 	accessorKey: "joinDate",
+		// 	header: "入职日期",
+		// 	meta: { title: "入职日期" },
+		// },
+		// {
+		// 	accessorKey: "salary",
+		// 	header: "薪资",
+		// 	meta: {
+		// 		title: "薪资",
+		// 		filterType: "custom" as const,
+		// 		enableLocalFilter: false, // 远程搜索
+		// 	},
+		// 	enableColumnFilter: true,
+		// },
+		// {
+		// 	accessorKey: "status",
+		// 	header: "状态",
+		// 	meta: {
+		// 		title: "状态",
+		// 		filterType: "checkbox" as const,
+		// 		enableLocalFilter: false, // 远程搜索
+		// 		filterOptions: [
+		// 			{ label: "在职", value: "active" },
+		// 			{ label: "休假", value: "vacation" },
+		// 			{ label: "离职", value: "left" },
+		// 			{ label: "试用期", value: "probation" },
+		// 		],
+		// 	},
+		// 	enableColumnFilter: true,
+		// },
+		// {
+		// 	accessorKey: "score",
+		// 	header: "评分",
+		// 	meta: {
+		// 		title: "评分",
+		// 		enableLocalSort: true,
+		// 		enableLocalFilter: true, // 本地搜索，不调用接口
+		// 		filterType: "input" as const,
+		// 	},
+		// 	enableColumnFilter: true,
+		// 	sortingFn: (rowA, rowB) => {
+		// 		const scoreA = rowA.original.score;
+		// 		const scoreB = rowB.original.score;
+		// 		return scoreA - scoreB;
+		// 	},
+		// 	filterFn: (row, _, filterValue) => {
+		// 		const score = row.original.score;
+		// 		const filter = parseFloat(filterValue as string);
+		// 		return !isNaN(filter) && score >= filter;
+		// 	},
+		// },
 		{
 			id: "action",
 			header: () => <span className="text-center">操作</span>,
-			cell: () => (
-				<div className="flex items-center justify-center gap-2">
-					<Button variant="ghost" size="icon" className="h-8 w-8">
-						<Edit className="h-4 w-4" />
-					</Button>
-					<Button variant="ghost" size="icon" className="h-8 w-8">
-						<Eye className="h-4 w-4" />
-					</Button>
-				</div>
-			),
+			cell: ({ row }) => {
+				const isPinnedTop = rowPinning.top.includes(row.id);
+				const isPinnedBottom = rowPinning.bottom.includes(row.id);
+				const isPinned = isPinnedTop || isPinnedBottom;
+
+				const handlePinTop = () => {
+					if (isPinnedTop) {
+						setRowPinning((prev) => ({
+							...prev,
+							top: prev.top.filter((id) => id !== row.id),
+						}));
+					} else {
+						setRowPinning((prev) => ({
+							top: [...prev.top.filter((id) => id !== row.id), row.id],
+							bottom: prev.bottom.filter((id) => id !== row.id),
+						}));
+					}
+				};
+
+				const handlePinBottom = () => {
+					if (isPinnedBottom) {
+						setRowPinning((prev) => ({
+							...prev,
+							bottom: prev.bottom.filter((id) => id !== row.id),
+						}));
+					} else {
+						setRowPinning((prev) => ({
+							bottom: [...prev.bottom.filter((id) => id !== row.id), row.id],
+							top: prev.top.filter((id) => id !== row.id),
+						}));
+					}
+				};
+
+				return (
+					<div className="flex items-center justify-center gap-2">
+						<Button
+							variant={isPinned ? "default" : "ghost"}
+							size="icon"
+							className="h-8 w-8"
+							onClick={handlePinTop}
+							title="固定到顶部"
+						>
+							<Pin className="h-4 w-4" />
+						</Button>
+						<Button
+							variant={isPinned ? "default" : "ghost"}
+							size="icon"
+							className="h-8 w-8"
+							onClick={handlePinBottom}
+							title="固定到底部"
+						>
+							<PinOff className="h-4 w-4 rotate-180" />
+						</Button>
+					</div>
+				);
+			},
 			meta: {
 				title: "操作",
 				pinning: 'right',
@@ -254,7 +312,7 @@ export function BasicDataGrid() {
 			enableSorting: false,
 			enableColumnFilter: false,
 		},
-	], []);
+	], [rowPinning]);
 
 	const loadData = async (
 		page = currentPage,
@@ -367,11 +425,28 @@ export function BasicDataGrid() {
 				}
 			}}
 			rowOrder={{
-				enable: true,
+				enable: false,
 				enableDrag: true,
+				handleColumn: {
+					enable: false,
+				},
 				onChange: (order) => {
 					console.log("行顺序改变了:", order);
 				}
+			}}
+			rowSelection={{
+				enable: false,
+
+			}}
+			columnPinning={{
+				enable: true,
+				columnPinningState: columnPinning,
+				onChange: setColumnPinning,
+			}}
+			rowPinning={{
+				enable: true,
+				rowPinningState: rowPinning,
+				onChange: setRowPinning,
 			}}
 		/>
 	);
