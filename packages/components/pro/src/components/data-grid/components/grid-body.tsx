@@ -1,3 +1,4 @@
+import { Choose, Otherwise, When } from "@rap/components-ui/when";
 import { cn } from "@rap/utils";
 import { flexRender, type Cell, type Row, type Table } from "@tanstack/react-table";
 import { Fragment, type ReactNode } from "react";
@@ -24,6 +25,7 @@ export function GridBody<TData>({
 	const bodyComponents = typeof props.components?.body === "object" ? props.components.body : undefined;
 	const BodyWrapper = bodyComponents?.wrapper ?? Fragment;
 	const BodyRow = bodyComponents?.row ?? GridRow;
+	const expandedRowRender = props.expandable === false ? undefined : props.expandable?.expandedRowRender;
 	const renderedRows = props.rowPinning
 		? [...table.getTopRows(), ...table.getCenterRows(), ...table.getBottomRows()]
 		: rows;
@@ -54,13 +56,13 @@ export function GridBody<TData>({
 								/>
 							))}
 						</BodyRow>
-						{row.getIsExpanded() && props.expandable && props.expandable.expandedRowRender ? (
-							<GridRow >
+						<When condition={row.getIsExpanded() && Boolean(expandedRowRender)}>
+							<GridRow>
 								<GridCell className="h-auto py-0">
-									{props.expandable.expandedRowRender(row.original, row.index, row)}
+									{expandedRowRender?.(row.original, row.index, row)}
 								</GridCell>
 							</GridRow>
-						) : null}
+						</When>
 					</Fragment>
 				)
 			})}
@@ -83,6 +85,8 @@ function GridBodyCell<TData>({
 	const CellComponent = bodyComponents?.cell ?? GridCell;
 	const pinning = getColumnPinningStyles(cell.column);
 	const meta = cell.column.columnDef.meta;
+	const enableResizing = Boolean(props.columnSizing);
+	const width = enableResizing ? cell.column.getSize() : undefined;
 	const internalProps: DataGridElementProps = {
 		className: cn(
 			"relative bg-background group-hover/row:bg-muted/50",
@@ -92,7 +96,7 @@ function GridBodyCell<TData>({
 		),
 		style: {
 			...pinning.style,
-			width: cell.column.getSize(),
+			width,
 		},
 		"data-pinned": cell.column.getIsPinned() ? "true" : undefined,
 	};
@@ -103,7 +107,16 @@ function GridBodyCell<TData>({
 		table,
 	});
 	const mergedProps = mergeElementProps(internalProps, userProps);
-	const content = "children" in mergedProps ? mergedProps.children : flexRender(cell.column.columnDef.cell, cell.getContext());
+	const content = (
+		<Choose>
+			<When condition={"children" in mergedProps}>
+				{mergedProps.children}
+			</When>
+			<Otherwise>
+				{flexRender(cell.column.columnDef.cell, cell.getContext())}
+			</Otherwise>
+		</Choose>
+	);
 	const { children: _children, ...cellProps } = mergedProps;
 
 	return (

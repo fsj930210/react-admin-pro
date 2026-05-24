@@ -1,8 +1,9 @@
-import { Button } from "@rap/components-ui/button";
+import { FloatingLayer } from "@rap/components-ui/floating-layer";
+import { Choose, Otherwise, When } from "@rap/components-ui/when";
+import { cn } from "@rap/utils";
 import type { Column, Table } from "@tanstack/react-table";
 import { ArrowDown, ArrowRight, ArrowUp, EyeOff, Pin, PinOff } from "lucide-react";
-import { useEffect, useRef, type ReactNode } from "react";
-import { createPortal } from "react-dom";
+import { useState, type ReactNode } from "react";
 
 export interface HeaderContextMenuState<TData> {
 	x: number;
@@ -27,68 +28,49 @@ export function GridContextMenu<TData>({
 	onClose: () => void;
 }) {
 	const column = menu.column;
-	const menuRef = useRef<HTMLDivElement>(null);
-	const leafColumns = table.getAllLeafColumns().filter((item) => item.getCanHide());
-	const left = Math.min(menu.x, window.innerWidth - 240);
-	const top = Math.min(menu.y, window.innerHeight - 320);
 
-	useEffect(() => {
-		const closeOnOutsidePointerDown = (event: PointerEvent) => {
-			const target = event.target as Node | null;
-			if (menuRef.current?.contains(target)) return;
-			onClose();
-		};
-		document.addEventListener("pointerdown", closeOnOutsidePointerDown);
-		return () => document.removeEventListener("pointerdown", closeOnOutsidePointerDown);
-	}, [onClose]);
-
-	if (render) {
-		return createPortal(
-			<div
-				ref={menuRef}
-				className="fixed z-[110]"
-				style={{ left, top }}
-			>
-				{render({ type: "header", table, column, close: onClose })}
-			</div>,
-			document.body,
-		);
-	}
-
-	return createPortal(
-		<div
-			ref={menuRef}
-			className="fixed z-[110] w-56 rounded-md border bg-popover p-1 text-sm shadow-md"
-			style={{ left, top }}
+	return (
+		<FloatingLayer
+			onOpenChange={(open) => { if (!open) onClose(); }}
+			open
+			point={{ x: menu.x, y: menu.y }}
 		>
-			<MenuButton onClick={() => { column.pin("left"); onClose(); }} icon={<Pin className="size-3.5" />}>Pin left</MenuButton>
-			<MenuButton onClick={() => { column.pin("right"); onClose(); }} icon={<Pin className="size-3.5" />}>Pin right</MenuButton>
-			<MenuButton onClick={() => { column.pin(false); onClose(); }} icon={<PinOff className="size-3.5" />}>Unpin</MenuButton>
-			<MenuButton onClick={() => { column.toggleVisibility(false); onClose(); }} icon={<EyeOff className="size-3.5" />}>Hide</MenuButton>
+			<Choose>
+				<When condition={Boolean(render)}>
+					{render?.({ type: "header", table, column, close: onClose })}
+				</When>
+				<Otherwise>
+					<div className="w-56 rounded-md border bg-popover p-1 text-sm shadow-md">
+						<MenuButton onClick={() => { column.pin("left"); onClose(); }} icon={<Pin className="size-3.5" />}>Pin left</MenuButton>
+						<MenuButton onClick={() => { column.pin("right"); onClose(); }} icon={<Pin className="size-3.5" />}>Pin right</MenuButton>
+						<MenuButton onClick={() => { column.pin(false); onClose(); }} icon={<PinOff className="size-3.5" />}>Unpin</MenuButton>
+						<MenuButton onClick={() => { column.toggleVisibility(false); onClose(); }} icon={<EyeOff className="size-3.5" />}>Hide</MenuButton>
 
-			<div className="my-1 border-t" />
-			<SubMenu label="Sort" disabled={!column.getCanSort()}>
-				<MenuButton disabled={!column.getCanSort()} onClick={() => { column.toggleSorting(false); onClose(); }} icon={<ArrowUp className="size-3.5" />}>Asc</MenuButton>
-				<MenuButton disabled={!column.getCanSort()} onClick={() => { column.toggleSorting(true); onClose(); }} icon={<ArrowDown className="size-3.5" />}>Desc</MenuButton>
-				<MenuButton disabled={!column.getCanSort()} onClick={() => { column.clearSorting(); onClose(); }}>Clear sort</MenuButton>
-			</SubMenu>
+						<div className="my-1 border-t" />
+						<SubMenu label="Sort" disabled={!column.getCanSort()}>
+							<MenuButton disabled={!column.getCanSort()} onClick={() => { column.toggleSorting(false); onClose(); }} icon={<ArrowUp className="size-3.5" />}>Asc</MenuButton>
+							<MenuButton disabled={!column.getCanSort()} onClick={() => { column.toggleSorting(true); onClose(); }} icon={<ArrowDown className="size-3.5" />}>Desc</MenuButton>
+							<MenuButton disabled={!column.getCanSort()} onClick={() => { column.clearSorting(); onClose(); }}>Clear sort</MenuButton>
+						</SubMenu>
 
-			<SubMenu label="Column visibility">
-				<div className="max-h-56 min-w-52 overflow-auto p-1">
-					{leafColumns.map((item) => (
-						<label key={item.id} className="flex h-8 cursor-pointer items-center gap-2 rounded px-2 hover:bg-accent">
-							<input
-								type="checkbox"
-								checked={item.getIsVisible()}
-								onChange={(event) => item.toggleVisibility(event.target.checked)}
-							/>
-							<span className="truncate">{String(item.columnDef.header ?? item.id)}</span>
-						</label>
-					))}
-				</div>
-			</SubMenu>
-		</div>,
-		document.body,
+						<SubMenu label="Column visibility" renderContent={() => (
+							<div className="max-h-56 min-w-52 overflow-auto p-1">
+								{table.getAllLeafColumns().filter((item) => item.getCanHide()).map((item) => (
+									<label key={item.id} className="flex h-8 cursor-pointer items-center gap-2 rounded px-2 hover:bg-accent">
+										<input
+											type="checkbox"
+											checked={item.getIsVisible()}
+											onChange={(event) => item.toggleVisibility(event.target.checked)}
+										/>
+										<span className="truncate">{String(item.columnDef.header ?? item.id)}</span>
+									</label>
+								))}
+							</div>
+						)} />
+					</div>
+				</Otherwise>
+			</Choose>
+		</FloatingLayer>
 	);
 }
 
@@ -96,13 +78,21 @@ function SubMenu({
 	children,
 	disabled,
 	label,
+	renderContent,
 }: {
-	children: React.ReactNode;
+	children?: React.ReactNode;
 	disabled?: boolean;
 	label: string;
+	renderContent?: () => React.ReactNode;
 }) {
+	const [open, setOpen] = useState(false);
+
 	return (
-		<div className="group/submenu relative">
+		<div
+			className="group/submenu relative"
+			onPointerEnter={() => setOpen(true)}
+			onPointerLeave={() => setOpen(false)}
+		>
 			<button
 				type="button"
 				disabled={disabled}
@@ -111,8 +101,17 @@ function SubMenu({
 				<span>{label}</span>
 				<ArrowRight className="size-3.5 text-muted-foreground" />
 			</button>
-			<div className="invisible absolute top-0 left-full z-[111] ml-1 min-w-36 rounded-md border bg-popover p-1 opacity-0 shadow-md group-hover/submenu:visible group-hover/submenu:opacity-100">
-				{children}
+			<div className="invisible absolute top-0 left-full z-[111] min-w-36 pl-1 opacity-0 group-hover/submenu:visible group-hover/submenu:opacity-100">
+				<div className="rounded-md border bg-popover p-1 shadow-md">
+					<Choose>
+						<When condition={Boolean(renderContent) && open}>
+							{renderContent?.()}
+						</When>
+						<Otherwise>
+							{children}
+						</Otherwise>
+					</Choose>
+				</div>
 			</div>
 		</div>
 	);
@@ -130,16 +129,17 @@ function MenuButton({
 	onClick?: () => void;
 }) {
 	return (
-		<Button
+		<button
 			type="button"
-			variant="ghost"
-			size="sm"
 			disabled={disabled}
-			className="h-8 w-full justify-start gap-2 px-2"
+			className={cn(
+				"flex h-8 w-full items-center gap-2 rounded-sm px-2 text-left hover:bg-accent",
+				disabled && "pointer-events-none opacity-50",
+			)}
 			onClick={onClick}
 		>
 			{icon}
 			{children}
-		</Button>
+		</button>
 	);
 }

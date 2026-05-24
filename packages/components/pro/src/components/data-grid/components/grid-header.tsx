@@ -1,3 +1,4 @@
+import { Choose, Otherwise, When } from "@rap/components-ui/when";
 import { cn } from "@rap/utils";
 import { flexRender, type Header, type Table } from "@tanstack/react-table";
 import type { MouseEvent, Ref } from "react";
@@ -7,6 +8,7 @@ import { getColumnPinningStyles } from "../utils/pinning-styles";
 import { ColumnFilter } from "./column-filter";
 import { ColumnSort } from "./column-sort";
 import { GridCell, GridRow } from "./grid";
+import { HeaderSeparator } from "./header-separator";
 
 export function GridHeader<TData>({
 	props,
@@ -64,16 +66,18 @@ function GridHeaderCell<TData>({
 	const HeaderCell = props.components?.header?.cell ?? GridCell;
 	const pinningStyles = getColumnPinningStyles(header.column);
 	const meta = header.column.columnDef.meta;
+	const enableResizing = Boolean(props.columnSizing);
+	const width = enableResizing ? header.column.getSize() : undefined;
 	const internalProps: DataGridElementProps = {
 		role: "columnheader",
 		className: cn(
-			"group/th bg-muted ",
+			"relative group/th bg-muted",
 			props.border && "border-r",
 			pinningStyles.className,
 		),
 		style: {
 			...pinningStyles.style,
-			width: header.column.getSize(),
+			width,
 		},
 		"data-pinned": header.column.getIsPinned() ? "true" : undefined,
 		onContextMenu: (event) => onHeaderContextMenu(event, header),
@@ -84,22 +88,25 @@ function GridHeaderCell<TData>({
 		<HeaderCell {...mergedProps} colSpan={header.colSpan}>
 			<div className="flex size-full min-w-0 items-center justify-between gap-1">
 				<div className="min-w-0 flex-1 truncate" title={getEllipsisTitle(meta?.ellipsis, header.column.columnDef.header)}>
-					{header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
+					<Choose>
+						<When condition={header.isPlaceholder}>
+							{null}
+						</When>
+						<Otherwise>
+							{flexRender(header.column.columnDef.header, header.getContext())}
+						</Otherwise>
+					</Choose>
 				</div>
-				{!header.isPlaceholder && header.colSpan === 1 ? (
+				<When condition={!header.isPlaceholder && header.colSpan === 1}>
 					<div className="flex shrink-0 items-center">
 						<ColumnFilter column={header.column} table={table} />
 						<ColumnSort column={header.column} table={table} />
 					</div>
-				) : null}
+				</When>
 			</div>
-			{header.column.getCanResize() ? (
-				<div
-					onMouseDown={header.getResizeHandler()}
-					onTouchStart={header.getResizeHandler()}
-					className="absolute right-0 top-0 h-full w-1 cursor-col-resize touch-none select-none bg-border opacity-0 group-hover/th:opacity-100"
-				/>
-			) : null}
+			<When condition={header.column.getCanResize()}>
+				<HeaderSeparator header={header} border={props.border} />
+			</When>
 		</HeaderCell>
 	);
 

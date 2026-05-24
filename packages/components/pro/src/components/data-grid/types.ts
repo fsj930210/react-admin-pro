@@ -115,6 +115,7 @@ export interface DataGridFilteringConfig {
 }
 
 export interface DataGridPaginationConfig extends Omit<PaginationProps, "page" | "pageSize" | "onChange"> {
+	enable?: boolean;
 	/** Defaults to remote. Local mode slices the current data with TanStack pagination. */
 	mode?: DataGridMode;
 	page?: number;

@@ -69,33 +69,35 @@
   box-shadow: inset 10px 0 8px -8px #00000026;
 }
 
-/* Utility classes for adding a pseudo-element shadow at the visual edge
-   of sticky pinned columns. Use `pinned-shadow-left` on the last left-pinned
-   column and `pinned-shadow-right` on the first right-pinned column. */
-.pinned-shadow-left {
-  position: relative;
-}
-.pinned-shadow-left::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  right: -8px;
-  width: 12px;
-  pointer-events: none;
-  box-shadow: inset 10px 0 8px -8px #00000026;
-}
-.pinned-shadow-right {
-  position: relative;
-}
-.pinned-shadow-right::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: -8px;
-  width: 12px;
-  pointer-events: none;
-  box-shadow: inset -10px 0 8px -8px #00000026;
+.pinned-cell {
+  isolation: isolate;
 }
 
+.data-grid-pinned-shadow {
+  --data-grid-pinned-left-width: 0px;
+  --data-grid-pinned-right-width: 0px;
+}
+
+.data-grid-pinned-shadow::before,
+.data-grid-pinned-shadow::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  z-index: 50;
+  display: none;
+  width: 30px;
+  pointer-events: none;
+}
+
+.data-grid-pinned-shadow[data-left-shadow='true']::before {
+  left: var(--data-grid-pinned-left-width);
+  display: block;
+  box-shadow: inset 10px 0 8px -8px #00000026;
+}
+
+.data-grid-pinned-shadow[data-right-shadow='true']::after {
+  right: var(--data-grid-pinned-right-width);
+  display: block;
+  box-shadow: inset -10px 0 8px -8px #00000026;
+}

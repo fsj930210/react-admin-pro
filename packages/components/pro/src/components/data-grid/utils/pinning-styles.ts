@@ -1,7 +1,5 @@
-
 import type { Column, Row } from "@tanstack/react-table";
 import type { CSSProperties } from "react";
-
 
 export interface PinningStyleResult {
 	className?: string;
@@ -18,21 +16,13 @@ export function getColumnPinningStyles<TData>(column: Column<TData>): PinningSty
 	const pinned = column.getIsPinned();
 	if (!pinned) return {};
 
-	const isLastLeft = pinned === "left" && column.getIsLastColumn("left");
-	const isFirstRight = pinned === "right" && column.getIsFirstColumn("right");
-	  const className = isLastLeft
-    ? 'pinned-shadow-left'
-    : isFirstRight
-      ? 'pinned-shadow-right'
-      : undefined
 	return {
-		className,
+		className: "pinned-cell",
 		style: {
 			left: pinned === "left" ? `${column.getStart("left")}px` : undefined,
 			right: pinned === "right" ? `${column.getAfter("right")}px` : undefined,
 			position: pinned ? "sticky" : "relative",
-			width: column.getSize(),
-			zIndex: pinned ? 1 : 0,
+			zIndex: pinned ? 3 : 0,
 		},
 	};
 }
