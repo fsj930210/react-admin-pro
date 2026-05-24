@@ -1,173 +1,113 @@
-"use client"
-
-import { flexRender, type Table, type Header } from "@tanstack/react-table"
-import { RestrictToHorizontalAxis } from '@dnd-kit/abstract/modifiers';
-import { useSortable } from '@dnd-kit/react/sortable';
-import { HeaderSeparator } from "./header-separator";
 import { cn } from "@rap/utils";
+import { flexRender, type Header, type Table } from "@tanstack/react-table";
+import type { MouseEvent, Ref } from "react";
+import type { DataGridElementProps, DataGridProps } from "../types";
+import { mergeElementProps } from "../utils/merge-element-props";
+import { getColumnPinningStyles } from "../utils/pinning-styles";
+import { ColumnFilter } from "./column-filter";
+import { ColumnSort } from "./column-sort";
 import { GridCell, GridRow } from "./grid";
-import type { ColumnOrderDragState, DataGridConfig } from "../types";
-import { getColumnDragTransforms } from "../utils/column-drag-transform";
 
-
-interface DataGridHeaderProps<TData> {
-	table: Table<TData>;
-	dragType?: 'row' | 'column';
-	border?: boolean;
-	config: DataGridConfig<TData>;
-	columnOrderDrag?: ColumnOrderDragState;
-}
-
-export function DataGridHeader<TData>({
+export function GridHeader<TData>({
+	props,
 	table,
-
-	dragType,
-	border,
-	config,
-	columnOrderDrag
-}: DataGridHeaderProps<TData>) {
-	const enableDrag = config?.columnOrder?.enable ?? false;
-	const leafColumns = table.getAllLeafColumns();
-	const columnTransforms = getColumnDragTransforms(
-		leafColumns.map((column) => ({
-			id: column.id,
-			width: column.getSize(),
-		})),
-		table.getFlatHeaders().map((header) => ({
-			id: header.column.id,
-			leafIds: header.column.getLeafColumns().map((column) => column.id),
-		})),
-		columnOrderDrag
-	);
+	headerRef,
+	onHeaderContextMenu,
+}: {
+	props: DataGridProps<TData>;
+	table: Table<TData>;
+	headerRef: Ref<HTMLDivElement>;
+	onHeaderContextMenu: (event: MouseEvent, header: Header<TData, unknown>) => void;
+}) {
+	const HeaderWrapper = props.components?.header?.wrapper ?? "div";
+	const HeaderRow = props.components?.header?.row ?? GridRow;
 
 	return (
-		<>
-			{table.getHeaderGroups().map((headerGroup) => {
-				return (
-					<GridRow key={headerGroup.id}>
-						{headerGroup.headers.map((header, index) => {
-							return enableDrag && dragType === 'column' && !header.isPlaceholder ? (
-								<SortableHeaderCell
+		<div ref={headerRef} className="sticky top-0 z-40 bg-muted">
+			<HeaderWrapper>
+				{table.getHeaderGroups().map((headerGroup, index) => {
+					const userProps = props.onHeaderRow?.(headerGroup.headers, index, { headerGroup, table });
+					return (
+						<HeaderRow
+							key={headerGroup.id}
+							role="row"
+							{...userProps}
+						>
+							{headerGroup.headers.map((header) => (
+								<GridHeaderCell
 									key={header.id}
+									props={props}
+									table={table}
 									header={header}
-									index={index}
-									border={border}
-									config={config}
-									isDragSource={columnOrderDrag?.activeColumnId === header.column.id}
-									transform={columnTransforms.get(header.column.id)}
-									isColumnDragging={columnOrderDrag?.isDragging}
-									enableDrag={enableDrag}
+									onHeaderContextMenu={onHeaderContextMenu}
 								/>
-							) : (
-								<HeaderCell
-									key={header.id}
-									header={header}
-									border={border}
-									config={config}
-								/>
-							)
-						})}
-					</GridRow>
-				)
-			})}
-		</>
-	)
-}
-
-
-interface SortableCellProps<TData> {
-	header: Header<TData, unknown>;
-	index: number;
-	border?: boolean;
-	config: DataGridConfig<TData>;
-	isDragSource?: boolean;
-	transform?: number;
-	isColumnDragging?: boolean;
-	enableDrag?: boolean;
-}
-
-function SortableHeaderCell<TData>({
-	header,
-	index,
-	border,
-	config,
-	isDragSource,
-	transform,
-	isColumnDragging,
-	enableDrag
-}: SortableCellProps<TData>) {
-	const { ref: sortableRef, handleRef: dragHandleRef } = useSortable({
-		id: header.column.id,
-		index,
-		type: 'column',
-		accept: 'column',
-		disabled: !enableDrag,
-		modifiers: [RestrictToHorizontalAxis],
-	});
-	return (
-		<HeaderCell
-			sortableRef={sortableRef}
-			header={header}
-			border={border}
-			config={config}
-			dragHandleRef={dragHandleRef}
-			isDragSource={isDragSource}
-			transform={transform}
-			isColumnDragging={isColumnDragging}
-		/>
+							))}
+						</HeaderRow>
+					);
+				})}
+			</HeaderWrapper>
+		</div>
 	);
 }
 
-interface HeaderCellProps<TData> {
-	header: Header<TData, unknown>;
-	border?: boolean;
-	config: DataGridConfig<TData>;
-	sortableRef?: (element: Element | null) => void;
-	dragHandleRef?: (element: HTMLDivElement | null) => void;
-	isDragSource?: boolean;
-	transform?: number;
-	isColumnDragging?: boolean;
-}
-
-function HeaderCell<TData>({
+function GridHeaderCell<TData>({
+	props,
+	table,
 	header,
-	border,
-	config,
-	sortableRef,
-	dragHandleRef,
-	isDragSource,
-	transform,
-	isColumnDragging
-}: HeaderCellProps<TData>) {
-	const enableResizing = config?.columnResizing?.enable;
-	return (
-		<GridCell
-			ref={sortableRef}
-			className={cn(
-				"relative group/th truncate",
-				isDragSource && "opacity-30",
-				border && !(header.colSpan && header.colSpan > 1) ? 'border-r' : ''
-			)}
-			colSpan={header.colSpan}
-			rowSpan={header.rowSpan}
-			style={{
-				width: enableResizing ? header.getSize() : undefined,
-				transform: transform ? `translateX(${transform}px)` : undefined,
-				transition: isColumnDragging ? "transform 180ms cubic-bezier(0.2, 0, 0, 1)" : undefined,
-			}}
-		>
-
-			<div ref={dragHandleRef} className="size-full flex items-center">
-				{header.isPlaceholder
-					? null
-					: flexRender(header.column.columnDef.header, header.getContext())}
-
+	onHeaderContextMenu,
+}: {
+	props: DataGridProps<TData>;
+	table: Table<TData>;
+	header: Header<TData, unknown>;
+	onHeaderContextMenu: (event: MouseEvent, header: Header<TData, unknown>) => void;
+}) {
+	const HeaderCell = props.components?.header?.cell ?? GridCell;
+	const pinningStyles = getColumnPinningStyles(header.column);
+	const meta = header.column.columnDef.meta;
+	const internalProps: DataGridElementProps = {
+		role: "columnheader",
+		className: cn(
+			"group/th bg-muted ",
+			props.border && "border-r",
+			pinningStyles.className,
+		),
+		style: {
+			...pinningStyles.style,
+			width: header.column.getSize(),
+		},
+		"data-pinned": header.column.getIsPinned() ? "true" : undefined,
+		onContextMenu: (event) => onHeaderContextMenu(event, header),
+	};
+	const userProps = props.onHeaderCell?.(header.column, { header, table });
+	const mergedProps = mergeElementProps(internalProps, userProps);
+	const content = (
+		<HeaderCell {...mergedProps} colSpan={header.colSpan}>
+			<div className="flex size-full min-w-0 items-center justify-between gap-1">
+				<div className="min-w-0 flex-1 truncate" title={getEllipsisTitle(meta?.ellipsis, header.column.columnDef.header)}>
+					{header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
+				</div>
+				{!header.isPlaceholder && header.colSpan === 1 ? (
+					<div className="flex shrink-0 items-center">
+						<ColumnFilter column={header.column} table={table} />
+						<ColumnSort column={header.column} table={table} />
+					</div>
+				) : null}
 			</div>
-			{
-				border && !enableResizing ? null : (
-					<HeaderSeparator<TData> header={header} border={border} />
-				)
-			}
-		</GridCell>
+			{header.column.getCanResize() ? (
+				<div
+					onMouseDown={header.getResizeHandler()}
+					onTouchStart={header.getResizeHandler()}
+					className="absolute right-0 top-0 h-full w-1 cursor-col-resize touch-none select-none bg-border opacity-0 group-hover/th:opacity-100"
+				/>
+			) : null}
+		</HeaderCell>
 	);
+
+	return content;
+}
+
+function getEllipsisTitle(ellipsis: unknown, value: unknown) {
+	if (!ellipsis) return undefined;
+	if (typeof ellipsis === "object" && ellipsis && "showTitle" in ellipsis && !ellipsis.showTitle) return undefined;
+	return typeof value === "string" || typeof value === "number" ? String(value) : undefined;
 }

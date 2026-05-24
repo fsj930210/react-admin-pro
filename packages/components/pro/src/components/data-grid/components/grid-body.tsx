@@ -1,195 +1,120 @@
-"use client"
+import { cn } from "@rap/utils";
+import { flexRender, type Cell, type Row, type Table } from "@tanstack/react-table";
+import { Fragment, type ReactNode } from "react";
+import type { DataGridElementProps, DataGridProps } from "../types";
+import { mergeElementProps } from "../utils/merge-element-props";
+import { getColumnPinningStyles, getRowPinningStyles } from "../utils/pinning-styles";
+import { GridCell, GridRow } from "./grid";
 
-import { flexRender, type Table, type Row } from "@tanstack/react-table"
-
-import { memo } from "react"
-import { useSortable } from "@dnd-kit/react/sortable"
-import { GridCell, GridRow } from "./grid"
-import type { ColumnOrderDragState, DataGridConfig, RowOrderDragState } from "../types"
-import { getColumnDragTransforms } from "../utils/column-drag-transform"
-import { ROW_ORDER_HANDLE_COLUMN } from "../utils/constants"
-import { cn } from "@rap/utils"
-
-interface DataGridBodyProps<TData> {
-	table: Table<TData>
-	rowKey: string | ((row: TData, index: number, parentRow?: Row<TData>) => string)
-	dragType?: 'row' | 'column';
-	border?: boolean;
-	config: DataGridConfig<TData>;
-	columnOrderDrag?: ColumnOrderDragState;
-	rowOrderDrag?: RowOrderDragState;
-}
-
-export function DataGridBody<TData>({
+export function GridBody<TData>({
+	props,
 	table,
-	rowKey,
-
-	dragType,
-	border = false,
-	config,
-	columnOrderDrag,
-	rowOrderDrag,
-}: DataGridBodyProps<TData>) {
-	const rows = table.getRowModel().rows;
-	const enableDrag = config.rowOrder?.enable ?? false;
-	return (
-		<>
-			{rows.map((row, index) => (
-				enableDrag && dragType === 'row' ? (
-					<SortableRow<TData>
-						key={row.id}
-						row={row}
-						index={index}
-						rowKey={rowKey}
-						border={border}
-						isLast={index === rows.length - 1}
-						config={config}
-						columnOrderDrag={columnOrderDrag}
-						rowOrderDrag={rowOrderDrag}
-						enableDrag={enableDrag}
-					/>
-				) : (
-					<BodyRow<TData>
-						key={row.id}
-						row={row}
-						border={border}
-						isLast={index === rows.length - 1}
-						config={config}
-						columnOrderDrag={columnOrderDrag}
-					/>
-				)
-			))}
-		</>
-	)
-}
-
-interface SortableRowProps<TData> {
-	row: Row<TData>;
-	index: number;
-	rowKey: string | ((row: TData, index: number, parentRow?: Row<TData>) => string);
-	border?: boolean;
-	isLast?: boolean;
-	className?: string;
-	config: DataGridConfig<TData>;
-	columnOrderDrag?: ColumnOrderDragState;
-	rowOrderDrag?: RowOrderDragState;
-	enableDrag?: boolean;
-}
-
-function SortableRow<TData>({
-	row,
-	index,
-	rowKey,
-	border,
-	isLast,
-	className,
-	config,
-	columnOrderDrag,
-	rowOrderDrag,
-	enableDrag,
-}: SortableRowProps<TData>) {
-	const computedId = typeof rowKey === 'function'
-		? rowKey(row.original as TData, index)
-		: String((row.original as Record<string, unknown>)[rowKey]);
-
-	const { ref, isDragging, handleRef } = useSortable({
-		id: computedId,
-		index,
-		type: 'row',
-		accept: 'row',
-		disabled: !enableDrag,
-	});
-	const style = {
-		boxShadow: isDragging
-			? '0 0 0 1px rgba(63, 63, 68, 0.05), 0px 15px 15px 0 rgba(34, 33, 81, 0.25)'
-			: undefined,
-		opacity: isDragging || rowOrderDrag?.activeRowId === computedId ? 0.35 : 1,
+	rows,
+	scrollElement,
+}: {
+	props: DataGridProps<TData>;
+	table: Table<TData>;
+	rows: Row<TData>[];
+	scrollElement: HTMLElement | null;
+}) {
+	if (typeof props.components?.body === "function") {
+		return props.components.body({ table, rows, scrollElement, children: null });
 	}
-	return (
-		<BodyRow<TData>
-			row={row}
-			border={border}
-			isLast={isLast}
-			ref={ref}
-			style={style}
-			className={className}
-			config={config}
-			columnOrderDrag={columnOrderDrag}
-			handleRef={handleRef}
-			enableDrag={enableDrag}
-		/>
-	);
-}
 
-interface BodyRowProps<TData> {
-	row: Row<TData>;
-	border?: boolean;
-	isLast?: boolean;
-	style?: React.CSSProperties;
-	className?: string;
-	config: DataGridConfig<TData>;
-	columnOrderDrag?: ColumnOrderDragState;
-	enableDrag?: boolean;
-	ref?: (element: Element | null) => void;
-	handleRef?: (element: Element | null) => void;
-}
-function BodyRow<TData>({
-	row,
-	border,
-	isLast,
-	ref,
-	handleRef,
-	style,
-	className,
-	config,
-	enableDrag,
-	columnOrderDrag
-}: BodyRowProps<TData>) {
-	const enableResizing = config?.columnResizing?.enable;
-	const cells = row.getVisibleCells();
-	const columnTransforms = getColumnDragTransforms(
-		cells.map((cell) => ({
-			id: cell.column.id,
-			width: cell.column.getSize(),
-		})),
-		[],
-		columnOrderDrag
-	);
+	const bodyComponents = typeof props.components?.body === "object" ? props.components.body : undefined;
+	const BodyWrapper = bodyComponents?.wrapper ?? Fragment;
+	const BodyRow = bodyComponents?.row ?? GridRow;
+	const renderedRows = props.rowPinning
+		? [...table.getTopRows(), ...table.getCenterRows(), ...table.getBottomRows()]
+		: rows;
 
-	return (
-		<GridRow
-			ref={ref}
-			style={{
-				...style,
-				...(isLast && border ? { borderBottom: '1px solid var(--border)' } : {}),
-			}}
-			className={className}
-		>
-			{cells.map((cell) => {
-				const context = cell.getContext()
-				const transform = columnTransforms.get(cell.column.id);
+	const body = (
+		<BodyWrapper>
+			{renderedRows.map((row) => {
+				const rowPinningStyles = getRowPinningStyles(
+					row,
+					table.getTopRows().length,
+					table.getBottomRows().length,
+				);
 				return (
-					<GridCell
-						key={cell.id}
-						className={cn(border ? 'border-r' : '', 'truncate')}
-						style={{
-							width: enableResizing ? cell.column.getSize() : undefined,
-							transform: transform ? `translateX(${transform}px)` : undefined,
-							transition: columnOrderDrag?.isDragging ? "transform 180ms cubic-bezier(0.2, 0, 0, 1)" : undefined,
-						}}
-					>
-						{flexRender(cell.column.columnDef.cell, {
-							...context,
-							handleRef: cell.column.id === ROW_ORDER_HANDLE_COLUMN && enableDrag ? handleRef : undefined,
-						})}
-					</GridCell>
+					<Fragment key={row.id}>
+						<BodyRow
+							data-state={row.getIsSelected() ? "selected" : undefined}
+							data-pinned={row.getIsPinned() || undefined}
+							style={{ ...rowPinningStyles.style }}
+							className={cn(rowPinningStyles.className, row.getIsPinned() && "z-20 bg-background")}
+							{...props.onRow?.(row.original, row.index, { row, table })}
+						>
+							{row.getVisibleCells().map((cell) => (
+								<GridBodyCell
+									key={cell.id}
+									props={props}
+									table={table}
+									cell={cell}
+								/>
+							))}
+						</BodyRow>
+						{row.getIsExpanded() && props.expandable && props.expandable.expandedRowRender ? (
+							<GridRow >
+								<GridCell className="h-auto py-0">
+									{props.expandable.expandedRowRender(row.original, row.index, row)}
+								</GridCell>
+							</GridRow>
+						) : null}
+					</Fragment>
 				)
 			})}
-		</GridRow>
+		</BodyWrapper>
+	);
+
+	return body;
+}
+
+function GridBodyCell<TData>({
+	props,
+	table,
+	cell,
+}: {
+	props: DataGridProps<TData>;
+	table: Table<TData>;
+	cell: Cell<TData, unknown>;
+}) {
+	const bodyComponents = typeof props.components?.body === "object" ? props.components.body : undefined;
+	const CellComponent = bodyComponents?.cell ?? GridCell;
+	const pinning = getColumnPinningStyles(cell.column);
+	const meta = cell.column.columnDef.meta;
+	const internalProps: DataGridElementProps = {
+		className: cn(
+			"relative bg-background group-hover/row:bg-muted/50",
+			pinning.className,
+			meta?.ellipsis && "truncate",
+			props.border && "border-r",
+		),
+		style: {
+			...pinning.style,
+			width: cell.column.getSize(),
+		},
+		"data-pinned": cell.column.getIsPinned() ? "true" : undefined,
+	};
+	const userProps = props.onCell?.(cell.row.original, cell.row.index, {
+		cell,
+		row: cell.row,
+		column: cell.column,
+		table,
+	});
+	const mergedProps = mergeElementProps(internalProps, userProps);
+	const content = "children" in mergedProps ? mergedProps.children : flexRender(cell.column.columnDef.cell, cell.getContext());
+	const { children: _children, ...cellProps } = mergedProps;
+
+	return (
+		<CellComponent {...cellProps} title={getEllipsisTitle(meta?.ellipsis, cell.getValue())}>
+			{content as ReactNode}
+		</CellComponent>
 	);
 }
 
-export const MemoizedDataGridBody = memo(
-	DataGridBody,
-	(prev, next) => prev.table.options.data === next.table.options.data,
-) as typeof DataGridBody
+function getEllipsisTitle(ellipsis: unknown, value: unknown) {
+	if (!ellipsis) return undefined;
+	if (typeof ellipsis === "object" && ellipsis && "showTitle" in ellipsis && !ellipsis.showTitle) return undefined;
+	return typeof value === "string" || typeof value === "number" ? String(value) : undefined;
+}

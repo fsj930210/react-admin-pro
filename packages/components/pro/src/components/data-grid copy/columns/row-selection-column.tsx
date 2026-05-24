@@ -63,9 +63,9 @@ function createRowSelectionColumn<TData>(
 				row.toggleSelected(value);
 
 				if (onSelect) {
-					const selectedRows = table
-						.getSelectedRowModel()
-						.rows.map((r) => r.original);
+					const selectedRows = table.getRowModel().rows
+						.filter((item) => item.id === row.id ? value : item.getIsSelected())
+						.map((r) => r.original);
 					onSelect(row.original, value, selectedRows);
 				}
 			};

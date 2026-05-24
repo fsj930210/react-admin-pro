@@ -33,7 +33,7 @@ export function ColumnFilter<TData, TValue>({
 	const enableNoLimit = meta?.enableFilterNoLimitOption ?? true
 	const filterOptions = meta?.filterOptions
 
-	const { table, currentFilterColumnRef } = useDataTable()
+	const { table, currentFilterColumnRef } = useDataTable<TData>()
 
 	const [isOpen, setIsOpen] = useState(false)
 	const [inputValue, setInputValue] = useState<string>(column.getFilterValue() as string ?? '')
@@ -46,7 +46,7 @@ export function ColumnFilter<TData, TValue>({
 
 	const handleOptionClick = (optionValue: string | number) => {
 		if (currentFilterColumnRef) {
-			currentFilterColumnRef.current = column
+			currentFilterColumnRef.current = column as any
 		}
 		if (filterType === "checkbox") {
 			if (optionValue === noLimitOption.value) {
@@ -82,7 +82,7 @@ export function ColumnFilter<TData, TValue>({
 		if (e.key === 'Enter') {
 			e.preventDefault()
 			if (currentFilterColumnRef) {
-				currentFilterColumnRef.current = column
+				currentFilterColumnRef.current = column as any
 			}
 			column.setFilterValue(inputValue || undefined)
 			setIsOpen(false)
@@ -131,7 +131,7 @@ export function ColumnFilter<TData, TValue>({
 				{
 					(filterType === "checkbox" || filterType === "radio") && (
 						<ul className="list-none m-0 p-0 space-y-0">
-							{renderedFilterOptions.map((option) => {
+							{renderedFilterOptions.map((option: { label: string; value: string | number }) => {
 								const isSelected = filterType === "checkbox" ? (column.getFilterValue() as (string | number)[])?.includes?.(option.value) : column.getFilterValue() === option.value
 								return (
 									<li

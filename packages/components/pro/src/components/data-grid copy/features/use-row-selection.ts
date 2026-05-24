@@ -34,7 +34,7 @@ export function useRowSelection<TData extends RowData>(
 		setRowSelectionValue(nextSelection);
 
 		if (config?.onChange && context) {
-			const selectedRowKeys = Object.keys(nextSelection);
+			const selectedRowKeys = Object.keys(nextSelection).filter((key) => nextSelection[key]);
 			const selectedRows = context.data.filter((row, index) =>
 				nextSelection[context.getRowId(row, index)]
 			);

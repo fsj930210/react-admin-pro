@@ -5,7 +5,7 @@ import { getColumnBlockWidth } from "../utils/column-drag-transform";
 
 interface ColumnDragOverlayProps<TData> {
 	table: Table<TData>;
-	config: DataGridConfig;
+	config: DataGridConfig<TData>;
 	columnOrderDrag?: ColumnOrderDragState;
 }
 
@@ -32,7 +32,7 @@ export function ColumnDragOverlay<TData>({
 
 interface HeaderOverlayCellProps<TData> {
 	header: Header<TData, unknown>;
-	config: DataGridConfig;
+	config: DataGridConfig<TData>;
 }
 
 function HeaderOverlayCell<TData>({ header, config }: HeaderOverlayCellProps<TData>) {

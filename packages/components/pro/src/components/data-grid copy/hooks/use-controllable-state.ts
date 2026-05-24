@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState, type SetStateAction } from "react";
+import { useCallback, useState, type SetStateAction } from "react";
 
 export function useControllableState<T>(
   defaultStateValue: T,
@@ -10,8 +10,6 @@ export function useControllableState<T>(
 ): [T, React.Dispatch<React.SetStateAction<T>>,] {
   const { defaultValue, value: propsValue, onChange } = props || {};
 
-  const isFirstRender = useRef(true);
-
   const [stateValue, setStateValue] = useState<T>(() => {
     if (propsValue !== undefined) {
       return propsValue!;
@@ -22,14 +20,6 @@ export function useControllableState<T>(
     }
   });
 
-  useEffect(() => {
-    if(propsValue !== undefined && !isFirstRender.current) {
-      setStateValue(propsValue);
-    }
-
-    isFirstRender.current = false;
-  }, [propsValue]);
-
   const mergedValue = propsValue === undefined ? stateValue : propsValue;
 
   function isFunction(value: unknown): value is Function {
@@ -37,13 +27,13 @@ export function useControllableState<T>(
   } 
 
   const setState = useCallback((value: SetStateAction<T>) => {
-    let res = isFunction(value) ? value(stateValue) : value
+    let res = isFunction(value) ? value(mergedValue) : value
 
     if (propsValue === undefined) {
       setStateValue(res);
     }
     onChange?.(res);
-  }, [onChange, propsValue, stateValue]);
+  }, [mergedValue, onChange, propsValue]);
 
   return [mergedValue, setState]
 }

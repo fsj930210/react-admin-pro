@@ -4,7 +4,7 @@ import type { DataGridConfig, RowOrderDragState } from "../types";
 
 interface RowDragOverlayProps<TData> {
 	table: Table<TData>;
-	config: DataGridConfig;
+	config: DataGridConfig<TData>;
 	rowOrderDrag?: RowOrderDragState;
 	border?: boolean;
 }

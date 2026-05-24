@@ -21,8 +21,7 @@ export interface TableResponse<T> {
 		total: number;
 		page: number;
 		pageSize: number;
-	}
-
+	};
 }
 
 export interface FetchUsersParams {

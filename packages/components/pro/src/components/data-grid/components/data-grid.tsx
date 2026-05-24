@@ -1,225 +1,134 @@
-import { useImperativeHandle, type ReactNode, type Ref } from "react";
-
-import {
-	getCoreRowModel,
-	useReactTable,
-	type ColumnDef,
-	type Row,
-	type Table,
-} from "@tanstack/react-table";
+import { Loading } from "@rap/components-ui/loading";
 import { OverlayScrollbarsComponent } from "overlayscrollbars-react";
-import { DataGridHeader } from "./grid-header";
-import { DataGridBody } from "./grid-body";
-import { useNormalizeColumns } from "../hooks/use-normalize-columns";
+import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
+import { Pagination } from "../../pagination";
+import { useDataGrid } from "../hooks/use-data-grid";
+import type { DataGridProps } from "../types";
+import { Empty } from "./empty";
 import { Grid } from "./grid";
-import type {
-	ColumnOrderConfig,
-	ColumnPinningConfig,
-	ColumnResizingConfig,
-	DataGridConfig,
-	DataGridRef,
-	DataUpdater,
-	RowOrderConfig,
-	RowPinningConfig,
-	RowSelectionConfig
-} from "../types";
-import { useMergedValue } from "../hooks/use-merged-value";
-import {
-	getDefaultColumnResizingConfig,
-	getDefaultColumnOrderConfig,
-	getDefaultRowOrderConfig,
-	getDefaultRowSelectionConfig,
-	getDefaultColumnPinningConfig,
-	getDefaultRowPinningConfig
-} from "../utils/default-config";
-import { useComposeFeatures } from "../features/use-compose-features";
-import { DndContainer } from "./dnd-container";
-import { useDataGridScrollArea } from "../hooks/use-scroll-area";
-import { ColumnDragOverlay } from "./column-drag-overlay";
-import { RowDragOverlay } from "./row-drag-overlay";
-import { useDataGridData } from "../hooks/use-data-grid-data";
-import { buildColumnsFromFactories } from "../utils/column-create-factory";
-import { createRowSelectionColumnFactory } from "../columns/row-selection-column";
-import { createRowOrderHandleColumnFactory } from "../columns/row-order-handle-column";
+import { GridBody } from "./grid-body";
+import { GridContextMenu, type HeaderContextMenuState } from "./grid-context-menu";
+import { GridHeader } from "./grid-header";
 
+const ROW_HEIGHT = 40;
 
-export interface DataGridProps<TData> {
-	data: TData[];
-	columns: ColumnDef<TData>[];
-	rowKey: string | ((row: TData, index: number, parentRow?: Row<TData>) => string);
-	border?: boolean;
-	scroll?: { x?: number | string; y?: number | string };
-	footer?: ReactNode | ((table: Table<TData>, config: DataGridConfig<TData>) => ReactNode);
-	columnResizing?: ColumnResizingConfig;
-	columnOrder?: ColumnOrderConfig;
-	rowOrder?: RowOrderConfig;
-	rowSelection?: RowSelectionConfig<TData>;
-	columnPinning?: ColumnPinningConfig;
-	rowPinning?: RowPinningConfig;
-	onDataChange?: (updater: DataUpdater<TData>) => void;
-	ref?: Ref<DataGridRef>;
+function getOverlayScrollViewport(root: HTMLElement | null) {
+	return root?.querySelector("[data-overlayscrollbars-viewport], .os-viewport") as HTMLElement | null;
 }
 
-export function DataGrid<TData>({
-	data,
-	columns: userColumns,
-	rowKey,
-	border = false,
-	scroll,
-	footer,
-	ref,
-	columnResizing: userColumnResizingConfig,
-	columnOrder: userColumnOrderConfig,
-	rowOrder: userRowOrderConfig,
-	rowSelection: userRowSelectionConfig,
-	columnPinning: userColumnPinningConfig,
-	rowPinning: userRowPinningConfig,
-	onDataChange,
-}: DataGridProps<TData>) {
-
-	const config = useMergedValue({
-		columnResizing: getDefaultColumnResizingConfig(),
-		columnOrder: getDefaultColumnOrderConfig(),
-		rowOrder: getDefaultRowOrderConfig(),
-		rowSelection: getDefaultRowSelectionConfig<TData>(),
-		columnPinning: getDefaultColumnPinningConfig(),
-		rowPinning: getDefaultRowPinningConfig(),
-	}, {
-		columnResizing: userColumnResizingConfig,
-		columnOrder: userColumnOrderConfig,
-		rowOrder: userRowOrderConfig,
-		rowSelection: userRowSelectionConfig,
-		columnPinning: userColumnPinningConfig,
-		rowPinning: userRowPinningConfig,
-	});
-	const { columnResizing } = config;
-
-	const { prependColumns, appendColumns } = buildColumnsFromFactories<TData>(config,
-		[
-			createRowOrderHandleColumnFactory<TData>(),
-			createRowSelectionColumnFactory<TData>()
-		]
+export function DataGrid<TData>(props: DataGridProps<TData>) {
+	const { table } = useDataGrid<TData>(props);
+	const scrollRootRef = useRef<{ getElement?: () => HTMLElement | null } | null>(null);
+	const headerRef = useRef<HTMLDivElement>(null);
+	const [headerHeight, setHeaderHeight] = useState(0);
+	const [scrollElement, setScrollElement] = useState<HTMLElement | null>(null);
+	const [headerMenu, setHeaderMenu] = useState<HeaderContextMenuState<TData> | null>(null);
+	const rows = table.getRowModel().rows;
+	const pagination = props.pagination === false ? undefined : props.pagination;
+	const total = pagination?.total ?? table.getFilteredRowModel().rows.length;
+	const gridTemplateColumns = useMemo(
+		() => table.getVisibleLeafColumns().map((column) => `${column.getSize()}px`).join(" "),
+		[table],
 	);
 
-	const columns = useNormalizeColumns([...prependColumns, ...userColumns, ...appendColumns]);
-	const {
-		data: tableData,
-		getRowId,
-		updateData,
-		updateCellData,
-		featureContext,
-	} = useDataGridData({
-		data,
-		rowKey,
-		onDataChange,
-	});
+	useEffect(() => {
+		const header = headerRef.current;
+		if (!header) return;
+		const updateHeaderHeight = () => setHeaderHeight(header.getBoundingClientRect().height);
+		updateHeaderHeight();
+		const observer = new ResizeObserver(updateHeaderHeight);
+		observer.observe(header);
+		return () => observer.disconnect();
+	}, []);
 
-	const {
-		state,
-		callbacks,
-		dndConfig,
-		fearureReturn,
-		api
-	} = useComposeFeatures<TData>(columns, config, featureContext);
-	const { columnOrderDrag, rowOrderDrag } = fearureReturn ?? {};
-	const { enable: enableDrag, callbacks: dndCallbacks } = dndConfig ?? {};
-	const coreRowModel = getCoreRowModel();
-	const table = useReactTable({
-		data: tableData,
-		columns,
-		columnResizeMode: columnResizing.columnResizeMode,
-		getRowId,
-		getCoreRowModel: coreRowModel,
-		enableColumnResizing: columnResizing.enable,
-		defaultColumn: {
-			minSize: columnResizing.minSize,
-			maxSize: columnResizing.maxSize,
-		},
-		state,
-		meta: {
-			updateData,
-			updateCellData,
-		},
-		...callbacks,
-	});
+	const contentWidth = table.getTotalSize();
+	const scrollWidth =
+		typeof props.scroll?.x === "number" && typeof contentWidth === "number"
+			? Math.min(props.scroll.x, contentWidth)
+			: props.scroll?.x;
 
-	useImperativeHandle(ref, () => ({
-		...api,
-	}));
-
-	const {
-		headerRef,
-		scrollAreaClassName,
-		scrollAreaStyle,
-	} = useDataGridScrollArea({ scroll });
-
-
-	const content = (
-		<OverlayScrollbarsComponent
-			className={scrollAreaClassName}
-			style={scrollAreaStyle}
-			options={{ scrollbars: { theme: "os-theme-dark" } }}
-			events={{
-				initialized: () => console.log("initialized"),
-				destroyed: () => console.log("destroyed"),
-				updated: () => console.log("updated"),
-				scroll: () => console.log("scroll"),
-			}}
-			defer
-		>
-			<div
-				className="w-max"
-				style={{ width: columnResizing.enable ? table.getTotalSize() : 'max-content' }}
-			>
-				<div ref={headerRef} className="bg-muted w-full sticky top-0">
-					<DataGridHeader<TData>
-						table={table}
-						border={border}
-						config={config}
-						dragType="column"
-						columnOrderDrag={columnOrderDrag}
-					/>
-				</div>
-				<div className="w-full">
-					<DataGridBody<TData>
-						table={table}
-						border={border}
-						rowKey={rowKey}
-						config={config}
-						dragType="row"
-						columnOrderDrag={columnOrderDrag}
-						rowOrderDrag={rowOrderDrag}
-					/>
-				</div>
-				{typeof footer === 'function' ? footer(table, config) : footer}
-			</div>
-		</OverlayScrollbarsComponent>
-	)
 	return (
-		<Grid>
-			{
-				enableDrag ? (
-					<DndContainer
-						{...dndCallbacks}
-						overlay={rowOrderDrag?.activeRowId ? (
-							<RowDragOverlay<TData>
-								table={table}
-								config={config}
-								rowOrderDrag={rowOrderDrag}
-								border={border}
-							/>
-						) : columnOrderDrag?.activeColumnId ? (
-							<ColumnDragOverlay<TData>
-								table={table}
-								config={config}
-								columnOrderDrag={columnOrderDrag}
-							/>
-						) : null}
-					>
-						{content}
-					</DndContainer>
-				) : content
-			}
+		<Grid
+			className={props.border ? undefined : "border-0"}
+			style={{
+				"--rap-data-grid-header-height": `${headerHeight}px`,
+				"--rap-data-grid-row-height": `${ROW_HEIGHT}px`,
+			} as CSSProperties}
+		>
+			<OverlayScrollbarsComponent
+				ref={scrollRootRef as never}
+				className="[&_.os-scrollbar-vertical]:!top-[var(--rap-data-grid-header-height)] [&_.os-scrollbar-vertical]:!bottom-0"
+				style={{ maxHeight: props.scroll?.y ?? "auto", maxWidth: scrollWidth ?? "auto" }}
+				options={{ scrollbars: { theme: "os-theme-dark" } }}
+				events={{
+					initialized: () => {
+						const root = scrollRootRef.current?.getElement?.();
+						setScrollElement(getOverlayScrollViewport(root ?? null));
+					},
+					scroll: (_instance, event) => {
+						const target = event.target as HTMLElement;
+						props.onScroll?.(event, {
+							scrollLeft: target.scrollLeft,
+							scrollTop: target.scrollTop,
+						});
+					},
+				}}
+				defer
+			>
+				<div style={{ width: contentWidth }}>
+					<GridHeader
+						props={props}
+						table={table}
+						headerRef={headerRef}
+						onHeaderContextMenu={(event, header) => {
+							if (props.contextMenu === false || header.isPlaceholder || header.colSpan !== 1) return;
+							event.preventDefault();
+							setHeaderMenu({ x: event.clientX, y: event.clientY, column: header.column });
+						}}
+					/>
+					{props.loading ? (
+						<div className="flex h-32 items-center justify-center">
+							<Loading />
+						</div>
+					) : rows.length ? (
+						<GridBody
+							props={props}
+							table={table}
+							rows={rows}
+							scrollElement={scrollElement}
+						/>
+					) : (
+						<Empty {...props.empty} />
+					)}
+				</div>
+			</OverlayScrollbarsComponent>
+			{pagination ? (
+				<Pagination
+					className="border-t p-2"
+					total={total}
+					page={table.getState().pagination.pageIndex + 1}
+					pageSize={table.getState().pagination.pageSize}
+					defaultPage={pagination.defaultPage}
+					defaultPageSize={pagination.defaultPageSize}
+					showSizeChanger={pagination.showSizeChanger ?? true}
+					showQuickJumper={pagination.showQuickJumper}
+					pageSizeOptions={pagination.pageSizeOptions}
+					showTotal={pagination.showTotal}
+					onChange={(page, pageSize) => {
+						table.setPageIndex(page - 1);
+						table.setPageSize(pageSize);
+					}}
+					onShowSizeChange={pagination.onShowSizeChange}
+				/>
+			) : null}
+			{headerMenu ? (
+				<GridContextMenu
+					table={table}
+					menu={headerMenu}
+					render={props.contextMenu && props.contextMenu.render ? props.contextMenu.render : undefined}
+					onClose={() => setHeaderMenu(null)}
+				/>
+			) : null}
 		</Grid>
 	);
 }

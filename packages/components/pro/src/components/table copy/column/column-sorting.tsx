@@ -21,7 +21,7 @@ export function ColumnSorting<TData, TValue>({
 	customRender,
 	...rest
 }: ColumnSortingProps<TData, TValue>) {
-	const context = useDataTable()
+	const context = useDataTable<TData>()
 	const canSort = column.getCanSort()
 	const isSorted = column.getIsSorted()
 	const enableMultiSort = context?.enableMultiSort ?? false
@@ -30,7 +30,7 @@ export function ColumnSorting<TData, TValue>({
 
 	const handleRemoveSort = () => {
 		if (currentSortColumnRef) {
-			currentSortColumnRef.current = column
+			currentSortColumnRef.current = column as any
 		}
 		if (table) {
 			const currentSorting = table.getState().sorting
@@ -41,14 +41,14 @@ export function ColumnSorting<TData, TValue>({
 
 	const handleSortAsc = () => {
 		if (currentSortColumnRef) {
-			currentSortColumnRef.current = column
+			currentSortColumnRef.current = column as any
 		}
 		column.toggleSorting(false, enableMultiSort)
 	}
 
 	const handleSortDesc = () => {
 		if (currentSortColumnRef) {
-			currentSortColumnRef.current = column
+			currentSortColumnRef.current = column as any
 		}
 		column.toggleSorting(true, enableMultiSort)
 	}

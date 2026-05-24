@@ -70,7 +70,8 @@ export function useNormalizeColumns<TData>(userColumns: ColumnDef<TData>[]) {
 
 	const { normalized, hasError } = normalizeColumns(userColumns);
 
-	if (hasError && process.env.NODE_ENV === "development") {
+	const isDevelopment = (globalThis as { process?: { env?: { NODE_ENV?: string } } }).process?.env?.NODE_ENV === "development";
+	if (hasError && isDevelopment) {
 		console.warn(
 			"[useNormalizeColumns]: Some columns are missing an `id` or `accessorKey`. " +
 				"Please provide an `id` or `accessorKey` for each column to ensure stable column identity."

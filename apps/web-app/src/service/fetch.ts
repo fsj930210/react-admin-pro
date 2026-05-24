@@ -25,8 +25,8 @@ const afterResponseJson: AfterResponseHook = async ({
 		if (clonedResponse.status >= 200 && clonedResponse.status < 300) {
 			const body = await clonedResponse.json();
 			if (body.code === SUCCESS_CODE) {
-		return body.data.data;
-	}
+				return body.data.data;
+			}
 			return body;
 		}
 		return response;

@@ -12,7 +12,6 @@ import type {
 	PaginationState,
 	ColumnSizingState,
 	Row,
-	RowData,
 	ColumnPinningPosition,
 	RowPinningState,
 	AccessorKeyColumnDef,
@@ -37,25 +36,7 @@ import { ROW_SELECTION_COLUMN, ROW_SORT_COLUMN } from "./utils/constants"
 
 import { DragDropProvider } from "@dnd-kit/react"
 import { arrayMove, move } from '@dnd-kit/helpers'
-import '@tanstack/react-table';
-
-declare module '@tanstack/react-table' {
-	interface ColumnMeta<TData extends RowData, TValue> {
-		filter?: {
-			options?: Array<{ label: string; value: string | number }>;
-			type?: "checkbox" | "radio" | "input" | "custom";
-			enableLocalFilter?: boolean;
-			enableNoLimitOption?: boolean;
-		}
-		sortting?: {
-			enableLocalSort?: boolean;
-			enableSortingRemoval?: boolean;
-		}
-		pinning?: ColumnPinningPosition;
-		visible?: boolean;
-		[key: string]: any
-	}
-}
+export type ColumnMeta = any;
 
 
 
@@ -380,6 +361,10 @@ export function DataTable<TData>({
 		enableSubRowSelection: rowSelectionProps?.enableSubRowSelection,
 		getRowId: typeof rowKey === "function" ? rowKey : (row: TData) => String((row as Record<string, string | number>)[rowKey]),
 		getCoreRowModel: getCoreRowModel(),
+		filterFns: {
+			dataGridFilter: () => true,
+			dataGridGlobalFuzzy: () => true,
+		},
 		...(enableLocalPagination ? { getPaginationRowModel: getPaginationRowModel() } : {}),
 		getSortedRowModel: getSortedRowModel(),
 		enableMultiSort: sortingProps?.enableMultiSort ?? false,
@@ -536,12 +521,10 @@ export function DataTable<TData>({
 	)
 }
 
-export function useDataTable() {
-	const context = use(TableContext)
+export function useDataTable<TData = any>() {
+	const context = use(TableContext) as TableContextValue<TData> | null
 	if (!context) {
 		throw new Error("useDataTable must be used within a DataTable component")
 	}
 	return context
 }
-
-

@@ -2,11 +2,16 @@ import { useEffect, useRef, useState, type CSSProperties } from "react";
 
 interface UseDataGridScrollAreaOptions {
 	scroll?: { x?: number | string; y?: number | string };
+	contentWidth?: number;
 }
 
-export function useDataGridScrollArea({ scroll }: UseDataGridScrollAreaOptions) {
+export function useDataGridScrollArea({ scroll, contentWidth }: UseDataGridScrollAreaOptions) {
 	const headerRef = useRef<HTMLDivElement>(null);
 	const [headerHeight, setHeaderHeight] = useState(0);
+	const scrollWidth =
+		typeof scroll?.x === "number" && typeof contentWidth === "number"
+			? Math.min(scroll.x, contentWidth)
+			: scroll?.x;
 
 	useEffect(() => {
 		const header = headerRef.current;
@@ -32,7 +37,7 @@ export function useDataGridScrollArea({ scroll }: UseDataGridScrollAreaOptions) 
 		scrollAreaStyle: {
 			"--rap-data-grid-header-height": `${headerHeight}px`,
 			maxHeight: scroll?.y || "auto",
-			maxWidth: scroll?.x || "auto",
+			maxWidth: scrollWidth || "auto",
 		} as CSSProperties,
 	};
 }

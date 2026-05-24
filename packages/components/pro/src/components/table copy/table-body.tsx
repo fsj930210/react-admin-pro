@@ -13,7 +13,7 @@ interface DataGridBodyProps<TData> {
 	rowKey: string | ((row: TData, index: number, parentRow?: Row<TData>) => string)
 }
 
-export function DataGridBody<TData>({ table, rowKey }: DataGridBodyProps<TData>) {
+export function DataTableBody<TData>({ table, rowKey }: DataGridBodyProps<TData>) {
 	return (
 		<TableBody>
 			{table.getRowModel().rows.map((row, index) => (
@@ -80,3 +80,5 @@ export const MemoizedTableBody = memo(
 	DataTableBody,
 	(prev, next) => prev.table.options.data === next.table.options.data,
 ) as typeof DataTableBody
+
+export { DataTableBody as DataGridBody };
