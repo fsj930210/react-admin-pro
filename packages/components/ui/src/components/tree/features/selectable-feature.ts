@@ -1,84 +1,74 @@
-import type { TreeFeature, TreeInstance, TreeItemInstance } from "../types";
-import { defineProperty, getItemsByKeys } from "../utils";
+import type { TreeFeature, TreeItemInstance, TreeKey } from "../types";
 
-declare module "../types.ts" {
-	interface TreeInstance {
-		getSelectedKeys?: () => string[];
-		updateSelectedKeys?: (keys: string[]) => void;
-	}
-	interface TreeItemInstance {
-		selected?: boolean;
-		select?: (append?: boolean) => void;
-		unselect?: () => void;
-	}
-}
 type SelectableFeatureOptions = {
-	defaultSelectedKeys?: string[];
+	selectedKeys?: TreeKey[];
+	defaultSelectedKeys?: TreeKey[];
 	multiple?: boolean;
+	onSelectedKeysChange?: (
+		keys: TreeKey[],
+		info: { selected: boolean; key: TreeKey; item?: TreeItemInstance },
+	) => void;
 	onSelect?: (
-		selectedKeys: string[],
+		selectedKeys: TreeKey[],
 		selectedItems: TreeItemInstance[],
-		selectInfo: {
-			selected: boolean;
-			node: TreeItemInstance;
-		},
+		selectInfo: { selected: boolean; node: TreeItemInstance },
 	) => void;
 };
+
 export function selectableFeature({
+	selectedKeys,
 	defaultSelectedKeys,
 	multiple = false,
+	onSelectedKeysChange,
 	onSelect,
-}: SelectableFeatureOptions): TreeFeature {
+}: SelectableFeatureOptions = {}): TreeFeature {
 	return {
 		name: "selectable-feature",
-		install(tree: TreeInstance) {
-			const selectedKeys = new Set<string>(defaultSelectedKeys || []);
+		install(ctx) {
+			const isControlled = selectedKeys !== undefined;
+			const store = ctx.registerState<Set<TreeKey>>(
+				"selectable.selectedKeys",
+				new Set(selectedKeys ?? defaultSelectedKeys ?? []),
+			);
+			const getSet = () => new Set(isControlled ? selectedKeys : store.get());
 
-			tree.getSelectedKeys = () => Array.from(selectedKeys);
-			tree.updateSelectedKeys = (keys: string[]) => {
-				selectedKeys.clear();
-				keys.forEach((key) => selectedKeys.add(key));
-				tree.notify();
-			};
-			const updateSelectedState = (key: string, selected: boolean) => {
-				if (!multiple) selectedKeys.clear();
-				if (selected) {
-					selectedKeys.add(key);
-				} else {
-					selectedKeys.delete(key);
+			const commit = (next: Set<TreeKey>, key: TreeKey, selected: boolean) => {
+				if (!isControlled) store.set(next, { changedKeys: [key], selectorKeys: ["selectedKeys"] });
+				else ctx.notify({ changedKeys: [key], selectorKeys: ["selectedKeys"] });
+				const keys = Array.from(next);
+				const item = ctx.tree.getItem(key);
+				onSelectedKeysChange?.(keys, { selected, key, item });
+				if (item) {
+					onSelect?.(
+						keys,
+						keys.map((itemKey) => ctx.tree.getItem(itemKey)).filter(Boolean) as TreeItemInstance[],
+						{ selected, node: item },
+					);
 				}
-				onSelect?.(
-					Array.from(selectedKeys),
-					getItemsByKeys(tree.items, Array.from(selectedKeys)),
-					{
-						selected,
-						node: tree.getItem(key) as TreeItemInstance,
-					},
-				);
-				tree.notify();
 			};
-		const init = () => {
-			tree.items.forEach((item) => {
-				defineProperty(item, "selected", {
-					get: () => selectedKeys.has(item.key),
-				});
-				item.select = () => {
-					if (!item.disabled) {
-						updateSelectedState(item.key, true);
-					}
-				};
-				item.unselect = () => {
-					if (!item.disabled) {
-						updateSelectedState(item.key, false);
-					}
-				};
-			});
-		};
-			init();
-			if (!tree.onRebuild) tree.onRebuild = [];
-			tree.onRebuild.push(() => {
-				init();
-			});
+
+			const select = (key: TreeKey, selected = true) => {
+				const item = ctx.tree.getItem(key);
+				if (!item || item.disabled) return;
+				const next = getSet();
+				const wasSelected = next.has(key);
+				if (!multiple) next.clear();
+				if (selected) next.add(key);
+				else next.delete(key);
+				if (wasSelected === selected && (multiple || next.size <= 1)) return;
+				commit(next, key, selected);
+			};
+
+			ctx.tree.select = select;
+			ctx.tree.unselect = (key) => select(key, false);
+			ctx.tree.getSelectedKeys = () => Array.from(getSet());
+			ctx.tree.updateSelectedKeys = (keys) => {
+				if (!isControlled)
+					store.set(new Set(keys), { changedKeys: keys, selectorKeys: ["selectedKeys"] });
+				onSelectedKeysChange?.(keys, { selected: true, key: keys[0] ?? "", item: undefined });
+			};
+
+			ctx.registerItemState("selected", (item) => getSet().has(item.key));
 		},
 	};
 }

@@ -1,7 +1,6 @@
 {
 	"extends": "@rap/tsconfig/web.json",
 	"compilerOptions": {
-		"baseUrl": ".",
 		"paths": {
 			"@rap/components-ui/*": ["./src/*"]
 		},

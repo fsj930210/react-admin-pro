@@ -1,7 +1,7 @@
 import React, { useMemo, useRef, useState } from 'react';
 import type { IconifyJSON } from '@iconify/react';
 import { useVirtualizer } from '@tanstack/react-virtual';
-import { useControllableValue } from 'ahooks';
+import { useControllableState } from '@rap/hooks/use-controllable-state';
 import { Input } from '@rap/components-ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@rap/components-ui/tabs';
 import { IconifyIcon, ImageIcon, type IconWrapperProps } from '@rap/components-ui/icon';
@@ -220,7 +220,7 @@ export interface IconViewProps {
 }
 
 export function IconView(props: IconViewProps) {
-	const [value, setValue] = useControllableValue(props);
+	const [value, setValue] = useControllableState(props);
 	const allIconSets = useMemo(() => {
 		const sets = props.disableDefaultIconSets ? [] : [...defaultIconSets];
 		if (props.iconSets?.length) {

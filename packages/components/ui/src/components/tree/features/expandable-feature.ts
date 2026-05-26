@@ -1,92 +1,102 @@
-import type {
-	TreeFeature,
-	TreeInstance,
-	TreeItemInstance,
-	TreeNode,
-} from "../types";
-import { defineProperty, getItemsByKeys } from "../utils";
+import type { TreeFeature, TreeItemInstance, TreeKey } from "../types";
 
-declare module "../types.ts" {
-	interface TreeInstance {
-		getExpandedKeys?: () => string[];
-		updateExpandedKeys?: (keys: string[]) => void;
-	}
-	interface TreeItemInstance {
-		expanded?: boolean;
-		expand?: (key: string) => void;
-		collapse?: (key: string) => void;
-	}
-}
 type ExpandableFeatureOptions = {
-	defaultExpandedKeys?: string[];
+	expandedKeys?: TreeKey[];
+	defaultExpandedKeys?: TreeKey[];
+	onExpandedKeysChange?: (
+		keys: TreeKey[],
+		info: { expanded: boolean; key: TreeKey; item?: TreeItemInstance },
+	) => void;
 	onExpand?: (
-		expandedKeys: string[],
+		expandedKeys: TreeKey[],
 		expandedItems: TreeItemInstance[],
-		expandInfo: {
-			expanded: boolean;
-			node: TreeItemInstance;
-		},
+		expandInfo: { expanded: boolean; node: TreeItemInstance },
 	) => void;
 };
 
 export function expandableFeature({
+	expandedKeys,
 	defaultExpandedKeys,
+	onExpandedKeysChange,
 	onExpand,
-}: ExpandableFeatureOptions): TreeFeature {
+}: ExpandableFeatureOptions = {}): TreeFeature {
 	return {
 		name: "expandable-feature",
-		install(tree: TreeInstance) {
-			const expandedKeys = new Set<string>(defaultExpandedKeys || []);
-			tree.getExpandedKeys = () => Array.from(expandedKeys);
-			tree.updateExpandedKeys = (keys: string[]) => {
-				expandedKeys.clear();
-				keys.forEach((key) => expandedKeys.add(key));
-				tree.notify();
-			};
-			tree.getVisibleItems = () => {
-				const result: TreeItemInstance[] = [];
-				function walk(nodes: TreeNode[]) {
-					for (const node of nodes) {
-						const item = tree.getItem(node.key) as TreeItemInstance;
-						result.push(item);
-						if (node.children && expandedKeys.has(node.key)) {
-							walk(node.children);
-						}
-					}
-				}
-				walk(tree.nodes);
-				return result;
-			};
-			const updateItemExpandedState = (key: string, expanded: boolean) => {
-				if (expanded) {
-					expandedKeys.add(key);
+		install(ctx) {
+			const isControlled = expandedKeys !== undefined;
+			const store = ctx.registerState<Set<TreeKey>>(
+				"expandable.expandedKeys",
+				new Set(expandedKeys ?? defaultExpandedKeys ?? []),
+			);
+
+			const getSet = () => new Set(isControlled ? expandedKeys : store.get());
+			const commit = (next: Set<TreeKey>, key: TreeKey, expanded: boolean) => {
+				if (!isControlled) {
+					store.set(next, { visibleChanged: true, selectorKeys: ["expandedKeys"] });
 				} else {
-					expandedKeys.delete(key);
+					ctx.notify({ visibleChanged: true, selectorKeys: ["expandedKeys"] });
 				}
-				onExpand?.(
-					Array.from(expandedKeys),
-					getItemsByKeys(tree.items, Array.from(expandedKeys)),
-					{
-						expanded: expanded,
-						node: tree.getItem(key) as TreeItemInstance,
-					},
-				);
-				tree.notify();
+				const keys = Array.from(next);
+				const item = ctx.tree.getItem(key);
+				onExpandedKeysChange?.(keys, { expanded, key, item });
+				if (item) {
+					onExpand?.(
+						keys,
+						keys.map((itemKey) => ctx.tree.getItem(itemKey)).filter(Boolean) as TreeItemInstance[],
+						{ expanded, node: item },
+					);
+				}
 			};
 
-			const init = () => {
-				tree.items.forEach((item) => {
-					defineProperty(item, "expanded", {
-						get: () => expandedKeys.has(item.key),
-					});
-					item.expand = () => updateItemExpandedState(item.key, true);
-					item.collapse = () => updateItemExpandedState(item.key, false);
+			const expand = (key: TreeKey) => {
+				const next = getSet();
+				if (next.has(key)) return;
+				next.add(key);
+				commit(next, key, true);
+			};
+			const collapse = (key: TreeKey) => {
+				const next = getSet();
+				if (!next.has(key)) return;
+				next.delete(key);
+				commit(next, key, false);
+			};
+			const toggleExpanded = (key: TreeKey) => {
+				if (getSet().has(key)) collapse(key);
+				else expand(key);
+			};
+
+			ctx.tree.expand = expand;
+			ctx.tree.collapse = collapse;
+			ctx.tree.toggleExpanded = toggleExpanded;
+			ctx.tree.getExpandedKeys = () => Array.from(getSet());
+			ctx.tree.updateExpandedKeys = (keys) => {
+				const next = new Set(keys);
+				if (!isControlled)
+					store.set(next, { visibleChanged: true, selectorKeys: ["expandedKeys"] });
+				onExpandedKeysChange?.(Array.from(next), {
+					expanded: true,
+					key: keys[0] ?? "",
+					item: undefined,
 				});
 			};
-			init();
-			if (!tree.onRebuild) tree.onRebuild = [];
-			tree.onRebuild.push(() => {
-				init();
+
+			ctx.registerItemState("expanded", (item) => getSet().has(item.key));
+			ctx.registerVisiblePipeline("expandable.visible", (items, tree) => {
+				const next: TreeItemInstance[] = [];
+				const expanded = getSet();
+				for (const item of items) {
+					let parentKey = item.parentKey;
+					let visible = true;
+					while (parentKey) {
+						if (!expanded.has(parentKey)) {
+							visible = false;
+							break;
+						}
+						parentKey = tree.parentByKey.get(parentKey) ?? null;
+					}
+					if (visible) next.push(item);
+				}
+				return next;
 			});
 		},
 	};

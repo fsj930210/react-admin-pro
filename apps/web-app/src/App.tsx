@@ -6,7 +6,7 @@ import "@bprogress/core/css";
 import { BProgress } from "@bprogress/core";
 import { ThemeProvider } from "@rap/components-ui/theme-provider";
 import { TooltipProvider } from "@rap/components-ui/tooltip";
-import { useEventEmitter } from "ahooks";
+import { useEventEmitter } from "@rap/hooks/use-event-emitter";
 import { APP_BASE_PATH } from "@/config";
 import { type AppEvent, AppProvider } from "./app-context";
 

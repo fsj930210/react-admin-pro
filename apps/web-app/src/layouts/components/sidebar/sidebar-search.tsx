@@ -1,4 +1,4 @@
-import { InputWithClear } from "@rap/components-pro/input";
+import { Input } from "@rap/components-pro/input";
 import { useSidebar } from "@rap/components-ui/sidebar";
 import { cn } from "@rap/utils";
 import { Search } from "lucide-react";
@@ -23,13 +23,14 @@ export function SidebarSearch({ onChange }: sidebarSearchProps) {
 	};
 	return (
 		<div className="flex-center px-2 py-1">
-			<InputWithClear
+			<Input
 				placeholder="搜索菜单"
 				ref={searchRef as React.RefObject<HTMLInputElement>}
 				className={cn("w-full", state === "collapsed" ? "hidden" : "")}
-				onChange={handleInputChange}
+				onValueChange={handleInputChange}
 				value={searchKeyword}
 				onClear={handleClearSearch}
+				allowClear
 			/>
 			<Search
 				className={cn("size-5 cursor-pointer", state === "expanded" ? "hidden" : "")}

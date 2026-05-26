@@ -1,179 +1,167 @@
-import type { TreeFeature, TreeInstance, TreeItemInstance } from "../types";
-import { defineProperty, getItemsByKeys } from "../utils";
-
-declare module "../types.ts" {
-	interface TreeInstance {
-		getCheckedKeys?: () => string[];
-		updateCheckedKeys?: (keys: string[]) => void;
-	}
-	interface TreeItemInstance {
-		checked?: boolean;
-		indeterminate?: boolean;
-		check?: () => void;
-		uncheck?: () => void;
-	}
-}
+import type { TreeFeature, TreeItemInstance, TreeKey } from "../types";
 
 export interface CheckableOptions {
-	defaultCheckedKeys?: string[];
+	checkedKeys?: TreeKey[];
+	defaultCheckedKeys?: TreeKey[];
 	checkStrictly?: boolean;
+	onCheckedKeysChange?: (
+		keys: TreeKey[],
+		info: { checked: boolean; key: TreeKey; item?: TreeItemInstance },
+	) => void;
 	onCheck?: (
-		checkedKeys: string[],
+		checkedKeys: TreeKey[],
 		checkedItems: TreeItemInstance[],
-		checkInfo: {
-			checked: boolean;
-			node: TreeItemInstance;
-		},
+		checkInfo: { checked: boolean; node: TreeItemInstance },
 	) => void;
 }
 
-function getAllDescendantKeys(
-	tree: TreeInstance,
-	item: TreeItemInstance,
-): string[] {
-	let keys: string[] = [];
-	const nodeData = item.node;
-	if (!nodeData || !nodeData.children || !nodeData.children.length) return [];
-	for (const child of nodeData.children) {
-		const childKey = String(child.key);
-		keys.push(childKey);
-		const childItem = tree.getItem(childKey);
-		if (childItem) keys = keys.concat(getAllDescendantKeys(tree, childItem));
-	}
-	return keys;
+function collectDescendantKeys(
+	tree: { childrenByKey: Map<TreeKey | null, TreeKey[]> },
+	key: TreeKey,
+): TreeKey[] {
+	const result: TreeKey[] = [];
+	const walk = (currentKey: TreeKey) => {
+		for (const childKey of tree.childrenByKey.get(currentKey) ?? []) {
+			result.push(childKey);
+			walk(childKey);
+		}
+	};
+	walk(key);
+	return result;
 }
 
-function getAllAncestorItems(
-	tree: TreeInstance,
-	item: TreeItemInstance,
-): TreeItemInstance[] {
-	const result: TreeItemInstance[] = [];
-	let parentKey = item.parentKey;
+function collectAncestorKeys(
+	tree: { parentByKey: Map<TreeKey, TreeKey | null> },
+	key: TreeKey,
+): TreeKey[] {
+	const result: TreeKey[] = [];
+	let parentKey = tree.parentByKey.get(key) ?? null;
 	while (parentKey) {
-		const parent = tree.getItem(parentKey);
-		if (!parent) break;
-		result.push(parent);
-		parentKey = parent.parentKey;
+		result.push(parentKey);
+		parentKey = tree.parentByKey.get(parentKey) ?? null;
 	}
 	return result;
 }
 
-function calcIndeterminate(
-	tree: TreeInstance,
-	checkedSet: Set<string>,
-	item: TreeItemInstance,
-): boolean {
-	const nodeData = item.node;
-	if (!nodeData || !nodeData.children || nodeData.children.length === 0)
-		return false;
-	let checkedCount = 0;
-	let indeterminate = false;
-	for (const child of nodeData.children) {
-		const childKey = String(child.key);
-		const childItem = tree.getItem(childKey);
-		if (!childItem) continue;
-		if (checkedSet.has(childKey)) checkedCount++;
-		if (calcIndeterminate(tree, checkedSet, childItem)) indeterminate = true;
-	}
-	if (checkedCount === 0 && !indeterminate) return false;
-	if (checkedCount === nodeData.children.length) return false;
-	return true;
-}
-
 export function checkableFeature({
+	checkedKeys,
 	defaultCheckedKeys,
-	checkStrictly,
+	checkStrictly = false,
+	onCheckedKeysChange,
 	onCheck,
-}: CheckableOptions): TreeFeature {
+}: CheckableOptions = {}): TreeFeature {
 	return {
 		name: "checkable-feature",
-		install(tree: TreeInstance) {
-			const checkedKeys = new Set(defaultCheckedKeys || []);
+		install(ctx) {
+			const isControlled = checkedKeys !== undefined;
+			const store = ctx.registerState<Set<TreeKey>>(
+				"checkable.checkedKeys",
+				new Set(checkedKeys ?? defaultCheckedKeys ?? []),
+			);
+			let indeterminateCache = new Map<TreeKey, boolean>();
 
-			const updateItemState = (item: TreeItemInstance) => {
-				defineProperty(item, "checked", {
-					configurable: true,
-					enumerable: true,
-					get() {
-						return checkedKeys.has(item.key);
-					},
-				});
-				defineProperty(item, "indeterminate", {
-					configurable: true,
-					enumerable: true,
-					get() {
-						if (checkStrictly) return false;
-						return calcIndeterminate(tree, checkedKeys, item);
-					},
-				});
+			const getSet = () => new Set(isControlled ? checkedKeys : store.get());
+			const rebuildIndeterminate = (set = getSet()) => {
+				const cache = new Map<TreeKey, boolean>();
+				const visit = (key: TreeKey): { checkedCount: number; total: number; partial: boolean } => {
+					const children = ctx.tree.childrenByKey.get(key) ?? [];
+					if (children.length === 0) {
+						return { checkedCount: set.has(key) ? 1 : 0, total: 1, partial: false };
+					}
+					let checkedCount = 0;
+					let partial = false;
+					for (const childKey of children) {
+						const child = visit(childKey);
+						if (set.has(childKey)) checkedCount += 1;
+						if (child.partial || (child.checkedCount > 0 && child.checkedCount < child.total))
+							partial = true;
+					}
+					const indeterminate =
+						!checkStrictly && ((checkedCount > 0 && checkedCount < children.length) || partial);
+					cache.set(key, indeterminate);
+					return { checkedCount, total: children.length, partial: indeterminate };
+				};
+				for (const rootKey of ctx.tree.childrenByKey.get(null) ?? []) visit(rootKey);
+				indeterminateCache = cache;
 			};
 
-			function updateChecked(item: TreeItemInstance, checked: boolean) {
-				if (checkStrictly) {
-					if (checked) {
-						checkedKeys.add(item.key);
-					} else {
-						checkedKeys.delete(item.key);
-					}
+			const commit = (
+				next: Set<TreeKey>,
+				key: TreeKey,
+				checked: boolean,
+				changedKeys: TreeKey[],
+			) => {
+				rebuildIndeterminate(next);
+				if (!isControlled) {
+					store.set(next, { changedKeys, selectorKeys: ["checkedKeys"] });
 				} else {
-					// 递归选中/取消自己和所有子节点
-					const keys = [item.key, ...getAllDescendantKeys(tree, item)];
-					if (checked) {
-						keys.forEach((key) => checkedKeys.add(key));
-					} else {
-						keys.forEach((key) => checkedKeys.delete(key));
+					ctx.notify({ changedKeys, selectorKeys: ["checkedKeys"] });
+				}
+				const keys = Array.from(next);
+				const item = ctx.tree.getItem(key);
+				onCheckedKeysChange?.(keys, { checked, key, item });
+				if (item) {
+					onCheck?.(
+						keys,
+						keys.map((itemKey) => ctx.tree.getItem(itemKey)).filter(Boolean) as TreeItemInstance[],
+						{ checked, node: item },
+					);
+				}
+			};
+
+			const check = (key: TreeKey, checked = true) => {
+				const item = ctx.tree.getItem(key);
+				if (!item || item.disabled) return;
+				const next = getSet();
+				const changedKeys = new Set<TreeKey>([key]);
+
+				if (checkStrictly) {
+					if (checked) next.add(key);
+					else next.delete(key);
+				} else {
+					const keys = [key, ...collectDescendantKeys(ctx.tree, key)];
+					for (const itemKey of keys) {
+						const current = ctx.tree.getItem(itemKey);
+						if (current?.disabled) continue;
+						changedKeys.add(itemKey);
+						if (checked) next.add(itemKey);
+						else next.delete(itemKey);
 					}
 
-					// 向上联动父节点（全选+父选，部分选+父indeterminate）
-					for (const ancestor of getAllAncestorItems(tree, item)) {
-						if (!ancestor.node.children) continue;
-						const allChecked = ancestor.node.children.every((child) =>
-							checkedKeys.has(String(child.key)),
+					for (const ancestorKey of collectAncestorKeys(ctx.tree, key)) {
+						changedKeys.add(ancestorKey);
+						const children = ctx.tree.childrenByKey.get(ancestorKey) ?? [];
+						const enabledChildren = children.filter(
+							(childKey) => !ctx.tree.getItem(childKey)?.disabled,
 						);
-						if (allChecked) {
-							checkedKeys.add(ancestor.key);
+						if (
+							enabledChildren.length > 0 &&
+							enabledChildren.every((childKey) => next.has(childKey))
+						) {
+							next.add(ancestorKey);
 						} else {
-							checkedKeys.delete(ancestor.key);
+							next.delete(ancestorKey);
 						}
 					}
 				}
-				onCheck?.(
-					Array.from(checkedKeys),
-					getItemsByKeys(tree.items, Array.from(checkedKeys)),
-					{
-						checked,
-						node: item,
-					},
-				);
-				tree.notify();
-			}
 
-			tree.getCheckedKeys = () => Array.from(checkedKeys);
-			tree.updateCheckedKeys = (Keys: string[]) => {
-				checkedKeys.clear();
-				Keys.forEach((key) => checkedKeys.add(key));
-				tree.notify();
+				commit(next, key, checked, Array.from(changedKeys));
 			};
-			const init = () => {
-			tree.items.forEach((item) => {
-				updateItemState(item);
-				item.check = () => {
-					if (!item.disabled) {
-						updateChecked(item, true);
-					}
-				};
-				item.uncheck = () => {
-					if (!item.disabled) {
-						updateChecked(item, false);
-					}
-				};
-			});
-		};
-			init();
-			if (!tree.onRebuild) tree.onRebuild = [];
-			tree.onRebuild.push(() => {
-				init();
-			});
+
+			ctx.tree.check = check;
+			ctx.tree.uncheck = (key) => check(key, false);
+			ctx.tree.getCheckedKeys = () => Array.from(getSet());
+			ctx.tree.updateCheckedKeys = (keys) => {
+				const next = new Set(keys);
+				rebuildIndeterminate(next);
+				if (!isControlled) store.set(next, { changedKeys: keys, selectorKeys: ["checkedKeys"] });
+				onCheckedKeysChange?.(keys, { checked: true, key: keys[0] ?? "", item: undefined });
+			};
+
+			ctx.registerItemState("checked", (item) => getSet().has(item.key));
+			ctx.registerItemState("indeterminate", (item) => indeterminateCache.get(item.key) ?? false);
+			ctx.onRebuild(() => rebuildIndeterminate());
+			rebuildIndeterminate();
 		},
 	};
 }

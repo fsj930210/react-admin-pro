@@ -3,15 +3,20 @@ import type { TreeInstance } from "./types";
 
 interface TreeContextValue {
 	indent: number;
-	tree?: TreeInstance;
-	rowHeight?: number;
+	rowHeight: number;
+	tree: TreeInstance | null;
 }
+
 export const TreeContext = createContext<TreeContextValue>({
 	indent: 24,
-	tree: undefined,
-	rowHeight: 24,
+	rowHeight: 28,
+	tree: null,
 });
 
 export function useTreeContext() {
-	return useContext(TreeContext) as TreeContextValue;
+	const context = useContext(TreeContext);
+	if (!context.tree) {
+		throw new Error("Tree primitives must be used inside TreeRoot.");
+	}
+	return context as TreeContextValue & { tree: TreeInstance };
 }

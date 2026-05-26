@@ -1,4 +1,4 @@
-import type { Column, Row } from "@tanstack/react-table";
+import type { Column, Header, Row } from "@tanstack/react-table";
 import type { CSSProperties } from "react";
 
 export interface PinningStyleResult {
@@ -13,20 +13,99 @@ export interface PinningStyleResult {
  * drawing its own divider and keeps large pinned groups visually quiet.
  */
 export function getColumnPinningStyles<TData>(column: Column<TData>): PinningStyleResult {
-	const pinned = column.getIsPinned();
-	if (!pinned) return {};
+	const groupPinning = getGroupPinningState(column);
+	const pinned = groupPinning?.pinned ?? column.getIsPinned();
+	if (!pinned) {
+		return {
+			style: {
+				position: "relative",
+				zIndex: 1,
+			},
+		};
+	}
 
 	return {
-		className: "pinned-cell",
+		className: "pinned-cell bg-background [background-color:var(--background)]",
 		style: {
-			left: pinned === "left" ? `${column.getStart("left")}px` : undefined,
-			right: pinned === "right" ? `${column.getAfter("right")}px` : undefined,
-			position: pinned ? "sticky" : "relative",
-			zIndex: pinned ? 3 : 0,
+			left:
+				pinned === "left"
+					? `${groupPinning?.offset ?? column.getStart("left")}px`
+					: undefined,
+			right:
+				pinned === "right"
+					? `${groupPinning?.offset ?? column.getAfter("right")}px`
+					: undefined,
+			position: "sticky",
+			width: groupPinning?.width,
+			zIndex: pinned === "left" ? 20 : 19,
 		},
 	};
 }
 
+export function getHeaderPinningStyles<TData>(header: Header<TData, unknown>): PinningStyleResult {
+	const headerPinning = getHeaderPinningState(header);
+	if (headerPinning) {
+		return {
+			className: "pinned-cell bg-muted [background-color:var(--muted)]",
+			style: {
+				left: headerPinning.pinned === "left" ? `${headerPinning.offset}px` : undefined,
+				position: "sticky",
+				right: headerPinning.pinned === "right" ? `${headerPinning.offset}px` : undefined,
+				width: headerPinning.width,
+				zIndex: headerPinning.pinned === "left" ? 30 : 29,
+			},
+		};
+	}
+
+	return getColumnPinningStyles(header.column);
+}
+
+function getGroupPinningState<TData>(column: Column<TData>) {
+	if (!column.columns.length) {
+		return undefined;
+	}
+
+	const leafColumns = column.getLeafColumns().filter((leafColumn) => leafColumn.getIsVisible());
+	if (!leafColumns.length) {
+		return undefined;
+	}
+
+	const pinned = leafColumns[0]?.getIsPinned();
+	if (!pinned || leafColumns.some((leafColumn) => leafColumn.getIsPinned() !== pinned)) {
+		return undefined;
+	}
+
+	return {
+		offset:
+			pinned === "left"
+				? Math.min(...leafColumns.map((leafColumn) => leafColumn.getStart("left")))
+				: Math.min(...leafColumns.map((leafColumn) => leafColumn.getAfter("right"))),
+		pinned,
+		width: leafColumns.reduce((total, leafColumn) => total + leafColumn.getSize(), 0),
+	};
+}
+
+function getHeaderPinningState<TData>(header: Header<TData, unknown>) {
+	const leafColumns = header.column.getLeafColumns().filter((column) => column.getIsVisible());
+
+	if (!leafColumns.length) {
+		return undefined;
+	}
+
+	const pinned = leafColumns[0]?.getIsPinned();
+	if (!pinned || leafColumns.some((column) => column.getIsPinned() !== pinned)) {
+		return undefined;
+	}
+
+	return {
+		offset:
+			pinned === "left"
+				? Math.min(...leafColumns.map((column) => column.getStart("left")))
+				: Math.min(...leafColumns.map((column) => column.getAfter("right"))),
+		pinned,
+		width: leafColumns.reduce((total, column) => total + column.getSize(), 0),
+	};
+}
 
 /**
  * Row pinning uses the configured row height CSS variable instead of measuring
@@ -34,7 +113,11 @@ export function getColumnPinningStyles<TData>(column: Column<TData>): PinningSty
  * row during render. Consumers with custom row heights can override
  * `--rap-data-grid-row-height` on the grid root.
  */
-export function getRowPinningStyles<TData>(row: Row<TData>, topRowsCount = 0, bottomRowsCount = 0): PinningStyleResult {
+export function getRowPinningStyles<TData>(
+	row: Row<TData>,
+	topRowsCount = 0,
+	bottomRowsCount = 0,
+): PinningStyleResult {
 	const pinned = row.getIsPinned();
 	if (!pinned) return {};
 	const pinnedIndex = row.getPinnedIndex();
@@ -45,8 +128,14 @@ export function getRowPinningStyles<TData>(row: Row<TData>, topRowsCount = 0, bo
 		className: "sticky z-10 bg-background shadow-sm",
 		style: {
 			background: "var(--background)",
-			top: pinned === "top" ? `calc(var(--rap-data-grid-header-height, 0px) + ${pinnedIndex} * var(--rap-data-grid-row-height, 40px))` : undefined,
-			bottom: pinned === "bottom" ? `calc(${Math.max(bottomRowsCount - pinnedIndex - 1, 0)} * var(--rap-data-grid-row-height, 40px))` : undefined,
+			top:
+				pinned === "top"
+					? `calc(var(--rap-data-grid-header-height, 0px) + ${pinnedIndex} * var(--rap-data-grid-row-height, 40px))`
+					: undefined,
+			bottom:
+				pinned === "bottom"
+					? `calc(${Math.max(bottomRowsCount - pinnedIndex - 1, 0)} * var(--rap-data-grid-row-height, 40px))`
+					: undefined,
 			boxShadow: isLastTopPinnedRow
 				? "0 4px 6px -6px rgb(0 0 0 / 0.35)"
 				: isFirstBottomPinnedRow

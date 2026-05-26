@@ -1,7 +1,14 @@
-import { getExpandedRowModel, getFilteredRowModel, getPaginationRowModel, getSortedRowModel, type ColumnDef, type RowSelectionState } from "@tanstack/react-table";
+import {
+	type ColumnDef,
+	type ColumnOrderState,
+	type ColumnPinningState,
+	getExpandedRowModel,
+	getFilteredRowModel,
+	getPaginationRowModel,
+	getSortedRowModel,
+	type RowSelectionState,
+} from "@tanstack/react-table";
 import { useMemo, useRef } from "react";
-import { composeTableCallbacks } from "../utils/compose-table-callbacks";
-import { useControllableState } from "../utils/use-controllable-state";
 import type {
 	DataGridExpandableConfig,
 	DataGridFeature,
@@ -12,8 +19,10 @@ import type {
 	DataGridSortingConfig,
 	DataGridTableCallbacks,
 } from "../types";
-import { DATA_GRID_EXPAND_COLUMN_ID, createExpandColumn } from "./expand-column";
-import { DATA_GRID_SELECTION_COLUMN_ID, createSelectionColumn } from "./selection-column";
+import { composeTableCallbacks } from "../utils/compose-table-callbacks";
+import { useControllableState } from "@rap/hooks/use-controllable-state";
+import { createExpandColumn, DATA_GRID_EXPAND_COLUMN_ID } from "./expand-column";
+import { createSelectionColumn, DATA_GRID_SELECTION_COLUMN_ID } from "./selection-column";
 
 const EMPTY_COLUMNS: ColumnDef<never>[] = [];
 
@@ -53,18 +62,31 @@ export function useDataGridFeatures<TData>(
 	const sortingFeature = useSortingFeature<TData>(props.sorting);
 	const filteringFeature = useFilteringFeature<TData>(props.filtering);
 	const paginationFeature = usePaginationFeature<TData>(props.pagination);
-	const columnsBefore = useMemo(() => orderFeatureColumns(
+	const columnsBefore = useMemo(
+		() =>
+			orderFeatureColumns(
+				[
+					...(expandFeature.columnsBefore ?? []),
+					...(selectionFeature.columnsBefore ?? []),
+					...(props.featureColumns?.columns ?? []),
+				],
+				props.featureColumns?.order,
+			),
 		[
-			...(expandFeature.columnsBefore ?? []),
-			...(selectionFeature.columnsBefore ?? []),
-			...(props.featureColumns?.columns ?? []),
+			expandFeature.columnsBefore,
+			props.featureColumns?.columns,
+			props.featureColumns?.order,
+			selectionFeature.columnsBefore,
 		],
-		props.featureColumns?.order,
-	), [expandFeature.columnsBefore, props.featureColumns?.columns, props.featureColumns?.order, selectionFeature.columnsBefore]);
-	const featureColumnIds = useMemo(() => columnsBefore.map((column) => getColumnId(column)).filter(Boolean), [columnsBefore]);
+	);
+	const featureColumnIds = useMemo(
+		() => columnsBefore.map((column) => getColumnId(column)).filter(Boolean),
+		[columnsBefore],
+	);
 	const columnPinningFeature = useColumnPinningFeature(props, featureColumnIds);
 	const rowPinningFeature = useRowPinningFeature(props);
 	const columnVisibilityFeature = useColumnVisibilityFeature(props);
+	const columnOrderingFeature = useColumnOrderingFeature(props);
 	const columnSizingFeature = useColumnSizingFeature(props);
 	const features = [
 		{ ...expandFeature, columnsBefore: [] },
@@ -75,11 +97,14 @@ export function useDataGridFeatures<TData>(
 		columnPinningFeature,
 		rowPinningFeature,
 		columnVisibilityFeature,
+		columnOrderingFeature,
 		columnSizingFeature,
 	] satisfies DataGridFeature<TData>[];
 
 	const hasColumnsAfter = features.some((feature) => feature.columnsAfter?.length);
-	const columnsAfter = hasColumnsAfter ? features.flatMap((feature) => feature.columnsAfter ?? []) : (EMPTY_COLUMNS as ColumnDef<TData>[]);
+	const columnsAfter = hasColumnsAfter
+		? features.flatMap((feature) => feature.columnsAfter ?? [])
+		: (EMPTY_COLUMNS as ColumnDef<TData>[]);
 	const state = Object.assign({}, ...features.map((feature) => feature.state));
 	const tableOptions = Object.assign({}, ...features.map((feature) => feature.tableOptions));
 	const api = Object.assign({}, ...features.map((feature) => feature.api));
@@ -91,10 +116,32 @@ export function useDataGridFeatures<TData>(
 }
 
 function getColumnId(column: { id?: string } | { accessorKey?: string | number | symbol }) {
-	return String("id" in column && column.id ? column.id : "accessorKey" in column && column.accessorKey ? column.accessorKey : "");
+	return String(
+		"id" in column && column.id
+			? column.id
+			: "accessorKey" in column && column.accessorKey
+				? column.accessorKey
+				: "",
+	);
 }
 
-function orderFeatureColumns<TData>(columns: DataGridFeature<TData>["columnsBefore"], order?: string[]) {
+function applyPartialOrder(ids: string[], order?: string[]) {
+	if (!order?.length) {
+		return ids;
+	}
+
+	const idsSet = new Set(ids);
+	const orderedIds = order.filter((id) => idsSet.has(id));
+	const orderedIdsSet = new Set(orderedIds);
+	const restIds = ids.filter((id) => !orderedIdsSet.has(id));
+
+	return [...orderedIds, ...restIds];
+}
+
+function orderFeatureColumns<TData>(
+	columns: DataGridFeature<TData>["columnsBefore"],
+	order?: string[],
+) {
 	const items = columns ?? [];
 	const defaultOrder = [DATA_GRID_EXPAND_COLUMN_ID, DATA_GRID_SELECTION_COLUMN_ID];
 	const orderList = order?.length ? order : defaultOrder;
@@ -110,7 +157,9 @@ function orderFeatureColumns<TData>(columns: DataGridFeature<TData>["columnsBefo
 	});
 }
 
-function useSortingFeature<TData>(config: DataGridSortingConfig | false | undefined): DataGridFeature<TData> {
+function useSortingFeature<TData>(
+	config: DataGridSortingConfig | false | undefined,
+): DataGridFeature<TData> {
 	const cfg = config === false ? undefined : config;
 	const enabled = !!cfg;
 	const currentColumnRef = useRef<string | undefined>(undefined);
@@ -125,7 +174,9 @@ function useSortingFeature<TData>(config: DataGridSortingConfig | false | undefi
 		state: { sorting },
 		callbacks: {
 			onSortingChange: (updater) => {
-				const next = setSorting(typeof updater === "function" ? (previous) => updater(previous) : updater);
+				const next = setSorting(
+					typeof updater === "function" ? (previous) => updater(previous) : updater,
+				);
 				cfg?.onChange?.(next, { column: undefined });
 				currentColumnRef.current = undefined;
 			},
@@ -140,7 +191,9 @@ function useSortingFeature<TData>(config: DataGridSortingConfig | false | undefi
 	};
 }
 
-function useFilteringFeature<TData>(config: DataGridFilteringConfig | false | undefined): DataGridFeature<TData> {
+function useFilteringFeature<TData>(
+	config: DataGridFilteringConfig | false | undefined,
+): DataGridFeature<TData> {
 	const cfg = config === false ? undefined : config;
 	const enabled = !!cfg;
 	const [columnFilters, setColumnFilters] = useControllableState({
@@ -158,27 +211,36 @@ function useFilteringFeature<TData>(config: DataGridFilteringConfig | false | un
 		state: { columnFilters, globalFilter },
 		callbacks: {
 			onColumnFiltersChange: (updater) => {
-				const next = setColumnFilters(typeof updater === "function" ? (previous) => updater(previous) : updater);
+				const next = setColumnFilters(
+					typeof updater === "function" ? (previous) => updater(previous) : updater,
+				);
 				cfg?.onColumnFiltersChange?.(next, { column: undefined });
 			},
 			onGlobalFilterChange: (updater) => {
-				const next = setGlobalFilter(typeof updater === "function" ? (previous: unknown) => updater(previous) : updater);
+				const next = setGlobalFilter(
+					typeof updater === "function" ? (previous: unknown) => updater(previous) : updater,
+				);
 				cfg?.onGlobalFilterChange?.(next);
 			},
 		},
 		tableOptions: {
 			manualFiltering: (cfg?.mode ?? "remote") === "remote",
-			...((cfg?.mode ?? "remote") === "local" ? { getFilteredRowModel: getFilteredRowModel() } : {}),
+			...((cfg?.mode ?? "remote") === "local"
+				? { getFilteredRowModel: getFilteredRowModel() }
+				: {}),
 		},
 	};
 }
 
-function usePaginationFeature<TData>(config: DataGridPaginationConfig | false | undefined): DataGridFeature<TData> {
+function usePaginationFeature<TData>(
+	config: DataGridPaginationConfig | false | undefined,
+): DataGridFeature<TData> {
 	const cfg = config === false ? undefined : config;
 	const [pagination, setPagination] = useControllableState({
-		value: cfg?.page != null || cfg?.pageSize != null
-			? { pageIndex: (cfg.page ?? 1) - 1, pageSize: cfg.pageSize ?? cfg.defaultPageSize ?? 10 }
-			: undefined,
+		value:
+			cfg?.page != null || cfg?.pageSize != null
+				? { pageIndex: (cfg.page ?? 1) - 1, pageSize: cfg.pageSize ?? cfg.defaultPageSize ?? 10 }
+				: undefined,
 		defaultValue: {
 			pageIndex: (cfg?.defaultPage ?? 1) - 1,
 			pageSize: cfg?.defaultPageSize ?? 10,
@@ -198,7 +260,9 @@ function usePaginationFeature<TData>(config: DataGridPaginationConfig | false | 
 		},
 		tableOptions: {
 			manualPagination: (cfg.mode ?? "remote") === "remote",
-			...((cfg.mode ?? "remote") === "local" ? { getPaginationRowModel: getPaginationRowModel() } : {}),
+			...((cfg.mode ?? "remote") === "local"
+				? { getPaginationRowModel: getPaginationRowModel() }
+				: {}),
 		},
 	};
 }
@@ -214,7 +278,9 @@ function useRowSelectionFeature<TData>(
 		defaultValue: keysToSelection(cfg?.defaultSelectedRowKeys),
 		onChange: (value) => {
 			const selectedKeys = selectionToKeys(value);
-			const selectedRows = context.data.filter((record: TData, index: number) => value[context.getRowId(record, index)]);
+			const selectedRows = context.data.filter(
+				(record: TData, index: number) => value[context.getRowId(record, index)],
+			);
 			cfg?.onChange?.(selectedKeys, selectedRows);
 		},
 	});
@@ -235,10 +301,10 @@ function useRowSelectionFeature<TData>(
 			},
 		},
 		tableOptions: {
-				enableRowSelection: cfg.enableRowSelection ?? true,
-				enableMultiRowSelection: (cfg.type ?? "checkbox") !== "radio",
-				enableSubRowSelection: cfg.checkStrictly === false,
-			},
+			enableRowSelection: cfg.enableRowSelection ?? true,
+			enableMultiRowSelection: (cfg.type ?? "checkbox") !== "radio",
+			enableSubRowSelection: cfg.checkStrictly === false,
+		},
 	};
 }
 
@@ -251,14 +317,17 @@ function useExpandableFeature<TData>(
 	const [expanded, setExpanded] = useControllableState({
 		value: cfg?.expandedRowKeys
 			? cfg.expandedRowKeys.reduce<Record<string, boolean>>((state, key) => {
-					state[key] = true;
-					return state;
-				}, {})
+				state[key] = true;
+				return state;
+			}, {})
 			: undefined,
-		defaultValue: (cfg?.defaultExpandedRowKeys ?? []).reduce<Record<string, boolean>>((state, key) => {
-			state[key] = true;
-			return state;
-		}, {}),
+		defaultValue: (cfg?.defaultExpandedRowKeys ?? []).reduce<Record<string, boolean>>(
+			(state, key) => {
+				state[key] = true;
+				return state;
+			},
+			{},
+		),
 		onChange: (value) => {
 			if (typeof value === "boolean") return;
 			cfg?.onExpandedRowsChange?.(Object.keys(value).filter((key) => value[key]));
@@ -272,18 +341,28 @@ function useExpandableFeature<TData>(
 		state: { expanded },
 		callbacks: {
 			onExpandedChange: (updater) => {
-				setExpanded(typeof updater === "function" ? (previous) => updater(previous) as Record<string, boolean> : updater as Record<string, boolean>);
+				setExpanded(
+					typeof updater === "function"
+						? (previous) => updater(previous) as Record<string, boolean>
+						: (updater as Record<string, boolean>),
+				);
 			},
 		},
 		tableOptions: {
 			getSubRows: cfg.getSubRows,
 			getExpandedRowModel: getExpandedRowModel(),
-			getRowCanExpand: (row) => !!cfg.expandedRowRender || !!cfg.getSubRows?.(row.original, row.index)?.length || (cfg.rowExpandable?.(row.original) ?? false),
+			getRowCanExpand: (row) =>
+				!!cfg.expandedRowRender ||
+				!!cfg.getSubRows?.(row.original, row.index)?.length ||
+				(cfg.rowExpandable?.(row.original) ?? false),
 		},
 	};
 }
 
-function useColumnPinningFeature<TData>(props: DataGridProps<TData>, featureColumnIds: string[]): DataGridFeature<TData> {
+function useColumnPinningFeature<TData>(
+	props: DataGridProps<TData>,
+	featureColumnIds: string[],
+): DataGridFeature<TData> {
 	const initialPinning = useMemo(() => {
 		const left: string[] = [];
 		const right: string[] = [];
@@ -293,25 +372,132 @@ function useColumnPinningFeature<TData>(props: DataGridProps<TData>, featureColu
 			if (column.meta?.pinned === "left") left.push(id);
 			if (column.meta?.pinned === "right") right.push(id);
 		}
-		const fixedFeatureColumns = props.featureColumns?.fixed === false ? [] : featureColumnIds;
+		const leftFeatureColumns =
+			props.featureColumns?.fixed === false || props.featureColumns?.fixed === "right"
+				? []
+				: featureColumnIds;
+		const rightFeatureColumns = props.featureColumns?.fixed === "right" ? featureColumnIds : [];
 		return {
-			left: [...fixedFeatureColumns, ...left.filter((id) => !fixedFeatureColumns.includes(id))],
-			right,
+			left: applyPartialOrder(
+				[...leftFeatureColumns, ...left.filter((id) => !leftFeatureColumns.includes(id))],
+				props.columnPinning?.leftOrder,
+			),
+			right: applyPartialOrder(
+				[...right.filter((id) => !rightFeatureColumns.includes(id)), ...rightFeatureColumns],
+				props.columnPinning?.rightOrder,
+			),
 		};
-	}, [featureColumnIds, props.columns, props.featureColumns?.fixed]);
+	}, [
+		featureColumnIds,
+		props.columnPinning?.leftOrder,
+		props.columnPinning?.rightOrder,
+		props.columns,
+		props.featureColumns?.fixed,
+	]);
 	const [columnPinning, setColumnPinning] = useControllableState({
 		value: props.columnPinning?.value,
 		defaultValue: props.columnPinning?.defaultValue ?? initialPinning,
 		onChange: props.columnPinning?.onChange,
 	});
+	const normalizedColumnPinning = useMemo(
+		() => normalizeGroupedColumnPinning(columnPinning, props.columns),
+		[columnPinning, props.columns],
+	);
 
 	return {
-		state: { columnPinning },
+		state: { columnPinning: normalizedColumnPinning },
 		callbacks: {
-			onColumnPinningChange: (updater) => setColumnPinning(typeof updater === "function" ? (previous) => updater(previous) : updater),
+			onColumnPinningChange: (updater) =>
+				setColumnPinning((previous) =>
+					normalizeGroupedColumnPinning(
+						typeof updater === "function" ? updater(previous) : updater,
+						props.columns,
+					),
+				),
 		},
 		tableOptions: { enableColumnPinning: true },
 	};
+}
+
+function normalizeGroupedColumnPinning<TData>(
+	columnPinning: ColumnPinningState,
+	columns: ColumnDef<TData>[],
+): ColumnPinningState {
+	const leafOrder = getLeafColumnIds(columns);
+	const left = new Set(columnPinning.left ?? []);
+	const right = new Set(columnPinning.right ?? []);
+
+	forEachColumnGroup(columns, (leafIds) => {
+		const leftCount = leafIds.filter((id) => left.has(id)).length;
+		const rightCount = leafIds.filter((id) => right.has(id)).length;
+
+		if (leftCount === 0 && rightCount === 0) {
+			return;
+		}
+
+		const side = rightCount > leftCount ? "right" : "left";
+
+		for (const id of leafIds) {
+			left.delete(id);
+			right.delete(id);
+		}
+		for (const id of leafIds) {
+			if (side === "right") {
+				right.add(id);
+			} else {
+				left.add(id);
+			}
+		}
+	});
+
+	return {
+		left: orderPinnedIds(left, leafOrder),
+		right: orderPinnedIds(right, leafOrder),
+	};
+}
+
+function forEachColumnGroup<TData>(
+	columns: ColumnDef<TData>[],
+	callback: (leafIds: string[]) => void,
+) {
+	for (const column of columns) {
+		const children = (column as { columns?: ColumnDef<TData>[] }).columns;
+
+		if (!children?.length) {
+			continue;
+		}
+
+		const leafIds = getLeafColumnIds(children);
+		if (leafIds.length > 1) {
+			callback(leafIds);
+		}
+		forEachColumnGroup(children, callback);
+	}
+}
+
+function getLeafColumnIds<TData>(columns: ColumnDef<TData>[]): string[] {
+	const leafIds: string[] = [];
+
+	for (const column of columns) {
+		const children = (column as { columns?: ColumnDef<TData>[] }).columns;
+		if (children?.length) {
+			leafIds.push(...getLeafColumnIds(children));
+			continue;
+		}
+
+		const id = getColumnId(column);
+		if (id) {
+			leafIds.push(id);
+		}
+	}
+
+	return leafIds;
+}
+
+function orderPinnedIds(ids: Set<string>, leafOrder: string[]) {
+	const knownIds = leafOrder.filter((id) => ids.has(id));
+	const unknownIds = [...ids].filter((id) => !leafOrder.includes(id));
+	return [...knownIds, ...unknownIds];
 }
 
 function useRowPinningFeature<TData>(props: DataGridProps<TData>): DataGridFeature<TData> {
@@ -324,7 +510,8 @@ function useRowPinningFeature<TData>(props: DataGridProps<TData>): DataGridFeatu
 	return {
 		state: { rowPinning },
 		callbacks: {
-			onRowPinningChange: (updater) => setRowPinning(typeof updater === "function" ? (previous) => updater(previous) : updater),
+			onRowPinningChange: (updater) =>
+				setRowPinning(typeof updater === "function" ? (previous) => updater(previous) : updater),
 		},
 		tableOptions: { enableRowPinning: !!props.rowPinning },
 	};
@@ -348,9 +535,33 @@ function useColumnVisibilityFeature<TData>(props: DataGridProps<TData>): DataGri
 	return {
 		state: { columnVisibility },
 		callbacks: {
-			onColumnVisibilityChange: (updater) => setColumnVisibility(typeof updater === "function" ? (previous) => updater(previous) : updater),
+			onColumnVisibilityChange: (updater) =>
+				setColumnVisibility(
+					typeof updater === "function" ? (previous) => updater(previous) : updater,
+				),
 		},
 		tableOptions: { enableHiding: true },
+	};
+}
+
+function useColumnOrderingFeature<TData>(props: DataGridProps<TData>): DataGridFeature<TData> {
+	const cfg = props.columnOrdering === false ? undefined : props.columnOrdering;
+	const enabled = props.columnOrdering !== false && cfg?.enabled !== false;
+	const [columnOrder, setColumnOrder] = useControllableState<ColumnOrderState>({
+		value: cfg?.value,
+		defaultValue: cfg?.defaultValue ?? [],
+		onChange: cfg?.onChange,
+		isEqual: isSameOrder,
+	});
+
+	if (!enabled) return {};
+
+	return {
+		state: { columnOrder },
+		callbacks: {
+			onColumnOrderChange: (updater) =>
+				setColumnOrder(typeof updater === "function" ? (previous) => updater(previous) : updater),
+		},
 	};
 }
 
@@ -364,11 +575,16 @@ function useColumnSizingFeature<TData>(props: DataGridProps<TData>): DataGridFea
 	return {
 		state: { columnSizing },
 		callbacks: {
-			onColumnSizingChange: (updater) => setColumnSizing(typeof updater === "function" ? (previous) => updater(previous) : updater),
+			onColumnSizingChange: (updater) =>
+				setColumnSizing(typeof updater === "function" ? (previous) => updater(previous) : updater),
 		},
 		tableOptions: {
 			enableColumnResizing: !!props.columnSizing,
 			columnResizeMode: props.columnSizing?.columnResizeMode ?? "onChange",
 		},
 	};
+}
+
+function isSameOrder(left: ColumnOrderState, right: ColumnOrderState) {
+	return left.length === right.length && left.every((id, index) => id === right[index]);
 }

@@ -12,42 +12,7 @@
   "private": true,
   "type": "module",
   "exports": {
-    "./use-mobile": {
-      "types": "./src/use-mobile.ts",
-      "default": "./src/use-mobile.ts"
-    },
-    "./use-zustand": {
-      "types": "./src/use-zustand.ts",
-      "default": "./src/use-zustand.ts"
-    },
-    "./use-move": {
-      "types": "./src/use-move.ts",
-      "default": "./src/use-move.ts"
-    },
-    "./use-resize": {
-      "types": "./src/use-resize.ts",
-      "default": "./src/use-resize.ts"
-    },
-    "./use-minimax": {
-      "types": "./src/use-minimax.ts",
-      "default": "./src/use-minimax.ts"
-    },
-    "./use-isomorphic-layout-effect": {
-      "types": "./src/use-isomorphic-layout-effect.ts",
-      "default": "./src/use-isomorphic-layout-effect.ts"
-    },
-    "./use-lazy-ref": {
-      "types": "./src/use-lazy-ref.ts",
-      "default": "./src/use-lazy-ref.ts"
-    },
-    "./use-as-ref": {
-      "types": "./src/use-as-ref.ts",
-      "default": "./src/use-as-ref.ts"
-    },
-    "./use-copy-to-clipboard": {
-      "types": "./src/use-copy-to-clipboard.ts",
-      "default": "./src/use-copy-to-clipboard.ts"
-    }
+    "./*": "./src/*.ts"
   },
   "devDependencies": {
     "@biomejs/biome": "catalog:",
@@ -63,6 +28,7 @@
   },
   "dependencies": {
     "@rap/utils": "workspace:*",
+    "dayjs": "catalog:",
     "immer": "catalog:",
     "lodash-es": "catalog:",
     "react": "catalog:",

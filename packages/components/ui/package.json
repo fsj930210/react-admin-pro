@@ -37,8 +37,7 @@
     "./tree/types": "./src/components/tree/types.ts",
     "./sidebar": "./src/components/sidebar/index.tsx",
     "./minimal-tiptap": "./src/components/minimal-tiptap/index.ts",
-    "./theme-provider": "./src/components/theme-provider/index.tsx",
-    "./keep-alive": "./src/components/keep-alive/index.ts"
+    "./theme-provider": "./src/components/theme-provider/index.tsx"
   },
   "dependencies": {
     "@diceui/checkbox-group": "catalog:",
@@ -50,15 +49,11 @@
     "@dnd-kit/sortable": "catalog:",
     "@dnd-kit/utilities": "catalog:",
     "@floating-ui/react-dom": "catalog:",
-    "@hookform/resolvers": "catalog:",
-    "@iconify/react": "catalog:",
     "@rap/hooks": "workspace:*",
     "@rap/lib": "workspace:*",
     "@rap/styles": "workspace:*",
     "@rap/utils": "workspace:*",
     "@tanstack/react-form": "catalog:",
-    "@tanstack/react-router": "catalog:",
-    "@tanstack/react-table": "catalog:",
     "@tanstack/react-virtual": "catalog:",
     "@tiptap/extension-bubble-menu": "catalog:",
     "@tiptap/extension-code-block-lowlight": "catalog:",
@@ -81,12 +76,9 @@
     "date-fns-tz": "catalog:",
     "embla-carousel-react": "catalog:",
     "input-otp": "catalog:",
-    "lodash-es": "catalog:",
     "lowlight": "catalog:",
-    "lru-cache": "catalog:",
     "lucide-react": "catalog:",
     "media-chrome": "catalog:",
-    "next-themes": "catalog:",
     "qrcode": "catalog:",
     "radix-ui": "catalog:",
     "react": "catalog:",
@@ -97,7 +89,6 @@
     "recharts": "catalog:",
     "sonner": "catalog:",
     "tailwind-merge": "catalog:",
-    "uuid": "catalog:",
     "vaul": "catalog:",
     "zod": "catalog:"
   }

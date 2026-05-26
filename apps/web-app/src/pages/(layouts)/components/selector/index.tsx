@@ -23,17 +23,24 @@ import {
 	SelectorSearch,
 	SelectorSelectAll,
 } from "@rap/components-ui/selector";
-import { Tree, TreeCheckbox, TreeExpandIcon, TreeItem, TreeLabel } from "@rap/components-ui/tree";
+import {
+	TreeCheckbox,
+	TreeItem,
+	TreeLabel,
+	TreeRoot,
+	TreeTrigger,
+	TreeViewport,
+} from "@rap/components-ui/tree";
 import {
 	checkableFeature,
 	expandableFeature,
 	selectableFeature,
 } from "@rap/components-ui/tree/features";
 import type { TreeItemInstance, TreeNode } from "@rap/components-ui/tree/types";
+import { useMemoizedFn } from "@rap/hooks/use-memoized-fn";
 import { traverseTree } from "@rap/utils";
 import { useForm } from "@tanstack/react-form";
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemoizedFn } from "ahooks";
 import { useEffect, useMemo, useState } from "react";
 import { z } from "zod";
 import { fetchSelectorItems } from "@/service/selector";
@@ -89,8 +96,8 @@ function BasicTree({
 	) => void;
 }) {
 	return (
-		<Tree
-			treeData={treeData}
+		<TreeRoot
+			data={treeData}
 			features={[
 				expandableFeature({
 					defaultExpandedKeys: ["root"],
@@ -112,23 +119,16 @@ function BasicTree({
 				}),
 			]}
 		>
-			{({ item, draggable, onDragStart, onDragOver, onDrop, onDragEnd }) => (
-				<TreeItem key={item.key} item={item}>
-					<div
-						className="flex items-center w-full h-full"
-						draggable={draggable}
-						onDragStart={onDragStart}
-						onDragOver={onDragOver}
-						onDrop={onDrop}
-						onDragEnd={onDragEnd}
-					>
-						<TreeExpandIcon item={item} />
+			<TreeViewport>
+				{(item) => (
+					<TreeItem key={item.key} item={item}>
+						<TreeTrigger item={item} />
 						<TreeCheckbox item={item} />
 						<TreeLabel item={item} />
-					</div>
-				</TreeItem>
-			)}
-		</Tree>
+					</TreeItem>
+				)}
+			</TreeViewport>
+		</TreeRoot>
 	);
 }
 // 1. 基础使用示例

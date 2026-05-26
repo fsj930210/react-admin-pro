@@ -1,11 +1,11 @@
 import { Choose, Otherwise, When } from "@rap/components-ui/when";
 import { cn } from "@rap/utils";
-import { flexRender, type Cell, type Row, type Table } from "@tanstack/react-table";
-import { Fragment, type ReactNode } from "react";
+import { type Cell, flexRender, type Row, type Table } from "@tanstack/react-table";
+import { type CSSProperties, Fragment, type ReactNode } from "react";
 import type { DataGridElementProps, DataGridProps } from "../types";
 import { mergeElementProps } from "../utils/merge-element-props";
 import { getColumnPinningStyles, getRowPinningStyles } from "../utils/pinning-styles";
-import { GridCell, GridRow } from "./grid";
+import { GridCell, GridRow, gridRowClassName } from "./grid";
 
 export function GridBody<TData>({
 	props,
@@ -22,13 +22,20 @@ export function GridBody<TData>({
 		return props.components.body({ table, rows, scrollElement, children: null });
 	}
 
-	const bodyComponents = typeof props.components?.body === "object" ? props.components.body : undefined;
+	const bodyComponents =
+		typeof props.components?.body === "object" ? props.components.body : undefined;
 	const BodyWrapper = bodyComponents?.wrapper ?? Fragment;
 	const BodyRow = bodyComponents?.row ?? GridRow;
-	const expandedRowRender = props.expandable === false ? undefined : props.expandable?.expandedRowRender;
+	const expandedRowRender =
+		props.expandable === false ? undefined : props.expandable?.expandedRowRender;
 	const renderedRows = props.rowPinning
 		? [...table.getTopRows(), ...table.getCenterRows(), ...table.getBottomRows()]
 		: rows;
+	const visibleColumns = [
+		...table.getLeftLeafColumns(),
+		...table.getCenterLeafColumns(),
+		...table.getRightLeafColumns(),
+	];
 
 	const body = (
 		<BodyWrapper>
@@ -38,38 +45,57 @@ export function GridBody<TData>({
 					table.getTopRows().length,
 					table.getBottomRows().length,
 				);
+				const internalRowProps: DataGridElementProps = {
+					"data-pinned": row.getIsPinned() || undefined,
+					"data-state": row.getIsSelected() ? "selected" : undefined,
+					role: "row",
+					className: cn(
+						gridRowClassName,
+						rowPinningStyles.className,
+						row.getIsPinned() && "z-20 bg-background",
+					),
+					style: {
+						gridTemplateColumns: "var(--rap-data-grid-template-columns)",
+						"--rap-data-grid-row-background":
+							props.striped && row.index % 2 === 1 ? "var(--muted)" : "var(--background)",
+						...rowPinningStyles.style,
+					} as CSSProperties,
+				};
+				const userRowProps = props.onRow?.(row.original, row.index, { row, table });
+				const mergedRowProps = mergeElementProps(internalRowProps, userRowProps);
+
 				return (
 					<Fragment key={row.id}>
-						<BodyRow
-							data-state={row.getIsSelected() ? "selected" : undefined}
-							data-pinned={row.getIsPinned() || undefined}
-							style={{ ...rowPinningStyles.style }}
-							className={cn(rowPinningStyles.className, row.getIsPinned() && "z-20 bg-background")}
-							{...props.onRow?.(row.original, row.index, { row, table })}
-						>
-							{row.getVisibleCells().map((cell) => (
-								<GridBodyCell
-									key={cell.id}
-									props={props}
-									table={table}
-									cell={cell}
-								/>
+						<BodyRow {...mergedRowProps}>
+							{getOrderedVisibleCells(row, visibleColumns).map((cell) => (
+								<GridBodyCell key={cell.id} props={props} table={table} cell={cell} />
 							))}
 						</BodyRow>
 						<When condition={row.getIsExpanded() && Boolean(expandedRowRender)}>
 							<GridRow>
-								<GridCell className="h-auto py-0">
+								<GridCell className="h-auto py-0" colSpan={row.getVisibleCells().length}>
 									{expandedRowRender?.(row.original, row.index, row)}
 								</GridCell>
 							</GridRow>
 						</When>
 					</Fragment>
-				)
+				);
 			})}
 		</BodyWrapper>
 	);
 
 	return body;
+}
+
+function getOrderedVisibleCells<TData>(
+	row: Row<TData>,
+	columns: ReturnType<Table<TData>["getVisibleLeafColumns"]>,
+) {
+	const cellsByColumnId = new Map(row.getVisibleCells().map((cell) => [cell.column.id, cell]));
+	return columns.map((column) => cellsByColumnId.get(column.id)).filter(Boolean) as Cell<
+		TData,
+		unknown
+	>[];
 }
 
 function GridBodyCell<TData>({
@@ -81,21 +107,26 @@ function GridBodyCell<TData>({
 	table: Table<TData>;
 	cell: Cell<TData, unknown>;
 }) {
-	const bodyComponents = typeof props.components?.body === "object" ? props.components.body : undefined;
+	const bodyComponents =
+		typeof props.components?.body === "object" ? props.components.body : undefined;
 	const CellComponent = bodyComponents?.cell ?? GridCell;
 	const pinning = getColumnPinningStyles(cell.column);
 	const meta = cell.column.columnDef.meta;
-	const enableResizing = Boolean(props.columnSizing);
-	const width = enableResizing ? cell.column.getSize() : undefined;
+	const shouldApplyWidth =
+		cell.column.columnDef.size != null ||
+		table.getState().columnSizing[cell.column.id] != null ||
+		Boolean(cell.column.getIsPinned());
+	const width = shouldApplyWidth ? cell.column.getSize() : undefined;
 	const internalProps: DataGridElementProps = {
 		className: cn(
-			"relative bg-background group-hover/row:bg-muted/50",
+			"relative [background-color:var(--rap-data-grid-row-background,var(--background))] group-hover/row:[--rap-data-grid-row-background:var(--muted)]",
 			pinning.className,
 			meta?.ellipsis && "truncate",
-			props.border && "border-r",
+			props.border ? "border-r border-b" : "border-b",
 		),
 		style: {
 			...pinning.style,
+			backgroundColor: "var(--rap-data-grid-row-background,var(--background))",
 			width,
 		},
 		"data-pinned": cell.column.getIsPinned() ? "true" : undefined,
@@ -109,12 +140,8 @@ function GridBodyCell<TData>({
 	const mergedProps = mergeElementProps(internalProps, userProps);
 	const content = (
 		<Choose>
-			<When condition={"children" in mergedProps}>
-				{mergedProps.children}
-			</When>
-			<Otherwise>
-				{flexRender(cell.column.columnDef.cell, cell.getContext())}
-			</Otherwise>
+			<When condition={"children" in mergedProps}>{mergedProps.children}</When>
+			<Otherwise>{flexRender(cell.column.columnDef.cell, cell.getContext())}</Otherwise>
 		</Choose>
 	);
 	const { children: _children, ...cellProps } = mergedProps;
@@ -128,6 +155,7 @@ function GridBodyCell<TData>({
 
 function getEllipsisTitle(ellipsis: unknown, value: unknown) {
 	if (!ellipsis) return undefined;
-	if (typeof ellipsis === "object" && ellipsis && "showTitle" in ellipsis && !ellipsis.showTitle) return undefined;
+	if (typeof ellipsis === "object" && ellipsis && "showTitle" in ellipsis && !ellipsis.showTitle)
+		return undefined;
 	return typeof value === "string" || typeof value === "number" ? String(value) : undefined;
 }

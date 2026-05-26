@@ -1,5 +1,9 @@
 export { asyncLoaderFeature } from "./async-loader-feature";
 export { checkableFeature } from "./checkable-feature";
+export { crudFeature } from "./crud-feature";
 export { dndFeature } from "./dnd-feature";
 export { expandableFeature } from "./expandable-feature";
+export { filterFeature } from "./filter-feature";
+export { searchFeature } from "./search-feature";
 export { selectableFeature } from "./selectable-feature";
+export { sortableFeature } from "./sortable-feature";

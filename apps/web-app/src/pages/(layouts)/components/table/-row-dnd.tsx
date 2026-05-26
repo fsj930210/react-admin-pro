@@ -1,6 +1,8 @@
 import {
 	closestCenter,
 	DndContext,
+	type DraggableAttributes,
+	type DraggableSyntheticListeners,
 	type DragOverEvent,
 	PointerSensor,
 	useSensor,
@@ -16,12 +18,20 @@ import {
 import { CSS } from "@dnd-kit/utilities";
 import { DataGrid } from "@rap/components-pro/data-grid";
 import { GripVertical } from "lucide-react";
-import { type ComponentProps, useMemo, useState } from "react";
+import { type ComponentProps, createContext, useContext, useMemo, useState } from "react";
 import { DemoTitle } from "./-basic";
 import { createUserColumns } from "./-demo-columns";
 import { createDemoUsers } from "./-demo-data";
 
 const ROW_DND_COLUMN_ID = "__row_dnd_handle__";
+
+interface RowDragContextValue {
+	attributes: DraggableAttributes;
+	listeners: DraggableSyntheticListeners | undefined;
+	setActivatorNodeRef: (node: HTMLElement | null) => void;
+}
+
+const RowDragContext = createContext<RowDragContextValue | null>(null);
 
 export function RowDndDataGridDemo() {
 	const [data, setData] = useState(() => createDemoUsers(20));
@@ -32,9 +42,12 @@ export function RowDndDataGridDemo() {
 			id: ROW_DND_COLUMN_ID,
 			header: "",
 			size: 44,
-			cell: () => <GripVertical className="size-4 text-muted-foreground" />,
+			cell: () => <RowDragHandle />,
 			enableSorting: false,
 			enableColumnFilter: false,
+			meta: {
+				pinned: "left" as const,
+			},
 		}),
 		[],
 	);
@@ -84,22 +97,47 @@ function SortableRow({ style, ...props }: ComponentProps<"div">) {
 	const id = String(
 		(props as ComponentProps<"div"> & { "data-row-id"?: string })["data-row-id"] ?? "",
 	);
-	const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+	const {
+		attributes,
+		listeners,
+		setActivatorNodeRef,
+		setNodeRef,
+		transform,
+		transition,
+		isDragging,
+	} = useSortable({
 		id,
 	});
 
 	return (
-		<div
-			{...props}
-			ref={setNodeRef}
-			style={{
-				...style,
-				transform: CSS.Transform.toString(transform),
-				transition,
-			}}
-			className={`${props.className ?? ""} ${isDragging ? "relative z-30 bg-background opacity-80 shadow-md" : ""}`}
-			{...attributes}
-			{...listeners}
-		/>
+		<RowDragContext.Provider value={{ attributes, listeners, setActivatorNodeRef }}>
+			<div
+				{...props}
+				ref={setNodeRef}
+				style={{
+					...style,
+					transform: CSS.Transform.toString(transform),
+					transition,
+				}}
+				className={`${props.className ?? ""} ${isDragging ? "relative z-30 bg-background opacity-80 shadow-md" : ""}`}
+			/>
+		</RowDragContext.Provider>
+	);
+}
+
+function RowDragHandle() {
+	const context = useContext(RowDragContext);
+
+	return (
+		<button
+			type="button"
+			ref={context?.setActivatorNodeRef}
+			className="flex size-7 cursor-grab items-center justify-center rounded-sm text-muted-foreground hover:bg-muted active:cursor-grabbing"
+			aria-label="Drag row"
+			{...context?.attributes}
+			{...context?.listeners}
+		>
+			<GripVertical className="size-4" />
+		</button>
 	);
 }

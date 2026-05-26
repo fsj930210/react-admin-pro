@@ -1,9 +1,55 @@
 import { DataGrid } from "@rap/components-pro/data-grid";
 import type { ColumnFiltersState, SortingState } from "@tanstack/react-table";
 import { useEffect, useMemo, useState } from "react";
-import { type FetchUsersParams, fetchUsers, type User } from "@/service/table";
+import { type ApiUser, type FetchUsersParams, fetchUsers, type User } from "@/service/table";
 import { DemoTitle } from "./-basic";
 import { createRemoteUserColumns } from "./-demo-columns";
+
+interface RequestRemoteUsersOptions {
+	columnFilters: ColumnFiltersState;
+	page: number;
+	pageSize: number;
+	sorting: SortingState;
+}
+
+interface RequestRemoteUsersResult {
+	data: User[];
+	total: number;
+}
+
+function toUser(record: ApiUser): User {
+	const { user_id, ...rest } = record;
+	return {
+		...rest,
+		id: user_id,
+	};
+}
+
+async function requestRemoteUsers({
+	columnFilters,
+	page,
+	pageSize,
+	sorting,
+}: RequestRemoteUsersOptions): Promise<RequestRemoteUsersResult> {
+	const params: FetchUsersParams = {
+		page,
+		pageSize,
+		sortFields: sorting.map((item) => ({ field: item.id, order: item.desc ? "desc" : "asc" })),
+		filters: Object.fromEntries(columnFilters.map((item) => [item.id, item.value])),
+	};
+	const firstFilter = columnFilters[0];
+	if (firstFilter) {
+		params.filterField = firstFilter.id;
+		params.filterValue = String(firstFilter.value ?? "");
+	}
+
+	const response = await fetchUsers(params);
+
+	return {
+		data: response.data.data.map(toUser),
+		total: response.data.pagination.total,
+	};
+}
 
 export function RemoteDataGridDemo() {
 	const columns = useMemo(() => createRemoteUserColumns(), []);
@@ -16,30 +62,24 @@ export function RemoteDataGridDemo() {
 	const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
 
 	useEffect(() => {
-		const params: FetchUsersParams = {
-			page,
-			pageSize,
-			sortFields: sorting.map((item) => ({ field: item.id, order: item.desc ? "desc" : "asc" })),
-			filters: Object.fromEntries(columnFilters.map((item) => [item.id, item.value])),
-		};
-		const firstFilter = columnFilters[0];
-		const compatParams = firstFilter
-			? { ...params, filterField: firstFilter.id, filterValue: String(firstFilter.value ?? "") }
-			: params;
+		let ignore = false;
 
 		setLoading(true);
-		fetchUsers(compatParams as FetchUsersParams)
+		requestRemoteUsers({ columnFilters, page, pageSize, sorting })
 			.then((response) => {
-				const payload = response as unknown as
-					| { data?: User[]; pagination?: { total?: number } }
-					| User[];
-				const nextData = Array.isArray(payload) ? payload : (payload.data ?? []);
-				setData(nextData);
-				setTotal(
-					Array.isArray(payload) ? nextData.length : (payload.pagination?.total ?? nextData.length),
-				);
+				if (ignore) return;
+				setData(response.data);
+				setTotal(response.total);
 			})
-			.finally(() => setLoading(false));
+			.finally(() => {
+				if (!ignore) {
+					setLoading(false);
+				}
+			});
+
+		return () => {
+			ignore = true;
+		};
 	}, [columnFilters, page, pageSize, sorting]);
 
 	return (

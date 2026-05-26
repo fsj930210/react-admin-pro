@@ -36,6 +36,7 @@
 		"@rap/biome-config": "workspace:*",
 		"@rap/eslint-config": "workspace:*",
 		"@rap/tsconfig": "workspace:*",
+		"@types/node": "catalog:",
 		"eslint": "catalog:",
 		"eslint-config-biome": "catalog:",
 		"typescript": "catalog:"

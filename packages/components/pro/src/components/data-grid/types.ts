@@ -1,8 +1,10 @@
+import type { Checkbox } from "@rap/components-ui/checkbox";
 import type {
 	Cell,
 	Column,
 	ColumnDef,
 	ColumnFiltersState,
+	ColumnOrderState,
 	ColumnPinningPosition,
 	ColumnPinningState,
 	ColumnSizingState,
@@ -20,14 +22,15 @@ import type {
 	TableState,
 	VisibilityState,
 } from "@tanstack/react-table";
-import type { Checkbox } from "@rap/components-ui/checkbox";
-import type { EmptyProps } from "./components/empty";
-import type { PaginationProps } from "../pagination";
 import type * as React from "react";
 import type { ComponentType, CSSProperties, HTMLAttributes, ReactNode } from "react";
+import type { PaginationProps } from "../pagination";
+import type { EmptyProps } from "./components/empty";
 
 export type DataGridMode = "remote" | "local";
-export type DataGridRowKey<TData> = string | ((record: TData, index: number, parent?: Row<TData>) => string);
+export type DataGridRowKey<TData> =
+	| string
+	| ((record: TData, index: number, parent?: Row<TData>) => string);
 export type DataGridScroll = { x?: number | string; y?: number | string };
 export type DataGridScrollInfo = { scrollLeft: number; scrollTop: number };
 
@@ -65,7 +68,16 @@ export interface DataGridFilterMeta<TData, TValue> {
 	/** Remote field name. Defaults to the column id. */
 	key?: string;
 	/** Built-in dropdown style. Custom rendering can still be supplied with render. */
-	type?: "input" | "checkbox" | "radio" | "custom" | "text" | "number" | "date" | "select" | "multiSelect";
+	type?:
+		| "input"
+		| "checkbox"
+		| "radio"
+		| "custom"
+		| "text"
+		| "number"
+		| "date"
+		| "select"
+		| "multiSelect";
 	options?: DataGridFilterOption[];
 	render?: (ctx: { column: Column<TData, TValue>; table: Table<TData> }) => ReactNode;
 }
@@ -89,7 +101,8 @@ export interface DataGridColumnMeta<TData, TValue> {
 }
 
 declare module "@tanstack/react-table" {
-	export interface ColumnMeta<TData extends RowData, TValue> extends DataGridColumnMeta<TData, TValue> {}
+	export interface ColumnMeta<TData extends RowData, TValue>
+		extends DataGridColumnMeta<TData, TValue> {}
 }
 
 export interface DataGridSortingConfig {
@@ -114,7 +127,8 @@ export interface DataGridFilteringConfig {
 	onGlobalFilterChange?: (value: unknown) => void;
 }
 
-export interface DataGridPaginationConfig extends Omit<PaginationProps, "page" | "pageSize" | "onChange"> {
+export interface DataGridPaginationConfig
+	extends Omit<PaginationProps, "page" | "pageSize" | "onChange"> {
 	enable?: boolean;
 	/** Defaults to remote. Local mode slices the current data with TanStack pagination. */
 	mode?: DataGridMode;
@@ -182,6 +196,15 @@ export interface DataGridFeatureColumnsConfig<TData> {
 	fixed?: ColumnPinningPosition | false;
 }
 
+export interface DataGridColumnOrderingConfig {
+	enabled?: boolean;
+	/** Enables built-in header drag sorting. State-only ordering stays available when false. */
+	drag?: boolean;
+	value?: ColumnOrderState;
+	defaultValue?: ColumnOrderState;
+	onChange?: (value: ColumnOrderState) => void;
+}
+
 export type DataGridElementProps = HTMLAttributes<HTMLElement> & {
 	style?: CSSProperties;
 	[key: `data-${string}`]: string | number | boolean | undefined;
@@ -194,6 +217,7 @@ export interface DataGridProps<TData> {
 	loading?: boolean;
 	empty?: EmptyProps;
 	border?: boolean;
+	striped?: boolean;
 	scroll?: DataGridScroll;
 	onScroll?: (event: Event, info: DataGridScrollInfo) => void;
 	components?: GridComponents<TData>;
@@ -205,6 +229,8 @@ export interface DataGridProps<TData> {
 	columnPinning?: {
 		value?: ColumnPinningState;
 		defaultValue?: ColumnPinningState;
+		leftOrder?: string[];
+		rightOrder?: string[];
 		onChange?: (value: ColumnPinningState) => void;
 	};
 	rowPinning?: {
@@ -217,6 +243,7 @@ export interface DataGridProps<TData> {
 		defaultValue?: VisibilityState;
 		onChange?: (value: VisibilityState) => void;
 	};
+	columnOrdering?: DataGridColumnOrderingConfig | false;
 	columnSizing?: {
 		value?: ColumnSizingState;
 		defaultValue?: ColumnSizingState;
@@ -225,11 +252,20 @@ export interface DataGridProps<TData> {
 	};
 	featureColumns?: DataGridFeatureColumnsConfig<TData>;
 	contextMenu?: DataGridContextMenuConfig<TData> | false;
-	onRow?: (record: TData, index: number, ctx: { row: Row<TData>; table: Table<TData> }) => DataGridElementProps;
+	onRow?: (
+		record: TData,
+		index: number,
+		ctx: { row: Row<TData>; table: Table<TData> },
+	) => DataGridElementProps;
 	onCell?: (
 		record: TData,
 		index: number,
-		ctx: { cell: Cell<TData, unknown>; row: Row<TData>; column: Column<TData>; table: Table<TData> },
+		ctx: {
+			cell: Cell<TData, unknown>;
+			row: Row<TData>;
+			column: Column<TData>;
+			table: Table<TData>;
+		},
 	) => DataGridElementProps;
 	onHeaderRow?: (
 		columns: Header<TData, unknown>[],
@@ -266,5 +302,6 @@ export type DataGridTableCallbacks = {
 	onColumnPinningChange?: OnChangeFn<ColumnPinningState>;
 	onRowPinningChange?: OnChangeFn<RowPinningState>;
 	onColumnVisibilityChange?: OnChangeFn<VisibilityState>;
+	onColumnOrderChange?: OnChangeFn<ColumnOrderState>;
 	onColumnSizingChange?: OnChangeFn<ColumnSizingState>;
 };

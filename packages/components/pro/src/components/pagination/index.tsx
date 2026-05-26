@@ -1,5 +1,5 @@
 import React from "react"
-import { useControllableValue } from "ahooks"
+import { useControllableState } from "@rap/hooks/use-controllable-state"
 import {
 	Pagination as UIPagination,
 	PaginationContent,
@@ -92,12 +92,12 @@ const Pagination = ({
 
 	const showSizeChangerFinal = showSizeChanger !== undefined ? showSizeChanger : total > 50
 
-	const [current, setCurrent] = useControllableValue<number>({
+	const [current, setCurrent] = useControllableState<number>({
 		value: page,
 		defaultValue: defaultPage,
 	})
 
-	const [pageSizeValue, setPageSizeValue] = useControllableValue<number>({
+	const [pageSizeValue, setPageSizeValue] = useControllableState<number>({
 		value: pageSize,
 		defaultValue: defaultPageSize,
 	})

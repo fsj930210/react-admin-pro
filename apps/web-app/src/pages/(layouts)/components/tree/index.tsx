@@ -1,612 +1,627 @@
+import { ProDraggableTree, ProTree, ProVirtualTree } from "@rap/components-pro/tree";
 import { Button } from "@rap/components-ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@rap/components-ui/tabs";
 import {
-	DraggableTree as DraggableTreeComponent,
-	Tree,
 	TreeCheckbox,
-	TreeExpandIcon,
+	TreeDropIndicator,
 	TreeItem,
 	TreeLabel,
-	VirtualizedTree,
+	TreeRoot,
+	TreeTrigger,
+	TreeViewport,
+	TreeVirtualViewport,
 } from "@rap/components-ui/tree";
 import {
 	asyncLoaderFeature,
 	checkableFeature,
+	crudFeature,
+	dndFeature,
 	expandableFeature,
+	filterFeature,
+	searchFeature,
 	selectableFeature,
+	sortableFeature,
 } from "@rap/components-ui/tree/features";
-import type { TreeItemInstance, TreeNode } from "@rap/components-ui/tree/types";
-import { useCopyToClipboard } from "@rap/hooks/use-copy-to-clipboard";
+import type {
+	DropIntent,
+	TreeInstance,
+	TreeItemInstance,
+	TreeKey,
+	TreeNode,
+} from "@rap/components-ui/tree/types";
 import { createFileRoute } from "@tanstack/react-router";
-import { Check, Copy } from "lucide-react";
-import { useState } from "react";
+import { useMemo, useRef, useState } from "react";
+import { fetchTreeChildren } from "@/service/tree";
 
 export const Route = createFileRoute("/(layouts)/components/tree/")({
 	component: TreeComponentPage,
 });
 
-const dig = (path = "root", level = 1, childCount = 2) => {
-	const treeNode: TreeNode = {
-		label: path === "root" ? "Root" : path,
+const createTreeNode = (path = "root", level = 2, childCount = 3): TreeNode => {
+	const node: TreeNode = {
 		key: path,
+		label: path === "root" ? "Root" : path,
+		type: path.includes("dept") ? "department" : "group",
 	};
 
 	if (level > 0) {
-		treeNode.children = [];
-		for (let i = 0; i < childCount; i += 1) {
-			const childKey = `${path}-${i}`;
-			treeNode.children.push(dig(childKey, level - 1, childCount));
-		}
+		node.children = Array.from({ length: childCount }, (_, index) =>
+			createTreeNode(`${path}-${index + 1}`, level - 1, childCount),
+		);
 	}
 
-	return treeNode;
+	return node;
 };
 
-const CodeBlock = ({ code }: { code: string }) => {
-	const { copyToClipboard, isCopied } = useCopyToClipboard();
+const createOrgTree = (): TreeNode[] => [
+	{
+		key: "company",
+		label: "Acme Corp",
+		type: "company",
+		children: [
+			{
+				key: "platform",
+				label: "Platform Department",
+				type: "department",
+				children: [
+					{ key: "platform-web", label: "Web Team", type: "team" },
+					{ key: "platform-infra", label: "Infrastructure Team", type: "team" },
+				],
+			},
+			{
+				key: "product",
+				label: "Product Department",
+				type: "department",
+				children: [
+					{ key: "product-growth", label: "Growth Team", type: "team" },
+					{ key: "product-admin", label: "Admin Team", type: "team", disabled: true },
+				],
+			},
+			{ key: "finance", label: "Finance Department", type: "department" },
+		],
+	},
+];
 
+const createRemoteTree = (): TreeNode[] => [
+	{
+		key: "remote-root",
+		label: "Remote Organization",
+		child_num: 3,
+		children: [
+			{ key: "remote-apac", label: "APAC", child_num: 4, children: [] },
+			{ key: "remote-emea", label: "EMEA", child_num: 4, children: [] },
+			{ key: "remote-na", label: "North America", child_num: 0, children: [] },
+		],
+	},
+];
+
+function renderLabel(item: TreeItemInstance) {
+	const segments = item.matchedSegments as { text: string; matched: boolean }[] | undefined;
+	if (!segments) return item.node.label;
+	return segments.map((segment, index) => (
+		<span
+			// biome-ignore lint/suspicious/noArrayIndexKey: segments are derived from immutable text slices for this render.
+			key={`${item.key}-${index}`}
+			className={segment.matched ? "rounded-sm bg-yellow-300/60 px-0.5 text-foreground" : undefined}
+		>
+			{segment.text}
+		</span>
+	));
+}
+
+function TreeRow({
+	item,
+	checkbox = true,
+	draggable = false,
+	dropIntent,
+	onDragStart,
+	onDragOver,
+	onDrop,
+	onDragEnd,
+}: {
+	item: TreeItemInstance;
+	checkbox?: boolean;
+	draggable?: boolean;
+	dropIntent?: DropIntent;
+	onDragStart?: React.DragEventHandler<HTMLDivElement>;
+	onDragOver?: React.DragEventHandler<HTMLDivElement>;
+	onDrop?: React.DragEventHandler<HTMLDivElement>;
+	onDragEnd?: React.DragEventHandler<HTMLDivElement>;
+}) {
 	return (
-		<div className="relative bg-muted rounded-md overflow-hidden">
-			<Button
-				variant="ghost"
-				size="icon"
-				className="absolute top-2 right-2 h-8 w-8"
-				onClick={() => copyToClipboard(code)}
-				title={isCopied ? "Copied!" : "Copy code"}
-			>
-				{isCopied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-			</Button>
-			<pre className="p-4 overflow-x-auto text-sm">{code}</pre>
-		</div>
+		<TreeItem
+			key={item.key}
+			item={item}
+			className="relative rounded-sm"
+			draggable={draggable}
+			onDragStart={onDragStart}
+			onDragOver={onDragOver}
+			onDrop={onDrop}
+			onDragEnd={onDragEnd}
+		>
+			<TreeTrigger item={item} />
+			{checkbox && <TreeCheckbox item={item} />}
+			<TreeLabel item={item}>{renderLabel}</TreeLabel>
+			{Boolean(item.loading) && <span className="ml-2 text-xs text-muted-foreground">Loading</span>}
+			{Boolean(item.loadError) && <span className="ml-2 text-xs text-destructive">Failed</span>}
+			<TreeDropIndicator item={item} intent={dropIntent} />
+		</TreeItem>
 	);
-};
+}
 
-const ExampleContainer = ({
+function StatePill({ children }: { children: React.ReactNode }) {
+	return (
+		<span className="inline-flex min-h-7 items-center rounded-md border bg-muted/40 px-2 text-xs text-muted-foreground">
+			{children}
+		</span>
+	);
+}
+
+function Section({
 	title,
-	preview,
-	code,
+	description,
+	children,
 }: {
 	title: string;
-	preview: React.ReactNode;
-	code: string;
-}) => {
-	const [activeTab, setActiveTab] = useState("preview");
-
+	description: string;
+	children: React.ReactNode;
+}) {
 	return (
-		<div className="space-y-4">
-			<h3 className="text-lg font-semibold">{title}</h3>
-			<Tabs defaultValue="preview" value={activeTab} onValueChange={setActiveTab}>
-				<TabsList className="w-fit">
-					<TabsTrigger value="preview">Preview</TabsTrigger>
-					<TabsTrigger value="code">Code</TabsTrigger>
-				</TabsList>
-				<TabsContent value="preview" className="border rounded-md p-4">
-					{preview}
-				</TabsContent>
-				<TabsContent value="code" className="mt-2">
-					<CodeBlock code={code} />
-				</TabsContent>
-			</Tabs>
-		</div>
+		<section className="space-y-3 border-t pt-5">
+			<div>
+				<h3 className="text-base font-semibold">{title}</h3>
+				<p className="mt-1 text-sm text-muted-foreground">{description}</p>
+			</div>
+			{children}
+		</section>
 	);
-};
+}
 
-function BasicTree() {
-	const [treeData] = useState(() => {
-		const rootNode = dig("root", 2);
-		if (rootNode?.children?.[1]) {
-			rootNode.children[1].disabled = true;
-		}
-		return [rootNode];
-	});
+function UncontrolledFeatureDemo() {
+	const [treeData] = useState(createOrgTree);
+	const features = useMemo(
+		() => [
+			expandableFeature({ defaultExpandedKeys: ["company", "platform"] }),
+			selectableFeature({ multiple: true }),
+			checkableFeature({}),
+		],
+		[],
+	);
 
 	return (
-		<Tree
-			treeData={treeData}
-			features={[
-				expandableFeature({
-					defaultExpandedKeys: ["root"],
-					onExpand: (expandedKeys, expandedItems, expandInfo) => {
-						console.log(expandedKeys, expandedItems, expandInfo);
-					},
-				}),
-				selectableFeature({
-					onSelect: (selectedKeys, selectedItems, selectInfo) => {
-						console.log(selectedKeys, selectedItems, selectInfo);
-					},
-				}),
-				checkableFeature({
-					onCheck: (checkKeys, checkItems, checkInfo) => {
-						console.log(checkKeys, checkItems, checkInfo);
-					},
-				}),
-			]}
-		>
-			{({ item, draggable, onDragStart, onDragOver, onDrop, onDragEnd }) => (
-				<TreeItem key={item.key} item={item}>
-					<div
-						className="flex items-center w-full h-full"
-						draggable={draggable}
-						onDragStart={onDragStart}
-						onDragOver={onDragOver}
-						onDrop={onDrop}
-						onDragEnd={onDragEnd}
+		<TreeRoot data={treeData} features={features}>
+			{(tree) => (
+				<div className="space-y-3">
+					<div className="flex flex-wrap gap-2">
+						<StatePill>expanded: {tree.getExpandedKeys?.().join(", ") ?? "-"}</StatePill>
+						<StatePill>selected: {tree.getSelectedKeys?.().join(", ") ?? "-"}</StatePill>
+						<StatePill>checked: {tree.getCheckedKeys?.().join(", ") ?? "-"}</StatePill>
+					</div>
+					<TreeViewport>{(item) => <TreeRow item={item} />}</TreeViewport>
+				</div>
+			)}
+		</TreeRoot>
+	);
+}
+
+function ControlledFeatureDemo() {
+	const [treeData] = useState(createOrgTree);
+	const [expandedKeys, setExpandedKeys] = useState(["company"]);
+	const [selectedKeys, setSelectedKeys] = useState<string[]>(["platform"]);
+	const [checkedKeys, setCheckedKeys] = useState<string[]>(["platform-web"]);
+	const features = useMemo(
+		() => [
+			expandableFeature({
+				expandedKeys,
+				onExpandedKeysChange: setExpandedKeys,
+			}),
+			selectableFeature({
+				selectedKeys,
+				multiple: true,
+				onSelectedKeysChange: setSelectedKeys,
+			}),
+			checkableFeature({
+				checkedKeys,
+				onCheckedKeysChange: setCheckedKeys,
+			}),
+		],
+		[checkedKeys, expandedKeys, selectedKeys],
+	);
+
+	return (
+		<TreeRoot data={treeData} features={features}>
+			<div className="space-y-3">
+				<div className="flex flex-wrap gap-2">
+					<Button
+						type="button"
+						variant="outline"
+						size="sm"
+						onClick={() =>
+							setExpandedKeys((keys) =>
+								keys.includes("product") ? ["company"] : ["company", "product"],
+							)
+						}
 					>
-						<TreeExpandIcon item={item} />
-						<TreeCheckbox item={item} />
-						<TreeLabel item={item} />
-					</div>
-				</TreeItem>
-			)}
-		</Tree>
-	);
-}
-
-function VirtualTree() {
-	const [treeData] = useState(() => [dig("root", 2, 20)]);
-
-	return (
-		<VirtualizedTree
-			treeData={treeData}
-			features={[
-				expandableFeature({ defaultExpandedKeys: ["root"] }),
-				selectableFeature({}),
-				checkableFeature({}),
-			]}
-			height={400}
-		>
-			{({ item, indent }) => (
-				<TreeItem key={item.key} item={item}>
-					<div className="inline-flex items-center" style={{ marginLeft: `${indent}px` }}>
-						<TreeExpandIcon item={item} />
-						<TreeCheckbox item={item} />
-						<TreeLabel item={item} />
-					</div>
-				</TreeItem>
-			)}
-		</VirtualizedTree>
-	);
-}
-
-function DraggableTree() {
-	const [treeData, setTreeData] = useState(() => {
-		const rootNode = dig("root", 1, 10);
-		if (rootNode?.children?.[1]) {
-			rootNode.children[1].disabled = true;
-		}
-		return [rootNode];
-	});
-
-	const handleTreeChange = (newTreeData: TreeNode[]) => {
-		console.log("Tree data changed:", newTreeData);
-		setTreeData(newTreeData);
-	};
-
-	const handleDrop = (
-		event: React.DragEvent<HTMLElement>,
-		item: TreeItemInstance,
-		dropInfo: any,
-	) => {
-		// The dnd-feature already handles the node movement internally
-		// onTreeChange will be called with the updated tree data
-		console.log("Drop event:", { item, dropInfo });
-	};
-
-	return (
-		<DraggableTreeComponent
-			treeData={treeData}
-			features={[
-				expandableFeature({
-					defaultExpandedKeys: ["root"],
-				}),
-			]}
-			onDrop={handleDrop}
-			onTreeChange={handleTreeChange}
-		>
-			{({ item, draggable, onDragStart, onDragOver, onDrop, onDragEnd }) => (
-				<TreeItem key={item.key} item={item}>
-					<div
-						className="flex items-center w-full h-full"
-						draggable={draggable}
-						onDragStart={onDragStart}
-						onDragOver={onDragOver}
-						onDrop={onDrop}
-						onDragEnd={onDragEnd}
+						Toggle product
+					</Button>
+					<Button
+						type="button"
+						variant="outline"
+						size="sm"
+						onClick={() => setSelectedKeys(["finance"])}
 					>
-						<TreeExpandIcon item={item} />
-						<TreeCheckbox item={item} />
-						<TreeLabel item={item} />
-					</div>
-				</TreeItem>
-			)}
-		</DraggableTreeComponent>
+						Select finance
+					</Button>
+					<Button
+						type="button"
+						variant="outline"
+						size="sm"
+						onClick={() => setCheckedKeys(["platform", "platform-web", "platform-infra"])}
+					>
+						Check platform
+					</Button>
+				</div>
+				<div className="flex flex-wrap gap-2">
+					<StatePill>expanded: {expandedKeys.join(", ") || "-"}</StatePill>
+					<StatePill>selected: {selectedKeys.join(", ") || "-"}</StatePill>
+					<StatePill>checked: {checkedKeys.join(", ") || "-"}</StatePill>
+				</div>
+				<TreeViewport>{(item) => <TreeRow item={item} />}</TreeViewport>
+			</div>
+		</TreeRoot>
 	);
 }
 
-function AsyncLoadingTree() {
-	const [treeData, setTreeData] = useState<TreeNode[]>(() => {
-		const rootNode = dig("root", 1);
-		if (rootNode.children) {
-			rootNode.children.forEach((node) => {
-				node.children = [];
-			});
-		}
-		return [rootNode];
-	});
+function CrudDemo() {
+	const [treeData, setTreeData] = useState(createOrgTree);
+	const [message, setMessage] = useState("Ready");
+	const features = useMemo(
+		() => [
+			crudFeature(),
+			expandableFeature({ defaultExpandedKeys: ["company", "platform"] }),
+			selectableFeature({}),
+		],
+		[],
+	);
 
-	const loadChildren = async (node: TreeNode): Promise<TreeNode[]> => {
-		return new Promise((resolve) => {
-			setTimeout(() => {
-				const childNode = dig(node.key, 1, 5);
-				const children = childNode.children ?? [];
-				children.forEach((child) => {
-					child.children = [];
-				});
-				setTreeData((prev) => {
-					const newTree = [...prev];
-					const parent = newTree.find((n) => n.key === node.key);
-					if (parent) {
-						parent.children = children;
-					}
-					return newTree;
-				});
-				resolve(children);
-			}, 1000);
-		});
-	};
-
-	const isLeafCondition = (node: TreeNode): boolean => {
-		return !node.children;
+	const commit = (tree: TreeInstance, label: string) => {
+		setTreeData(tree.nodes);
+		setMessage(label);
 	};
 
 	return (
-		<Tree
-			treeData={treeData}
-			height={400}
-			features={[
-				expandableFeature({ defaultExpandedKeys: ["root"] }),
-				selectableFeature({}),
-				checkableFeature({}),
-				asyncLoaderFeature({ loadChildren }),
-			]}
-			isLeafCondition={isLeafCondition}
+		<TreeRoot data={treeData} features={features}>
+			{(tree) => (
+				<div className="space-y-3">
+					<div className="flex flex-wrap gap-2">
+						<Button
+							type="button"
+							variant="outline"
+							size="sm"
+							onClick={() => {
+								const result = tree.updateNode("platform-web", {
+									label: `Web Team ${new Date().toLocaleTimeString()}`,
+								});
+								commit(tree, `updateNode: ${result.changedKeys.join(", ")}`);
+							}}
+						>
+							Rename
+						</Button>
+						<Button
+							type="button"
+							variant="outline"
+							size="sm"
+							onClick={() => {
+								const key = `platform-new-${Date.now()}`;
+								const result = tree.insertNode("platform", { key, label: "New Platform Squad" });
+								commit(tree, `insertNode: ${result.changedKeys.join(", ")}`);
+							}}
+						>
+							Insert
+						</Button>
+						<Button
+							type="button"
+							variant="outline"
+							size="sm"
+							onClick={() => {
+								const result = tree.moveNode("finance", "platform", "inside");
+								commit(
+									tree,
+									result.ok ? "moveNode: finance -> platform" : (result.reason ?? "move failed"),
+								);
+							}}
+						>
+							Move finance inside
+						</Button>
+						<Button
+							type="button"
+							variant="outline"
+							size="sm"
+							onClick={() => {
+								const result = tree.removeNode("product-admin");
+								commit(
+									tree,
+									result.ok ? "removeNode: product-admin" : (result.reason ?? "remove failed"),
+								);
+							}}
+						>
+							Remove disabled
+						</Button>
+					</div>
+					<StatePill>{message}</StatePill>
+					<TreeViewport>{(item) => <TreeRow item={item} checkbox={false} />}</TreeViewport>
+				</div>
+			)}
+		</TreeRoot>
+	);
+}
+
+function SearchFilterDemo() {
+	const [treeData] = useState(createOrgTree);
+	const [keyword, setKeyword] = useState("");
+	const [teamsOnly, setTeamsOnly] = useState(false);
+	const features = useMemo(
+		() => [
+			expandableFeature({ defaultExpandedKeys: ["company", "platform", "product"] }),
+			searchFeature(),
+			filterFeature({
+				filter: teamsOnly ? (item) => item.node.type === "team" : undefined,
+			}),
+			selectableFeature({}),
+		],
+		[teamsOnly],
+	);
+
+	return (
+		<TreeRoot data={treeData} features={features}>
+			{(tree) => (
+				<div className="space-y-3">
+					<div className="flex flex-wrap gap-2">
+						<input
+							className="h-9 w-56 rounded-md border bg-background px-3 text-sm"
+							placeholder="Search label"
+							value={keyword}
+							onChange={(event) => {
+								setKeyword(event.target.value);
+								tree.search?.(event.target.value);
+							}}
+						/>
+						<Button
+							type="button"
+							variant={teamsOnly ? "default" : "outline"}
+							size="sm"
+							onClick={() => setTeamsOnly((value) => !value)}
+						>
+							Teams only
+						</Button>
+						<StatePill>matched: {tree.getMatchedKeys?.().join(", ") ?? "-"}</StatePill>
+					</div>
+					<TreeViewport>{(item) => <TreeRow item={item} checkbox={false} />}</TreeViewport>
+				</div>
+			)}
+		</TreeRoot>
+	);
+}
+
+function RemoteLoadingDemo() {
+	const [treeData] = useState(createRemoteTree);
+	const features = useMemo(
+		() => [
+			expandableFeature({ defaultExpandedKeys: ["remote-root"] }),
+			asyncLoaderFeature({
+				loadChildren: (node) => fetchTreeChildren(node.key),
+			}),
+			checkableFeature({}),
+		],
+		[],
+	);
+
+	return (
+		<TreeRoot
+			data={treeData}
+			features={features}
+			isLeaf={(node) => typeof node.child_num === "number" && node.child_num <= 0}
 		>
-			{({ item }) => {
+			<TreeViewport>{(item) => <TreeRow item={item} />}</TreeViewport>
+		</TreeRoot>
+	);
+}
+
+function VirtualDemo() {
+	const [treeData] = useState(() => [createTreeNode("virtual-root", 3, 18)]);
+	const features = useMemo(
+		() => [
+			expandableFeature({
+				defaultExpandedKeys: ["virtual-root", "virtual-root-1", "virtual-root-2"],
+			}),
+			selectableFeature({}),
+			checkableFeature({ checkStrictly: true }),
+		],
+		[],
+	);
+
+	return (
+		<TreeRoot data={treeData} features={features} rowHeight={30}>
+			<TreeVirtualViewport height={360}>{(item) => <TreeRow item={item} />}</TreeVirtualViewport>
+		</TreeRoot>
+	);
+}
+
+function SortableDemo() {
+	const [treeData, setTreeData] = useState(createOrgTree);
+	const dragStartPoint = useRef({ x: 0, y: 0 });
+	const features = useMemo(
+		() => [
+			crudFeature(),
+			expandableFeature({ defaultExpandedKeys: ["company", "platform", "product"] }),
+			dndFeature({
+				canDrag: (item) => !item.disabled,
+				canDrop: ({ nextParentKey }) => {
+					if (nextParentKey === "product-admin") return "Disabled team cannot receive drops.";
+					return true;
+				},
+			}),
+			sortableFeature(),
+		],
+		[],
+	);
+
+	return (
+		<TreeRoot data={treeData} features={features}>
+			{(tree) => {
+				const dropIntent = tree.getSelectorValue<DropIntent>("dnd.dropIntent");
 				return (
-					<TreeItem key={item.key} item={item}>
-						<div className="inline-flex items-center">
-							<TreeExpandIcon item={item} />
-							<TreeCheckbox item={item} />
-							<TreeLabel item={item} />
-							{item.loading && (
-								<span className="ml-2 text-sm text-muted-foreground">Loading...</span>
+					<div className="space-y-3">
+						<StatePill>
+							drop:{" "}
+							{dropIntent
+								? `${dropIntent.dragKey} ${dropIntent.position} ${dropIntent.dropTargetKey}`
+								: "-"}
+						</StatePill>
+						<TreeViewport>
+							{(item) => (
+								<TreeRow
+									item={item}
+									checkbox={false}
+									draggable
+									dropIntent={dropIntent}
+									onDragStart={(event) => {
+										dragStartPoint.current = { x: event.clientX, y: event.clientY };
+										tree.actions["dnd.startDrag"]?.(item.key);
+										event.dataTransfer.effectAllowed = "move";
+									}}
+									onDragOver={(event) => {
+										event.preventDefault();
+										tree.actions["dnd.updateDropIntent"]?.({
+											targetKey: item.key,
+											pointer: { x: event.clientX, y: event.clientY },
+											initialPointer: dragStartPoint.current,
+											targetRect: event.currentTarget.getBoundingClientRect(),
+										});
+									}}
+									onDrop={(event) => {
+										event.preventDefault();
+										tree.actions["sortable.drop"]?.();
+										setTreeData(tree.nodes);
+									}}
+									onDragEnd={() => tree.actions["dnd.cancel"]?.()}
+								/>
 							)}
-						</div>
-					</TreeItem>
+						</TreeViewport>
+					</div>
 				);
 			}}
-		</Tree>
+		</TreeRoot>
+	);
+}
+
+function ProTreeDemo() {
+	const [treeData, setTreeData] = useState(createOrgTree);
+	const [checkedKeys, setCheckedKeys] = useState<TreeKey[]>(["platform-web"]);
+
+	return (
+		<div className="grid gap-4 lg:grid-cols-3">
+			<div className="space-y-2">
+				<h4 className="text-sm font-medium">ProTree</h4>
+				<ProTree
+					data={treeData}
+					defaultExpandedKeys={["company", "platform"]}
+					checkable
+					selectable={{ multiple: true }}
+					checkedKeys={checkedKeys}
+					onCheckedKeysChange={setCheckedKeys}
+					searchable
+				/>
+			</div>
+			<div className="space-y-2">
+				<h4 className="text-sm font-medium">ProVirtualTree</h4>
+				<ProVirtualTree
+					data={[createTreeNode("pro-virtual", 3, 12)]}
+					height={260}
+					rowHeight={30}
+					defaultExpandedKeys={["pro-virtual", "pro-virtual-1"]}
+					checkable={{ checkStrictly: true }}
+					selectable
+				/>
+			</div>
+			<div className="space-y-2">
+				<h4 className="text-sm font-medium">ProDraggableTree</h4>
+				<ProDraggableTree
+					data={treeData}
+					defaultExpandedKeys={["company", "platform", "product"]}
+					onTreeChange={setTreeData}
+					canDrag={(item) => !item.disabled}
+					checkable={false}
+				/>
+			</div>
+		</div>
 	);
 }
 
 function TreeComponentPage() {
 	return (
-		<div className="size-full p-6">
-			<h2 className="text-2xl font-bold mb-6">Tree Components</h2>
-			<div className="space-y-8">
-				<ExampleContainer
-					title="1. Basic Tree"
-					preview={<BasicTree />}
-					code={`import { Tree, TreeCheckbox, TreeExpandIcon, TreeItem, TreeLabel } from "@rap/components-ui/tree";
-import { checkableFeature, expandableFeature, selectableFeature } from "@rap/components-ui/tree/features";
-import { useState } from "react";
-
-function BasicTree() {
-  const [treeData] = useState(() => {
-    const rootNode = dig("root", 2);
-    // Add disabled node for demonstration
-    if (rootNode?.children?.[1]) {
-      rootNode.children[1].disabled = true;
-    }
-    return [rootNode];
-  });
-  
-  return (
-    <Tree
-      treeData={treeData}
-      height={400}
-      features={[
-        expandableFeature({ defaultExpandedKeys: ["root"] }),
-        selectableFeature({}),
-        checkableFeature({}),
-      ]}
-    >
-      {({ item }) => (
-        <TreeItem key={item.key} item={item}>
-          <div className="inline-flex items-center">
-            <TreeExpandIcon item={item} />
-            <TreeCheckbox item={item} />
-            <TreeLabel item={item} />
-          </div>
-        </TreeItem>
-      )}
-    </Tree>
-  );
-}`}
-				/>
-
-				<ExampleContainer
-					title="2. Virtual Scrolling Tree"
-					preview={<VirtualTree />}
-					code={`import { VirtualizedTree, TreeCheckbox, TreeExpandIcon, TreeItem, TreeLabel } from "@rap/components-ui/tree";
-import { checkableFeature, expandableFeature, selectableFeature } from "@rap/components-ui/tree/features";
-import { useState } from "react";
-
-const dig = (path = "0", level = 2) => {
-  const list = [];
-  for (let i = 0; i < 100; i += 1) {
-    const key = \`\${path}-\${i}\`;
-    const treeNode = {
-      label: \`Item \${key}\`,
-      key,
-    };
-
-    if (level > 0) {
-      treeNode.children = dig(key, level - 1);
-    }
-
-    list.push(treeNode);
-  }
-  return list;
-};
-
-function VirtualTree() {
-  const [treeData] = useState(() => dig());
-  
-  return (
-    <VirtualizedTree
-      treeData={treeData}
-      features={[
-        expandableFeature({ defaultExpandedKeys: ["0"] }),
-        selectableFeature({}),
-        checkableFeature({}),
-      ]}
-      height={400}
-    >
-      {({ item, indent }) => (
-        <TreeItem key={item.key} item={item}>
-          <div className="inline-flex items-center" style={{ marginLeft: \`\${indent}px\` }}>
-            <TreeExpandIcon item={item} />
-            <TreeCheckbox item={item} />
-            <TreeLabel item={item} />
-          </div>
-        </TreeItem>
-      )}
-    </VirtualizedTree>
-  );
-}`}
-				/>
-
-				<ExampleContainer
-					title="3. Draggable Tree"
-					preview={<DraggableTree />}
-					code={`import { VirtualizedTree, TreeCheckbox, TreeExpandIcon, TreeItem, TreeLabel, DropIndicator } from "@rap/components-ui/tree";
-import { checkableFeature, dndFeature, expandableFeature, selectableFeature } from "@rap/components-ui/tree/features";
-import { moveNode } from "@rap/components-ui/tree/utils.js";
-import { useRef, useState } from "react";
-import type { DropInfo, TreeInstance, TreeItemInstance, TreeNode } from "@rap/components-ui/tree/types";
-
-const dig = (path = "0", level = 1) => {
-  const list = [];
-  for (let i = 0; i < 5; i += 1) {
-    const key = \`\${path}-\${i}\`;
-    const treeNode: TreeNode = {
-      label: key,
-      key,
-    };
-
-    if (level > 0) {
-      treeNode.children = dig(key, level - 1);
-    }
-
-    list.push(treeNode);
-  }
-  return list;
-};
-
-function DraggableTree() {
-  const [treeData, setTreeData] = useState<TreeNode[]>(() => dig());
-  const [dropInfo, setDropInfo] = useState<DropInfo | null>(null);
-  const containerRef = useRef<HTMLDivElement | null>(null);
-  
-  const handleDragStart = (e: React.DragEvent<HTMLElement>, item: TreeItemInstance) => {
-    e.stopPropagation();
-    const ghost = (e.currentTarget as HTMLElement).cloneNode(true) as HTMLElement;
-    ghost.style.position = "fixed";
-    ghost.style.left = "-9999px";
-    ghost.style.top = "-9999px";
-    document.body.appendChild(ghost);
-    try {
-      e.dataTransfer?.setDragImage(ghost, 0, 0);
-    } catch { }
-    setTimeout(() => {
-      if (ghost.parentNode) ghost.parentNode.removeChild(ghost);
-    }, 0);
-    item.dragStart?.(e, item);
-    setDropInfo(null);
-  };
-
-  const handleDragOver = (
-    e: React.DragEvent<HTMLElement>,
-    item: TreeItemInstance,
-    indent: number,
-  ) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (!containerRef.current) return;
-    const res = item.dragOver?.(e, containerRef.current, null, indent);
-    setDropInfo(res as DropInfo | null);
-  };
-  
-  const handleDrop = (
-    e: React.DragEvent<HTMLElement>,
-    item: TreeItemInstance,
-    tree: TreeInstance,
-  ) => {
-    e.preventDefault();
-    e.stopPropagation();
-    const draggingKey = tree.getDraggingKey?.();
-    if (draggingKey && dropInfo) {
-      const newTree = moveNode(
-        draggingKey,
-        dropInfo.dropTargetKey,
-        dropInfo.dropPosition,
-        treeData,
-      );
-      setTreeData(newTree);
-
-      item.dragEnd?.(e, item);
-      setDropInfo(null);
-    }
-  };
-
-  const handleDragEnd = (e: React.DragEvent<HTMLElement>, item: TreeItemInstance) => {
-    e.stopPropagation();
-    item.dragEnd?.(e, item);
-    setDropInfo(null);
-  };
-  
-  return (
-    <div ref={containerRef} className="relative size-full">
-      <VirtualizedTree
-        treeData={treeData}
-        features={[
-          expandableFeature({ defaultExpandedKeys: ["0"] }),
-          selectableFeature({}),
-          checkableFeature({}),
-          dndFeature({}),
-        ]}
-        height={400}
-      >
-        {({ item, indent, tree }) => (
-          <TreeItem key={item.key} item={item}>
-            <div
-              className="inline-flex items-center"
-              onDragStart={(e) => handleDragStart(e, item)}
-              onDragOver={(e) => handleDragOver(e, item, indent)}
-              onDrop={(e) => handleDrop(e, item, tree)}
-              onDragEnd={(e) => handleDragEnd(e, item)}
-              draggable
-            >
-              <TreeExpandIcon item={item} />
-              <TreeCheckbox item={item} />
-              <TreeLabel item={item} />
-            </div>
-          </TreeItem>
-        )}
-      </VirtualizedTree>
-      <DropIndicator info={dropInfo ?? undefined} />
-    </div>
-  );
-}`}
-				/>
-
-				<ExampleContainer
-					title="4. Async Loading Tree"
-					preview={<AsyncLoadingTree />}
-					code={`import { Tree, TreeCheckbox, TreeItem, TreeLabel } from "@rap/components-ui/tree";
-import { checkableFeature, expandableFeature, selectableFeature } from "@rap/components-ui/tree/features";
-import { useState } from "react";
-import { ChevronDownIcon } from "lucide-react";
-import type { TreeNode } from "@rap/components-ui/tree/types";
-
-// Helper function to generate tree nodes
-const dig = (path = "0", level = 1) => {
-  const list = [];
-  for (let i = 0; i < 10; i += 1) {
-    const key = \`\${path}-\${i}\`;
-    const treeNode = {
-      label: key,
-      key,
-    };
-
-    if (level > 0) {
-      treeNode.children = dig(key, level - 1);
-    }
-
-    list.push(treeNode);
-  }
-  return list;
-};
-
-function AsyncLoadingTree() {
-  const [treeData, setTreeData] = useState<TreeNode[]>(() => {
-    // Generate initial data with dig function
-    const rootNode = dig("root", 1);
-    // Set empty children for nodes that should load async
-    if (rootNode.children) {
-      rootNode.children.forEach(node => {
-        node.children = [];
-      });
-    }
-    return [rootNode];
-  });
-  
-  // Async load children function
-  const loadChildren = async (node: TreeNode): Promise<TreeNode[]> => {
-    // Simulate async loading
-    return new Promise(resolve => {
-      setTimeout(() => {
-        // Generate children using dig function
-        const childNode = dig(node.key, 1);
-        // Get children from the generated node
-        const children = childNode.children || [];
-        // Set empty children for nested async loading
-        children.forEach(child => {
-          child.children = [];
-        });
-        resolve(children);
-      }, 1000);
-    });
-  };
-  
-  // Custom isLeaf condition to trigger async loading
-  // Nodes with empty children are not leaf nodes, so they can trigger async loading
-  const isLeafCondition = (node: TreeNode): boolean => {
-    // If node has children property, it's not a leaf node (even if children is empty)
-    // This allows async loading to be triggered
-    return !node.children;
-  };
-  
-  return (
-    <Tree
-      treeData={treeData}
-      height={400}
-      features={[
-        expandableFeature({ defaultExpandedKeys: ["root"] }),
-        selectableFeature({}),
-        checkableFeature({}),
-        asyncLoaderFeature({ loadChildren }),
-      ]}
-      isLeafCondition={isLeafCondition}
-    >
-      {({ item }) => {
-        return (
-          <TreeItem key={item.key} item={item}>
-            <div className="inline-flex items-center">
-              <TreeExpandIcon item={item} />
-              <TreeCheckbox item={item} />
-              <TreeLabel item={item} />
-              {item.loading && <span className="ml-2 text-sm text-muted-foreground">Loading...</span>}
-            </div>
-          </TreeItem>
-        );
-      }}
-    </Tree>
-  );
-}`}
-				/>
+		<div className="size-full space-y-6 p-6">
+			<div>
+				<h2 className="text-2xl font-bold">Tree Components</h2>
+				<p className="mt-2 text-sm text-muted-foreground">
+					Feature-based, UI-agnostic tree core with React primitives.
+				</p>
 			</div>
+
+			<Section
+				title="Uncontrolled expandable / selectable / checkable"
+				description="Uses default keys and lets the tree own state internally."
+			>
+				<UncontrolledFeatureDemo />
+			</Section>
+
+			<Section
+				title="Controlled expandable / selectable / checkable"
+				description="External React state owns expanded, selected, and checked keys."
+			>
+				<ControlledFeatureDemo />
+			</Section>
+
+			<Section
+				title="CRUD local mutations"
+				description="updateNode, insertNode, moveNode, and removeNode mutate by key with minimal structural work."
+			>
+				<CrudDemo />
+			</Section>
+
+			<Section
+				title="Search and filter"
+				description="Search highlights matched segments while filter narrows visible items."
+			>
+				<SearchFilterDemo />
+			</Section>
+
+			<Section
+				title="Remote async loading"
+				description="Children are loaded through the MSW mock endpoint when a lazy node expands."
+			>
+				<RemoteLoadingDemo />
+			</Section>
+
+			<Section
+				title="Virtual viewport"
+				description="The same primitives render a large expanded tree through tanstack virtual."
+			>
+				<VirtualDemo />
+			</Section>
+
+			<Section
+				title="DND intent and sortable"
+				description="DND computes drop intent; sortable converts valid intent into a CRUD move."
+			>
+				<SortableDemo />
+			</Section>
+
+			<Section
+				title="Pro wrappers"
+				description="High-level tree wrappers reduce repeated code while still accepting features and custom rendering."
+			>
+				<ProTreeDemo />
+			</Section>
 		</div>
 	);
 }

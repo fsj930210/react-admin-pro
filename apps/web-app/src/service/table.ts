@@ -1,7 +1,7 @@
 import request from "@/service/fetch";
 
-export interface User {
-	id: string;
+export interface ApiUser {
+	user_id: string;
 	name: string;
 	email: string;
 	age: number;
@@ -13,6 +13,10 @@ export interface User {
 	salary: number;
 	status: string;
 	score: number;
+}
+
+export interface User extends Omit<ApiUser, "user_id"> {
+	id: string;
 }
 
 export interface TableResponse<T> {
@@ -29,10 +33,12 @@ export interface FetchUsersParams {
 	pageSize?: number;
 	sortBy?: string;
 	sortOrder?: "asc" | "desc";
-	sortFields?: { field: string; order: string }[];
+	sortFields?: { field: string; order: "asc" | "desc" }[];
+	filterField?: string;
+	filterValue?: string;
 	filters?: Record<string, unknown>;
 }
 
 export const fetchUsers = (params?: FetchUsersParams) => {
-	return request.post<TableResponse<User>>(`/api/rap/table/users`, { data: params });
+	return request.post<TableResponse<ApiUser>>(`/api/rap/table/users`, { data: params });
 };

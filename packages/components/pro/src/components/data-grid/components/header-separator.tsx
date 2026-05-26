@@ -12,6 +12,10 @@ export function HeaderSeparator<TData>({ header, border }: HeaderSeparatorProps<
 	const canResize = header.column.getCanResize();
 	const resizeHandler = header.getResizeHandler();
 
+	if (border && !canResize) {
+		return null;
+	}
+
 	const handleResizeMouseDown = (event: MouseEvent<HTMLDivElement>) => {
 		event.stopPropagation();
 		resizeHandler(event);
@@ -27,10 +31,10 @@ export function HeaderSeparator<TData>({ header, border }: HeaderSeparatorProps<
 			onMouseDown={canResize ? handleResizeMouseDown : undefined}
 			onTouchStart={canResize ? handleResizeTouchStart : undefined}
 			className={cn(
-				"absolute right-0 top-0 z-20 h-full w-2 touch-none select-none",
-				"after:absolute after:left-1/2 after:top-1/2 after:h-1/2 after:w-1 after:-translate-y-1/2 after:translate-x-1/2 after:bg-border after:transition-all after:content-['']",
+				"absolute -right-1 top-0 z-20 h-full w-2 touch-none select-none",
+				"after:absolute after:left-1/2 after:top-1/2 after:h-1/2 after:w-px after:-translate-x-1/2 after:-translate-y-1/2 after:bg-border after:transition-all after:content-['']",
 				canResize && "cursor-ew-resize",
-				border && "after:opacity-0 group-hover/th:after:opacity-100",
+				!canResize && "pointer-events-none",
 				isResizing && "after:bg-primary after:opacity-100",
 			)}
 			aria-hidden="true"

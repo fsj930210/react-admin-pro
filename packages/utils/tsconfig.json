@@ -1,8 +1,6 @@
 {
   "extends": "@rap/tsconfig/web.json",
   "include": ["src/**/*"],
-  "compilerOptions": {
-    "typeRoots": ["src/**/*.ts"]
-  },
+  "compilerOptions": {},
   "exclude": ["node_modules"]
 }

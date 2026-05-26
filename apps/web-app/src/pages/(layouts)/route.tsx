@@ -1,4 +1,4 @@
-import { KeepAliveRoot } from "@rap/components-ui/keep-alive";
+
 import { useQueries } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { LayoutProvider } from "@/layouts/context/layout-context";
@@ -78,9 +78,7 @@ function Layout({ type = "vertical" }: LayoutProps) {
 			{loading ? (
 				<LayoutSkeleton />
 			) : (
-				<KeepAliveRoot max={20}>
-					<LayoutComponent />
-				</KeepAliveRoot>
+				<LayoutComponent />
 			)}
 		</LayoutProvider>
 	);

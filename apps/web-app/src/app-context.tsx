@@ -1,5 +1,5 @@
 /** biome-ignore-all lint:suspicious/noExplicitAny */
-import type { EventEmitter } from "ahooks/lib/useEventEmitter";
+import { EventEmitter } from "@rap/hooks/use-event-emitter";
 import { createContext, type ReactNode, use } from "react";
 
 export type AppEventType = "reload-tab" | "remove-tab" | "maximize-tab";

@@ -1,10 +1,10 @@
-import { KeepAliveOutlet, type KeepAliveRef } from "@rap/components-ui/keep-alive";
+import { RouteKeepAlive, type RouteKeepAliveRef } from "@rap/components-pro/route-keep-alive";
 import { useMinimax } from "@rap/hooks/use-minimax";
-import { useLocation } from "@tanstack/react-router";
 import { useRef } from "react";
 import type { AppEvent } from "@/app-context";
 import { useAppContext } from "@/app-context";
 import { Footer } from "../footer";
+import { ContentSkeleton } from "../skeleton";
 import { AppTabs } from "../tabs";
 
 interface AppContentProps {
@@ -14,17 +14,12 @@ interface AppContentProps {
 export const AppContent = ({ className = "", showTabs = true }: AppContentProps) => {
 	const { eventBus } = useAppContext();
 	const { isMaximized, handleMaximize, handleRestore } = useMinimax();
-	const keepAliveRef = useRef<KeepAliveRef>(null);
-	const cacheKey = useLocation({
-		select: (location) => location.pathname,
-	});
+	const routeKeepAliveRef = useRef<RouteKeepAliveRef>(null);
 	eventBus.useSubscription((event: AppEvent<string | string[]>) => {
 		if (event.type === "reload-tab") {
-			// eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
-			keepAliveRef.current?.handleRefreshCache(event.payload as string);
+			routeKeepAliveRef.current?.refreshTab(event.payload);
 		} else if (event.type === "remove-tab") {
-			// eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
-			keepAliveRef.current?.handleRemoveCache(event.payload as string[]);
+			routeKeepAliveRef.current?.removeTabs(event.payload);
 		} else if (event.type === "maximize-tab") {
 			if (isMaximized) {
 				handleRestore();
@@ -40,7 +35,7 @@ export const AppContent = ({ className = "", showTabs = true }: AppContentProps)
 		>
 			{showTabs && <AppTabs isMaximized={isMaximized} />}
 			<main className="flex-1 overflow-hidden bg-app-content">
-				<KeepAliveOutlet className="overflow-y-auto" cacheKey={cacheKey} ref={keepAliveRef} />
+				<RouteKeepAlive fallback={<ContentSkeleton />} ref={routeKeepAliveRef} />
 			</main>
 			<Footer />
 		</div>

@@ -10,7 +10,7 @@ export function useCopyToClipboard({
   onCopy?: () => void;
 } = {}): { copyToClipboard: (value: string) => void; isCopied: boolean } {
   const [isCopied, setIsCopied] = React.useState(false);
-  const timeoutIdRef = React.useRef<NodeJS.Timeout | null>(null);
+  const timeoutIdRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const copyToClipboard = (value: string): void => {
     if (typeof window === "undefined" || !navigator.clipboard.writeText) {

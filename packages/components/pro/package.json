@@ -23,12 +23,10 @@
 		"@rap/components-ui": "workspace:*",
 		"@rap/hooks": "workspace:*",
 		"@rap/utils": "workspace:*",
+		"@tanstack/react-router": "catalog:",
 		"@tanstack/react-table": "catalog:",
 		"@tanstack/react-virtual": "catalog:",
-		"ahooks": "catalog:",
 		"class-variance-authority": "catalog:",
-		"lodash-es": "catalog:",
-		"lru-cache": "catalog:",
 		"lucide-react": "catalog:",
 		"overlayscrollbars": "catalog:",
 		"overlayscrollbars-react": "catalog:",
@@ -40,6 +38,8 @@
 		"./icon": "./src/components/icon/index.tsx",
 		"./dialog": "./src/components/dialog/index.tsx",
 		"./pagination": "./src/components/pagination/index.tsx",
+		"./route-keep-alive": "./src/components/route-keep-alive/index.tsx",
+		"./tree": "./src/components/tree/index.tsx",
 		"./data-grid": "./src/components/data-grid/index.ts"
 	},
 	"devDependencies": {

@@ -43,6 +43,7 @@ import { Route as layoutsComponentsTransferIndexRouteImport } from "./pages/(lay
 import { Route as layoutsComponentsTableIndexRouteImport } from "./pages/(layouts)/components/table/index";
 import { Route as layoutsComponentsSelectorIndexRouteImport } from "./pages/(layouts)/components/selector/index";
 import { Route as layoutsComponentsRichTextIndexRouteImport } from "./pages/(layouts)/components/rich-text/index";
+import { Route as layoutsComponentsInputIndexRouteImport } from "./pages/(layouts)/components/input/index";
 import { Route as layoutsComponentsIconIndexRouteImport } from "./pages/(layouts)/components/icon/index";
 import { Route as layoutsNestedMenuNestedMenu2NestedMenu21RouteImport } from "./pages/(layouts)/nested-menu/nested-menu-2/nested-menu-2-1";
 import { Route as layoutsNestedMenuNestedMenu1NestedMenu13RouteImport } from "./pages/(layouts)/nested-menu/nested-menu-1/nested-menu-1-3";
@@ -238,6 +239,12 @@ const layoutsComponentsRichTextIndexRoute =
     path: "/components/rich-text/",
     getParentRoute: () => layoutsRouteRoute,
   } as any);
+const layoutsComponentsInputIndexRoute =
+  layoutsComponentsInputIndexRouteImport.update({
+    id: "/components/input/",
+    path: "/components/input/",
+    getParentRoute: () => layoutsRouteRoute,
+  } as any);
 const layoutsComponentsIconIndexRoute =
   layoutsComponentsIconIndexRouteImport.update({
     id: "/components/icon/",
@@ -304,6 +311,7 @@ export interface FileRoutesByFullPath {
   "/nested-menu/nested-menu-1/nested-menu-1-3": typeof layoutsNestedMenuNestedMenu1NestedMenu13Route;
   "/nested-menu/nested-menu-2/nested-menu-2-1": typeof layoutsNestedMenuNestedMenu2NestedMenu21Route;
   "/components/icon/": typeof layoutsComponentsIconIndexRoute;
+  "/components/input/": typeof layoutsComponentsInputIndexRoute;
   "/components/rich-text/": typeof layoutsComponentsRichTextIndexRoute;
   "/components/selector/": typeof layoutsComponentsSelectorIndexRoute;
   "/components/table/": typeof layoutsComponentsTableIndexRoute;
@@ -347,6 +355,7 @@ export interface FileRoutesByTo {
   "/nested-menu/nested-menu-1/nested-menu-1-3": typeof layoutsNestedMenuNestedMenu1NestedMenu13Route;
   "/nested-menu/nested-menu-2/nested-menu-2-1": typeof layoutsNestedMenuNestedMenu2NestedMenu21Route;
   "/components/icon": typeof layoutsComponentsIconIndexRoute;
+  "/components/input": typeof layoutsComponentsInputIndexRoute;
   "/components/rich-text": typeof layoutsComponentsRichTextIndexRoute;
   "/components/selector": typeof layoutsComponentsSelectorIndexRoute;
   "/components/table": typeof layoutsComponentsTableIndexRoute;
@@ -392,6 +401,7 @@ export interface FileRoutesById {
   "/(layouts)/nested-menu/nested-menu-1/nested-menu-1-3": typeof layoutsNestedMenuNestedMenu1NestedMenu13Route;
   "/(layouts)/nested-menu/nested-menu-2/nested-menu-2-1": typeof layoutsNestedMenuNestedMenu2NestedMenu21Route;
   "/(layouts)/components/icon/": typeof layoutsComponentsIconIndexRoute;
+  "/(layouts)/components/input/": typeof layoutsComponentsInputIndexRoute;
   "/(layouts)/components/rich-text/": typeof layoutsComponentsRichTextIndexRoute;
   "/(layouts)/components/selector/": typeof layoutsComponentsSelectorIndexRoute;
   "/(layouts)/components/table/": typeof layoutsComponentsTableIndexRoute;
@@ -437,6 +447,7 @@ export interface FileRouteTypes {
     | "/nested-menu/nested-menu-1/nested-menu-1-3"
     | "/nested-menu/nested-menu-2/nested-menu-2-1"
     | "/components/icon/"
+    | "/components/input/"
     | "/components/rich-text/"
     | "/components/selector/"
     | "/components/table/"
@@ -480,6 +491,7 @@ export interface FileRouteTypes {
     | "/nested-menu/nested-menu-1/nested-menu-1-3"
     | "/nested-menu/nested-menu-2/nested-menu-2-1"
     | "/components/icon"
+    | "/components/input"
     | "/components/rich-text"
     | "/components/selector"
     | "/components/table"
@@ -524,6 +536,7 @@ export interface FileRouteTypes {
     | "/(layouts)/nested-menu/nested-menu-1/nested-menu-1-3"
     | "/(layouts)/nested-menu/nested-menu-2/nested-menu-2-1"
     | "/(layouts)/components/icon/"
+    | "/(layouts)/components/input/"
     | "/(layouts)/components/rich-text/"
     | "/(layouts)/components/selector/"
     | "/(layouts)/components/table/"
@@ -797,6 +810,13 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof layoutsComponentsRichTextIndexRouteImport;
       parentRoute: typeof layoutsRouteRoute;
     };
+    "/(layouts)/components/input/": {
+      id: "/(layouts)/components/input/";
+      path: "/components/input";
+      fullPath: "/components/input/";
+      preLoaderRoute: typeof layoutsComponentsInputIndexRouteImport;
+      parentRoute: typeof layoutsRouteRoute;
+    };
     "/(layouts)/components/icon/": {
       id: "/(layouts)/components/icon/";
       path: "/components/icon";
@@ -871,6 +891,7 @@ interface layoutsRouteRouteChildren {
   layoutsNestedMenuNestedMenu1NestedMenu13Route: typeof layoutsNestedMenuNestedMenu1NestedMenu13Route;
   layoutsNestedMenuNestedMenu2NestedMenu21Route: typeof layoutsNestedMenuNestedMenu2NestedMenu21Route;
   layoutsComponentsIconIndexRoute: typeof layoutsComponentsIconIndexRoute;
+  layoutsComponentsInputIndexRoute: typeof layoutsComponentsInputIndexRoute;
   layoutsComponentsRichTextIndexRoute: typeof layoutsComponentsRichTextIndexRoute;
   layoutsComponentsSelectorIndexRoute: typeof layoutsComponentsSelectorIndexRoute;
   layoutsComponentsTableIndexRoute: typeof layoutsComponentsTableIndexRoute;
@@ -916,6 +937,7 @@ const layoutsRouteRouteChildren: layoutsRouteRouteChildren = {
   layoutsNestedMenuNestedMenu2NestedMenu21Route:
     layoutsNestedMenuNestedMenu2NestedMenu21Route,
   layoutsComponentsIconIndexRoute: layoutsComponentsIconIndexRoute,
+  layoutsComponentsInputIndexRoute: layoutsComponentsInputIndexRoute,
   layoutsComponentsRichTextIndexRoute: layoutsComponentsRichTextIndexRoute,
   layoutsComponentsSelectorIndexRoute: layoutsComponentsSelectorIndexRoute,
   layoutsComponentsTableIndexRoute: layoutsComponentsTableIndexRoute,

@@ -9,12 +9,16 @@ import { EditableCellDataGridDemo } from "./-editable-cell";
 import { EditableRowDataGridDemo } from "./-editable-row";
 import { EventsDataGridDemo } from "./-events";
 import { ExpandingDataGridDemo } from "./-expanding";
+import { GroupedColumnOrderDataGridDemo } from "./-grouped-column-order";
+import { GroupedHeaderDataGridDemo } from "./-grouped-header";
 import { InfiniteDataGridDemo } from "./-infinite";
 import { LocalDataGridDemo } from "./-local-data";
+import { NoScrollDataGridDemo } from "./-no-scroll";
 import { RemoteDataGridDemo } from "./-remote-data";
 import { RowDndDataGridDemo } from "./-row-dnd";
 import { RowOrderDataGridDemo } from "./-row-order";
 import { RowSelectionDataGridDemo } from "./-row-selection";
+import { StableColumnsDataGridDemo } from "./-stable-columns";
 import { TreeTableDataGridDemo } from "./-tree-table";
 import { VirtualDataGridDemo } from "./-virtual";
 
@@ -27,17 +31,21 @@ const groups = {
 		["basic", "Basic", BasicDataGrid],
 		["remote", "Remote", RemoteDataGridDemo],
 		["local", "Local", LocalDataGridDemo],
+		["no-scroll", "No scroll", NoScrollDataGridDemo],
+		["grouped-header", "Grouped header", GroupedHeaderDataGridDemo],
 		["selection", "Selection", RowSelectionDataGridDemo],
 		["expand", "Expand", ExpandingDataGridDemo],
 		["menu", "Context menu", ColumnMenuDataGridDemo],
+		["column-order", "Column order", ColumnOrderDataGridDemo],
+		["column-dnd", "Column DnD", ColumnDndDataGridDemo],
+		["grouped-order", "Grouped order", GroupedColumnOrderDataGridDemo],
 		["events", "Events", EventsDataGridDemo],
+		["stable-columns", "Stable columns", StableColumnsDataGridDemo],
 	],
 	extensions: [
 		["virtual", "Virtual", VirtualDataGridDemo],
 		["row-order", "Row order", RowOrderDataGridDemo],
-		["column-order", "Column order", ColumnOrderDataGridDemo],
 		["row-dnd", "Row DnD", RowDndDataGridDemo],
-		["column-dnd", "Column DnD", ColumnDndDataGridDemo],
 		["editable-cell", "Editable cell", EditableCellDataGridDemo],
 		["editable-row", "Editable row", EditableRowDataGridDemo],
 		["tree", "Tree table", TreeTableDataGridDemo],
