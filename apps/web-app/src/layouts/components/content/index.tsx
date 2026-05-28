@@ -6,6 +6,7 @@ import { useAppContext } from "@/app-context";
 import { Footer } from "../footer";
 import { ContentSkeleton } from "../skeleton";
 import { AppTabs } from "../tabs";
+import { useUIPreferences } from "@/store/ui-preferences";
 
 interface AppContentProps {
 	className?: string;
@@ -13,13 +14,18 @@ interface AppContentProps {
 }
 export const AppContent = ({ className = "", showTabs = true }: AppContentProps) => {
 	const { eventBus } = useAppContext();
+	const preferences = useUIPreferences("preferences");
 	const { isMaximized, handleMaximize, handleRestore } = useMinimax();
 	const routeKeepAliveRef = useRef<RouteKeepAliveRef>(null);
 	eventBus.useSubscription((event: AppEvent<string | string[]>) => {
 		if (event.type === "reload-tab") {
-			routeKeepAliveRef.current?.refreshTab(event.payload);
+			if (typeof event.payload === "string") {
+				routeKeepAliveRef.current?.refreshTab(event.payload);
+			}
 		} else if (event.type === "remove-tab") {
-			routeKeepAliveRef.current?.removeTabs(event.payload);
+			routeKeepAliveRef.current?.removeTabs(
+				Array.isArray(event.payload) ? event.payload : [event.payload],
+			);
 		} else if (event.type === "maximize-tab") {
 			if (isMaximized) {
 				handleRestore();
@@ -33,11 +39,24 @@ export const AppContent = ({ className = "", showTabs = true }: AppContentProps)
 		<div
 			className={`flex flex-col flex-1 bg-muted overflow-hidden ${isMaximized ? "fixed top-0 left-0 z-99 w-screen h-screen" : ""} ${className}`}
 		>
-			{showTabs && <AppTabs isMaximized={isMaximized} />}
-			<main className="flex-1 overflow-hidden bg-app-content">
-				<RouteKeepAlive fallback={<ContentSkeleton />} ref={routeKeepAliveRef} />
+			{showTabs && preferences.tabs.enabled && (
+				<AppTabs
+					isMaximized={isMaximized}
+					sortable={preferences.tabs.sortable}
+					tabType={preferences.tabs.type}
+					showContextMenu={preferences.tabs.showContextMenu}
+					showMaximize={preferences.tabs.showMaximize}
+					showRefresh={preferences.tabs.showRefresh}
+				/>
+			)}
+			<main className="flex-1 overflow-hidden bg-app-content p-(--app-content-padding)">
+				<div
+					className={`h-full ${preferences.layout.contentWidth === "fixed" ? "mx-auto w-full max-w-(--app-max-content-width)" : ""}`}
+				>
+					<RouteKeepAlive fallback={<ContentSkeleton />} ref={routeKeepAliveRef} />
+				</div>
 			</main>
-			<Footer />
+			{preferences.layout.footer.enabled && <Footer />}
 		</div>
 	);
 };

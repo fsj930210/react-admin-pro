@@ -5,7 +5,7 @@ interface LayoutConfigState {
 	layoutType: "vertical" | "horizontal";
 }
 interface AppearanceConfigState {
-	appTheme: "light" | "dark" | "system";
+	appTheme: "light" | "dark" | "tech-blue" | "eco-green" | "system";
 	primaryColor: string;
 }
 interface CommonConfigState {

@@ -7,7 +7,10 @@ import { BProgress } from "@bprogress/core";
 import { ThemeProvider } from "@rap/components-ui/theme-provider";
 import { TooltipProvider } from "@rap/components-ui/tooltip";
 import { useEventEmitter } from "@rap/hooks/use-event-emitter";
+import { useMemo } from "react";
 import { APP_BASE_PATH } from "@/config";
+import { UIPreferencesEffects, UIPreferencesPreview } from "@/components/app/ui-preferences";
+import { uiPreferencesStore, useUIPreferences } from "@/store/ui-preferences";
 import { type AppEvent, AppProvider } from "./app-context";
 
 const queryClient = new QueryClient({
@@ -40,7 +43,8 @@ const router = createRouter({
 let isNavigating = false;
 
 router.subscribe("onBeforeNavigate", () => {
-	if (!isNavigating) {
+	const { preferences } = uiPreferencesStore.store.getState();
+	if (preferences.animation.progress && !isNavigating) {
 		isNavigating = true;
 		BProgress.start();
 	}
@@ -61,15 +65,26 @@ declare module "@tanstack/react-router" {
 }
 const App = () => {
 	const eventBus = useEventEmitter<AppEvent<unknown>>();
+	const preferences = useUIPreferences("preferences");
+	const themes = useMemo(
+		() => preferences.appearance.availableThemes.filter((theme) => theme !== "system"),
+		[preferences.appearance.availableThemes],
+	);
 	return (
 		<ThemeProvider
 			scope="root"
 			storageKey="rap-web-theme"
+			themes={themes}
+			colorSchemeMap={{
+				"tech-blue": "dark",
+				"eco-green": "dark",
+			}}
 			attribute="class"
-			enableSystem
+			enableSystem={preferences.appearance.followSystem}
 			enableColorScheme
-			defaultTheme="dark"
+			defaultTheme={preferences.appearance.theme}
 		>
+			<UIPreferencesEffects />
 			<div className="size-full overflow-x-hidden">
 				<TooltipProvider>
 					<AppProvider eventBus={eventBus}>
@@ -77,6 +92,7 @@ const App = () => {
 							<RouterProvider router={router} />
 						</QueryClientProvider>
 						<Toaster />
+						<UIPreferencesPreview />
 					</AppProvider>
 				</TooltipProvider>
 			</div>

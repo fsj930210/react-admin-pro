@@ -18,6 +18,9 @@ export interface AppTabsProps {
 	sortable?: boolean;
 	tabType?: TabType;
 	isMaximized?: boolean;
+	showRefresh?: boolean;
+	showMaximize?: boolean;
+	showContextMenu?: boolean;
 }
 
 const TabItemStrategies = {
@@ -32,6 +35,9 @@ export function AppTabs({
 	sortable = true,
 	tabType = "chrome",
 	isMaximized = false,
+	showRefresh = true,
+	showMaximize = true,
+	showContextMenu = true,
 }: AppTabsProps) {
 	const {
 		containerRef,
@@ -93,6 +99,7 @@ export function AppTabs({
 								updateTabs={setTabs}
 								activeTab={activeTab}
 								setActiveTab={setActiveTab}
+								disabled={!showContextMenu}
 							>
 								<TabItemComponent
 									tab={item}
@@ -129,6 +136,7 @@ export function AppTabs({
 									activeTab={activeTab}
 									setActiveTab={setActiveTab}
 									className="w-fit max-w-45"
+									disabled={!showContextMenu}
 								>
 									<TabItemComponent
 										tab={item}
@@ -152,6 +160,7 @@ export function AppTabs({
 					activeTab={activeTab}
 					setActiveTab={setActiveTab}
 					className="flex-center border-l-app-tabs-border border-l"
+					disabled={!showContextMenu}
 				>
 					<Button
 						type="button"
@@ -163,7 +172,7 @@ export function AppTabs({
 						<LayoutGrid className="size-4" />
 					</Button>
 				</TabsContextMenu>
-				<div className="border-l-app-tabs-border border-l">
+				{showRefresh && <div className="border-l-app-tabs-border border-l">
 					<Button
 						type="button"
 						variant="ghost"
@@ -174,8 +183,8 @@ export function AppTabs({
 					>
 						<RotateCw className="size-4" />
 					</Button>
-				</div>
-				<div className="border-l-app-tabs-border border-l">
+				</div>}
+				{showMaximize && <div className="border-l-app-tabs-border border-l">
 					<Button
 						type="button"
 						variant="ghost"
@@ -186,7 +195,7 @@ export function AppTabs({
 					>
 						{isMaximized ? <Minimize className="size-4" /> : <Maximize className="size-4" />}
 					</Button>
-				</div>
+				</div>}
 			</div>
 			<ScrollButton canScroll={canScrollRight} direction="right" scroll={scrollRight}>
 				<ChevronRight />

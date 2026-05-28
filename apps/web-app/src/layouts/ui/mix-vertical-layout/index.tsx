@@ -19,8 +19,10 @@ import { SidebarMain } from "@/layouts/components/sidebar/sidebar-main";
 import { useLayout } from "@/layouts/context/layout-context";
 import { MenuService } from "@/layouts/service/menuService";
 import type { MenuItem } from "@/layouts/types";
+import { useUIPreferences } from "@/store/ui-preferences";
 
 export function MixVerticalLayout() {
+	const preferences = useUIPreferences("preferences");
 	const navigate = useNavigate();
 	const pathname = useRouterState({
 		select: (state) => state.location.pathname,
@@ -64,18 +66,15 @@ export function MixVerticalLayout() {
 		handleMenuItemClick(menu);
 	};
 	return (
-		<SidebarProvider className="flex flex-col h-full min-h-auto overflow-hidden">
+		<SidebarProvider
+			className="flex flex-col h-full min-h-auto overflow-hidden"
+			defaultOpen={!preferences.layout.sidebar.defaultCollapsed}
+			defaultWidth={`${preferences.layout.sidebar.width}px`}
+			collapsedWidth={`${preferences.layout.sidebar.collapsedWidth}px`}
+		>
 			<AppHeader
-				className="border-b"
-				rightFeatures={[
-					"app-search",
-					"theme-switch",
-					"i18n",
-					"fullscreen",
-					"reload",
-					"notify",
-					"user-center",
-				]}
+				className="border-b h-(--app-header-height)"
+				rightFeatures={preferences.layout.header.rightFeatures}
 				leftRender={
 					<div className="flex items-center w-full">
 						<div className="mr-6">
@@ -90,7 +89,7 @@ export function MixVerticalLayout() {
 					</div>
 				}
 			/>
-			<SidebarInset className="flex-row overflow-hidden min-h-auto h-[calc(100%-var(--spacing)*11)]">
+			<SidebarInset className="flex-row overflow-hidden min-h-auto h-[calc(100%-var(--app-header-height))]">
 				<MixVerticalLayoutSidebar menus={secondLevelMenus} />
 				<AppContent />
 			</SidebarInset>
@@ -134,10 +133,11 @@ interface MixVerticalLayoutSidebarProps {
 }
 function MixVerticalLayoutSidebar({ menus }: MixVerticalLayoutSidebarProps) {
 	const { state, toggleSidebar } = useSidebar();
+	const preferences = useUIPreferences("preferences");
 	return menus.length > 0 ? (
 		<Sidebar
-			collapsible="icon"
-			className={`h-[calc(100%-var(--spacing)*11)] top-11 flex-1 transition-all duration-300`}
+			collapsible={preferences.layout.sidebar.collapsible ? "icon" : "none"}
+			className={`h-[calc(100%-var(--app-header-height))] top-(--app-header-height) flex-1 transition-all duration-300`}
 		>
 			<SidebarContent>
 				<SidebarMain menus={menus} showSearch={false} />
@@ -155,7 +155,11 @@ function MixVerticalLayoutSidebar({ menus }: MixVerticalLayoutSidebarProps) {
 					)}
 				</button>
 			</SidebarFooter>
-			<SidebarRail />
+			<SidebarRail
+				enableDrag={preferences.layout.sidebar.resizable}
+				minResizeWidth={`${preferences.layout.sidebar.minWidth}px`}
+				maxResizeWidth={`${preferences.layout.sidebar.maxWidth}px`}
+			/>
 		</Sidebar>
 	) : null;
 }

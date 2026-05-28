@@ -18,6 +18,7 @@ import { SideLayoutSkeleton } from "@/layouts/ui/side-layout/skeleton";
 import { VerticalLayout } from "@/layouts/ui/vertical-layout";
 import { VerticalLayoutSkeleton } from "@/layouts/ui/vertical-layout/skeleton";
 import { fetchUserInfo, fetchUserMenus } from "@/service/auth";
+import { useUIPreferences } from "@/store/ui-preferences";
 
 export const Route = createFileRoute("/(layouts)")({
 	component: Layout,
@@ -54,6 +55,7 @@ interface LayoutProps {
 	type?: LayoutType;
 }
 function Layout({ type = "vertical" }: LayoutProps) {
+	const preferences = useUIPreferences("preferences");
 	const queryResults = useQueries({
 		queries: [
 			{
@@ -71,8 +73,9 @@ function Layout({ type = "vertical" }: LayoutProps) {
 	const userInfo = userInfoResult.data?.data ?? null;
 	const loading = queryResults.some((result) => result.isLoading);
 	const menuService = new MenuService(menus);
-	const LayoutComponent = LayoutComponentStrategies[type] || LayoutComponentStrategies.vertical;
-	const LayoutSkeleton = LayoutSkeletonStrategies[type] || LayoutSkeletonStrategies.vertical;
+	const resolvedType = preferences.layout.mode || type;
+	const LayoutComponent = LayoutComponentStrategies[resolvedType] || LayoutComponentStrategies.vertical;
+	const LayoutSkeleton = LayoutSkeletonStrategies[resolvedType] || LayoutSkeletonStrategies.vertical;
 	return (
 		<LayoutProvider menuService={menuService} userMenus={menus} userInfo={userInfo}>
 			{loading ? (

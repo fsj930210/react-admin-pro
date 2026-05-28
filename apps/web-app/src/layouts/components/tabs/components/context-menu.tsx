@@ -17,6 +17,7 @@ interface TabsContextMenuProps {
 	children: React.ReactNode;
 	activeTab: AppTabItem | null;
 	className?: string;
+	disabled?: boolean;
 	updateTabs: React.Dispatch<React.SetStateAction<AppTabItem[]>>;
 	setActiveTab: React.Dispatch<React.SetStateAction<AppTabItem | null>>;
 }
@@ -27,9 +28,13 @@ export function TabsContextMenu({
 	children,
 	activeTab,
 	className,
+	disabled = false,
 	updateTabs,
 	setActiveTab,
 }: TabsContextMenuProps) {
+	if (disabled) {
+		return <div className={cn("size-full", className)}>{children}</div>;
+	}
 	// 使用自定义hook处理标签页上下文菜单逻辑
 	const {
 		handleCloseTab,

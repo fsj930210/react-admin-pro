@@ -64,6 +64,7 @@ type SidebarProviderProps = React.ComponentProps<"div"> & {
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
   defaultWidth?: string;
+  collapsedWidth?: string;
   ref?: React.RefObject<HTMLDivElement>;
 };
 
@@ -76,6 +77,7 @@ const SidebarProvider = ({
   style,
   children,
   defaultWidth = SIDEBAR_WIDTH,
+  collapsedWidth = SIDEBAR_WIDTH_ICON,
   ...props
 }: SidebarProviderProps) => {
     const isMobile = useIsMobile();
@@ -136,6 +138,10 @@ const SidebarProvider = ({
     // This makes it easier to style the sidebar with Tailwind classes.
     const state = open ? "expanded" : "collapsed";
 
+    React.useEffect(() => {
+      setWidth(defaultWidth);
+    }, [defaultWidth]);
+
     const contextValue = React.useMemo<SidebarContext>(
       () => ({
         state,
@@ -176,7 +182,7 @@ const SidebarProvider = ({
               {
                 // * update '--sidebar-width' to use the new width state
                 "--sidebar-width": width,
-                "--sidebar-width-icon": SIDEBAR_WIDTH_ICON,
+                "--sidebar-width-icon": collapsedWidth,
                 ...style,
               } as React.CSSProperties
             }
@@ -344,6 +350,8 @@ SidebarTrigger.displayName = "SidebarTrigger";
 
 type SidebarRailProps = React.ComponentProps<"button"> & {
   enableDrag?: boolean;
+  minResizeWidth?: string;
+  maxResizeWidth?: string;
   ref?: React.RefObject<HTMLButtonElement>;
 };
 
@@ -351,6 +359,8 @@ const SidebarRail = ({
   ref,
   className,
   enableDrag = true,
+  minResizeWidth = MIN_SIDEBAR_WIDTH,
+  maxResizeWidth = MAX_SIDEBAR_WIDTH,
   ...props
 }: SidebarRailProps) => {
   const { toggleSidebar, setWidth, state, width, setIsDraggingRail } =
@@ -363,8 +373,8 @@ const SidebarRail = ({
     onToggle: toggleSidebar,
     currentWidth: width,
     isCollapsed: state === "collapsed",
-    minResizeWidth: MIN_SIDEBAR_WIDTH,
-    maxResizeWidth: MAX_SIDEBAR_WIDTH,
+    minResizeWidth,
+    maxResizeWidth,
     setIsDraggingRail,
     widthCookieName: "sidebar:width",
     widthCookieMaxAge: 60 * 60 * 24 * 7,

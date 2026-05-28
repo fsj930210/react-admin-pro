@@ -7,12 +7,14 @@ import { FullscreenFeature } from "../../widget/fullscreen";
 import { I18nFeature } from "../../widget/i18n";
 import { ReloadFeature } from "../../widget/reload";
 import { ThemeSwitchFeature } from "../../widget/theme-switch";
+import { UIPreferencesFeature } from "../../widget/ui-preferences";
 import { Breadcrumb } from "../breadcrumb";
 import { AppSearchFeature } from "./features/app-search";
 import { NotifyFeature } from "./features/notify";
 import { UserCenterFeature } from "./features/user-center";
+import { useUIPreferences } from "@/store/ui-preferences";
 
-type AppHeaderFeatures =
+export type AppHeaderFeatures =
 	| "logo"
 	| "reload"
 	| "user-center"
@@ -22,7 +24,8 @@ type AppHeaderFeatures =
 	| "app-search"
 	| "breadcrumb"
 	| "collapse-sidebar"
-	| "i18n";
+	| "i18n"
+	| "ui-preferences";
 
 interface AppHeaderProps {
 	leftFeatures?: AppHeaderFeatures[];
@@ -37,6 +40,7 @@ const featureComponents: Record<AppHeaderFeatures, React.FC<any>> = {
 	logo: AppLogo,
 	reload: ReloadFeature,
 	i18n: I18nFeature,
+	"ui-preferences": UIPreferencesFeature,
 	fullscreen: FullscreenFeature,
 	notify: NotifyFeature,
 	breadcrumb: Breadcrumb,
@@ -62,6 +66,14 @@ export const AppHeader = memo(
 		rightRender,
 		className,
 	}: AppHeaderProps) => {
+		const preferences = useUIPreferences("preferences");
+		const rightFeatureSet = preferences.templatePreview.enabled && !rightFeatures.includes("ui-preferences")
+			? [...rightFeatures, "ui-preferences" as const]
+			: rightFeatures;
+		const resolvedRightFeatures = rightFeatureSet.filter((feature) => {
+			if (feature === "i18n") return preferences.i18n.showSwitcher;
+			return true;
+		});
 		const renderFeature = (feature: AppHeaderFeatures, index: number) => {
 			const Component = featureComponents[feature];
 			return Component ? <Component key={`${feature}-${index}`} /> : null;
@@ -79,7 +91,7 @@ export const AppHeader = memo(
 				</div>
 
 				<div className="flex items-center gap-2">
-					{rightRender ?? rightFeatures.map((feature, index) => renderFeature(feature, index))}
+					{rightRender ?? resolvedRightFeatures.map((feature, index) => renderFeature(feature, index))}
 				</div>
 			</header>
 		);

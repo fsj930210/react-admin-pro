@@ -4,3 +4,28 @@ body,
 	width: 100%;
 	height: 100%;
 }
+
+html {
+	font-size: var(--app-font-size, 14px);
+}
+
+html.app-grayscale {
+	filter: grayscale(1);
+}
+
+html.app-reduced-motion *,
+html.app-reduced-motion *::before,
+html.app-reduced-motion *::after {
+	animation-duration: 0.01ms !important;
+	animation-iteration-count: 1 !important;
+	scroll-behavior: auto !important;
+	transition-duration: 0.01ms !important;
+}
+
+html[data-app-density="compact"] [data-sidebar="menu-button"] {
+	min-height: 1.75rem;
+}
+
+html[data-app-density="comfortable"] [data-sidebar="menu-button"] {
+	min-height: 2.5rem;
+}

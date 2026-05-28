@@ -11,24 +11,19 @@ import { useLayout } from "@/layouts/context/layout-context";
 import { useMenu } from "@/layouts/hooks/useMenu";
 import { MenuService } from "@/layouts/service/menuService";
 import type { MenuItem } from "@/layouts/types";
+import { useUIPreferences } from "@/store/ui-preferences";
 
 export function HorizontalLayout() {
 	const { userMenus } = useLayout();
+	const preferences = useUIPreferences("preferences");
 	const menuService = new MenuService(userMenus);
 	const { handleMenuItemClick } = useMenu({ menuService });
 
 	return (
 		<SidebarInset className="overflow-hidden  min-w-0">
 			<AppHeader
-				rightFeatures={[
-					"app-search",
-					"theme-switch",
-					"i18n",
-					"fullscreen",
-					"reload",
-					"notify",
-					"user-center",
-				]}
+				rightFeatures={preferences.layout.header.rightFeatures}
+				className="h-(--app-header-height)"
 				leftRender={
 					<div className="flex items-center w-full">
 						<div className="mr-6">

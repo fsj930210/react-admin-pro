@@ -1,7 +1,11 @@
+import { useUIPreferences } from "@/store/ui-preferences";
+
 export function Footer() {
+	const preferences = useUIPreferences("preferences");
+
 	return (
-		<footer className="w-full p-4 text-center text-secondary-foreground bg-transparent">
-			©{new Date().getFullYear()} React Admin Pro
+		<footer className="flex w-full items-center justify-center bg-transparent text-center text-secondary-foreground h-(--app-footer-height)">
+			©{new Date().getFullYear()} {preferences.layout.footer.text}
 		</footer>
 	);
 }

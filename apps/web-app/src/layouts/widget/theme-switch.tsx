@@ -6,14 +6,33 @@ import {
 	DropdownMenuTrigger,
 } from "@rap/components-ui/dropdown-menu";
 import { useTheme } from "@rap/components-ui/theme-provider";
-import { Moon, Sun } from "lucide-react";
+import { Cpu, Leaf, Monitor, Moon, Sun } from "lucide-react";
+import type { AppTheme } from "@/config/ui-preferences";
+import { useUIPreferences } from "@/store/ui-preferences";
 
 interface ThemeSwitchFeatureProps {
 	className?: string;
 }
 
+const themeOptions: Array<{ value: AppTheme; label: string; icon: typeof Sun }> = [
+	{ value: "light", label: "浅色主题", icon: Sun },
+	{ value: "dark", label: "深色主题", icon: Moon },
+	{ value: "tech-blue", label: "科技蓝", icon: Cpu },
+	{ value: "eco-green", label: "生态绿", icon: Leaf },
+	{ value: "system", label: "跟随系统", icon: Monitor },
+];
+
 export function ThemeSwitchFeature({ className }: ThemeSwitchFeatureProps) {
 	const { setTheme } = useTheme();
+	const preferences = useUIPreferences("preferences");
+	const updatePreferences = useUIPreferences((state) => state.updatePreferences);
+
+	const handleThemeChange = (theme: AppTheme) => {
+		setTheme(theme);
+		updatePreferences((draft) => {
+			draft.appearance.theme = theme;
+		});
+	};
 
 	return (
 		<DropdownMenu>
@@ -25,9 +44,17 @@ export function ThemeSwitchFeature({ className }: ThemeSwitchFeatureProps) {
 				</Button>
 			</DropdownMenuTrigger>
 			<DropdownMenuContent align="center">
-				<DropdownMenuItem onClick={() => setTheme("light")}>浅色主题</DropdownMenuItem>
-				<DropdownMenuItem onClick={() => setTheme("dark")}>深色主题</DropdownMenuItem>
-				<DropdownMenuItem onClick={() => setTheme("system")}>系统默认</DropdownMenuItem>
+				{themeOptions
+					.filter((item) => preferences.appearance.availableThemes.includes(item.value))
+					.map((item) => {
+						const Icon = item.icon;
+						return (
+							<DropdownMenuItem key={item.value} onClick={() => handleThemeChange(item.value)}>
+								<Icon className="size-4" />
+								{item.label}
+							</DropdownMenuItem>
+						);
+					})}
 			</DropdownMenuContent>
 		</DropdownMenu>
 	);

@@ -20,8 +20,10 @@ import { User } from "@/layouts/components/sidebar/sidebar-user";
 import { useLayout } from "@/layouts/context/layout-context";
 import { MenuService } from "@/layouts/service/menuService";
 import type { MenuItem } from "@/layouts/types";
+import { useUIPreferences } from "@/store/ui-preferences";
 
 export function DoubleColumnLayout() {
+	const preferences = useUIPreferences("preferences");
 	const navigate = useNavigate();
 	const pathname = useRouterState({
 		select: (state) => state.location.pathname,
@@ -60,14 +62,23 @@ export function DoubleColumnLayout() {
 		}
 	};
 	return (
-		<SidebarProvider className="h-full">
+		<SidebarProvider
+			className="h-full"
+			defaultOpen={!preferences.layout.sidebar.defaultCollapsed}
+			defaultWidth={`${preferences.layout.sidebar.width}px`}
+			collapsedWidth={`${preferences.layout.sidebar.collapsedWidth}px`}
+		>
 			<DoubleColumnLayoutSidebar
 				selectedFistLevelMenu={selectedFistLevelMenu}
 				onMenuItemClick={handleMenuItemClick}
 				userMenus={userMenus}
 			/>
 			<SidebarInset className="h-full min-h-auto overflow-hidden min-w-0">
-				<AppHeader />
+				<AppHeader
+					leftFeatures={preferences.layout.header.leftFeatures}
+					rightFeatures={preferences.layout.header.rightFeatures}
+					className="h-(--app-header-height)"
+				/>
 				<AppContent />
 			</SidebarInset>
 		</SidebarProvider>
@@ -123,6 +134,7 @@ function DoubleColumnLayoutSidebar({
 }: DoubleColumnLayoutSidebarProps) {
 	const secondLevelMenus = selectedFistLevelMenu?.children ?? [];
 	const { state, toggleSidebar } = useSidebar();
+	const preferences = useUIPreferences("preferences");
 	return (
 		<div className="flex">
 			<FirstLevelMenu
@@ -131,7 +143,10 @@ function DoubleColumnLayoutSidebar({
 				selectedItem={selectedFistLevelMenu}
 			/>
 			{secondLevelMenus.length > 0 && (
-				<Sidebar collapsible="icon" className={`h-full left-22 flex-1 transition-all duration-300`}>
+				<Sidebar
+					collapsible={preferences.layout.sidebar.collapsible ? "icon" : "none"}
+					className={`h-full left-22 flex-1 transition-all duration-300`}
+				>
 					<SidebarContent>
 						<SidebarMain menus={secondLevelMenus} showSearch={false} />
 					</SidebarContent>
@@ -148,7 +163,11 @@ function DoubleColumnLayoutSidebar({
 							)}
 						</button>
 					</SidebarFooter>
-					<SidebarRail />
+					<SidebarRail
+						enableDrag={preferences.layout.sidebar.resizable}
+						minResizeWidth={`${preferences.layout.sidebar.minWidth}px`}
+						maxResizeWidth={`${preferences.layout.sidebar.maxWidth}px`}
+					/>
 				</Sidebar>
 			)}
 		</div>

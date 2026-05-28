@@ -7,6 +7,19 @@ export const Route = createFileRoute("/(layouts)/features/theme/")({
 	component: ThemePageFeature,
 });
 
+const appThemes = ["light", "dark", "tech-blue", "eco-green"];
+const colorSchemeMap = {
+	"tech-blue": "dark",
+	"eco-green": "dark",
+} as const;
+const themeLabels: Record<string, string> = {
+	light: "浅色主题",
+	dark: "深色主题",
+	"tech-blue": "科技蓝",
+	"eco-green": "生态绿",
+	system: "系统默认",
+};
+
 const ThemeToggle: React.FC = () => {
 	const { theme, resolvedTheme, themes, setTheme, systemTheme } = useTheme();
 
@@ -27,14 +40,14 @@ const ThemeToggle: React.FC = () => {
 						size="sm"
 						className="flex-1 text-foreground"
 					>
-						{t}
+						{themeLabels[t] ?? t}
 					</ToggleGroupItem>
 				))}
 			</ToggleGroup>
 			<div className="space-y-2 text-sm text-muted-foreground">
-				<div>当前主题: {theme}</div>
-				<div>当前解析主题: {resolvedTheme}</div>
-				<div>系统主题: {systemTheme}</div>
+				<div>当前主题: {themeLabels[theme] ?? theme}</div>
+				<div>当前解析主题: {themeLabels[resolvedTheme] ?? resolvedTheme}</div>
+				<div>系统主题: {systemTheme ? (themeLabels[systemTheme] ?? systemTheme) : "-"}</div>
 			</div>
 		</div>
 	);
@@ -58,6 +71,8 @@ function ThemePageFeature() {
 					<ThemeProvider
 						scope="local"
 						storageKey="rap-isolated-theme"
+						themes={appThemes}
+						colorSchemeMap={colorSchemeMap}
 						enableSystem={true}
 						attribute="class"
 						as="section"
@@ -71,10 +86,12 @@ function ThemePageFeature() {
 					<h3 className="text-lg font-medium text-foreground mb-4">3. 强制主题</h3>
 					<ThemeProvider
 						scope="local"
+						themes={appThemes}
+						colorSchemeMap={colorSchemeMap}
 						enableSystem={true}
 						attribute="class"
 						as="section"
-						forcedTheme="light"
+						forcedTheme="tech-blue"
 					>
 						<ThemeToggle />
 					</ThemeProvider>
