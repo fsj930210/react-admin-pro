@@ -1,112 +1,160 @@
-/** biome-ignore-all lint:suspicious/noExplicitAny> */
 import isEqual from "lodash-es/isEqual";
+import type { Draft } from "immer";
 import type { StateCreator } from "zustand";
+import { shallow } from "zustand/shallow";
 import { devtools } from "zustand/middleware";
 import { immer } from "zustand/middleware/immer";
 import {
-  createWithEqualityFn,
-  useStoreWithEqualityFn,
+	createWithEqualityFn,
+	useStoreWithEqualityFn,
 } from "zustand/traditional";
 
-/**
- * 自动包裹 immer、devtools、精细比较
- * @param initializer - (set, get) => state
- * @param options - 可选，如 devtools 的 name
- */
-export function createStore<T>(
-  initializer: StateCreator<T, [["zustand/immer", never]], []>,
-  options?: { name?: string }
-) {
-  // 包裹 immer、devtools
-  const store = createWithEqualityFn<T>()(
-    devtools(immer(initializer), { name: options?.name }),
-    isEqual
-  );
-  /**
-   * 状态选择器函数
-   * @template K - 选择器的类型（可以是 key、key数组或函数）
-   * @param selector - 选择器参数
-   * @returns 根据选择器类型返回相应的状态值
-   * - 如果是函数，返回函数的返回值类型
-   * - 如果是数组，返回选中的多个状态的对象类型
-   * - 如果是单个 key，返回该状态的类型
-   */
-  function selector<K extends keyof T | (keyof T)[] | ((state: T) => any)>(
-    selector: K
-  ): K extends (state: T) => infer R
-    ? R
-    : K extends Array<keyof T> | ReadonlyArray<keyof T>
-    ? Pick<T, K[number]>
-    : K extends keyof T
-    ? Pick<T, K>
-    : never {
-    return useStoreWithEqualityFn(
-      store,
-      (state: T) => {
-        if (typeof selector === "function") {
-          return (selector as (state: T) => any)(state);
-        }
-        const keys = Array.isArray(selector) ? selector : [selector];
-        const picked: Partial<T> = {};
-        keys.forEach((k) => {
-          picked[k as keyof T] = state[k as keyof T];
-        });
-        return picked;
-      },
-      isEqual
-    );
-  }
+type EqualityFn<T> = (prev: T, next: T) => boolean;
+type StoreSelector<T extends object, R> = (state: T) => R;
+type SelectorParam<T extends object> =
+	| keyof T
+	| ReadonlyArray<keyof T>
+	| StoreSelector<T, unknown>;
 
-  return { store, selector };
+type SelectorResult<T extends object, S> = S extends StoreSelector<T, infer R>
+	? R
+	: S extends ReadonlyArray<keyof T>
+		? Pick<T, S[number]>
+		: S extends keyof T
+			? T[S]
+			: never;
+type ObjectKeys<T extends object> = {
+	[K in keyof T]: T[K] extends object ? K : never;
+}[keyof T];
+
+interface CreateStoreOptions {
+	name?: string;
+	equalityFn?: EqualityFn<unknown>;
 }
 
-// 通用的 setter 类型，支持函数式更新
-// 支持两种函数签名：
-// 1. (state: T) => void - 适用于简单对象
-// 2. (state: T, fieldValue: T[K]) => void - 适用于嵌套对象
-// 3. (state: T, fieldValue: T[K]) => T[K] - 适用于返回新值的情况
-export type SetterFunction<T, K extends keyof T> = (
-  nextValue: T[K] | ((state: T, fieldValue: T[K]) => void)
+export type StoreSet<T extends object> = <K extends keyof T>(
+	key: K,
+	value: T[K]
 ) => void;
 
+export type StoreUpdate<T extends object> = <K extends ObjectKeys<T>>(
+	key: K,
+	recipe: (draft: Draft<T[K]>) => void
+) => void;
+
+export type StoreUpdateState<T extends object> = (
+	recipe: (draft: Draft<T>) => void
+) => void;
+
+export type SetterFunction<T extends object, K extends keyof T> = (
+	nextValue: T[K] | ((draft: Draft<T[K]>, state: Draft<T>) => void)
+) => void;
+
+function smartEqual<T>(
+	prev: T,
+	next: T,
+	customEqual?: EqualityFn<T>
+): boolean {
+	if (customEqual) {
+		return customEqual(prev, next);
+	}
+	if (Object.is(prev, next)) {
+		return true;
+	}
+	if (shallow(prev, next)) {
+		return true;
+	}
+	return isEqual(prev, next);
+}
+
+function buildSelector<T extends object, S extends SelectorParam<T>>(
+	selector: S
+): StoreSelector<T, SelectorResult<T, S>> {
+	return ((state: T) => {
+		if (typeof selector === "function") {
+			return selector(state);
+		}
+
+		if (Array.isArray(selector)) {
+			const keys = selector as ReadonlyArray<keyof T>;
+			return keys.reduce<Partial<T>>((picked, key) => {
+				picked[key] = state[key];
+				return picked;
+			}, {});
+		}
+
+		return state[selector as keyof T];
+	}) as StoreSelector<T, SelectorResult<T, S>>;
+}
+
 /**
- * 创建一个通用的 setter 函数，用于处理 immer 状态更新
+ * Creates a zustand store with immer, devtools, and smart equality.
  *
- * @template S - 状态对象的类型
- * @template K - 状态对象中的键名，必须是 S 的有效键
- * @param {(fn: (state: S) => void) => void} set - zustand 的 set 函数
- * @param {K} key - 要更新的状态字段名
- * @returns {SetterFunction<S[K]>} 返回一个 setter 函数，可以接受新值或更新函数
+ * Read:
+ * - use("count") returns the field value
+ * - use(["count", "layoutConfig"]) returns a picked object
+ * - use((state) => state.xxx) supports custom selectors
  *
- * @example
- * // 基础用法
- * const setCount = createSetter(set, 'count');
- *
- * // 直接设置新值
- * setCount(10);
- *
- * // 使用函数更新简单类型
- * setCount((state) => state.count = state.count + 1);
- *
- * // 使用函数更新嵌套对象
- * setConfig((state, config) => config.theme = 'dark');
+ * Write:
+ * - set("count", 1) replaces a field
+ * - update("layoutConfig", draft => {}) updates one field with immer
+ * - updateState(draft => {}) updates multiple fields in one transaction
  */
-export function createSetter<S, K extends keyof S>(
-  set: (fn: (state: S) => void) => void,
-  key: K
+export function createStore<T extends object>(
+	initializer: StateCreator<T, [["zustand/immer", never]], []>,
+	options?: CreateStoreOptions
+) {
+	const store = createWithEqualityFn<T>()(
+		devtools(immer(initializer), { name: options?.name }),
+		(prev, next) => smartEqual(prev, next, options?.equalityFn)
+	);
+
+	function use<S extends SelectorParam<T>>(
+		selector: S,
+		equalityFn?: EqualityFn<SelectorResult<T, S>>
+	): SelectorResult<T, S> {
+		return useStoreWithEqualityFn(
+			store,
+			buildSelector(selector),
+			(prev, next) => smartEqual(prev, next, equalityFn)
+		);
+	}
+
+	const set: StoreSet<T> = (key, value) => {
+		store.setState((state) => {
+			(state as Record<typeof key, T[typeof key]>)[key] = value;
+		});
+	};
+
+	const update: StoreUpdate<T> = (key, recipe) => {
+		store.setState((state) => {
+			recipe((state as Record<typeof key, Draft<T[typeof key]>>)[key]);
+		});
+	};
+
+	const updateState: StoreUpdateState<T> = (recipe) => {
+		store.setState((state) => {
+			recipe(state);
+		});
+	};
+
+	return { store, use, set, update, updateState };
+}
+
+export function createSetter<S extends object, K extends keyof S>(
+	set: (fn: (state: Draft<S>) => void) => void,
+	key: K
 ): SetterFunction<S, K> {
-  return (nextValue) =>
-    set((state) => {
-      // 当 nextValue 是函数时，调用它
-      // 由于 immer 的特性，我们不需要显式返回新状态
-      if (typeof nextValue === "function") {
-        // 传递整个 state 和 state[key] 作为参数
-        // 这样既支持 (state) => state.a = 4 的形式
-        // 也支持 (state, fieldValue) => fieldValue.cc = 5 的形式
-        const result = (nextValue as Function)(state, state[key]);
-        state[key] = result ?? state[key];
-      } else {
-        state[key] = nextValue;
-      }
-    });
+	return (nextValue) =>
+		set((state) => {
+			if (typeof nextValue === "function") {
+				(nextValue as (draft: Draft<S[K]>, state: Draft<S>) => void)(
+					(state as Record<K, Draft<S[K]>>)[key],
+					state
+				);
+				return;
+			}
+
+			(state as Record<K, S[K]>)[key] = nextValue;
+		});
 }

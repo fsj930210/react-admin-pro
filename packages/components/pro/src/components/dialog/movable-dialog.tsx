@@ -7,7 +7,6 @@ import {
 } from "@rap/components-ui/dialog";
 import { useMove, type MoveOptions } from "@rap/hooks/use-move";
 import { cn } from "@rap/utils";
-import { useRef } from "react";
 
 export interface MovableDialogProps {
 	children: React.ReactNode;
@@ -15,11 +14,12 @@ export interface MovableDialogProps {
 	header?: React.ReactNode;
 	footer?: React.ReactNode;
 	dialogProps?: React.ComponentProps<typeof Dialog>;
-	moveOptions?: Omit<MoveOptions<HTMLDivElement>, "styleRef">;
+	moveOptions?: MoveOptions<HTMLDivElement>;
 	contentProps?: React.ComponentProps<typeof DialogContent>;
 	headerProps?: React.ComponentProps<typeof DialogHeader>;
 	footerProps?: React.ComponentProps<typeof DialogFooter>;
 }
+
 export function MovableDialog({
 	children,
 	triggerChildren,
@@ -31,64 +31,39 @@ export function MovableDialog({
 	headerProps,
 	footerProps,
 }: MovableDialogProps) {
-	const dialogContentRef = useRef<HTMLDivElement | null>(null);
-
-	const {
-		position,
-		moveRef,
-		bindEvent,
-		removeEvent,
-	} = useMove<HTMLDivElement>({
+	const { targetRef, handleRef, transform, isMoving, reset } = useMove<HTMLDivElement, HTMLDivElement>({
+		bounds: "viewport",
+		boundaryMode: "keep-handle-visible",
 		...moveOptions,
 	});
-	const rafIdRef = useRef(-1);
+
 	const handleOpenChange = (open: boolean) => {
-		if (open) {
-			rafIdRef.current = requestAnimationFrame(() => {
-				bindEvent();
-			});
-		} else {
-			removeEvent();
-			cancelAnimationFrame(rafIdRef.current);
-		}
+		if (!open) reset();
 		dialogProps?.onOpenChange?.(open);
 	};
+
 	return (
-		<Dialog {...dialogProps} onOpenChange={handleOpenChange} >
-			<DialogTrigger asChild>
-				{triggerChildren}
-			</DialogTrigger>
+		<Dialog {...dialogProps} onOpenChange={handleOpenChange}>
+			<DialogTrigger asChild>{triggerChildren}</DialogTrigger>
 			<DialogContent
 				{...contentProps}
-				ref={dialogContentRef}
-				style={
-					position
-						? {
-							transform: `translate(${position.x}px, ${position.y}px)`,
-							willChange: "transfrom",
-						}
-						: undefined
-				}
+				ref={targetRef}
+				style={{
+					...contentProps?.style,
+					transform,
+					willChange: isMoving ? "transform" : contentProps?.style?.willChange,
+				}}
 			>
 				<DialogHeader
 					{...headerProps}
-					ref={moveRef}
-					className={cn(
-						"select-none cursor-move",
-						headerProps?.className,
-					)}
+					ref={handleRef}
+					className={cn("select-none cursor-move touch-none", headerProps?.className)}
 				>
 					{header}
 				</DialogHeader>
 				{children}
-				{
-					footer && (
-						<DialogFooter {...footerProps}>
-							{footer}
-						</DialogFooter>
-					)
-				}
+				{footer && <DialogFooter {...footerProps}>{footer}</DialogFooter>}
 			</DialogContent>
 		</Dialog>
-	)
+	);
 }

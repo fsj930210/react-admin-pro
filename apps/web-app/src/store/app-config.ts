@@ -1,4 +1,4 @@
-import { createSetter, createStore, type SetterFunction } from "@rap/hooks/use-zustand";
+import { createStore } from "@rap/hooks/use-zustand";
 
 interface LayoutConfigState {
 	showTabs: boolean;
@@ -18,17 +18,8 @@ interface AppConfigState {
 	count: number;
 }
 
-interface AppConfigActions {
-	setLayoutConfig: SetterFunction<AppConfigState, "layoutConfig">;
-	setAppearanceConfig: SetterFunction<AppConfigState, "appearanceConfig">;
-	setCommonConfig: SetterFunction<AppConfigState, "commonConfig">;
-	setCount: SetterFunction<AppConfigState, "count">;
-}
-
-type AppConfigStore = AppConfigState & AppConfigActions;
-
-const { selector: useAppConfigSelector } = createStore<AppConfigStore>(
-	(set) => ({
+const appConfigStore = createStore<AppConfigState>(
+	() => ({
 		layoutConfig: {
 			showTabs: true,
 			layoutType: "vertical",
@@ -41,14 +32,12 @@ const { selector: useAppConfigSelector } = createStore<AppConfigStore>(
 			appLanguage: "zhCN",
 		},
 		count: 0,
-		setLayoutConfig: createSetter<AppConfigState, "layoutConfig">(set, "layoutConfig"),
-		setAppearanceConfig: createSetter<AppConfigState, "appearanceConfig">(set, "appearanceConfig"),
-		setCommonConfig: createSetter<AppConfigState, "commonConfig">(set, "commonConfig"),
-		setCount: createSetter<AppConfigState, "count">(set, "count"),
 	}),
 	{
 		name: "AppConfigStore",
 	},
 );
 
-export { useAppConfigSelector };
+const useAppConfig = appConfigStore.use;
+
+export { appConfigStore, useAppConfig };

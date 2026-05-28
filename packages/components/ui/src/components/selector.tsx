@@ -1,254 +1,495 @@
-import { Checkbox } from "./checkbox";
-import { Label } from "./label";
+import { useControllableState } from "@rap/hooks/use-controllable-state";
 import { cn } from "@rap/utils";
-import { useState, useEffect, createContext, use, useMemo, useRef, useCallback } from 'react'
-import { Inbox, SearchIcon, Check } from 'lucide-react'
-import { InputGroup, InputGroupAddon, InputGroupInput } from "./input-group";
+import { Check, Inbox, SearchIcon } from "lucide-react";
+import * as React from "react";
+import { use, useCallback, useMemo, useRef } from "react";
 import { useVirtualizer } from "@tanstack/react-virtual";
+import { Checkbox } from "./checkbox";
+import { InputGroup, InputGroupAddon, InputGroupInput } from "./input-group";
+import { Label } from "./label";
 
+export type SelectorValue = string | number;
 
 export interface SelectorItem {
-	label: string;
-	value: string;
+	label: React.ReactNode;
+	value: SelectorValue;
 	disabled?: boolean;
+	[key: string]: unknown;
 }
 
-interface SelectorContextValue {
-	dataSource: SelectorItem[];
-	filteredItems: SelectorItem[];
-	selectedItems: SelectorItem[];
-	selectedValues: string[];
+export type SelectorFieldNames<T> = {
+	label?: keyof T;
+	value?: keyof T;
+	disabled?: keyof T;
+};
+
+export type SelectorVirtualOptions = {
+	itemSize?: number;
+	overscan?: number;
+};
+
+export type SelectorSelectionScope = "all" | "filtered";
+
+export interface SelectorRenderApi<T, V extends SelectorValue = string> {
+	dataSource: T[];
+	filteredItems: T[];
+	selectedValues: V[];
+	selectedSet: Set<V>;
+	selectedItems: T[];
 	searchValue: string;
-	selectItem: (value: string, selected: boolean) => void;
-	selectAll: (selected: boolean) => void;
-	selectItems: (values: string[], selected: boolean) => void;
-	handleValueChange: (newValues: string[]) => void;
-	setFilteredItems: (items: SelectorItem[]) => void;
+	getValue: (item: T) => V;
+	getLabel: (item: T) => React.ReactNode;
+	getDisabled: (item: T) => boolean;
+	isSelected: (value: V) => boolean;
+	toggleValue: (value: V) => void;
+	setValues: (values: V[]) => void;
+	selectValues: (values: V[]) => void;
+	deselectValues: (values: V[]) => void;
+	clear: () => void;
+	selectAll: (selected?: boolean, scope?: SelectorSelectionScope) => void;
 	setSearchValue: (value: string) => void;
 }
 
-const SelectorContext = createContext<SelectorContextValue | undefined>(undefined);
+export interface SelectorProps<T = SelectorItem, V extends SelectorValue = string>
+	extends Omit<React.ComponentProps<"div">, "children" | "defaultValue" | "onChange"> {
+	dataSource: T[];
+	value?: V[];
+	defaultValue?: V[];
+	onChange?: (value: V[], selectedItems: T[]) => void;
+	getValue?: (item: T) => V;
+	getLabel?: (item: T) => React.ReactNode;
+	getDisabled?: (item: T) => boolean;
+	fieldNames?: SelectorFieldNames<T>;
+	multiple?: boolean;
+	disabled?: boolean;
+	searchValue?: string;
+	defaultSearchValue?: string;
+	onSearchChange?: (value: string) => void;
+	filterOption?: false | ((input: string, item: T) => boolean);
+	virtual?: boolean | SelectorVirtualOptions;
+	children?: React.ReactNode | ((api: SelectorRenderApi<T, V>) => React.ReactNode);
+}
 
+type SelectorContextValue<T = SelectorItem, V extends SelectorValue = string> =
+	SelectorRenderApi<T, V> & {
+		multiple: boolean;
+		disabled: boolean;
+		virtual?: boolean | SelectorVirtualOptions;
+	};
 
-export function useSelector() {
+const SelectorContext = React.createContext<SelectorContextValue<any, any> | undefined>(undefined);
+
+export function useSelector<T = SelectorItem, V extends SelectorValue = string>() {
 	const context = use(SelectorContext);
 	if (!context) {
 		throw new Error("useSelector must be used within a Selector");
 	}
-	return context;
+	return context as SelectorContextValue<T, V>;
 }
 
-export interface SelectorProps {
-	dataSource: SelectorItem[];
-	children?: React.ReactNode | ((props: {
-		filteredItems: SelectorItem[];
-		selectedValues: string[];
-		selectedItems: SelectorItem[];
-		searchValue: string;
-		onItemSelect: (value: string, selected: boolean) => void;
-		onItemsSelect: (values: string[], selected: boolean) => void;
-		onItemSelectAll: (selected: boolean) => void;
-	}) => React.ReactNode);
-	defaultValue?: string[];
-	value?: string[];
-	onChange?: (value: string[], selectedItems: SelectorItem[]) => void;
+function defaultFilter(input: string, item: unknown, getLabel: (item: unknown) => React.ReactNode) {
+	return String(getLabel(item) ?? "")
+		.toLowerCase()
+		.includes(input.toLowerCase());
 }
 
-export function Selector({
+function readField<T>(item: T, key: keyof T | undefined) {
+	if (!key || item == null) return undefined;
+	return item[key];
+}
+
+function uniqueValues<V extends SelectorValue>(values: V[]) {
+	return Array.from(new Set(values));
+}
+
+export function Selector<T = SelectorItem, V extends SelectorValue = string>({
 	dataSource,
-	defaultValue,
 	value,
-	children,
+	defaultValue = [],
 	onChange,
-}: SelectorProps) {
-	const [filteredItems, setFilteredItems] = useState<SelectorItem[]>([]);
-	const [internalSelectedValues, setInternalSelectedValues] = useState<string[]>(defaultValue || []);
-	const [searchValue, setSearchValue] = useState("");
+	getValue: getValueProp,
+	getLabel: getLabelProp,
+	getDisabled: getDisabledProp,
+	fieldNames,
+	multiple = true,
+	disabled = false,
+	searchValue: searchValueProp,
+	defaultSearchValue = "",
+	onSearchChange,
+	filterOption,
+	virtual = false,
+	children,
+	className,
+	...props
+}: SelectorProps<T, V>) {
+	const [selectedValues, setSelectedValues] = useControllableState<V[]>(
+		{ value, defaultValue },
+		{ defaultValue: [] as V[] },
+	);
+	const [searchValue, setSearchValueState] = useControllableState<string>(
+		{ value: searchValueProp, defaultValue: defaultSearchValue, onChange: onSearchChange },
+		{ defaultValue: "" },
+	);
 
-	const isControlled = value !== undefined;
-	const selectedValues = isControlled ? value : internalSelectedValues;
+	const getValue = useCallback(
+		(item: T) => {
+			if (getValueProp) return getValueProp(item);
+			return readField(item, fieldNames?.value ?? ("value" as keyof T)) as V;
+		},
+		[getValueProp, fieldNames?.value],
+	);
+
+	const getLabel = useCallback(
+		(item: T) => {
+			if (getLabelProp) return getLabelProp(item);
+			return readField(item, fieldNames?.label ?? ("label" as keyof T)) as React.ReactNode;
+		},
+		[getLabelProp, fieldNames?.label],
+	);
+
+	const getDisabled = useCallback(
+		(item: T) => {
+			if (disabled) return true;
+			if (getDisabledProp) return getDisabledProp(item);
+			return Boolean(readField(item, fieldNames?.disabled ?? ("disabled" as keyof T)));
+		},
+		[disabled, getDisabledProp, fieldNames?.disabled],
+	);
+
+	const itemMap = useMemo(() => {
+		const map = new Map<V, T>();
+		for (const item of dataSource) {
+			map.set(getValue(item), item);
+		}
+		return map;
+	}, [dataSource, getValue]);
+
+	const selectedSet = useMemo(() => new Set(selectedValues), [selectedValues]);
 
 	const selectedItems = useMemo(() => {
-		return dataSource.filter(item => selectedValues.includes(item.value));
-	}, [dataSource, selectedValues]);
+		return selectedValues
+			.map((itemValue) => itemMap.get(itemValue))
+			.filter((item): item is T => Boolean(item));
+	}, [itemMap, selectedValues]);
 
-	useEffect(() => {
-		setFilteredItems(dataSource);
-	}, [dataSource]);
+	const filteredItems = useMemo(() => {
+		if (!searchValue || filterOption === false) return dataSource;
+		const predicate =
+			filterOption ??
+			((input: string, item: T) => defaultFilter(input, item, getLabel as (item: unknown) => React.ReactNode));
+		return dataSource.filter((item) => predicate(searchValue, item));
+	}, [dataSource, filterOption, getLabel, searchValue]);
 
-	useEffect(() => {
-		if (!isControlled) {
-			setInternalSelectedValues(defaultValue || []);
-		}
-	}, [defaultValue, isControlled]);
+	const emitChange = useCallback(
+		(nextValue: V[]) => {
+			const nextValues = multiple ? uniqueValues(nextValue) : nextValue.slice(0, 1);
+			setSelectedValues(nextValues);
+			onChange?.(
+				nextValues,
+				nextValues.map((itemValue) => itemMap.get(itemValue)).filter((item): item is T => Boolean(item)),
+			);
+		},
+		[itemMap, multiple, onChange, setSelectedValues],
+	);
 
-	const handleValueChange = useCallback((newValues: string[]) => {
-		if (!isControlled) {
-			setInternalSelectedValues(newValues);
-		}
-		onChange?.(newValues, dataSource.filter(item => newValues.includes(item.value)));
-	}, [isControlled, onChange, dataSource]);
+	const isSelectableValue = useCallback(
+		(itemValue: V) => {
+			const item = itemMap.get(itemValue);
+			return Boolean(item && !getDisabled(item));
+		},
+		[getDisabled, itemMap],
+	);
 
-	const selectItem = useCallback((value: string, selected: boolean) => {
-		let newValues: string[];
-		if (selected) {
-			newValues = selectedValues.filter(v => v !== value);
-		} else {
-			newValues = [...selectedValues, value];
-		}
-		handleValueChange(newValues);
-	}, [selectedValues, handleValueChange]);
+	const isSelected = useCallback((itemValue: V) => selectedSet.has(itemValue), [selectedSet]);
 
-	const selectItems = useCallback((values: string[], selected: boolean) => {
-		let newValues: string[];
-		if (selected) {
-			newValues = values;
-		} else {
-			newValues = selectedValues.filter(v => !values.includes(v));
-		}
-		handleValueChange(newValues);
-	}, [selectedValues, handleValueChange]);
+	const selectValues = useCallback(
+		(values: V[]) => {
+			const availableValues = values.filter(isSelectableValue);
+			if (!availableValues.length) return;
+			emitChange(multiple ? [...selectedValues, ...availableValues] : [availableValues[0]]);
+		},
+		[emitChange, isSelectableValue, multiple, selectedValues],
+	);
 
-	const selectAll = useCallback((selected: boolean) => {
-		let newValues: string[];
-		if (selected) {
-			newValues = filteredItems.map(item => item.value);
-		} else {
-			newValues = [];
-		}
-		handleValueChange(newValues);
-	}, [filteredItems, handleValueChange]);
+	const setValues = useCallback(
+		(values: V[]) => {
+			emitChange(values.filter(isSelectableValue));
+		},
+		[emitChange, isSelectableValue],
+	);
 
-	const contextValue: SelectorContextValue = useMemo(() => ({
-		dataSource,
-		filteredItems,
-		selectedItems,
-		selectedValues,
-		searchValue,
-		selectItems,
-		selectItem,
-		selectAll,
-		handleValueChange,
-		setFilteredItems,
-		setSearchValue,
-	}), [
-		dataSource,
-		filteredItems,
-		selectedItems,
-		selectedValues,
-		searchValue,
-		selectItems,
-		selectItem,
-		selectAll,
-		handleValueChange,
-		setFilteredItems,
-		setSearchValue
-	]);
+	const deselectValues = useCallback(
+		(values: V[]) => {
+			const removeSet = new Set(values);
+			emitChange(selectedValues.filter((itemValue) => !removeSet.has(itemValue)));
+		},
+		[emitChange, selectedValues],
+	);
 
-	const renderChildren = () => {
-		if (typeof children === 'function') {
-			return children({
-				filteredItems,
-				selectedValues,
-				selectedItems,
-				searchValue,
-				onItemSelect: selectItem,
-				onItemsSelect: selectItems,
-				onItemSelectAll: selectAll,
-			});
-		}
-		if (children) {
-			return children;
-		}
-		return (
-			<SelectorContent>
-				{({ item }) => (
-					<SelectorContentItem item={item} />
-				)}
-			</SelectorContent>
-		);
-	};
+	const toggleValue = useCallback(
+		(itemValue: V) => {
+			if (!isSelectableValue(itemValue)) return;
+			if (selectedSet.has(itemValue)) {
+				deselectValues([itemValue]);
+			} else {
+				selectValues([itemValue]);
+			}
+		},
+		[deselectValues, isSelectableValue, selectValues, selectedSet],
+	);
+
+	const clear = useCallback(() => emitChange([]), [emitChange]);
+
+	const selectAll = useCallback(
+		(selected = true, scope: SelectorSelectionScope = "filtered") => {
+			const source = scope === "all" ? dataSource : filteredItems;
+			const values = source.filter((item) => !getDisabled(item)).map(getValue);
+			if (selected) {
+				selectValues(values);
+			} else {
+				deselectValues(values);
+			}
+		},
+		[dataSource, deselectValues, filteredItems, getDisabled, getValue, selectValues],
+	);
+
+	const setSearchValue = useCallback(
+		(nextValue: string) => {
+			setSearchValueState(nextValue);
+		},
+		[setSearchValueState],
+	);
+
+	const api = useMemo<SelectorContextValue<T, V>>(
+		() => ({
+			dataSource,
+			filteredItems,
+			selectedValues,
+			selectedSet,
+			selectedItems,
+			searchValue,
+			getValue,
+			getLabel,
+			getDisabled,
+			isSelected,
+			toggleValue,
+			setValues,
+			selectValues,
+			deselectValues,
+			clear,
+			selectAll,
+			setSearchValue,
+			multiple,
+			disabled,
+			virtual,
+		}),
+		[
+			dataSource,
+			filteredItems,
+			selectedValues,
+			selectedSet,
+			selectedItems,
+			searchValue,
+			getValue,
+			getLabel,
+			getDisabled,
+			isSelected,
+			toggleValue,
+			setValues,
+			selectValues,
+			deselectValues,
+			clear,
+			selectAll,
+			setSearchValue,
+			multiple,
+			disabled,
+			virtual,
+		],
+	);
+
+	const content = typeof children === "function" ? children(api) : children;
 
 	return (
-		<SelectorContext value={contextValue}>
-			{renderChildren()}
+		<SelectorContext value={api}>
+			<div className={cn("flex min-h-0 flex-col gap-3", className)} {...props}>
+				{content ?? (
+					<>
+						<SelectorSearch />
+						<SelectorSelectAll />
+						<SelectorList />
+						<SelectorEmpty />
+					</>
+				)}
+			</div>
 		</SelectorContext>
 	);
 }
 
-type SelectorContentProps = Omit<React.ComponentProps<'div'>, 'children'> & {
-	children: ((props: {
-		item: SelectorItem;
-		selectedValues: string[];
-		selectedItems: SelectorItem[];
-		searchValue: string;
-		index: number;
-		selectItem: (value: string, selected: boolean) => void;
-		selectAll: (selected: boolean) => void;
-		selectItems: (values: string[], selected: boolean) => void;
-	}) => React.ReactNode);
-	className?: string;
-	itemSize?: number;
-	onScroll?: React.ComponentProps<'div'>['onScroll'];
+export interface SelectorSearchProps
+	extends Omit<React.ComponentProps<typeof InputGroupInput>, "value" | "onChange"> {
+	wrapperClassName?: string;
+	onSearch?: (value: string) => void;
 }
 
-export function SelectorContent({ children, className, itemSize = 48, onScroll }: SelectorContentProps) {
-	const {
-		filteredItems,
-		selectedValues,
-		selectedItems,
-		searchValue,
-		selectItem,
-		selectAll,
-		selectItems,
-	} = useSelector();
+export function SelectorSearch({
+	wrapperClassName,
+	className,
+	placeholder = "搜索...",
+	onSearch,
+	onKeyDown,
+	...props
+}: SelectorSearchProps) {
+	const { searchValue, setSearchValue } = useSelector();
+
+	const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+		const nextValue = event.target.value;
+		setSearchValue(nextValue);
+		onSearch?.(nextValue);
+	};
+
+	return (
+		<InputGroup className={wrapperClassName}>
+			<InputGroupInput
+				className={className}
+				placeholder={placeholder}
+				value={searchValue}
+				onChange={handleChange}
+				onKeyDown={(event) => {
+					if (event.key === "Enter") onSearch?.(searchValue);
+					onKeyDown?.(event);
+				}}
+				{...props}
+			/>
+			<InputGroupAddon>
+				<SearchIcon className="size-4 cursor-pointer" onClick={() => onSearch?.(searchValue)} />
+			</InputGroupAddon>
+		</InputGroup>
+	);
+}
+
+export interface SelectorSelectAllProps extends React.ComponentProps<"div"> {
+	scope?: SelectorSelectionScope;
+	label?: React.ReactNode;
+}
+
+export function SelectorSelectAll({
+	scope = "filtered",
+	label = "全选",
+	className,
+	...props
+}: SelectorSelectAllProps) {
+	const { dataSource, filteredItems, getDisabled, getValue, selectedSet, selectAll } = useSelector();
+	const items = scope === "all" ? dataSource : filteredItems;
+	const enabledItems = items.filter((item) => !getDisabled(item));
+	const allSelected = enabledItems.length > 0 && enabledItems.every((item) => selectedSet.has(getValue(item)));
+	const someSelected = enabledItems.some((item) => selectedSet.has(getValue(item)));
+
+	if (items.length === 0) return null;
+
+	return (
+		<div className={cn("flex items-center gap-2 px-2", className)} {...props}>
+			<Checkbox
+				checked={allSelected ? true : someSelected ? "indeterminate" : false}
+				onCheckedChange={(checked) => selectAll(checked === true, scope)}
+			/>
+			<Label className="text-sm">
+				{label} ({enabledItems.length})
+			</Label>
+		</div>
+	);
+}
+
+export interface SelectorListProps<T = SelectorItem, V extends SelectorValue = string>
+	extends Omit<React.ComponentProps<"div">, "children"> {
+	children?: (api: {
+		item: T;
+		index: number;
+		value: V;
+		selected: boolean;
+		disabled: boolean;
+	}) => React.ReactNode;
+	virtual?: boolean | SelectorVirtualOptions;
+	itemSize?: number;
+	overscan?: number;
+}
+
+export function SelectorList<T = SelectorItem, V extends SelectorValue = string>({
+	children,
+	className,
+	virtual: virtualProp,
+	itemSize: itemSizeProp,
+	overscan: overscanProp,
+	...props
+}: SelectorListProps<T, V>) {
+	const { filteredItems, getValue, getDisabled, selectedSet, virtual: rootVirtual } = useSelector<T, V>();
 	const parentRef = useRef<HTMLDivElement>(null);
+	const virtual = virtualProp ?? rootVirtual;
+	const virtualOptions = typeof virtual === "object" ? virtual : {};
+	const useVirtual = Boolean(virtual);
+	const itemSize = itemSizeProp ?? virtualOptions.itemSize ?? 40;
+	const overscan = overscanProp ?? virtualOptions.overscan ?? 6;
+
+	const renderItem = (item: T, index: number) => {
+		const itemValue = getValue(item);
+		return (
+			children?.({
+				item,
+				index,
+				value: itemValue,
+				selected: selectedSet.has(itemValue),
+				disabled: getDisabled(item),
+			}) ?? <SelectorListItem item={item} />
+		);
+	};
 
 	const virtualizer = useVirtualizer({
-		count: filteredItems.length,
+		count: useVirtual ? filteredItems.length : 0,
 		estimateSize: () => itemSize,
-		overscan: 5,
+		overscan,
 		getScrollElement: () => parentRef.current,
 	});
+
+	if (!useVirtual) {
+		return (
+			<div
+				ref={parentRef}
+				className={cn("min-h-0 flex-1 overflow-auto rounded-md border p-1", className)}
+				{...props}
+			>
+				{filteredItems.map((item, index) => (
+					<React.Fragment key={String(getValue(item))}>{renderItem(item, index)}</React.Fragment>
+				))}
+			</div>
+		);
+	}
 
 	return (
 		<div
 			ref={parentRef}
-			className={cn("h-100 flex-1 overflow-auto", className)}
-			onScroll={onScroll}
+			className={cn("min-h-0 flex-1 overflow-auto rounded-md border p-1", className)}
+			{...props}
 		>
 			<div
 				style={{
 					height: `${virtualizer.getTotalSize()}px`,
-					width: '100%',
-					position: 'relative',
+					position: "relative",
+					width: "100%",
 				}}
 			>
 				{virtualizer.getVirtualItems().map((virtualItem) => {
 					const item = filteredItems[virtualItem.index];
 					return (
 						<div
-							key={item.value}
+							key={String(getValue(item))}
 							style={{
-								position: 'absolute',
-								width: '100%',
-								top: 0,
 								left: 0,
+								position: "absolute",
+								top: 0,
 								transform: `translateY(${virtualItem.start}px)`,
+								width: "100%",
 							}}
 						>
-							{
-								children({
-									item,
-									selectedValues,
-									selectedItems,
-									searchValue,
-									index: virtualItem.index,
-									selectItem,
-									selectItems,
-									selectAll,
-								})
-							}
+							{renderItem(item, virtualItem.index)}
 						</div>
 					);
 				})}
@@ -257,199 +498,97 @@ export function SelectorContent({ children, className, itemSize = 48, onScroll }
 	);
 }
 
-interface SelectorSearchProps {
-	placeholder?: string;
-	className?: string;
-	onSearch?: (value: string) => void;
-	asyncSearch?: boolean;
+export interface SelectorListItemProps<T = SelectorItem>
+	extends Omit<React.ComponentProps<"div">, "children"> {
+	item: T;
+	children?: React.ReactNode | ((api: SelectorRenderApi<T, any>) => React.ReactNode);
+	hideCheckIcon?: boolean;
 }
 
-export function SelectorSearch({
-	placeholder = "搜索...",
-	className,
-	onSearch,
-	asyncSearch = false,
-}: SelectorSearchProps) {
-	const { dataSource, setFilteredItems, searchValue, setSearchValue } = useSelector();
-
-	function handleSearch(value: string) {
-		onSearch?.(value);
-		if (!asyncSearch) {
-			if (value) {
-				const filtered = dataSource.filter(item =>
-					item.label.toString().toLowerCase().includes(value.toLowerCase()),
-				);
-				setFilteredItems(filtered);
-			} else {
-				setFilteredItems(dataSource);
-			}
-		}
-	}
-
-	const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-		const value = e.target.value;
-		setSearchValue(value);
-		handleSearch(value);
-	};
-
-	const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-		if (e.key === 'Enter') {
-			handleSearch(searchValue);
-		}
-	};
-
-	return (
-		<InputGroup className={className}>
-			<InputGroupInput
-				placeholder={placeholder}
-				value={searchValue}
-				onChange={handleChange}
-				onKeyDown={handleKeyDown}
-			/>
-			<InputGroupAddon>
-				<SearchIcon className="cursor-pointer" onClick={() => handleSearch(searchValue)} />
-			</InputGroupAddon>
-		</InputGroup>
-	);
-}
-
-interface SelectorSelectAllProps {
-	className?: string;
-}
-
-export function SelectorSelectAll({ className }: SelectorSelectAllProps) {
-	const { filteredItems, selectedValues, selectAll } = useSelector();
-
-	const isAllSelected = filteredItems.length > 0 && filteredItems.every(item => selectedValues.includes(item.value));
-	const isSomeSelected = filteredItems.some(item => selectedValues.includes(item.value));
-
-	if (filteredItems.length === 0) return null;
-
-	return (
-		<div className={cn("flex items-center mb-2 px-2", className)}>
-			<Checkbox
-				checked={isAllSelected ? true : isSomeSelected ? "indeterminate" : false}
-				onCheckedChange={(value) => selectAll(value === true)}
-				className="mr-2"
-			/>
-			<Label>全选 ({filteredItems.length})</Label>
-		</div>
-	);
-}
-
-type SelectedItems = {
-	selectedItems: SelectorItem[];
-	selectedValues: string[];
-}
-interface SelectorContentItemProps {
-	item: SelectorItem;
-	children?: React.ReactNode;
-	className?: string;
-	onSelect?: (selected: boolean, item: SelectorItem, selectedItems: SelectedItems) => void;
-}
-export function SelectorContentItem({
+export function SelectorListItem<T = SelectorItem>({
 	item,
 	children,
 	className,
-	onSelect,
-}: SelectorContentItemProps) {
-	const { selectedItems, selectedValues, selectItem, searchValue } = useSelector();
-
-	const handleSelect = () => {
-		if (item.disabled) return;
-		const selected = selectedValues.includes(item.value);
-		selectItem(item.value, selected);
-		onSelect?.(selected, item, { selectedItems, selectedValues });
-	};
-
-	const handleCheckboxChange = () => {
-		if (item.disabled) return;
-		const selected = selectedValues.includes(item.value);
-		selectItem(item.value, selected);
-	};
-
-	const highlightSearchKeyword = (text: string) => {
-		if (!searchValue) return text;
-
-		const parts = text.split(new RegExp(`(${searchValue})`, 'gi'));
-		return (
-			<span>
-				{parts.map((part, index) =>
-					part.toLowerCase() === searchValue.toLowerCase() ? (
-						<span key={index} className="bg-yellow-200 text-black">{part}</span>
-					) : (
-						part
-					)
-				)}
-			</span>
-		);
-	};
-
-	const isSelected = selectedValues.includes(item.value);
-
-	if (children) {
-		return (
-			<div
-				className={cn(
-					"flex w-full cursor-pointer select-none items-center justify-between gap-2 rounded-md p-4 outline-hidden focus-visible:ring-ring data-disabled:pointer-events-none data-disabled:opacity-50 data-highlighted:bg-accent data-highlighted:text-accent-foreground hover:bg-accent",
-					item.disabled && "opacity-50 pointer-events-none cursor-not-allowed",
-					className
-				)}
-				onClick={handleSelect}
-			>
-				{children}
-			</div>
-		);
-	}
+	hideCheckIcon = false,
+	onClick,
+	...props
+}: SelectorListItemProps<T>) {
+	const api = useSelector<T, any>();
+	const itemValue = api.getValue(item);
+	const selected = api.selectedSet.has(itemValue);
+	const disabled = api.getDisabled(item);
+	const label = api.getLabel(item);
 
 	return (
 		<div
+			data-selected={selected}
+			data-disabled={disabled}
 			className={cn(
-				"flex w-full cursor-pointer select-none items-center justify-between gap-2 rounded-md p-2 outline-hidden focus-visible:ring-ring data-disabled:pointer-events-none data-disabled:opacity-50 hover:bg-accent",
-				item.disabled && "opacity-50 pointer-events-none cursor-not-allowed",
-				isSelected && "bg-accent/50",
-				className
+				"flex min-h-10 w-full cursor-pointer select-none items-center justify-between gap-2 rounded-md px-2 py-2 text-sm outline-hidden hover:bg-accent data-[disabled=true]:pointer-events-none data-[disabled=true]:cursor-not-allowed data-[disabled=true]:opacity-50 data-[selected=true]:bg-accent/60",
+				className,
 			)}
-			onClick={handleSelect}
+			onClick={(event) => {
+				api.toggleValue(itemValue);
+				onClick?.(event);
+			}}
+			{...props}
 		>
-			<div className="flex items-center overflow-hidden">
-				<div onClick={(e) => e.stopPropagation()} className="mr-2">
-					<Checkbox
-						checked={isSelected}
-						onCheckedChange={handleCheckboxChange}
-						disabled={item.disabled}
-					/>
+			<div className="flex min-w-0 flex-1 items-center gap-2">
+				<div onClick={(event) => event.stopPropagation()}>
+					<Checkbox checked={selected} disabled={disabled} onCheckedChange={() => api.toggleValue(itemValue)} />
 				</div>
-				<span className="flex-1 truncate">{highlightSearchKeyword(item.label)}</span>
+				<div className="min-w-0 flex-1 truncate">
+					{typeof children === "function" ? children(api) : children ?? label}
+				</div>
 			</div>
-			{isSelected && (
-				<Check className="size-4 text-green-500" />
-			)}
+			{selected && !hideCheckIcon ? <Check className="size-4 shrink-0 text-green-500" /> : null}
 		</div>
 	);
 }
 
-interface SelectorEmptyProps {
-	className?: string;
-	children?: React.ReactNode;
-	emptyText?: string;
+export interface SelectorEmptyProps extends React.ComponentProps<"div"> {
+	emptyText?: React.ReactNode;
 	emptyIcon?: React.ReactNode;
 }
+
 export function SelectorEmpty({
 	className,
 	children,
 	emptyText = "暂无数据",
 	emptyIcon,
+	...props
 }: SelectorEmptyProps) {
 	const { filteredItems } = useSelector();
-	return filteredItems.length === 0 ? (
-		<div className={cn("h-full text-muted-foreground", className)}>
-			{children || (
-				<div className="h-full flex-col-center">
-					{emptyIcon || <Inbox />}
-					<span className="space-y-2">{emptyText}</span>
-				</div>
+
+	if (filteredItems.length > 0) return null;
+
+	return (
+		<div className={cn("flex min-h-40 flex-col items-center justify-center gap-2 text-muted-foreground", className)} {...props}>
+			{children ?? (
+				<>
+					{emptyIcon ?? <Inbox className="size-6" />}
+					<span className="text-sm">{emptyText}</span>
+				</>
 			)}
 		</div>
-	) : null;
+	);
 }
+
+export function SelectorCount({ className, ...props }: React.ComponentProps<"div">) {
+	const { filteredItems, selectedValues } = useSelector();
+
+	return (
+		<div className={cn("text-sm text-muted-foreground", className)} {...props}>
+			已选 {selectedValues.length} 项 / 当前 {filteredItems.length} 项
+		</div>
+	);
+}
+
+export function SelectorFooter({ className, ...props }: React.ComponentProps<"div">) {
+	return <div className={cn("border-t pt-3", className)} {...props} />;
+}
+
+export {
+	SelectorList as SelectorContent,
+	SelectorListItem as SelectorContentItem,
+};

@@ -864,6 +864,9 @@ importers:
       '@floating-ui/react-dom':
         specifier: 'catalog:'
         version: 2.1.8(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
+      '@iconify/react':
+        specifier: 'catalog:'
+        version: 6.0.2(react@19.2.5)
       '@rap/hooks':
         specifier: workspace:*
         version: link:../../hooks

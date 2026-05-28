@@ -1,236 +1,354 @@
-import { useState, useMemo, createContext, use } from 'react';
+import { useControllableState } from "@rap/hooks/use-controllable-state";
 import { cn } from "@rap/utils";
-import { Selector, type SelectorItem, type SelectorProps } from "./selector";
-import { ChevronLeft, ChevronRight, ChevronsLeft } from 'lucide-react';
-import { Button } from './button';
-import React from 'react';
+import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react";
+import * as React from "react";
+import { use, useCallback, useEffect, useMemo } from "react";
+import { Button } from "./button";
+import {
+	Selector,
+	SelectorEmpty,
+	type SelectorItem,
+	SelectorList,
+	type SelectorProps,
+	SelectorSearch,
+	SelectorSelectAll,
+	type SelectorValue,
+	useSelector,
+} from "./selector";
 
-interface TransferContextValue {
-  sourceItems: SelectorItem[];
-  targetItems: SelectorItem[];
-  selectedValues: string[];
-  sourceSelectedValues: string[];
-  targetSelectedValues: string[];
-  setSourceSelectedValues: (values: string[]) => void;
-  setTargetSelectedValues: (values: string[]) => void;
-  handleMoveToTarget: () => void;
-  handleMoveToSource: () => void;
-  handleMoveAllToTarget: () => void;
-  handleMoveAllToSource: () => void;
+export interface TransferRenderApi<T, V extends SelectorValue = string> {
+	sourceItems: T[];
+	targetItems: T[];
+	targetValues: V[];
+	sourceCheckedValues: V[];
+	targetCheckedValues: V[];
+	moveToTarget: () => void;
+	moveToSource: () => void;
+	moveAllToTarget: () => void;
+	moveAllToSource: () => void;
+	setSourceCheckedValues: (values: V[]) => void;
+	setTargetCheckedValues: (values: V[]) => void;
 }
 
-const TransferContext = createContext<TransferContextValue | undefined>(undefined);
-
-export function useTransfer() {
-  const context = use(TransferContext);
-  if (!context) {
-    throw new Error("useTransfer must be used within a Transfer");
-  }
-  return context;
+interface TransferContextValue<T = SelectorItem, V extends SelectorValue = string>
+	extends TransferRenderApi<T, V> {
+	getValue: (item: T) => V;
+	getLabel?: SelectorProps<T, V>["getLabel"];
+	getDisabled: (item: T) => boolean;
+	selectorProps: Pick<
+		SelectorProps<T, V>,
+		"fieldNames" | "getValue" | "getLabel" | "getDisabled" | "filterOption" | "virtual"
+	>;
 }
 
-interface TransferProps {
-  dataSource: SelectorItem[];
-  value?: string[];
-  defaultValue?: string[];
-  children: React.ReactNode;
-  onChange?: (value: string[]) => void;
+const TransferContext = React.createContext<TransferContextValue<any, any> | undefined>(undefined);
+
+export function useTransfer<T = SelectorItem, V extends SelectorValue = string>() {
+	const context = use(TransferContext);
+	if (!context) {
+		throw new Error("useTransfer must be used within a Transfer");
+	}
+	return context as TransferContextValue<T, V>;
 }
 
-export function Transfer({
-  dataSource,
-  value,
-  defaultValue = [],
-  onChange,
-  children,
-}: TransferProps) {
-  const [internalValue, setInternalValue] = useState<string[]>(defaultValue);
-  const [sourceSelectedValues, setSourceSelectedValues] = useState<string[]>([]);
-  const [targetSelectedValues, setTargetSelectedValues] = useState<string[]>([]);
-  const isControlled = value !== undefined;
-  const selectedValues = isControlled ? value : internalValue;
-
-  const sourceItems = useMemo(() => {
-    return dataSource.filter(item => !selectedValues.includes(item.value));
-  }, [dataSource, selectedValues]);
-
-  const targetItems = useMemo(() => {
-    return dataSource.filter(item => selectedValues.includes(item.value));
-  }, [dataSource, selectedValues]);
-
-  const handleValueChange = (newValues: string[]) => {
-    if (!isControlled) {
-      setInternalValue(newValues);
-    }
-    onChange?.(newValues);
-  };
-
-  const handleMoveToTarget = () => {
-    const newValues = [...selectedValues, ...sourceSelectedValues];
-    handleValueChange(newValues);
-    setSourceSelectedValues([]);
-  };
-
-  const handleMoveToSource = () => {
-    const newValues = selectedValues.filter(value => !targetSelectedValues.includes(value));
-    handleValueChange(newValues);
-    setTargetSelectedValues([]);
-  };
-
-  const handleMoveAllToTarget = () => {
-    const sourceValues = sourceItems.filter(item => !item.disabled).map(item => item.value);
-    handleValueChange([...selectedValues, ...sourceValues]);
-    setSourceSelectedValues([]);
-  };
-
-  const handleMoveAllToSource = () => {
-    const targetValues = targetItems.filter(item => !item.disabled).map(item => item.value);
-    handleValueChange([...targetValues]);
-    setTargetSelectedValues([]);
-  };
-
-  const contextValue: TransferContextValue = {
-    sourceItems,
-    targetItems,
-    selectedValues,
-    handleMoveToTarget,
-    handleMoveToSource,
-    handleMoveAllToTarget,
-    handleMoveAllToSource,
-    sourceSelectedValues,
-    targetSelectedValues,
-    setSourceSelectedValues,
-    setTargetSelectedValues,
-  };
-
-
-  return (
-    <TransferContext value={contextValue}>
-      {children}
-    </TransferContext>
-  );
-
+export interface TransferProps<T = SelectorItem, V extends SelectorValue = string>
+	extends Omit<React.ComponentProps<"div">, "defaultValue" | "onChange" | "children"> {
+	dataSource: T[];
+	value?: V[];
+	defaultValue?: V[];
+	onChange?: (value: V[], selectedItems: T[]) => void;
+	getValue?: SelectorProps<T, V>["getValue"];
+	getLabel?: SelectorProps<T, V>["getLabel"];
+	getDisabled?: SelectorProps<T, V>["getDisabled"];
+	fieldNames?: SelectorProps<T, V>["fieldNames"];
+	filterOption?: SelectorProps<T, V>["filterOption"];
+	virtual?: SelectorProps<T, V>["virtual"];
+	children?: React.ReactNode | ((api: TransferRenderApi<T, V>) => React.ReactNode);
 }
 
-interface TransferPanelProps extends Omit<SelectorProps, 'dataSource'> {
-  className?: string;
-  type: 'source' | 'target';
-}
-export function TransferPanel({ className, type, ...resetProps }: TransferPanelProps) {
-  const { sourceItems, targetItems, setSourceSelectedValues, setTargetSelectedValues } = useTransfer();
-  return (
-    <div className={cn("h-104 border border-accent", className)}>
-      <Selector
-        {...resetProps}
-        dataSource={type === 'source' ? sourceItems : targetItems}
-        onChange={(values, selectedItems) => {
-          if (type === 'source') {
-            setSourceSelectedValues(values);
-          } else {
-            setTargetSelectedValues(values);
-          }
-          resetProps.onChange?.(values, selectedItems);
-        }}
-      />
-    </div>
-  );
+function readTransferField<T>(item: T, key: keyof T | undefined) {
+	if (!key || item == null) return undefined;
+	return item[key];
 }
 
-interface MoveToTargetActionProps {
-  disabled?: boolean;
-  children?: ({ moveToTarget, disabled }: { moveToTarget: () => void; disabled: boolean }) => React.ReactNode;
+function uniqueValues<V extends SelectorValue>(values: V[]) {
+	return Array.from(new Set(values));
 }
-export function MoveToTargetAction({
-  children,
-  disabled,
-}: MoveToTargetActionProps) {
-  const { handleMoveToTarget, sourceSelectedValues } = useTransfer();
-  const moveToTarget = () => handleMoveToTarget();
-  if (children) {
-    return children({ moveToTarget, disabled: sourceSelectedValues.length === 0 || !!disabled });
-  }
-  return (
-    <Button
-      className="p-2 rounded-md hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed"
-      onClick={() => handleMoveToTarget()}
-      disabled={sourceSelectedValues.length === 0 || !!disabled}
-      variant="outline"
-    >
-      <ChevronRight className="size-5" />
-      <span>右移</span>
-    </Button>
-  );
+
+export function Transfer<T = SelectorItem, V extends SelectorValue = string>({
+	dataSource,
+	value,
+	defaultValue = [],
+	onChange,
+	getValue: getValueProp,
+	getLabel,
+	getDisabled: getDisabledProp,
+	fieldNames,
+	filterOption,
+	virtual,
+	children,
+	className,
+	...props
+}: TransferProps<T, V>) {
+	const [targetValues, setTargetValues] = useControllableState<V[]>(
+		{ value, defaultValue },
+		{ defaultValue: [] as V[] },
+	);
+	const [sourceCheckedValues, setSourceCheckedValues] = React.useState<V[]>([]);
+	const [targetCheckedValues, setTargetCheckedValues] = React.useState<V[]>([]);
+
+	const getValue = useCallback(
+		(item: T) => {
+			if (getValueProp) return getValueProp(item);
+			return readTransferField(item, fieldNames?.value ?? ("value" as keyof T)) as V;
+		},
+		[getValueProp, fieldNames?.value],
+	);
+
+	const getDisabled = useCallback(
+		(item: T) => {
+			if (getDisabledProp) return getDisabledProp(item);
+			return Boolean(readTransferField(item, fieldNames?.disabled ?? ("disabled" as keyof T)));
+		},
+		[getDisabledProp, fieldNames?.disabled],
+	);
+
+	const itemMap = useMemo(() => {
+		const map = new Map<V, T>();
+		for (const item of dataSource) {
+			map.set(getValue(item), item);
+		}
+		return map;
+	}, [dataSource, getValue]);
+
+	const targetSet = useMemo(() => new Set(targetValues), [targetValues]);
+
+	const sourceItems = useMemo(
+		() => dataSource.filter((item) => !targetSet.has(getValue(item))),
+		[dataSource, getValue, targetSet],
+	);
+
+	const targetItems = useMemo(
+		() => dataSource.filter((item) => targetSet.has(getValue(item))),
+		[dataSource, getValue, targetSet],
+	);
+
+	useEffect(() => {
+		const sourceSet = new Set(sourceItems.map(getValue));
+		setSourceCheckedValues((currentValues) => currentValues.filter((itemValue) => sourceSet.has(itemValue)));
+	}, [getValue, sourceItems]);
+
+	useEffect(() => {
+		const currentTargetSet = new Set(targetItems.map(getValue));
+		setTargetCheckedValues((currentValues) => currentValues.filter((itemValue) => currentTargetSet.has(itemValue)));
+	}, [getValue, targetItems]);
+
+	const emitChange = useCallback(
+		(nextValues: V[]) => {
+			const nextTargetValues = uniqueValues(nextValues);
+			setTargetValues(nextTargetValues);
+			onChange?.(
+				nextTargetValues,
+				nextTargetValues.map((itemValue) => itemMap.get(itemValue)).filter((item): item is T => Boolean(item)),
+			);
+		},
+		[itemMap, onChange, setTargetValues],
+	);
+
+	const moveToTarget = useCallback(() => {
+		emitChange([...targetValues, ...sourceCheckedValues]);
+		setSourceCheckedValues([]);
+	}, [emitChange, sourceCheckedValues, targetValues]);
+
+	const moveToSource = useCallback(() => {
+		const removeSet = new Set(targetCheckedValues);
+		emitChange(targetValues.filter((itemValue) => !removeSet.has(itemValue)));
+		setTargetCheckedValues([]);
+	}, [emitChange, targetCheckedValues, targetValues]);
+
+	const moveAllToTarget = useCallback(() => {
+		const movableValues = sourceItems.filter((item) => !getDisabled(item)).map(getValue);
+		emitChange([...targetValues, ...movableValues]);
+		setSourceCheckedValues([]);
+	}, [emitChange, getDisabled, getValue, sourceItems, targetValues]);
+
+	const moveAllToSource = useCallback(() => {
+		const movableSet = new Set(targetItems.filter((item) => !getDisabled(item)).map(getValue));
+		emitChange(targetValues.filter((itemValue) => !movableSet.has(itemValue)));
+		setTargetCheckedValues([]);
+	}, [emitChange, getDisabled, getValue, targetItems, targetValues]);
+
+	const selectorProps = useMemo(
+		() => ({
+			fieldNames,
+			getValue: getValueProp,
+			getLabel,
+			getDisabled: getDisabledProp,
+			filterOption,
+			virtual,
+		}),
+		[fieldNames, filterOption, getDisabledProp, getLabel, getValueProp, virtual],
+	);
+
+	const api = useMemo<TransferContextValue<T, V>>(
+		() => ({
+			sourceItems,
+			targetItems,
+			targetValues,
+			sourceCheckedValues,
+			targetCheckedValues,
+			moveToTarget,
+			moveToSource,
+			moveAllToTarget,
+			moveAllToSource,
+			setSourceCheckedValues,
+			setTargetCheckedValues,
+			getValue,
+			getLabel,
+			getDisabled,
+			selectorProps,
+		}),
+		[
+			sourceItems,
+			targetItems,
+			targetValues,
+			sourceCheckedValues,
+			targetCheckedValues,
+			moveToTarget,
+			moveToSource,
+			moveAllToTarget,
+			moveAllToSource,
+			getValue,
+			getLabel,
+			getDisabled,
+			selectorProps,
+		],
+	);
+
+	const content = typeof children === "function" ? children(api) : children;
+
+	return (
+		<TransferContext value={api}>
+			<div className={cn("flex min-h-0 flex-col gap-3", className)} {...props}>
+				{content}
+			</div>
+		</TransferContext>
+	);
 }
-interface MoveToSourceActionProps {
-  disabled?: boolean;
-  children?: ({ moveToSource, disabled }: { moveToSource: () => void; disabled: boolean }) => React.ReactNode;
+
+export interface TransferPanelProps<T = SelectorItem, V extends SelectorValue = string>
+	extends Omit<SelectorProps<T, V>, "dataSource" | "value" | "defaultValue" | "onChange" | "title"> {
+	type: "source" | "target";
+	title?: React.ReactNode;
+	extra?: React.ReactNode;
+	footer?: React.ReactNode;
 }
-export function MoveToSourceAction({
-  children,
-  disabled,
-}: MoveToSourceActionProps) {
-  const { handleMoveToSource, targetSelectedValues } = useTransfer();
-  const moveToSource = () => handleMoveToSource();
-  if (children) {
-    return children({ moveToSource, disabled: targetSelectedValues.length === 0 || !!disabled });
-  }
-  return (
-    <Button
-      className="p-2 rounded-md hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed"
-      onClick={() => handleMoveToSource()}
-      disabled={targetSelectedValues.length === 0 || !!disabled}
-      variant="outline"
-    >
-      <ChevronLeft className="size-5" />
-      <span>左移</span>
-    </Button>
-  );
+
+export function TransferPanel<T = SelectorItem, V extends SelectorValue = string>({
+	type,
+	title,
+	extra,
+	footer,
+	className,
+	children,
+	...props
+}: TransferPanelProps<T, V>) {
+	const transfer = useTransfer<T, V>();
+	const isSource = type === "source";
+	const items = isSource ? transfer.sourceItems : transfer.targetItems;
+	const checkedValues = isSource ? transfer.sourceCheckedValues : transfer.targetCheckedValues;
+	const setCheckedValues = isSource ? transfer.setSourceCheckedValues : transfer.setTargetCheckedValues;
+
+	return (
+		<div className={cn("flex h-[520px] min-w-0 flex-1 flex-col rounded-md border bg-background", className)}>
+			{title || extra ? (
+				<div className="flex min-h-11 items-center justify-between border-b px-3">
+					<div className="font-medium text-sm">{title}</div>
+					{extra}
+				</div>
+			) : null}
+			<Selector
+				{...transfer.selectorProps}
+				{...props}
+				className="min-h-0 flex-1 gap-2 p-3"
+				dataSource={items}
+				value={checkedValues}
+				onChange={(nextValues) => setCheckedValues(nextValues)}
+			>
+				{children ?? (
+					<DefaultTransferPanelContent />
+				)}
+			</Selector>
+			{footer ? <div className="border-t px-3 py-2">{footer}</div> : null}
+		</div>
+	);
 }
-interface MoveAllToTargetActionProps {
-  disabled?: boolean;
-  children?: ({ moveAllToTarget, disabled }: { moveAllToTarget: () => void; disabled: boolean }) => React.ReactNode;
+
+function DefaultTransferPanelContent() {
+	const { filteredItems } = useSelector();
+
+	return (
+		<>
+			<SelectorSearch />
+			<SelectorSelectAll />
+			{filteredItems.length > 0 ? (
+				<SelectorList />
+			) : (
+				<div className="min-h-0 flex-1 rounded-md border">
+					<SelectorEmpty className="h-full min-h-0" />
+				</div>
+			)}
+		</>
+	);
 }
-export function MoveAllToTargetAction({
-  children,
-  disabled,
-}: MoveAllToTargetActionProps) {
-  const { handleMoveAllToTarget, sourceItems } = useTransfer();
-  if (children) {
-    return children({ moveAllToTarget: handleMoveAllToTarget, disabled: sourceItems.length === 0 || !!disabled });
-  }
-  return (
-    <Button
-      className="p-2 rounded-md hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed"
-      onClick={() => handleMoveAllToTarget()}
-      disabled={sourceItems.length === 0 || !!disabled}
-      variant="outline"
-    >
-      <ChevronRight className="size-5" />
-      <span>全部右移</span>
-    </Button>
-  );
+
+type TransferActionChildren = (props: { disabled: boolean; action: () => void }) => React.ReactNode;
+
+interface TransferActionProps {
+	disabled?: boolean;
+	children?: TransferActionChildren;
 }
-interface MoveAllToSourceActionProps {
-  disabled?: boolean;
-  children?: ({ moveAllToSource, disabled }: { moveAllToSource: () => void; disabled: boolean }) => React.ReactNode;
+
+export function MoveToTargetAction({ children, disabled }: TransferActionProps) {
+	const { moveToTarget, sourceCheckedValues } = useTransfer();
+	const isDisabled = sourceCheckedValues.length === 0 || Boolean(disabled);
+	if (children) return children({ action: moveToTarget, disabled: isDisabled });
+	return (
+		<Button type="button" variant="outline" size="icon" onClick={moveToTarget} disabled={isDisabled}>
+			<ChevronRight className="size-4" />
+		</Button>
+	);
 }
-export function MoveAllToSourceAction({
-  children,
-  disabled,
-}: MoveAllToSourceActionProps) {
-  const { handleMoveAllToSource, targetItems } = useTransfer();
-  if (children) {
-    return children({ moveAllToSource: handleMoveAllToSource, disabled: targetItems.length === 0 || !!disabled });
-  }
-  return (
-    <Button
-      className="p-2 rounded-md hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed"
-      onClick={() => handleMoveAllToSource()}
-      disabled={targetItems.length === 0 || !!disabled}
-      variant="outline"
-    >
-      <ChevronsLeft className="size-5" />
-      <span>全部左移</span>
-    </Button>
-  );
+
+export function MoveToSourceAction({ children, disabled }: TransferActionProps) {
+	const { moveToSource, targetCheckedValues } = useTransfer();
+	const isDisabled = targetCheckedValues.length === 0 || Boolean(disabled);
+	if (children) return children({ action: moveToSource, disabled: isDisabled });
+	return (
+		<Button type="button" variant="outline" size="icon" onClick={moveToSource} disabled={isDisabled}>
+			<ChevronLeft className="size-4" />
+		</Button>
+	);
+}
+
+export function MoveAllToTargetAction({ children, disabled }: TransferActionProps) {
+	const { moveAllToTarget, sourceItems, getDisabled } = useTransfer();
+	const isDisabled = !sourceItems.some((item) => !getDisabled(item)) || Boolean(disabled);
+	if (children) return children({ action: moveAllToTarget, disabled: isDisabled });
+	return (
+		<Button type="button" variant="outline" size="icon" onClick={moveAllToTarget} disabled={isDisabled}>
+			<ChevronsRight className="size-4" />
+		</Button>
+	);
+}
+
+export function MoveAllToSourceAction({ children, disabled }: TransferActionProps) {
+	const { moveAllToSource, targetItems, getDisabled } = useTransfer();
+	const isDisabled = !targetItems.some((item) => !getDisabled(item)) || Boolean(disabled);
+	if (children) return children({ action: moveAllToSource, disabled: isDisabled });
+	return (
+		<Button type="button" variant="outline" size="icon" onClick={moveAllToSource} disabled={isDisabled}>
+			<ChevronsLeft className="size-4" />
+		</Button>
+	);
 }

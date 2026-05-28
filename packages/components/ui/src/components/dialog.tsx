@@ -1,5 +1,5 @@
 import * as React from "react"
-import { XIcon } from "lucide-react"
+import { X } from "lucide-react"
 import { Dialog as DialogPrimitive } from "radix-ui"
 
 import { cn } from "@rap/utils"
@@ -49,13 +49,15 @@ function DialogContent({
 	className,
 	children,
 	closable = true,
+	overlay = true,
 	...props
 }: React.ComponentProps<typeof DialogPrimitive.Content> & {
 	closable?: boolean
+	overlay?: boolean
 }) {
 	return (
 		<DialogPortal data-slot="dialog-portal">
-			<DialogOverlay />
+			{overlay && <DialogOverlay />}
 			<DialogPrimitive.Content
 				data-slot="dialog-content"
 				className={cn(
@@ -70,7 +72,7 @@ function DialogContent({
 						data-slot="dialog-close"
 						className="absolute top-4 right-4 rounded-xs opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-hidden disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4"
 					>
-						<XIcon />
+						<X />
 						<span className="sr-only">Close</span>
 					</DialogPrimitive.Close>
 				)}

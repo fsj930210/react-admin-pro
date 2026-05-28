@@ -16,6 +16,7 @@ function normalizeColumns<TData>(
 	const normalized = columns.map((column, index) => {
 		const currentIndex = parentIndex ? `${parentIndex}-${index}` : String(index);
 		const columnWithUnknownData = column as ColumnDef<unknown>;
+		const hasExplicitSize = Object.prototype.hasOwnProperty.call(column, "size");
 		const explicitId = column.id;
 		const accessorKey = getAccessorKey(columnWithUnknownData);
 		let id = explicitId ?? accessorKey;
@@ -44,6 +45,7 @@ function normalizeColumns<TData>(
 			meta: {
 				...column.meta,
 				parentId,
+				__rapDataGridExplicitSize: hasExplicitSize,
 			},
 			...(nestedResult ? { columns: nestedResult.normalized } : {}),
 		} as ColumnDef<TData>;

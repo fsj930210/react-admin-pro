@@ -14,6 +14,10 @@ import { ColumnSort } from "./column-sort";
 import { GridCell, GridRow, gridRowClassName } from "./grid";
 import { HeaderSeparator } from "./header-separator";
 
+function hasExplicitColumnWidth<TData>(header: Header<TData, unknown>) {
+	return Boolean(header.column.columnDef.meta?.__rapDataGridExplicitSize);
+}
+
 export function GridHeader<TData>({
 	props,
 	table,
@@ -134,7 +138,7 @@ function GridHeaderCell<TData>({
 	const isLeafHeader = header.colSpan === 1;
 	const shouldApplyWidth =
 		isLeafHeader &&
-		(header.column.columnDef.size != null ||
+		(hasExplicitColumnWidth(header) ||
 			table.getState().columnSizing[header.column.id] != null ||
 			Boolean(header.column.getIsPinned()));
 	const width = shouldApplyWidth ? header.column.getSize() : undefined;

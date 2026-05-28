@@ -1,10 +1,14 @@
-import type { Header, Table } from "@tanstack/react-table";
+import type { Column, Header, Table } from "@tanstack/react-table";
 import { type CSSProperties, type MouseEvent, useEffect, useRef, useState } from "react";
 import type { HeaderContextMenuState } from "../components/grid-context-menu";
 import type { DataGridProps } from "../types";
 
 const ROW_HEIGHT = 40;
 const SCROLL_EDGE_OFFSET = 1;
+
+function hasExplicitColumnWidth<TData>(column: Column<TData, unknown>) {
+	return Boolean(column.columnDef.meta?.__rapDataGridExplicitSize);
+}
 
 function getOverlayScrollViewport(root: HTMLElement | null) {
 	return root?.querySelector(
@@ -34,7 +38,8 @@ export function useDataGridView<TData>(props: DataGridProps<TData>, table: Table
 		return () => observer.disconnect();
 	}, []);
 
-	const contentWidth = table.getTotalSize();
+	const measuredContentWidth = table.getTotalSize();
+	const contentWidth = `max(100%, ${measuredContentWidth}px)`;
 	const columnSizing = table.getState().columnSizing;
 	const visibleColumns = [
 		...table.getLeftLeafColumns(),
@@ -44,7 +49,7 @@ export function useDataGridView<TData>(props: DataGridProps<TData>, table: Table
 	const gridTemplateColumns = visibleColumns
 		.map((column) => {
 			const hasExplicitSize =
-				column.columnDef.size != null ||
+				hasExplicitColumnWidth(column) ||
 				columnSizing[column.id] != null ||
 				Boolean(column.getIsPinned());
 
@@ -58,8 +63,8 @@ export function useDataGridView<TData>(props: DataGridProps<TData>, table: Table
 		.getRightLeafColumns()
 		.reduce((total, column) => total + column.getSize(), 0);
 	const scrollWidth =
-		typeof props.scroll?.x === "number" && typeof contentWidth === "number"
-			? Math.min(props.scroll.x, contentWidth)
+		typeof props.scroll?.x === "number"
+			? Math.min(props.scroll.x, measuredContentWidth)
 			: props.scroll?.x;
 	const hasLeftShadow = leftPinnedWidth > 0 && scrollLeft > SCROLL_EDGE_OFFSET;
 	const hasRightShadow = rightPinnedWidth > 0 && maxScrollLeft - scrollLeft > SCROLL_EDGE_OFFSET;
@@ -109,13 +114,16 @@ export function useDataGridView<TData>(props: DataGridProps<TData>, table: Table
 		scrollRootRef,
 		scrollAreaProps: {
 			className:
-				"relative data-grid-pinned-shadow [&_.os-scrollbar-vertical]:!top-[var(--rap-data-grid-header-height)] [&_.os-scrollbar-vertical]:!bottom-0",
+				"relative min-h-0 data-grid-pinned-shadow data-[fill-height=true]:flex-1 [&[data-allow-horizontal=false]_.os-scrollbar-horizontal]:!hidden [&_.os-scrollbar-vertical]:!top-[var(--rap-data-grid-header-height)] [&_.os-scrollbar-vertical]:!bottom-0",
+			"data-allow-horizontal": props.scroll?.x != null ? "true" : "false",
+			"data-fill-height": props.scroll?.y != null ? "true" : undefined,
 			"data-left-shadow": hasLeftShadow ? "true" : undefined,
 			"data-right-shadow": hasRightShadow ? "true" : undefined,
 			style: {
 				"--data-grid-pinned-left-width": `${leftPinnedWidth}px`,
 				"--data-grid-pinned-right-width": `${rightPinnedWidth}px`,
 				maxHeight: props.scroll?.y ?? "auto",
+				height: props.scroll?.y === "100%" ? "100%" : undefined,
 				maxWidth: scrollWidth ?? "auto",
 			} as CSSProperties,
 		},

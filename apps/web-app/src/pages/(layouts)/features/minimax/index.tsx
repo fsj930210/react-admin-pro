@@ -19,8 +19,8 @@ function MinimaxDialogExample() {
 	return (
 		<Card>
 			<CardHeader>
-				<CardTitle>最小最大化 Dialog</CardTitle>
-				<CardDescription>支持最小化、最大化、还原功能的对话框组件</CardDescription>
+				<CardTitle>最大最小化 Dialog</CardTitle>
+				<CardDescription>支持最小化、最大化、还原和关闭的后台工作窗。</CardDescription>
 			</CardHeader>
 			<CardContent>
 				<MinimaxDialog
@@ -30,7 +30,7 @@ function MinimaxDialogExample() {
 							打开 Dialog
 						</Button>
 					}
-					header={<CardTitle>最小最大化 Dialog 示例</CardTitle>}
+					header={<CardTitle>最大最小化 Dialog 示例</CardTitle>}
 					actions={{
 						close: true,
 						minimize: true,
@@ -42,19 +42,18 @@ function MinimaxDialogExample() {
 					}}
 				>
 					<div className="py-4">
-						<p>这是对话框的内容区域。</p>
-						<p className="mt-2">你可以对其进行任意操作：</p>
-						<ul className="list-disc list-inside mt-2 space-y-1">
-							<li>点击最小化按钮，对话框将最小化到右下角</li>
-							<li>点击最大化按钮，对话框将全屏显示</li>
-							<li>再次点击可还原到正常大小</li>
-							<li>最小化后可以拖动到底部的小圆点</li>
+						<p>这个 Dialog 可以最小化成底部条，也可以最大化成全屏工作区。</p>
+						<ul className="mt-2 list-inside list-disc space-y-1">
+							<li>最小化条可以拖动。</li>
+							<li>最小化条上有恢复、最大化、关闭按钮。</li>
+							<li>关闭按钮会直接关闭 Dialog。</li>
+							<li>最大化和还原有过渡动画。</li>
 						</ul>
 					</div>
 				</MinimaxDialog>
 			</CardContent>
 			<CardFooter className="flex justify-between">
-				<span className="text-sm text-muted-foreground">点击按钮打开示例对话框</span>
+				<span className="text-sm text-muted-foreground">点击按钮打开示例 Dialog。</span>
 			</CardFooter>
 		</Card>
 	);
@@ -62,13 +61,14 @@ function MinimaxDialogExample() {
 
 function MinimaxFeaturePage() {
 	return (
-		<div className="p-6 space-y-6">
+		<div className="space-y-6 p-6">
 			<div className="space-y-2">
 				<h1 className="text-3xl font-bold">Minimax Dialog</h1>
-				<p className="text-muted-foreground">支持最小化、最大化、还原功能的对话框组件</p>
+				<p className="text-muted-foreground">后台系统里常用的最小化、最大化和恢复能力。</p>
 			</div>
-
 			<MinimaxDialogExample />
 		</div>
 	);
 }
+
+export default MinimaxFeaturePage;

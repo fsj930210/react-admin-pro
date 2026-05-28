@@ -1,496 +1,395 @@
-/** biome-ignore-all lint:correctness/useExhaustiveDependencies */
-
+import { DataGrid } from "@rap/components-pro/data-grid";
+import { ProTree } from "@rap/components-pro/tree";
 import { Button } from "@rap/components-ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@rap/components-ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@rap/components-ui/card";
 import { FieldGroup, FieldLabel } from "@rap/components-ui/field";
 import { Form, FormField } from "@rap/components-ui/form";
 import { Input } from "@rap/components-ui/input";
 import {
-	Pagination,
-	PaginationContent,
-	PaginationEllipsis,
-	PaginationItem,
-	PaginationLink,
-	PaginationNext,
-	PaginationPrevious,
-} from "@rap/components-ui/pagination";
-import {
 	Selector,
-	SelectorContent,
-	SelectorContentItem,
+	SelectorCount,
 	SelectorEmpty,
+	SelectorFooter,
 	type SelectorItem,
+	SelectorList,
+	SelectorListItem,
 	SelectorSearch,
 	SelectorSelectAll,
+	useSelector,
 } from "@rap/components-ui/selector";
 import {
-	TreeCheckbox,
-	TreeItem,
-	TreeLabel,
-	TreeRoot,
-	TreeTrigger,
-	TreeViewport,
-} from "@rap/components-ui/tree";
-import {
-	checkableFeature,
-	expandableFeature,
-	selectableFeature,
-} from "@rap/components-ui/tree/features";
-import type { TreeItemInstance, TreeNode } from "@rap/components-ui/tree/types";
-import { useMemoizedFn } from "@rap/hooks/use-memoized-fn";
-import { traverseTree } from "@rap/utils";
+	Pagination,
+	PaginationContent,
+	PaginationItem,
+	PaginationLink,
+} from "@rap/components-ui/pagination";
+import type { TreeNode } from "@rap/components-ui/tree/types";
 import { useForm } from "@tanstack/react-form";
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
-import { z } from "zod";
-import { fetchSelectorItems } from "@/service/selector";
+import type { ColumnDef } from "@tanstack/react-table";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import type * as React from "react";
+import { useMemo, useState } from "react";
 
 export const Route = createFileRoute("/(layouts)/components/selector/")({
 	component: RouteComponent,
 });
 
-const dig = (path = "root", level = 1, childCount = 5) => {
-	const treeNode: TreeNode = {
-		label: path === "root" ? "Root" : path,
-		key: path,
-	};
-
-	if (level > 0) {
-		treeNode.children = [];
-		for (let i = 0; i < childCount; i += 1) {
-			const childKey = `${path}-${i}`;
-			treeNode.children.push(dig(childKey, level - 1, childCount));
-		}
-	}
-
-	return treeNode;
+interface User {
+	id: string;
+	name: string;
+	department: string;
+	role: string;
+	status: "active" | "locked";
+	disabled?: boolean;
 };
-const generateData = (count: number): SelectorItem[] => {
+
+const departments = ["研发中心", "产品设计", "增长运营", "客户成功"];
+const roles = ["Owner", "Admin", "Editor", "Viewer"];
+const longText =
+	"这是一个非常非常非常非常非常非常非常非常非常长的名称，用来验证省略、布局稳定和选择状态不会把面板撑破";
+
+function createUsers(count: number): User[] {
 	return Array.from({ length: count }, (_, index) => ({
-		label: `选项 ${index + 1}`,
-		value: `value-${index + 1}`,
+		id: `user-${index + 1}`,
+		name: index % 7 === 0 ? `成员 ${index + 1} - ${longText}` : `成员 ${index + 1}`,
+		department: departments[index % departments.length],
+		role: roles[index % roles.length],
+		status: index % 11 === 0 ? "locked" : "active",
+		disabled: index % 19 === 0,
 	}));
-};
+}
 
-function BasicTree({
-	treeData,
-	onSelect,
-	onCheck,
+const listItems: SelectorItem[] = Array.from({ length: 80 }, (_, index) => ({
+	label: index % 6 === 0 ? `选项 ${index + 1} - ${longText}` : `选项 ${index + 1}`,
+	value: `option-${index + 1}`,
+	disabled: index % 17 === 0,
+}));
+
+const users = createUsers(128);
+
+const treeData: TreeNode[] = [
+	{
+		key: "engineering",
+		label: "研发中心 - 包含多个真实业务小组",
+		children: [
+			{ key: "frontend", label: `前端平台 - ${longText}` },
+			{ key: "backend", label: "后端服务" },
+			{ key: "qa", label: "质量保障", disabled: true },
+		],
+	},
+	{
+		key: "business",
+		label: "业务团队",
+		children: [
+			{ key: "growth", label: "增长运营" },
+			{ key: "success", label: `客户成功 - ${longText}` },
+		],
+	},
+];
+
+function flattenTree(nodes: TreeNode[]): TreeNode[] {
+	return nodes.flatMap((node) => [node, ...(node.children ? flattenTree(node.children) : [])]);
+}
+
+function Section({
+	title,
+	description,
+	children,
 }: {
-	treeData: TreeNode[];
-	onSelect: (
-		selectedKeys: string[],
-		selectedItems: TreeItemInstance[],
-		selectInfo: {
-			selected: boolean;
-			node: TreeItemInstance;
-		},
-	) => void;
-	onCheck: (
-		checkKeys: string[],
-		checkItems: TreeItemInstance[],
-		checkInfo: {
-			checked: boolean;
-			node: TreeItemInstance;
-		},
-	) => void;
+	title: string;
+	description: string;
+	children: React.ReactNode;
 }) {
 	return (
-		<TreeRoot
-			data={treeData}
-			features={[
-				expandableFeature({
-					defaultExpandedKeys: ["root"],
-					onExpand: (expandedKeys, expandedItems, expandInfo) => {
-						console.log(expandedKeys, expandedItems, expandInfo);
-					},
-				}),
-				selectableFeature({
-					onSelect: (selectedKeys, selectedItems, selectInfo) => {
-						console.log(selectedKeys, selectedItems, selectInfo);
-						onSelect(selectedKeys, selectedItems, selectInfo);
-					},
-				}),
-				checkableFeature({
-					onCheck: (checkKeys, checkItems, checkInfo) => {
-						console.log(checkKeys, checkItems, checkInfo);
-						onCheck(checkKeys, checkItems, checkInfo);
-					},
-				}),
-			]}
-		>
-			<TreeViewport>
-				{(item) => (
-					<TreeItem key={item.key} item={item}>
-						<TreeTrigger item={item} />
-						<TreeCheckbox item={item} />
-						<TreeLabel item={item} />
-					</TreeItem>
-				)}
-			</TreeViewport>
-		</TreeRoot>
-	);
-}
-// 1. 基础使用示例
-function BasicUsage() {
-	const [data] = useState(() => generateData(200));
-	const [value, setValue] = useState<string[]>([]);
-
-	return (
 		<Card>
 			<CardHeader>
-				<CardTitle>基础使用</CardTitle>
+				<CardTitle>{title}</CardTitle>
+				<CardDescription>{description}</CardDescription>
 			</CardHeader>
-			<CardContent>
-				<div className="space-y-4">
-					<Selector dataSource={data} onChange={setValue} value={value}>
-						<SelectorSearch placeholder="搜索选项..." />
-						<SelectorSelectAll />
-						<SelectorContent>{({ item }) => <SelectorContentItem item={item} />}</SelectorContent>
-						<SelectorEmpty />
-					</Selector>
-					<div className="mt-4">
-						<p>
-							已选择: {value.length}/{data.length}{" "}
-						</p>
-						<p>选中的值: {value.join(", ")}</p>
-					</div>
-				</div>
-			</CardContent>
+			<CardContent>{children}</CardContent>
 		</Card>
 	);
 }
 
-// 2. 无限滚动示例
-function InfiniteScroll() {
-	const [data, setData] = useState<SelectorItem[]>([]);
-	const [loading, setLoading] = useState(false);
+function BasicListDemo() {
+	const [value, setValue] = useState<string[]>(["option-2", "option-4"]);
+
+	return (
+		<Section title="列表选择" description="默认列表、长文本、搜索、全选、空状态。">
+			<Selector className="h-[460px]" dataSource={listItems} value={value} onChange={setValue}>
+				<SelectorSearch placeholder="搜索选项" />
+				<SelectorSelectAll />
+				<SelectorList>
+					{({ item }) => (
+						<SelectorListItem item={item}>
+							<span className="block truncate">{item.label}</span>
+						</SelectorListItem>
+					)}
+				</SelectorList>
+				<SelectorEmpty />
+				<SelectorCount />
+			</Selector>
+		</Section>
+	);
+}
+
+function VirtualListDemo() {
+	const [value, setValue] = useState<string[]>([]);
+	const data = useMemo(
+		() =>
+			Array.from({ length: 2000 }, (_, index) => ({
+				label: index % 10 === 0 ? `虚拟列表选项 ${index + 1} - ${longText}` : `虚拟列表选项 ${index + 1}`,
+				value: `virtual-${index + 1}`,
+			})),
+		[],
+	);
+
+	return (
+		<Section title="虚拟列表" description="virtual 默认关闭，需要时传 true 或配置对象。">
+			<Selector
+				className="h-[460px]"
+				dataSource={data}
+				value={value}
+				virtual={{ itemSize: 42, overscan: 8 }}
+				onChange={setValue}
+			>
+				<SelectorSearch placeholder="搜索虚拟列表" />
+				<SelectorSelectAll />
+				<SelectorList />
+				<SelectorEmpty />
+				<SelectorCount />
+			</Selector>
+		</Section>
+	);
+}
+
+const userColumns: ColumnDef<User>[] = [
+	{ accessorKey: "name", header: "姓名", meta: { ellipsis: true } },
+	{ accessorKey: "department", header: "部门", meta: { ellipsis: true } },
+	{ accessorKey: "role", header: "角色", meta: { ellipsis: true } },
+];
+
+function DataGridSelectorContent() {
+	const api = useSelector<User>();
+
+	return (
+		<div className="min-h-0 flex-1">
+			<DataGrid
+				rowKey="id"
+				columns={userColumns}
+				data={api.filteredItems}
+				scroll={{ y: 320 }}
+				pagination={{
+					mode: "local",
+					defaultPageSize: 8,
+					showSizeChanger: false,
+					contentClassName:
+						"flex-nowrap justify-end [&_[data-slot=pagination-link]>span]:hidden",
+				}}
+				rowSelection={{
+					selectedRowKeys: api.selectedValues,
+					onChange: (keys) => api.setValues(keys),
+					getCheckboxProps: (record) => ({ disabled: api.getDisabled(record) }),
+				}}
+			/>
+		</div>
+	);
+}
+
+function TableDemo() {
+	const [value, setValue] = useState<string[]>(["user-2", "user-5"]);
+
+	return (
+		<Section title="DataGrid 渲染" description="真实表格场景接 pro DataGrid，并使用 DataGrid 自己的分页。">
+			<Selector<User>
+				className="h-[520px]"
+				dataSource={users}
+				value={value}
+				getValue={(item) => item.id}
+				getLabel={(item) => item.name}
+				getDisabled={(item) => item.disabled ?? item.status === "locked"}
+				onChange={setValue}
+			>
+				<SelectorSearch placeholder="搜索成员" />
+				<DataGridSelectorContent />
+				<SelectorCount />
+			</Selector>
+		</Section>
+	);
+}
+
+function ProTreeSelectorContent() {
+	const api = useSelector<TreeNode>();
+
+	return (
+		<div className="min-h-0 flex-1 overflow-auto rounded-md border p-2">
+			<ProTree
+				data={treeData}
+				checkable={{ checkStrictly: false }}
+				defaultExpandedKeys={["engineering", "business"]}
+				checkedKeys={api.selectedValues}
+				onCheckedKeysChange={(keys) => api.setValues(keys.map(String))}
+				labelRender={(item) => <span className="block max-w-[520px] truncate">{item.node.label}</span>}
+			/>
+		</div>
+	);
+}
+
+function TreeDemo() {
+	const [value, setValue] = useState<string[]>(["frontend"]);
+	const flatTree = useMemo(() => flattenTree(treeData), []);
+
+	return (
+		<Section title="ProTree 渲染" description="真实树场景接 pro Tree，Selector 只同步 checkedKeys。">
+			<Selector<TreeNode>
+				className="h-[420px]"
+				dataSource={flatTree}
+				value={value}
+				getValue={(item) => String(item.key)}
+				getLabel={(item) => item.label}
+				getDisabled={(item) => Boolean(item.disabled)}
+				onChange={setValue}
+			>
+				<ProTreeSelectorContent />
+				<SelectorCount />
+			</Selector>
+		</Section>
+	);
+}
+
+function InternalPaginationDemo() {
 	const [page, setPage] = useState(1);
 	const [value, setValue] = useState<string[]>([]);
-
-	const loadMore = useMemoizedFn(async () => {
-		if (loading) return;
-		setLoading(true);
-		try {
-			const response = await fetchSelectorItems({
-				page,
-				limit: 20,
-			});
-			const { data } = response.data;
-
-			setData((prev) => [...prev, ...data]);
-			setPage((prev) => prev + 1);
-		} catch (error) {
-			console.error("Failed to load data:", error);
-		} finally {
-			setLoading(false);
-		}
-	});
-
-	useEffect(() => {
-		loadMore();
-	}, []);
-
-	const handleScroll = (event: React.UIEvent<HTMLDivElement>) => {
-		const { scrollTop, clientHeight, scrollHeight } = event.currentTarget;
-		if (scrollTop + clientHeight >= scrollHeight - 100) {
-			loadMore();
-		}
-	};
+	const pageSize = 10;
+	const pageCount = Math.ceil(listItems.length / pageSize);
+	const pageItems = listItems.slice((page - 1) * pageSize, page * pageSize);
 
 	return (
-		<Card>
-			<CardHeader>
-				<CardTitle>无限滚动</CardTitle>
-			</CardHeader>
-			<CardContent>
-				<div className="space-y-4">
-					<Selector dataSource={data} value={value} onChange={setValue}>
-						<SelectorSearch placeholder="搜索选项..." />
-						<SelectorSelectAll />
-						<SelectorContent onScroll={handleScroll}>
-							{({ item }) => <SelectorContentItem item={item} />}
-						</SelectorContent>
-						{loading && <div className="p-4 text-center">加载中...</div>}
-						<SelectorEmpty />
-					</Selector>
-					<div className="mt-4">
-						<p>已选择: {value.length} 项</p>
-						<p>总数据量: {data.length} 项</p>
+		<Section title="Selector 内部分页" description="分页作为 Selector 内部 footer，而不是放到 Selector 外面。">
+			<Selector className="h-[460px]" dataSource={pageItems} value={value} onChange={setValue}>
+				<SelectorSearch placeholder="搜索当前页" />
+				<SelectorSelectAll />
+				<SelectorList>
+					{({ item }) => (
+						<SelectorListItem item={item}>
+							<span className="block truncate">{item.label}</span>
+						</SelectorListItem>
+					)}
+				</SelectorList>
+				<SelectorEmpty />
+				<SelectorFooter className="flex flex-wrap items-center justify-between gap-2 sm:flex-nowrap">
+					<div className="shrink-0 whitespace-nowrap text-sm text-muted-foreground">
+						第 {page} / {pageCount} 页，共 {listItems.length} 项
 					</div>
-				</div>
-			</CardContent>
-		</Card>
-	);
-}
-
-// 3. 分页示例
-function PaginationExample() {
-	const [data, setData] = useState<SelectorItem[]>([]);
-	const [loading, setLoading] = useState(false);
-	const [currentPage, setCurrentPage] = useState(1);
-	const [totalPages, setTotalPages] = useState(1);
-	const pageSize = 20;
-	const [value, setValue] = useState<string[]>([]);
-
-	const loadPageData = async () => {
-		setLoading(true);
-		try {
-			const response = await fetchSelectorItems({
-				page: currentPage,
-				limit: pageSize,
-			});
-			const { data, pagination } = response.data;
-			setData(data);
-			setTotalPages(pagination.total || 1);
-		} catch (error) {
-			console.error("Failed to load page data:", error);
-		} finally {
-			setLoading(false);
-		}
-	};
-
-	useEffect(() => {
-		// eslint-disable-next-line react-hooks/set-state-in-effect
-		loadPageData();
-	}, [currentPage, pageSize]);
-
-	return (
-		<Card>
-			<CardHeader>
-				<CardTitle>分页示例</CardTitle>
-			</CardHeader>
-			<CardContent>
-				<div className="space-y-4">
-					<Selector dataSource={data} value={value} onChange={setValue}>
-						<SelectorSearch placeholder="搜索选项..." />
-						<SelectorSelectAll />
-						<SelectorContent>{({ item }) => <SelectorContentItem item={item} />}</SelectorContent>
-						{loading && <div className="p-4 text-center">加载中...</div>}
-						<SelectorEmpty />
-					</Selector>
-					<Pagination>
-						<PaginationContent>
+					<Pagination className="mx-0 w-auto">
+						<PaginationContent className="justify-end">
 							<PaginationItem>
-								<PaginationPrevious
-									onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
-									disabled={currentPage === 1 || loading}
-								/>
-							</PaginationItem>
-							{/* 第一页 */}
-							<PaginationItem>
-								<PaginationLink isActive={currentPage === 1} onClick={() => setCurrentPage(1)}>
-									1
+								<PaginationLink
+									aria-label="上一页"
+									disabled={page <= 1}
+									size="icon"
+									onClick={() => setPage((prev) => Math.max(1, prev - 1))}
+								>
+									<ChevronLeft className="size-4" />
 								</PaginationLink>
 							</PaginationItem>
-							{/* 第一页和当前页之间的省略号 */}
-							{currentPage > 4 && (
-								<PaginationItem>
-									<PaginationEllipsis />
-								</PaginationItem>
-							)}
-							{/* 当前页的前两页 */}
-							{Array.from({ length: 2 }, (_, i) => currentPage - 2 + i)
-								.filter((page) => page > 1 && page < currentPage)
-								.map((page) => (
-									<PaginationItem key={page}>
-										<PaginationLink onClick={() => setCurrentPage(page)}>{page}</PaginationLink>
-									</PaginationItem>
-								))}
-							{/* 当前页 */}
-							{currentPage > 1 && currentPage < totalPages && (
-								<PaginationItem>
-									<PaginationLink isActive onClick={() => setCurrentPage(currentPage)}>
-										{currentPage}
+							{Array.from({ length: Math.min(5, pageCount) }, (_, index) => index + 1).map((itemPage) => (
+								<PaginationItem key={itemPage}>
+									<PaginationLink isActive={itemPage === page} onClick={() => setPage(itemPage)}>
+										{itemPage}
 									</PaginationLink>
 								</PaginationItem>
-							)}
-							{/* 当前页的后两页 */}
-							{Array.from({ length: 2 }, (_, i) => currentPage + 1 + i)
-								.filter((page) => page > currentPage && page < totalPages)
-								.map((page) => (
-									<PaginationItem key={page}>
-										<PaginationLink onClick={() => setCurrentPage(page)}>{page}</PaginationLink>
-									</PaginationItem>
-								))}
-							{/* 当前页和最后一页之间的省略号 */}
-							{currentPage < totalPages - 3 && (
-								<PaginationItem>
-									<PaginationEllipsis />
-								</PaginationItem>
-							)}
-							{/* 最后一页 */}
-							{totalPages > 1 && (
-								<PaginationItem>
-									<PaginationLink
-										isActive={currentPage === totalPages}
-										onClick={() => setCurrentPage(totalPages)}
-									>
-										{totalPages}
-									</PaginationLink>
-								</PaginationItem>
-							)}
+							))}
 							<PaginationItem>
-								<PaginationNext
-									onClick={() => setCurrentPage((prev) => prev + 1)}
-									disabled={currentPage >= totalPages || loading}
-								/>
+								<PaginationLink
+									aria-label="下一页"
+									disabled={page >= pageCount}
+									size="icon"
+									onClick={() => setPage((prev) => Math.min(pageCount, prev + 1))}
+								>
+									<ChevronRight className="size-4" />
+								</PaginationLink>
 							</PaginationItem>
 						</PaginationContent>
 					</Pagination>
-					<div className="mt-4">
-						<p>已选择: {value.length} 项</p>
-					</div>
-				</div>
-			</CardContent>
-		</Card>
+				</SelectorFooter>
+			</Selector>
+		</Section>
 	);
 }
 
-// 4. 渲染树示例
-function TreeRendering() {
-	const [treeData] = useState(() => {
-		const rootNode = dig("root", 2);
-		if (rootNode?.children?.[1]) {
-			rootNode.children[1].disabled = true;
-		}
-		return [rootNode];
-	});
-	const data = useMemo(() => {
-		const result: SelectorItem[] = [];
-		traverseTree(treeData, (node: TreeNode) => {
-			result.push({ value: node.key, label: node.label });
-		});
-		return result;
-	}, [treeData]);
-	const [value, setValue] = useState<string[]>([]);
-	return (
-		<Card>
-			<CardHeader>
-				<CardTitle>渲染树</CardTitle>
-			</CardHeader>
-			<CardContent>
-				<div className="space-y-4">
-					<Selector dataSource={data} onChange={setValue} value={value}>
-						{({ onItemsSelect }) => (
-							<BasicTree
-								treeData={treeData}
-								onSelect={(selectedKeys, _, selectInfo) =>
-									onItemsSelect(selectedKeys, selectInfo.selected)
-								}
-								onCheck={(checkKeys, _, checkInfo) => onItemsSelect(checkKeys, checkInfo.checked)}
-							/>
-						)}
-					</Selector>
-					<div className="mt-4">
-						<p>
-							已选择: {value.length}/{data.length}{" "}
-						</p>
-						<p>选中的值: {value.join(", ")}</p>
-					</div>
-				</div>
-			</CardContent>
-		</Card>
-	);
-}
-
-// 5. 结合表单示例
-function FormIntegration() {
-	const [data] = useState(() => generateData(20));
+function FormDemo() {
 	const form = useForm({
 		defaultValues: {
-			selectedItems: [] as string[],
 			name: "",
+			members: ["option-1"] as string[],
 		},
-		validators: {
-			onChange: z.object({
-				name: z.string().min(1, "名称不能为空"),
-				selectedItems: z.array(z.string()),
-			}),
-			onSubmit: z.object({
-				name: z.string(),
-				selectedItems: z.array(z.string()),
-			}),
-		},
-		onSubmit: ({ value }) => {
-			console.log("表单提交:", value);
-		},
+		onSubmit: ({ value }) => console.log("selector form submit", value),
 	});
 
 	return (
-		<Card>
-			<CardHeader>
-				<CardTitle>结合表单</CardTitle>
-			</CardHeader>
-			<CardContent>
-				<Form
-					form={form}
-					onSubmit={(e) => {
-						e.preventDefault();
-						form.handleSubmit();
-					}}
-					className="space-y-4"
-				>
-					<FieldGroup>
-						<FormField
-							name="name"
-							render={({ field, isInvalid }) => (
-								<>
-									<FieldLabel htmlFor="name">名称</FieldLabel>
-									<Input
-										placeholder="请输入名称"
-										id="name"
-										name={field.name}
-										value={field.state.value}
-										onBlur={field.handleBlur}
-										onChange={(e) => field.handleChange(e.target.value)}
-										aria-invalid={isInvalid}
-									/>
-								</>
-							)}
-						/>
-						<FormField
-							name="selectedItems"
-							render={({ field }) => (
-								<>
-									<FieldLabel>选择项目</FieldLabel>
-									<Selector
-										dataSource={data}
-										value={field.state.value}
-										onChange={(values) => {
-											field.handleChange(values);
-										}}
-									>
-										<SelectorSearch placeholder="搜索选项..." />
-										<SelectorSelectAll />
-										<SelectorContent>
-											{({ item }) => <SelectorContentItem item={item} />}
-										</SelectorContent>
-										<SelectorEmpty />
-									</Selector>
-								</>
-							)}
-						/>
-					</FieldGroup>
-
-					<Button type="submit">提交</Button>
-				</Form>
-			</CardContent>
-		</Card>
+		<Section title="表单集成" description="value/onChange 维持纯数组，适合放进 FormField。">
+			<Form
+				form={form}
+				className="space-y-5"
+				onSubmit={(event) => {
+					event.preventDefault();
+					form.handleSubmit();
+				}}
+			>
+				<FieldGroup>
+					<FormField
+						name="name"
+						render={({ field }) => (
+							<>
+								<FieldLabel htmlFor="selector-form-name">名称</FieldLabel>
+								<Input
+									id="selector-form-name"
+									name={field.name}
+									value={field.state.value}
+									placeholder="请输入名称"
+									onBlur={field.handleBlur}
+									onChange={(event) => field.handleChange(event.target.value)}
+								/>
+							</>
+						)}
+					/>
+					<FormField
+						name="members"
+						render={({ field }) => (
+							<>
+								<FieldLabel>选择项</FieldLabel>
+								<Selector
+									className="h-80"
+									dataSource={listItems}
+									value={field.state.value}
+									onChange={(nextValue) => field.handleChange(nextValue)}
+								/>
+							</>
+						)}
+					/>
+				</FieldGroup>
+				<Button type="submit">提交</Button>
+			</Form>
+		</Section>
 	);
 }
 
 function RouteComponent() {
 	return (
-		<div className="container mx-auto py-8">
-			<h1 className="text-3xl font-bold mb-8">Selector 组件示例</h1>
-
-			<div className="space-y-8">
-				<BasicUsage />
-				<InfiniteScroll />
-				<PaginationExample />
-				<TreeRendering />
-				<FormIntegration />
+		<div className="container mx-auto space-y-6 py-8">
+			<div>
+				<h1 className="text-3xl font-bold">Selector 组件</h1>
+				<p className="mt-2 text-muted-foreground">选择状态内核接真实 List、DataGrid、ProTree、分页和表单场景。</p>
+			</div>
+			<div className="grid gap-6 xl:grid-cols-2">
+				<BasicListDemo />
+				<VirtualListDemo />
+				<TableDemo />
+				<TreeDemo />
+				<InternalPaginationDemo />
+				<FormDemo />
 			</div>
 		</div>
 	);

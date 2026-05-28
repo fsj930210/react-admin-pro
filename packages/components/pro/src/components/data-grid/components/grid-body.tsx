@@ -7,6 +7,10 @@ import { mergeElementProps } from "../utils/merge-element-props";
 import { getColumnPinningStyles, getRowPinningStyles } from "../utils/pinning-styles";
 import { GridCell, GridRow, gridRowClassName } from "./grid";
 
+function hasExplicitColumnWidth<TData>(cell: Cell<TData, unknown>) {
+	return Boolean(cell.column.columnDef.meta?.__rapDataGridExplicitSize);
+}
+
 export function GridBody<TData>({
 	props,
 	table,
@@ -113,7 +117,7 @@ function GridBodyCell<TData>({
 	const pinning = getColumnPinningStyles(cell.column);
 	const meta = cell.column.columnDef.meta;
 	const shouldApplyWidth =
-		cell.column.columnDef.size != null ||
+		hasExplicitColumnWidth(cell) ||
 		table.getState().columnSizing[cell.column.id] != null ||
 		Boolean(cell.column.getIsPinned());
 	const width = shouldApplyWidth ? cell.column.getSize() : undefined;

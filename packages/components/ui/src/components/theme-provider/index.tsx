@@ -1,200 +1,274 @@
 "use client";
+
 import type React from "react";
-import { 
-	createContext, 
-	createElement,
-	use, 
-	useContext, 
-	useEffect, 
-	useEffectEvent,
-	useRef, 
-	useState 
-} from "react";
-import type {  ThemeContextValue, ThemeProviderProps } from "./types";
 import {
-  applyThemeToElement,
-  getSystemTheme,
+	createContext,
+	createElement,
+	use,
+	useCallback,
+	useContext,
+	useEffect,
+	useMemo,
+	useRef,
+	useState,
+} from "react";
+import type {
+	ColorScheme,
+	ThemeContextValue,
+	ThemeProviderProps,
+} from "./types";
+import {
+	applyThemeToElement,
+	colorSchemes,
+	getStoredTheme,
+	getSystemTheme,
+	MEDIA,
 	saveToStorage,
 } from "./utils";
 
-
 const ThemeContext = createContext<ThemeContextValue | undefined>(undefined);
-const usedStorageKeys = new Set<string>();
-const MEDIA = '(prefers-color-scheme: dark)';
 
-export const ThemeProvider: React.FC<ThemeProviderProps> = ({
-  children,
-  storageKey,
-  themes = ["light", "dark"],
-  enableSystem = false,
-  enableColorScheme = false,
-  isIsolated = false,
-  attributes = "class",
-  defaultTheme = "light",
-	asChild = isIsolated ? 'div' : 'html',
-  forcedTheme,
-	className,
+const getFallbackTheme = (themes: string[], defaultTheme: string) => {
+	return themes.includes(defaultTheme) || defaultTheme === "system"
+		? defaultTheme
+		: themes[0];
+};
+
+const getResolvedTheme = ({
+	theme,
+	forcedTheme,
+	systemTheme,
+}: {
+	theme: string;
+	forcedTheme?: string;
+	systemTheme: ColorScheme;
 }) => {
-  const parentContext = useContext(ThemeContext);
-  const containerRef = useRef<HTMLElement | null>(null);
+	if (forcedTheme) return forcedTheme;
+	return theme === "system" ? systemTheme : theme;
+};
 
-  // 校验逻辑
-  if (!parentContext && !isIsolated && !storageKey) {
-    throw new Error("⚠️ 根组件（无父组件且非隔离）必须提供storageKey！");
-  }
-  if (isIsolated && !storageKey) {
-    throw new Error("⚠️ 隔离组件必须提供storageKey！");
-  }
-  if (forcedTheme && forcedTheme !== 'system' && !storageKey) {
-    throw new Error("⚠️ 强制主题组件必须提供storageKey！");
-  }
+type ActiveThemeProviderProps = ThemeProviderProps & {
+	scope: Exclude<NonNullable<ThemeProviderProps["scope"]>, "inherit">;
+};
 
-  // 有父组件且非隔离 - 只做传递，不做其他逻辑
-  // 但强制主题是独立控制的，即使isIsolated为false
-  if (!isIsolated && parentContext && !forcedTheme) {
-    const contextValue: ThemeContextValue = {
-      theme: parentContext.theme,
-      resolvedTheme: parentContext.resolvedTheme,
-      forcedTheme: parentContext.forcedTheme,
-      themes: parentContext.themes,
-      systemTheme: parentContext.systemTheme,
-      setTheme: parentContext.setTheme,
-    };
-    return (
-      <ThemeContext value={contextValue}>
-        {children}
-      </ThemeContext>
-    );
-  }
+const ActiveThemeProvider: React.FC<ActiveThemeProviderProps> = ({
+	children,
+	scope,
+	storageKey,
+	themes = ["light", "dark"],
+	enableSystem = false,
+	enableColorScheme = false,
+	attribute = "class",
+	defaultTheme = "light",
+	forcedTheme,
+	className,
+	as = "div",
+	colorSchemeMap,
+}) => {
+	const parentContext = useContext(ThemeContext);
+	const containerRef = useRef<HTMLElement | null>(null);
+	const appliedThemeRef = useRef<string | undefined>(undefined);
 
-  // 根组件、隔离组件、强制主题组件
-	const [localTheme, setLocalTheme] = useState<string>(() => {
-		if (forcedTheme && forcedTheme !== 'system') {
-			saveToStorage(storageKey!, forcedTheme);
-			return forcedTheme;
-		}
+	if (scope === "root" && parentContext) {
+		throw new Error("ThemeProvider scope='root' cannot be nested.");
+	}
+
+	if (scope === "root" && !storageKey && !forcedTheme) {
+		throw new Error(
+			"ThemeProvider scope='root' requires storageKey unless forcedTheme is provided.",
+		);
+	}
+
+	const availableThemes = useMemo(() => {
+		return enableSystem ? [...themes, "system"] : themes;
+	}, [enableSystem, themes]);
+
+	const resolvedColorSchemeMap = useMemo<Record<string, ColorScheme>>(() => {
+		return {
+			...Object.fromEntries(colorSchemes.map((item) => [item, item])),
+			...colorSchemeMap,
+		};
+	}, [colorSchemeMap]);
+
+	const [systemTheme, setSystemTheme] = useState<ColorScheme>(() =>
+		getSystemTheme(),
+	);
+	const [theme, setThemeState] = useState<string>(() => {
+		if (forcedTheme) return forcedTheme;
+
 		if (storageKey) {
-			const theme = localStorage.getItem(storageKey);
-			if (theme && themes.includes(theme)) {
-				return theme;
+			const storedTheme = getStoredTheme(storageKey);
+			if (storedTheme && availableThemes.includes(storedTheme)) {
+				return storedTheme;
 			}
 		}
-		const fallback = themes.includes(defaultTheme) ? defaultTheme : themes[0];
-		if (storageKey) {
-			saveToStorage(storageKey, fallback);
+
+		const fallback = getFallbackTheme(availableThemes, defaultTheme);
+		if (fallback === "system" && !enableSystem) {
+			return themes[0];
 		}
 		return fallback;
 	});
-	const [resolvedTheme, setResolvedTheme] = useState<string>(() => localTheme === 'system' ? getSystemTheme() : localTheme);
 
-  const handleMediaQuery = useEffectEvent((e: MediaQueryListEvent | MediaQueryList) => {
-		const resolved = getSystemTheme(e);
-		setResolvedTheme(resolved);
-		if (localTheme === 'system' && enableSystem && !forcedTheme) {
-			applyThemeToElement({
-				element: isIsolated ? containerRef.current! : document.documentElement,
-				theme: resolved,
-				attributes,
-				themes,
-				enableColorScheme,
-				defaultTheme,
-			})
-		}
+	const resolvedTheme = getResolvedTheme({
+		theme,
+		forcedTheme,
+		systemTheme,
 	});
 
-  const handleStorageChange = (e: StorageEvent) => {
-		if (e.key !== storageKey) return;
-
-		// If default theme set, use it if localstorage === null (happens on local storage manual deletion)
-		if (!e.newValue) {
-			setTheme(defaultTheme)
-		} else {
-			setLocalTheme(e.newValue) // Direct state update to avoid loops
-		}
-	};
-
-  const setTheme = (theme: string | ((prevTheme: string) => string)) => {
-		function handleSetTheme (newTheme: string) {
+	const setTheme = useCallback<ThemeContextValue["setTheme"]>(
+		(value) => {
 			if (forcedTheme) return;
-			setLocalTheme(newTheme);
-			setResolvedTheme(newTheme === 'system' ? getSystemTheme() : newTheme);
-			if (storageKey) {
-				saveToStorage(storageKey, newTheme);
-			}
-		}
-		if (typeof theme === 'function') {
-			const newTheme = theme(localTheme);
-			handleSetTheme(newTheme);
-		} else {
-			handleSetTheme(theme);
-		}
-	};
+
+			setThemeState((prevTheme) => {
+				const nextTheme =
+					typeof value === "function" ? value(prevTheme) : value;
+				if (!availableThemes.includes(nextTheme)) return prevTheme;
+				if (storageKey) {
+					saveToStorage(storageKey, nextTheme);
+				}
+				return nextTheme;
+			});
+		},
+		[availableThemes, forcedTheme, storageKey],
+	);
 
 	useEffect(() => {
-		if (isIsolated && storageKey) {
-			if (usedStorageKeys.has(storageKey)) {
-				throw new Error(`⚠️ 重复的缓存Key: ${storageKey}，多个独立组件使用相同Key会导致缓存覆盖！`);
+		if (forcedTheme) {
+			setThemeState(forcedTheme);
+		}
+	}, [forcedTheme]);
+
+	useEffect(() => {
+		if (!enableSystem) return;
+
+		const media = window.matchMedia(MEDIA);
+		const handleChange = (event: MediaQueryListEvent | MediaQueryList) => {
+			setSystemTheme(getSystemTheme(event));
+		};
+
+		handleChange(media);
+		media.addEventListener("change", handleChange);
+		return () => media.removeEventListener("change", handleChange);
+	}, [enableSystem]);
+
+	useEffect(() => {
+		if (!storageKey || forcedTheme) return;
+
+		const handleStorageChange = (event: StorageEvent) => {
+			if (event.key !== storageKey) return;
+
+			const nextTheme = event.newValue;
+			if (nextTheme && availableThemes.includes(nextTheme)) {
+				setThemeState(nextTheme);
 			} else {
-				usedStorageKeys.add(storageKey);
+				setThemeState(getFallbackTheme(availableThemes, defaultTheme));
 			}
-		}
-    const media = window.matchMedia(MEDIA)
-    media.addEventListener('change', handleMediaQuery)
-    handleMediaQuery(media)
-		window.addEventListener('storage', handleStorageChange)
-    return () => {
-			usedStorageKeys.delete(storageKey || '');
-			window.removeEventListener('storage', handleStorageChange)
-			media.removeEventListener('change', handleMediaQuery)
-		}
-  }, []);
+		};
+
+		window.addEventListener("storage", handleStorageChange);
+		return () => window.removeEventListener("storage", handleStorageChange);
+	}, [availableThemes, defaultTheme, forcedTheme, storageKey]);
 
 	useEffect(() => {
-		const el = asChild === 'html' ? document.documentElement : containerRef.current!;
+		const element =
+			scope === "root" ? document.documentElement : containerRef.current;
+		if (!element) return;
+
+		if (
+			attribute === "class" &&
+			appliedThemeRef.current &&
+			!themes.includes(appliedThemeRef.current)
+		) {
+			element.classList.remove(appliedThemeRef.current);
+		}
+
 		applyThemeToElement({
-			element: el,
-			theme: forcedTheme ?? localTheme,
-			attributes,
+			element,
+			theme: resolvedTheme,
+			attribute,
 			themes,
 			enableColorScheme,
-			defaultTheme,
-		})
-	}, [forcedTheme, localTheme]);
-
-  const contextValue: ThemeContextValue = {
-    theme: localTheme,
+			colorSchemeMap: resolvedColorSchemeMap,
+		});
+		appliedThemeRef.current = resolvedTheme;
+	}, [
+		attribute,
+		enableColorScheme,
+		resolvedColorSchemeMap,
 		resolvedTheme,
-    forcedTheme,
-		themes: enableSystem ? [...themes, 'system'] : themes,
-    systemTheme: (enableSystem ? getSystemTheme() : undefined) as 'light' | 'dark' | undefined,
-    setTheme,
-  };
-  const slot = asChild === 'html' ? 'div' : asChild;
-  return (
-    <ThemeContext value={contextValue}>
-			{
-				asChild === 'html' ? children : createElement(slot, {
-					ref: containerRef,
-					className,
-					id: storageKey,
-				}, children)
-			}
-    </ThemeContext>
-  );
+		scope,
+		themes,
+	]);
+
+	const contextValue = useMemo<ThemeContextValue>(
+		() => ({
+			theme,
+			resolvedTheme,
+			forcedTheme,
+			themes: availableThemes,
+			systemTheme: enableSystem ? systemTheme : undefined,
+			setTheme,
+		}),
+		[
+			availableThemes,
+			enableSystem,
+			forcedTheme,
+			resolvedTheme,
+			setTheme,
+			systemTheme,
+			theme,
+		],
+	);
+
+	return (
+		<ThemeContext value={contextValue}>
+			{scope === "root"
+				? children
+				: createElement(
+						as,
+						{
+							ref: containerRef,
+							className,
+							"data-theme-scope": storageKey,
+						},
+						children,
+					)}
+		</ThemeContext>
+	);
+};
+
+export const ThemeProvider: React.FC<ThemeProviderProps> = ({
+	scope = "root",
+	children,
+	forcedTheme,
+	...props
+}) => {
+	const parentContext = useContext(ThemeContext);
+
+	if (scope === "inherit") {
+		if (!parentContext) {
+			throw new Error("ThemeProvider scope='inherit' requires a parent provider.");
+		}
+		if (forcedTheme) {
+			throw new Error("ThemeProvider scope='inherit' cannot use forcedTheme.");
+		}
+
+		return <ThemeContext value={parentContext}>{children}</ThemeContext>;
+	}
+
+	return (
+		<ActiveThemeProvider scope={scope} forcedTheme={forcedTheme} {...props}>
+			{children}
+		</ActiveThemeProvider>
+	);
 };
 
 export const useTheme = () => {
-  const context = use(ThemeContext);
-  if (context === undefined) {
-    throw new Error("useTheme must be used within a ThemeProvider");
-  }
-  const { theme, themes, setTheme, resolvedTheme, systemTheme, forcedTheme } = context;
-  return {
-    theme,
-    themes,
-		systemTheme,
-		resolvedTheme,
-		forcedTheme,
-    setTheme,
-  };
+	const context = use(ThemeContext);
+	if (context === undefined) {
+		throw new Error("useTheme must be used within a ThemeProvider");
+	}
+
+	return context;
 };

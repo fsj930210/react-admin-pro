@@ -37,7 +37,6 @@ import { Route as layoutsFeaturesThemeIndexRouteImport } from "./pages/(layouts)
 import { Route as layoutsFeaturesResizeIndexRouteImport } from "./pages/(layouts)/features/resize/index";
 import { Route as layoutsFeaturesMoveIndexRouteImport } from "./pages/(layouts)/features/move/index";
 import { Route as layoutsFeaturesMinimaxIndexRouteImport } from "./pages/(layouts)/features/minimax/index";
-import { Route as layoutsFeaturesKeepAliveIndexRouteImport } from "./pages/(layouts)/features/keep-alive/index";
 import { Route as layoutsComponentsTreeIndexRouteImport } from "./pages/(layouts)/components/tree/index";
 import { Route as layoutsComponentsTransferIndexRouteImport } from "./pages/(layouts)/components/transfer/index";
 import { Route as layoutsComponentsTableIndexRouteImport } from "./pages/(layouts)/components/table/index";
@@ -203,12 +202,6 @@ const layoutsFeaturesMinimaxIndexRoute =
     path: "/features/minimax/",
     getParentRoute: () => layoutsRouteRoute,
   } as any);
-const layoutsFeaturesKeepAliveIndexRoute =
-  layoutsFeaturesKeepAliveIndexRouteImport.update({
-    id: "/features/keep-alive/",
-    path: "/features/keep-alive/",
-    getParentRoute: () => layoutsRouteRoute,
-  } as any);
 const layoutsComponentsTreeIndexRoute =
   layoutsComponentsTreeIndexRouteImport.update({
     id: "/components/tree/",
@@ -317,7 +310,6 @@ export interface FileRoutesByFullPath {
   "/components/table/": typeof layoutsComponentsTableIndexRoute;
   "/components/transfer/": typeof layoutsComponentsTransferIndexRoute;
   "/components/tree/": typeof layoutsComponentsTreeIndexRoute;
-  "/features/keep-alive/": typeof layoutsFeaturesKeepAliveIndexRoute;
   "/features/minimax/": typeof layoutsFeaturesMinimaxIndexRoute;
   "/features/move/": typeof layoutsFeaturesMoveIndexRoute;
   "/features/resize/": typeof layoutsFeaturesResizeIndexRoute;
@@ -361,7 +353,6 @@ export interface FileRoutesByTo {
   "/components/table": typeof layoutsComponentsTableIndexRoute;
   "/components/transfer": typeof layoutsComponentsTransferIndexRoute;
   "/components/tree": typeof layoutsComponentsTreeIndexRoute;
-  "/features/keep-alive": typeof layoutsFeaturesKeepAliveIndexRoute;
   "/features/minimax": typeof layoutsFeaturesMinimaxIndexRoute;
   "/features/move": typeof layoutsFeaturesMoveIndexRoute;
   "/features/resize": typeof layoutsFeaturesResizeIndexRoute;
@@ -407,7 +398,6 @@ export interface FileRoutesById {
   "/(layouts)/components/table/": typeof layoutsComponentsTableIndexRoute;
   "/(layouts)/components/transfer/": typeof layoutsComponentsTransferIndexRoute;
   "/(layouts)/components/tree/": typeof layoutsComponentsTreeIndexRoute;
-  "/(layouts)/features/keep-alive/": typeof layoutsFeaturesKeepAliveIndexRoute;
   "/(layouts)/features/minimax/": typeof layoutsFeaturesMinimaxIndexRoute;
   "/(layouts)/features/move/": typeof layoutsFeaturesMoveIndexRoute;
   "/(layouts)/features/resize/": typeof layoutsFeaturesResizeIndexRoute;
@@ -453,7 +443,6 @@ export interface FileRouteTypes {
     | "/components/table/"
     | "/components/transfer/"
     | "/components/tree/"
-    | "/features/keep-alive/"
     | "/features/minimax/"
     | "/features/move/"
     | "/features/resize/"
@@ -497,7 +486,6 @@ export interface FileRouteTypes {
     | "/components/table"
     | "/components/transfer"
     | "/components/tree"
-    | "/features/keep-alive"
     | "/features/minimax"
     | "/features/move"
     | "/features/resize"
@@ -542,7 +530,6 @@ export interface FileRouteTypes {
     | "/(layouts)/components/table/"
     | "/(layouts)/components/transfer/"
     | "/(layouts)/components/tree/"
-    | "/(layouts)/features/keep-alive/"
     | "/(layouts)/features/minimax/"
     | "/(layouts)/features/move/"
     | "/(layouts)/features/resize/"
@@ -768,13 +755,6 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof layoutsFeaturesMinimaxIndexRouteImport;
       parentRoute: typeof layoutsRouteRoute;
     };
-    "/(layouts)/features/keep-alive/": {
-      id: "/(layouts)/features/keep-alive/";
-      path: "/features/keep-alive";
-      fullPath: "/features/keep-alive/";
-      preLoaderRoute: typeof layoutsFeaturesKeepAliveIndexRouteImport;
-      parentRoute: typeof layoutsRouteRoute;
-    };
     "/(layouts)/components/tree/": {
       id: "/(layouts)/components/tree/";
       path: "/components/tree";
@@ -897,7 +877,6 @@ interface layoutsRouteRouteChildren {
   layoutsComponentsTableIndexRoute: typeof layoutsComponentsTableIndexRoute;
   layoutsComponentsTransferIndexRoute: typeof layoutsComponentsTransferIndexRoute;
   layoutsComponentsTreeIndexRoute: typeof layoutsComponentsTreeIndexRoute;
-  layoutsFeaturesKeepAliveIndexRoute: typeof layoutsFeaturesKeepAliveIndexRoute;
   layoutsFeaturesMinimaxIndexRoute: typeof layoutsFeaturesMinimaxIndexRoute;
   layoutsFeaturesMoveIndexRoute: typeof layoutsFeaturesMoveIndexRoute;
   layoutsFeaturesResizeIndexRoute: typeof layoutsFeaturesResizeIndexRoute;
@@ -943,7 +922,6 @@ const layoutsRouteRouteChildren: layoutsRouteRouteChildren = {
   layoutsComponentsTableIndexRoute: layoutsComponentsTableIndexRoute,
   layoutsComponentsTransferIndexRoute: layoutsComponentsTransferIndexRoute,
   layoutsComponentsTreeIndexRoute: layoutsComponentsTreeIndexRoute,
-  layoutsFeaturesKeepAliveIndexRoute: layoutsFeaturesKeepAliveIndexRoute,
   layoutsFeaturesMinimaxIndexRoute: layoutsFeaturesMinimaxIndexRoute,
   layoutsFeaturesMoveIndexRoute: layoutsFeaturesMoveIndexRoute,
   layoutsFeaturesResizeIndexRoute: layoutsFeaturesResizeIndexRoute,

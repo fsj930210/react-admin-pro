@@ -63,10 +63,9 @@ const App = () => {
 	const eventBus = useEventEmitter<AppEvent<unknown>>();
 	return (
 		<ThemeProvider
+			scope="root"
 			storageKey="rap-web-theme"
-			className="size-full"
-			attributes="class"
-			asChild="html"
+			attribute="class"
 			enableSystem
 			enableColorScheme
 			defaultTheme="dark"

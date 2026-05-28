@@ -47,7 +47,7 @@ function ThemePageFeature() {
 
 			<section className="space-y-4">
 				<h3 className="text-xl font-semibold text-foreground">1. 基础主题切换</h3>
-				<ThemeProvider>
+				<ThemeProvider scope="inherit">
 					<ThemeToggle />
 				</ThemeProvider>
 			</section>
@@ -56,11 +56,11 @@ function ThemePageFeature() {
 				<div className="p-6 bg-card rounded-lg shadow-sm border">
 					<h3 className="text-lg font-medium text-foreground mb-4">2. 单独控制区域</h3>
 					<ThemeProvider
+						scope="local"
 						storageKey="rap-isolated-theme"
-						isIsolated={true}
 						enableSystem={true}
-						attributes="class"
-						asChild="section"
+						attribute="class"
+						as="section"
 					>
 						<ThemeToggle />
 					</ThemeProvider>
@@ -70,10 +70,10 @@ function ThemePageFeature() {
 				<div className="p-6 bg-card rounded-lg shadow-sm border">
 					<h3 className="text-lg font-medium text-foreground mb-4">3. 强制主题</h3>
 					<ThemeProvider
-						storageKey="rap-forced-theme"
+						scope="local"
 						enableSystem={true}
-						attributes="class"
-						asChild="section"
+						attribute="class"
+						as="section"
 						forcedTheme="light"
 					>
 						<ThemeToggle />

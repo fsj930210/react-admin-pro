@@ -49,6 +49,7 @@
     "@dnd-kit/sortable": "catalog:",
     "@dnd-kit/utilities": "catalog:",
     "@floating-ui/react-dom": "catalog:",
+    "@iconify/react": "catalog:",
     "@rap/hooks": "workspace:*",
     "@rap/lib": "workspace:*",
     "@rap/styles": "workspace:*",

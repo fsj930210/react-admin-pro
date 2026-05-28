@@ -32,7 +32,11 @@ export function DataGrid<TData>(props: DataGridProps<TData>) {
 
 	const content = (
 		<div
-			className={cn("w-full overflow-hidden", props.border && "border-t border-l")}
+			className={cn(
+				"w-full overflow-hidden",
+				props.scroll?.y != null && "flex h-full min-h-0 flex-col",
+				props.border && "border-t border-l",
+			)}
 			style={view.rootStyle}
 		>
 			<OverlayScrollbarsComponent
