@@ -21,31 +21,19 @@
 		"dev:vite": "vite",
 		"build:vite": "tsc -b && vite build",
 		"preview:vite": "vite preview",
-		"lint:eslint": "eslint --fix",
-		"lint:stylelint": "stylelint --cache --fix \"**/*.{css}\" --cache-location  node_modules/.cache/stylelint/ --allow-empty-input",
-		"lint:biome": "biome check --write",
-		"lint": " pnpm run lint:biome && pnpm run lint:eslint && pnpm run lint:stylelint"
+		"lint": ""
 	},
 	"devDependencies": {
-		"@biomejs/biome": "catalog:",
-		"@rap/biome-config": "workspace:*",
-		"@rap/eslint-config": "workspace:*",
 		"@rap/rsbuild-config": "workspace:*",
-		"@rap/stylelint-config": "workspace:*",
 		"@rap/tailwindcss-config": "workspace:*",
 		"@rap/tsconfig": "workspace:*",
 		"@rap/vite-config": "workspace:*",
 		"@rsbuild/core": "catalog:",
 		"@tanstack/react-router-devtools": "catalog:",
 		"@types/lodash-es": "catalog:",
-		"@types/node": "catalog:",
 		"@types/react": "catalog:",
 		"@types/react-dom": "catalog:",
-		"eslint": "catalog:",
-		"eslint-config-biome": "catalog:",
 		"msw": "catalog:",
-		"stylelint": "catalog:",
-		"typescript": "catalog:",
 		"vite": "catalog:"
 	},
 	"dependencies": {

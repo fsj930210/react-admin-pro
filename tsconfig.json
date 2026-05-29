@@ -1,0 +1,23 @@
+{
+  "extends": "@rap/tsconfig/web.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@rap/*": ["packages/*/src"],
+      "@rap/*/*": ["packages/*/src/*"]
+    },
+    "noEmit": true,
+    "incremental": true,
+    "tsBuildInfoFile": ".tsbuildinfo"
+  },
+  "files": [],
+  "references": [
+    { "path": "./apps/web-app" },
+    { "path": "./apps/admin" },
+    { "path": "./packages/components/ui" },
+    { "path": "./packages/components/pro" },
+    { "path": "./packages/hooks" },
+    { "path": "./packages/utils" },
+    { "path": "./packages/types" }
+  ]
+}

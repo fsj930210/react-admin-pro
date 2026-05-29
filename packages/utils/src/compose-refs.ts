@@ -16,7 +16,7 @@ function setRef<T>(ref: PossibleRef<T>, value: T) {
   }
 
   if (ref !== null && ref !== undefined) {
-    ref.current = value;
+    (ref as React.MutableRefObject<T | null>).current = value as any;
   }
 }
 
@@ -25,20 +25,16 @@ function setRef<T>(ref: PossibleRef<T>, value: T) {
  * Accepts callback refs and RefObject(s)
  */
 function composeRefs<T>(...refs: PossibleRef<T>[]): React.RefCallback<T> {
-  return (node) => {
+  return (node: T | null) => {
     let hasCleanup = false;
     const cleanups = refs.map((ref) => {
-      const cleanup = setRef(ref, node);
+      const cleanup = setRef(ref, node as any);
       if (!hasCleanup && typeof cleanup === "function") {
         hasCleanup = true;
       }
-      return cleanup;
+      return cleanup as any;
     });
 
-    // React <19 will log an error to the console if a callback ref returns a
-    // value. We don't use ref cleanups internally so this will only happen if a
-    // user's ref callback returns a value, which we only expect if they are
-    // using the cleanup functionality added in React 19.
     if (hasCleanup) {
       return () => {
         for (let i = 0; i < cleanups.length; i++) {
@@ -46,7 +42,7 @@ function composeRefs<T>(...refs: PossibleRef<T>[]): React.RefCallback<T> {
           if (typeof cleanup === "function") {
             cleanup();
           } else {
-            setRef(refs[i], null);
+            setRef(refs[i], null as any);
           }
         }
       };
@@ -60,7 +56,7 @@ function composeRefs<T>(...refs: PossibleRef<T>[]): React.RefCallback<T> {
  */
 function useComposedRefs<T>(...refs: PossibleRef<T>[]): React.RefCallback<T> {
   // biome-ignore lint/correctness/useExhaustiveDependencies: we want to memoize by all values
-  return React.useCallback(composeRefs(...refs), refs);
+  return React.useCallback(composeRefs(...refs), refs as any);
 }
 
 export { composeRefs, useComposedRefs };

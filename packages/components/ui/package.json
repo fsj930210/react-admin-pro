@@ -15,20 +15,15 @@
   "private": true,
   "scripts": {},
   "devDependencies": {
-    "@biomejs/biome": "catalog:",
-    "@rap/biome-config": "workspace:*",
-    "@rap/eslint-config": "workspace:*",
     "@rap/tailwindcss-config": "workspace:*",
     "@rap/tsconfig": "workspace:*",
     "@tailwindcss/typography": "catalog:",
-    "@types/node": "catalog:",
     "@types/qrcode": "catalog:",
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
-    "eslint": "catalog:",
-    "eslint-config-biome": "catalog:",
     "tw-animate-css": "catalog:",
-    "typescript": "catalog:"
+    "react": "catalog:",
+    "react-dom": "catalog:"
   },
   "exports": {
     "./*": "./src/components/*.tsx",
@@ -51,7 +46,6 @@
     "@floating-ui/react-dom": "catalog:",
     "@iconify/react": "catalog:",
     "@rap/hooks": "workspace:*",
-    "@rap/lib": "workspace:*",
     "@rap/styles": "workspace:*",
     "@rap/utils": "workspace:*",
     "@tanstack/react-form": "catalog:",
@@ -82,9 +76,7 @@
     "media-chrome": "catalog:",
     "qrcode": "catalog:",
     "radix-ui": "catalog:",
-    "react": "catalog:",
     "react-day-picker": "catalog:",
-    "react-dom": "catalog:",
     "react-medium-image-zoom": "catalog:",
     "react-resizable-panels": "catalog:",
     "recharts": "catalog:",
@@ -92,5 +84,10 @@
     "tailwind-merge": "catalog:",
     "vaul": "catalog:",
     "zod": "catalog:"
+  }
+  ,
+  "peerDependencies": {
+    "react": "catalog:",
+    "react-dom": "catalog:"
   }
 }

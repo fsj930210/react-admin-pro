@@ -40,7 +40,7 @@ import {
 } from "radix-ui";
 import * as React from "react";
 import * as ReactDOM from "react-dom";
-import { useComposedRefs } from "@rap/lib/compose-refs";
+import { useComposedRefs } from "@rap/utils/compose-refs";
 import { cn } from "@rap/utils";
 import { useLazyRef } from "@rap/hooks/use-lazy-ref";
 import { Badge } from "./badge";

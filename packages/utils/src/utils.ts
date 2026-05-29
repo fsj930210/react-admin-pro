@@ -171,3 +171,5 @@ export const isNonNullable = <T>(val: T): val is NonNullable<T> => {
 export const isThenable = <T>(val: any): val is PromiseLike<T> => {
   return isNonNullable(val) && isFunction(val.then);
 };
+
+export * from './compose-refs';

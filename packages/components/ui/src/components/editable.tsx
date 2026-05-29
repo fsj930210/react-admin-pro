@@ -5,7 +5,7 @@ import {
   Slot as SlotPrimitive,
 } from "radix-ui";
 import * as React from "react";
-import { useComposedRefs } from "@rap/lib/compose-refs";
+import { useComposedRefs } from "@rap/utils/compose-refs";
 import { cn } from "@rap/utils";
 import { VisuallyHiddenInput } from "./visually-hidden-input";
 import { useAsRef } from "@rap/hooks/use-as-ref";

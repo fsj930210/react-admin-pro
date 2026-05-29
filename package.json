@@ -36,13 +36,17 @@
 	"type": "module",
 	"packageManager": "pnpm@11.0.8",
 	"devDependencies": {
-		"@biomejs/monorepo": "catalog:",
 		"@rap/commitlint-config": "workspace:*",
 		"commitlint": "catalog:",
 		"husky": "catalog:",
-		"turbo": "catalog:"
-	},
-	"dependencies": {
-		"@dnd-kit/sortable": "catalog:"
+		"oxfmt": "catalog:",
+		"oxlint": "catalog:",
+		"turbo": "catalog:",
+		"typescript": "catalog:",
+		"@types/node": "catalog:",
+		"react": "catalog:",
+		"react-dom": "catalog:",
+		"@types/react": "catalog:",
+		"@types/react-dom": "catalog:"
 	}
 }

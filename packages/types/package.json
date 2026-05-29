@@ -9,12 +9,6 @@
 		}
 	},
 	"devDependencies": {
-		"@biomejs/biome": "catalog:",
-		"@rap/biome-config": "workspace:*",
-		"@rap/eslint-config": "workspace:*",
-		"@rap/tsconfig": "workspace:*",
-		"eslint": "catalog:",
-		"eslint-config-biome": "catalog:",
-		"typescript": "catalog:"
+		"@rap/tsconfig": "workspace:*"
 	}
 }

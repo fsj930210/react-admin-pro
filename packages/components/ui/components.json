@@ -16,7 +16,7 @@
     "utils": "@rap/utils",
     "ui": "@rap/components-ui/components",
     "hooks": "@rap/hooks",
-    "lib": "@rap/lib"
+    "lib": "@rap/utils"
   },
   "registries": {
     "@diceui": "https://diceui.com/r/{name}.json"

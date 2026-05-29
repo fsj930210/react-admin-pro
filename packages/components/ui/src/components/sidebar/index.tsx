@@ -6,7 +6,7 @@ import { PanelLeftOpen, PanelLeftClose } from "lucide-react";
 import * as React from "react";
 
 import { useIsMobile } from "@rap/hooks/use-mobile";
-import { composeRefs } from "@rap/lib/compose-refs";
+import { composeRefs } from "@rap/utils/compose-refs";
 import { cn } from "@rap/utils";
 import { Button } from "../button";
 import { Input } from "../input";

@@ -18,7 +18,6 @@
 	"devDependencies": {
 		"@rap/tsconfig": "workspace:*",
 		"@rsbuild/core": "catalog:",
-		"@types/node": "catalog:",
 		"msw": "catalog:",
 		"vite": "catalog:"
 	}

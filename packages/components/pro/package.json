@@ -29,7 +29,9 @@
 		"class-variance-authority": "catalog:",
 		"lucide-react": "catalog:",
 		"overlayscrollbars": "catalog:",
-		"overlayscrollbars-react": "catalog:",
+		"overlayscrollbars-react": "catalog:"
+	},
+	"peerDependencies": {
 		"react": "catalog:",
 		"react-dom": "catalog:"
 	},
@@ -43,17 +45,12 @@
 		"./data-grid": "./src/components/data-grid/index.ts"
 	},
 	"devDependencies": {
-		"@biomejs/biome": "catalog:",
-		"@rap/biome-config": "workspace:*",
-		"@rap/eslint-config": "workspace:*",
 		"@rap/tailwindcss-config": "workspace:*",
 		"@rap/tsconfig": "workspace:*",
 		"@types/lodash-es": "catalog:",
-		"@types/node": "catalog:",
 		"@types/react": "catalog:",
 		"@types/react-dom": "catalog:",
-		"eslint": "catalog:",
-		"eslint-config-biome": "catalog:",
-		"typescript": "catalog:"
+		"react": "catalog:",
+		"react-dom": "catalog:"
 	}
 }

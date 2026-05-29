@@ -1,0 +1,9 @@
+{
+	"name": "@rap/oxc-config",
+	"version": "0.0.1",
+	"type": "module",
+	"exports": {
+		"./oxlint.json": "./src/oxlint.json",
+		"./oxfmt.json": "./src/oxfmt.json"
+	}
+}
