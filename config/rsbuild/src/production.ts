@@ -4,8 +4,6 @@ import {
 	mergeRsbuildConfig,
 } from "@rsbuild/core";
 
-const needAnalyzer = process.env.analyzer;
-
 export function defineRsbuildProdConfig(options: RsbuildConfig = {}) {
 	// 基础生产配置
 	const baseProdConfig = defineRsbuildConfig({
@@ -14,13 +12,6 @@ export function defineRsbuildProdConfig(options: RsbuildConfig = {}) {
 			preload: {
 				type: "async-chunks",
 			},
-			bundleAnalyze: needAnalyzer
-				? {
-						analyzerMode: "server",
-						openAnalyzer: true,
-						analyzerPort: 5001,
-					}
-				: undefined,
 			chunkSplit: {
 				strategy: "split-by-size",
 				override: {
@@ -29,6 +20,48 @@ export function defineRsbuildProdConfig(options: RsbuildConfig = {}) {
 							test: /node_modules[\\/](react|react-dom)[\\/]/,
 							name: "react",
 							chunks: "all",
+						},
+						iconify: {
+							test: /node_modules[\\/](@iconify|@iconify-json)[\\/]/,
+							name: "iconify",
+							chunks: "all",
+							priority: 40,
+						},
+						echarts: {
+							test: /node_modules[\\/](echarts|zrender|echarts-for-react)[\\/]/,
+							name: "echarts",
+							chunks: "all",
+							priority: 30,
+						},
+						tiptap: {
+							test: /node_modules[\\/](@tiptap|prosemirror-[^\\/]+|lowlight|highlight\.js|marked|linkifyjs|orderedmap)[\\/]/,
+							name: "tiptap",
+							chunks: "all",
+							priority: 30,
+						},
+						tanstackRouterQuery: {
+							test: /node_modules[\\/]@tanstack[\\/](react-query|query-core|react-router|router-core|history|store|react-store)[\\/]/,
+							name: "tanstack-router-query",
+							chunks: "all",
+							priority: 20,
+						},
+						tanstackData: {
+							test: /node_modules[\\/]@tanstack[\\/](react-table|table-core|react-virtual|virtual-core|react-form|form-core)[\\/]/,
+							name: "tanstack-data",
+							chunks: "all",
+							priority: 20,
+						},
+						radix: {
+							test: /node_modules[\\/]@radix-ui[\\/]/,
+							name: "radix",
+							chunks: "all",
+							priority: 20,
+						},
+						dnd: {
+							test: /node_modules[\\/]@dnd-kit[\\/]/,
+							name: "dnd-kit",
+							chunks: "all",
+							priority: 20,
 						},
 					},
 				},

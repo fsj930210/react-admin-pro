@@ -1,4 +1,4 @@
-import { useRef, useEffect } from 'react';
+import { useRef, useEffect } from "react";
 
 type Subscription<T> = (val: T) => void;
 
@@ -37,4 +37,3 @@ export const useEventEmitter = <T = void>() => {
   }
   return ref.current;
 };
-

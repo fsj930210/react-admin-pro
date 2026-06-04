@@ -1,5 +1,5 @@
-import { CodeBlockLowlight as TiptapCodeBlockLowlight } from "@tiptap/extension-code-block-lowlight"
-import { common, createLowlight } from "lowlight"
+import { CodeBlockLowlight as TiptapCodeBlockLowlight } from "@tiptap/extension-code-block-lowlight";
+import { common, createLowlight } from "lowlight";
 
 export const CodeBlockLowlight = TiptapCodeBlockLowlight.extend({
   addOptions() {
@@ -10,13 +10,13 @@ export const CodeBlockLowlight = TiptapCodeBlockLowlight.extend({
       HTMLAttributes: {
         class: "block-node",
       },
-      languageClassPrefix: 'language-',
+      languageClassPrefix: "language-",
       exitOnTripleEnter: true,
       exitOnArrowDown: true,
       enableTabIndentation: false,
       tabSize: 4,
-    }
+    };
   },
-})
+});
 
-export default CodeBlockLowlight
+export default CodeBlockLowlight;

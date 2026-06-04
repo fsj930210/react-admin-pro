@@ -1,4 +1,4 @@
-import { HorizontalRule as TiptapHorizontalRule } from "@tiptap/extension-horizontal-rule"
+import { HorizontalRule as TiptapHorizontalRule } from "@tiptap/extension-horizontal-rule";
 
 export const HorizontalRule = TiptapHorizontalRule.extend({
   addKeyboardShortcuts() {
@@ -7,8 +7,8 @@ export const HorizontalRule = TiptapHorizontalRule.extend({
         this.editor.commands.insertContent({
           type: this.name,
         }),
-    }
+    };
   },
-})
+});
 
-export default HorizontalRule
+export default HorizontalRule;

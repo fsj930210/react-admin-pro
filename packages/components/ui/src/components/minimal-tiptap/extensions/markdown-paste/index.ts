@@ -1,2 +1,1 @@
-export * from "./markdown-paste"
-
+export * from "./markdown-paste";

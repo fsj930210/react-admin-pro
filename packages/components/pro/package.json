@@ -1,56 +1,65 @@
 {
-	"name": "@rap/components-pro",
-	"version": "0.0.1",
-	"description": "High-level UI components for React Admin Pro built on top of base components",
-	"keywords": [
-		"react",
-		"ui-components",
-		"admin-ui",
-		"layouts",
-		"dashboard",
-		"tailwindcss"
-	],
-	"type": "module",
-	"dependencies": {
-		"@dnd-kit/abstract": "catalog:",
-		"@dnd-kit/helpers": "catalog:",
-		"@dnd-kit/react": "catalog:",
-		"@dnd-kit/sortable": "catalog:",
-		"@iconify-json/carbon": "catalog:",
-		"@iconify-json/lucide": "catalog:",
-		"@iconify-json/ri": "catalog:",
-		"@iconify/react": "catalog:",
-		"@rap/components-ui": "workspace:*",
-		"@rap/hooks": "workspace:*",
-		"@rap/utils": "workspace:*",
-		"@tanstack/react-router": "catalog:",
-		"@tanstack/react-table": "catalog:",
-		"@tanstack/react-virtual": "catalog:",
-		"class-variance-authority": "catalog:",
-		"lucide-react": "catalog:",
-		"overlayscrollbars": "catalog:",
-		"overlayscrollbars-react": "catalog:"
-	},
-	"peerDependencies": {
-		"react": "catalog:",
-		"react-dom": "catalog:"
-	},
-	"exports": {
-		"./input": "./src/components/input/index.tsx",
-		"./icon": "./src/components/icon/index.tsx",
-		"./dialog": "./src/components/dialog/index.tsx",
-		"./pagination": "./src/components/pagination/index.tsx",
-		"./route-keep-alive": "./src/components/route-keep-alive/index.tsx",
-		"./tree": "./src/components/tree/index.tsx",
-		"./data-grid": "./src/components/data-grid/index.ts"
-	},
-	"devDependencies": {
-		"@rap/tailwindcss-config": "workspace:*",
-		"@rap/tsconfig": "workspace:*",
-		"@types/lodash-es": "catalog:",
-		"@types/react": "catalog:",
-		"@types/react-dom": "catalog:",
-		"react": "catalog:",
-		"react-dom": "catalog:"
-	}
+  "name": "@rap/components-pro",
+  "version": "0.0.1",
+  "description": "High-level UI components for React Admin Pro built on top of base components",
+  "keywords": [
+    "admin-ui",
+    "dashboard",
+    "layouts",
+    "react",
+    "tailwindcss",
+    "ui-components"
+  ],
+  "type": "module",
+  "exports": {
+    "./input": "./src/components/input/index.tsx",
+    "./icon": "./src/components/icon/index.tsx",
+    "./dialog": "./src/components/dialog/index.tsx",
+    "./markdown": "./src/components/markdown/index.tsx",
+    "./pagination": "./src/components/pagination/index.tsx",
+    "./route-keep-alive": "./src/components/route-keep-alive/index.tsx",
+    "./tree": "./src/components/tree/index.tsx"
+  },
+  "scripts": {
+    "lint": "oxfmt --check -c ./oxfmt.config.ts . && oxlint -c ./oxlint.config.ts .",
+    "lint:fix": "oxlint -c ./oxlint.config.ts . --fix && oxfmt --write -c ./oxfmt.config.ts ."
+  },
+  "dependencies": {
+    "@dnd-kit/abstract": "catalog:",
+    "@dnd-kit/helpers": "catalog:",
+    "@dnd-kit/react": "catalog:",
+    "@iconify-json/carbon": "catalog:",
+    "@iconify-json/lucide": "catalog:",
+    "@iconify-json/ri": "catalog:",
+    "@iconify/react": "catalog:",
+    "@rap/components-ui": "workspace:*",
+    "@rap/hooks": "workspace:*",
+    "@rap/utils": "workspace:*",
+    "@tanstack/react-router": "catalog:",
+    "@tanstack/react-table": "catalog:",
+    "@tanstack/react-virtual": "catalog:",
+    "class-variance-authority": "catalog:",
+    "framer-motion": "catalog:",
+    "highlight.js": "catalog:",
+    "lucide-react": "catalog:",
+    "react-markdown": "catalog:",
+    "rehype-highlight": "catalog:",
+    "rehype-raw": "catalog:",
+    "rehype-sanitize": "catalog:",
+    "remark-gfm": "catalog:"
+  },
+  "devDependencies": {
+    "@rap/oxc-config": "workspace:*",
+    "@rap/tailwindcss-config": "workspace:*",
+    "@rap/tsconfig": "workspace:*",
+    "@types/lodash-es": "catalog:",
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
+    "react": "catalog:",
+    "react-dom": "catalog:"
+  },
+  "peerDependencies": {
+    "react": "catalog:",
+    "react-dom": "catalog:"
+  }
 }

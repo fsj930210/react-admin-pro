@@ -1,14 +1,19 @@
 {
-	"name": "@rap/types",
-	"version": "0.0.1",
-	"type": "module",
-	"exports": {
-		"./type-utils": {
-			"types": "./src/type-utils.ts",
-			"default": "./src/type-utils.ts"
-		}
-	},
-	"devDependencies": {
-		"@rap/tsconfig": "workspace:*"
-	}
+  "name": "@rap/types",
+  "version": "0.0.1",
+  "type": "module",
+  "scripts": {
+    "lint": "oxfmt --check -c ./oxfmt.config.ts . && oxlint -c ./oxlint.config.ts .",
+    "lint:fix": "oxlint -c ./oxlint.config.ts . --fix && oxfmt --write -c ./oxfmt.config.ts ."
+  },
+  "exports": {
+    "./type-utils": {
+      "types": "./src/type-utils.ts",
+      "default": "./src/type-utils.ts"
+    }
+  },
+  "devDependencies": {
+    "@rap/oxc-config": "workspace:*",
+    "@rap/tsconfig": "workspace:*"
+  }
 }

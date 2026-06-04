@@ -1,9 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/(layouts)/nested-menu/nested-menu-1/nested-menu-1-3")({
-	component: RouteComponent,
+  component: RouteComponent,
 });
 
 function RouteComponent() {
-	return <div>嵌套菜单-1-3（三级菜单-1-3）</div>;
+  return <div>嵌套菜单-1-3（三级菜单-1-3）</div>;
 }

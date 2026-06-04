@@ -1,21 +1,14 @@
-import * as React from "react"
-import { cn } from "@rap/utils"
-import { getShortcutKey } from "../utils"
+import * as React from "react";
+import { cn } from "@rap/utils";
+import { getShortcutKey } from "../utils";
 
 export interface ShortcutKeyProps extends React.ComponentProps<"span"> {
-  keys: string[]
+  keys: string[];
 }
 
-export const ShortcutKey = ({
-  ref,
-  className,
-  keys,
-  ...props
-}: ShortcutKeyProps) => {
-  const modifiedKeys = keys.map((key) => getShortcutKey(key))
-  const ariaLabel = modifiedKeys
-    .map((shortcut) => shortcut.readable)
-    .join(" + ")
+export const ShortcutKey = ({ ref, className, keys, ...props }: ShortcutKeyProps) => {
+  const modifiedKeys = keys.map((key) => getShortcutKey(key));
+  const ariaLabel = modifiedKeys.map((shortcut) => shortcut.readable).join(" + ");
 
   return (
     <span
@@ -39,7 +32,7 @@ export const ShortcutKey = ({
         </kbd>
       ))}
     </span>
-  )
-}
+  );
+};
 
-ShortcutKey.displayName = "ShortcutKey"
+ShortcutKey.displayName = "ShortcutKey";

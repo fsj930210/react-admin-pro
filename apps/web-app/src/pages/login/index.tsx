@@ -3,9 +3,9 @@ import { ClassicLogin } from "./-components/classic-login";
 // import { DialogLogin } from "./-components/dialog-login";
 
 export const Route = createFileRoute("/login/")({
-	component: LoginPage,
+  component: LoginPage,
 });
 
 function LoginPage() {
-	return <ClassicLogin />;
+  return <ClassicLogin />;
 }

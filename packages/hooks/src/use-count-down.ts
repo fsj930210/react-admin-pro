@@ -1,7 +1,7 @@
-import dayjs from 'dayjs';
-import { useEffect, useMemo, useState } from 'react';
-import {useLatest} from './use-latest';
-import { isNumber } from '@rap/utils';
+import dayjs from "dayjs";
+import { useEffect, useMemo, useState } from "react";
+import { useLatest } from "./use-latest";
+import { isNumber } from "@rap/utils";
 
 export type TDate = dayjs.ConfigType;
 
@@ -46,7 +46,7 @@ export const useCountdown = (options: Options = {}) => {
     return isNumber(leftTime) && leftTime > 0 ? Date.now() + leftTime : undefined;
   }, [leftTime]);
 
-  const target = 'leftTime' in options ? memoLeftTime : targetDate;
+  const target = "leftTime" in options ? memoLeftTime : targetDate;
 
   const [timeLeft, setTimeLeft] = useState(() => calcLeft(target));
 
@@ -72,7 +72,7 @@ export const useCountdown = (options: Options = {}) => {
     }, interval);
 
     return () => clearInterval(timer);
-  }, [target, interval]);
+  }, [target, interval, onEndRef]);
 
   const formattedRes = useMemo(() => parseMs(timeLeft), [timeLeft]);
 

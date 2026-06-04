@@ -42,13 +42,11 @@ function BadgeOverflow<T = string>(props: BadgeOverflowProps<T>) {
   const getBadgeLabel = React.useCallback(
     (item: T): string => {
       if (typeof item === "object" && !getBadgeLabelProp) {
-        throw new Error(
-          "`getBadgeLabel` is required when using array of objects",
-        );
+        throw new Error("`getBadgeLabel` is required when using array of objects");
       }
       return getBadgeLabelProp ? getBadgeLabelProp(item) : (item as string);
     },
-    [getBadgeLabelProp],
+    [getBadgeLabelProp]
   );
 
   const rootRef = React.useRef<BadgeOverflowElement | null>(null);
@@ -59,9 +57,7 @@ function BadgeOverflow<T = string>(props: BadgeOverflowProps<T>) {
   const [badgeHeight, setBadgeHeight] = React.useState(20);
   const [overflowBadgeWidth, setOverflowBadgeWidth] = React.useState(40);
   const [isMeasured, setIsMeasured] = React.useState(false);
-  const [badgeWidths, setBadgeWidths] = React.useState<Map<string, number>>(
-    new Map(),
-  );
+  const [badgeWidths, setBadgeWidths] = React.useState<Map<string, number>>(new Map());
 
   React.useLayoutEffect(() => {
     if (!rootRef.current || !measureRef.current) return;
@@ -96,9 +92,7 @@ function BadgeOverflow<T = string>(props: BadgeOverflowProps<T>) {
         setBadgeHeight(firstBadge.offsetHeight || 20);
       }
 
-      const overflowChild = measureChildren[items.length] as
-        | HTMLElement
-        | undefined;
+      const overflowChild = measureChildren[items.length] as HTMLElement | undefined;
 
       if (overflowChild) {
         setOverflowBadgeWidth(overflowChild.offsetWidth || 40);
@@ -121,7 +115,7 @@ function BadgeOverflow<T = string>(props: BadgeOverflowProps<T>) {
 
   const placeholderHeight = React.useMemo(
     () => badgeHeight * lineCount + badgeGap * (lineCount - 1),
-    [badgeHeight, badgeGap, lineCount],
+    [badgeHeight, badgeGap, lineCount]
   );
 
   const { visibleItems, hiddenCount } = React.useMemo(() => {
@@ -171,15 +165,7 @@ function BadgeOverflow<T = string>(props: BadgeOverflowProps<T>) {
       visibleItems: visible,
       hiddenCount: Math.max(0, items.length - visible.length),
     };
-  }, [
-    items,
-    getBadgeLabel,
-    containerWidth,
-    lineCount,
-    badgeGap,
-    overflowBadgeWidth,
-    badgeWidths,
-  ]);
+  }, [items, getBadgeLabel, containerWidth, lineCount, badgeGap, overflowBadgeWidth, badgeWidths]);
 
   const Comp = asChild ? SlotPrimitive.Slot : "div";
 
@@ -191,9 +177,7 @@ function BadgeOverflow<T = string>(props: BadgeOverflowProps<T>) {
         style={{ gap: badgeGap }}
       >
         {items.map((item, index) => (
-          <React.Fragment key={index}>
-            {renderBadge(item, getBadgeLabel(item))}
-          </React.Fragment>
+          <React.Fragment key={index}>{renderBadge(item, getBadgeLabel(item))}</React.Fragment>
         ))}
         {renderOverflow ? (
           renderOverflow(99)
@@ -215,9 +199,7 @@ function BadgeOverflow<T = string>(props: BadgeOverflowProps<T>) {
           }}
         >
           {visibleItems.map((item, index) => (
-            <React.Fragment key={index}>
-              {renderBadge(item, getBadgeLabel(item))}
-            </React.Fragment>
+            <React.Fragment key={index}>{renderBadge(item, getBadgeLabel(item))}</React.Fragment>
           ))}
           {hiddenCount > 0 &&
             (renderOverflow ? (
@@ -241,14 +223,9 @@ function BadgeOverflow<T = string>(props: BadgeOverflowProps<T>) {
           }}
         >
           {items
-            .slice(
-              0,
-              Math.min(items.length, lineCount * 3 - (lineCount > 1 ? 1 : 0)),
-            )
+            .slice(0, Math.min(items.length, lineCount * 3 - (lineCount > 1 ? 1 : 0)))
             .map((item, index) => (
-              <React.Fragment key={index}>
-                {renderBadge(item, getBadgeLabel(item))}
-              </React.Fragment>
+              <React.Fragment key={index}>{renderBadge(item, getBadgeLabel(item))}</React.Fragment>
             ))}
         </Comp>
       )}

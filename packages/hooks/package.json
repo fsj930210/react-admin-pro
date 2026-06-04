@@ -11,10 +11,15 @@
   ],
   "private": true,
   "type": "module",
+  "scripts": {
+    "lint": "oxfmt --check -c ./oxfmt.config.ts . && oxlint -c ./oxlint.config.ts .",
+    "lint:fix": "oxlint -c ./oxlint.config.ts . --fix && oxfmt --write -c ./oxfmt.config.ts ."
+  },
   "exports": {
     "./*": "./src/*.ts"
   },
   "devDependencies": {
+    "@rap/oxc-config": "workspace:*",
     "@rap/tsconfig": "workspace:*",
     "@types/lodash-es": "catalog:",
     "@types/react": "catalog:",
@@ -26,9 +31,8 @@
     "immer": "catalog:",
     "lodash-es": "catalog:",
     "zustand": "catalog:"
+  },
+  "peerDependencies": {
+    "react": "catalog:"
   }
-	,
-	"peerDependencies": {
-		"react": "catalog:"
-	}
 }

@@ -17,12 +17,12 @@
 
   &::-webkit-scrollbar {
     display: none !important;
-		width: 0 !important;
-		height: 0 !important;
+    width: 0 !important;
+    height: 0 !important;
   }
-	&::-webkit-scrollbar-track {
-		display: none !important;
-	}
+  &::-webkit-scrollbar-track {
+    display: none !important;
+  }
 }
 
 @utility inline-flex-center {
@@ -30,23 +30,10 @@
 }
 
 @utility ribbon-breadcrumb {
-  clip-path: polygon(
-    0 0,
-    calc(100% - 10px) 0,
-    100% 50%,
-    calc(100% - 10px) 100%,
-    0 100%,
-    10px 50%
-  );
+  clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 50%, calc(100% - 10px) 100%, 0 100%, 10px 50%);
 }
 @utility ribbon-breadcrumb-first {
-  clip-path: polygon(
-    0 0,
-    calc(100% - 10px) 0,
-    100% 50%,
-    calc(100% - 10px) 100%,
-    0 100%
-  );
+  clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 50%, calc(100% - 10px) 100%, 0 100%);
 }
 @utility ribbon-breadcrumb-last {
   clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%, 10px 50%);
@@ -56,12 +43,7 @@
   clip-path: polygon(8px 0, 100% 0, calc(100% - 8px) 100%, 0 100%);
 }
 @utility capsule-breadcrumb {
-  mask: radial-gradient(
-      circle 0.5lh at 0 50%,
-      #0000 calc(0.5lh + 0.11em),
-      #000 0
-    )
-    0 0;
+  mask: radial-gradient(circle 0.5lh at 0 50%, #0000 calc(0.5lh + 0.11em), #000 0) 0 0;
 }
 
 /* Pinned column shadow utilities */
@@ -80,7 +62,7 @@
 
 .data-grid-pinned-shadow::before,
 .data-grid-pinned-shadow::after {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   bottom: 0;
@@ -90,14 +72,21 @@
   pointer-events: none;
 }
 
-.data-grid-pinned-shadow[data-left-shadow='true']::before {
+.data-grid-pinned-shadow[data-left-shadow="true"]::before {
   left: var(--data-grid-pinned-left-width);
   display: block;
   box-shadow: inset 10px 0 8px -8px #00000026;
 }
 
-.data-grid-pinned-shadow[data-right-shadow='true']::after {
+.data-grid-pinned-shadow[data-right-shadow="true"]::after {
   right: var(--data-grid-pinned-right-width);
   display: block;
   box-shadow: inset -10px 0 8px -8px #00000026;
+}
+
+.rap-data-grid-scrollbar.os-theme-dark,
+.rap-data-grid-scrollbar.os-theme-light {
+  --os-handle-bg: var(--rap-data-grid-os-handle-bg);
+  --os-handle-bg-hover: var(--rap-data-grid-os-handle-bg-hover);
+  --os-handle-bg-active: var(--rap-data-grid-os-handle-bg-active);
 }

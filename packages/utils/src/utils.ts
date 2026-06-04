@@ -22,69 +22,69 @@ export interface TreeNode {
 export function traverseTree<T extends TreeNode>(
   tree: T[],
   callback: (node: T, level: number, path: T[]) => boolean | void,
-  traversalType: 'dfs' | 'bfs' = 'dfs'
+  traversalType: "dfs" | "bfs" = "dfs"
 ): T | null {
-  if (traversalType === 'dfs') {
+  if (traversalType === "dfs") {
     const stack: Array<{ node: T; level: number; path: T[] }> = [];
-    
+
     const len = tree.length;
     for (let i = 0; i < len; i++) {
       stack.push({ node: tree[i], level: 0, path: [] });
     }
-    
+
     while (stack.length > 0) {
       const { node, level, path } = stack.pop()!;
-      
+
       const result = callback(node, level, path);
       if (result === true) {
         return node;
       }
-      
+
       if (node.children && node.children.length > 0) {
         const children = node.children as T[];
         const childrenLen = children.length;
         for (let i = childrenLen - 1; i >= 0; i--) {
-          stack.push({ 
-            node: children[i], 
-            level: level + 1, 
-            path: [...path, children[i]] 
+          stack.push({
+            node: children[i],
+            level: level + 1,
+            path: [...path, children[i]],
           });
         }
       }
     }
   } else {
     const queue: Array<{ node: T; level: number; path: T[] }> = [];
-    
+
     const len = tree.length;
     for (let i = 0; i < len; i++) {
       queue.push({ node: tree[i], level: 0, path: [] });
     }
-    
+
     let index = 0;
     while (index < queue.length) {
       const { node, level, path } = queue[index];
-      
+
       const result = callback(node, level, path);
       if (result === true) {
         return node;
       }
-      
+
       if (node.children && node.children.length > 0) {
         const children = node.children as T[];
         const childrenLen = children.length;
         for (let i = 0; i < childrenLen; i++) {
-          queue.push({ 
-            node: children[i], 
-            level: level + 1, 
-            path: [...path, children[i]] 
+          queue.push({
+            node: children[i],
+            level: level + 1,
+            path: [...path, children[i]],
           });
         }
       }
-      
+
       index++;
     }
   }
-  
+
   return null;
 }
 
@@ -98,7 +98,7 @@ export function dfsSearch<T extends TreeNode>(
   tree: T[],
   callback: (node: T, level: number, path: T[]) => boolean | void
 ): T | null {
-  return traverseTree(tree, callback, 'dfs');
+  return traverseTree(tree, callback, "dfs");
 }
 
 /**
@@ -111,7 +111,7 @@ export function bfsSearch<T extends TreeNode>(
   tree: T[],
   callback: (node: T, level: number, path: T[]) => boolean | void
 ): T | null {
-  return traverseTree(tree, callback, 'bfs');
+  return traverseTree(tree, callback, "bfs");
 }
 
 type RuntimeImportMeta = ImportMeta & {
@@ -132,36 +132,36 @@ const runtimeMode =
   (import.meta as RuntimeImportMeta).env?.MODE ??
   (globalThis as RuntimeGlobal).process?.env?.NODE_ENV;
 
-export const isDev = runtimeMode === 'development';
+export const isDev = runtimeMode === "development";
 
 export const isBrowser = !!(
-  typeof window !== 'undefined' &&
+  typeof window !== "undefined" &&
   window.document &&
   window.document.createElement
 );
 
 export const isObject = (val: unknown): val is Record<PropertyKey, any> => {
-  return val !== null && typeof val === 'object';
+  return val !== null && typeof val === "object";
 };
 
 export const isFunction = (val: unknown): val is (...args: any[]) => any => {
-  return typeof val === 'function';
+  return typeof val === "function";
 };
 
 export const isString = (val: unknown): val is string => {
-  return typeof val === 'string';
+  return typeof val === "string";
 };
 
 export const isBoolean = (val: unknown): val is boolean => {
-  return typeof val === 'boolean';
+  return typeof val === "boolean";
 };
 
 export const isNumber = (val: unknown): val is number => {
-  return typeof val === 'number' && !Number.isNaN(val);
+  return typeof val === "number" && !Number.isNaN(val);
 };
 
 export const isUndef = (val: unknown): val is undefined => {
-  return typeof val === 'undefined';
+  return typeof val === "undefined";
 };
 
 export const isNonNullable = <T>(val: T): val is NonNullable<T> => {
@@ -172,4 +172,4 @@ export const isThenable = <T>(val: any): val is PromiseLike<T> => {
   return isNonNullable(val) && isFunction(val.then);
 };
 
-export * from './compose-refs';
+export * from "./compose-refs";

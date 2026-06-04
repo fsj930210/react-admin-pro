@@ -3,25 +3,25 @@ import { Settings2 } from "lucide-react";
 import { useUIPreferences } from "@/store/ui-preferences";
 
 export function UIPreferencesFeature() {
-	const preferences = useUIPreferences("preferences");
-	const updatePreferences = useUIPreferences((state) => state.updatePreferences);
+  const preferences = useUIPreferences("preferences");
+  const updatePreferences = useUIPreferences((state) => state.updatePreferences);
 
-	if (!preferences.templatePreview.enabled) return null;
+  if (!preferences.templatePreview.enabled) return null;
 
-	return (
-		<Button
-			type="button"
-			variant="ghost"
-			size="icon"
-			title="偏好设置"
-			onClick={() =>
-				updatePreferences((draft) => {
-					draft.templatePreview.panelOpen = true;
-				})
-			}
-		>
-			<Settings2 className="size-4" />
-			<span className="sr-only">偏好设置</span>
-		</Button>
-	);
+  return (
+    <Button
+      type="button"
+      variant="ghost"
+      size="icon"
+      title="偏好设置"
+      onClick={() =>
+        updatePreferences((draft) => {
+          draft.templatePreview.panelOpen = true;
+        })
+      }
+    >
+      <Settings2 className="size-4" />
+      <span className="sr-only">偏好设置</span>
+    </Button>
+  );
 }

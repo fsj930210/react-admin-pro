@@ -1,6 +1,5 @@
-import { useMemo, useRef } from 'react';
-import { isFunction, isDev } from '@rap/utils';
-
+import { useMemo, useRef } from "react";
+import { isFunction, isDev } from "@rap/utils";
 
 type noop = (this: any, ...args: any[]) => any;
 
@@ -12,7 +11,7 @@ type PickFunction<T extends noop> = (
 export const useMemoizedFn = <T extends noop>(fn: T) => {
   if (isDev) {
     if (!isFunction(fn)) {
-      console.error(`useMemoizedFn expected parameter is a function, got ${typeof fn}`);
+      throw new TypeError(`useMemoizedFn expected parameter is a function, got ${typeof fn}`);
     }
   }
 
@@ -32,4 +31,3 @@ export const useMemoizedFn = <T extends noop>(fn: T) => {
 
   return memoizedFn.current;
 };
-

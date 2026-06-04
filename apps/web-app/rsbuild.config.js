@@ -26,13 +26,7 @@ const devConfig = defineRsbuildDevConfig({
     tools: {
         rspack: {
             watchOptions: {
-                ignored: [
-                    "/node_modules/",
-                    "!node_modules/virtual-react-local-iconify",
-                    "**/.turbo",
-                    "**/dist",
-                    "**/build",
-                ],
+                ignored: ["/node_modules/", "**/.turbo", "**/dist", "**/build"],
                 aggregateTimeout: 200,
                 poll: 100,
             },
@@ -40,4 +34,7 @@ const devConfig = defineRsbuildDevConfig({
     },
 });
 const prodConfig = defineRsbuildProdConfig({});
-export default mergeRsbuildConfig(baseConfig, devConfig, prodConfig);
+const isDevCommand = process.argv.includes("dev");
+export default isDevCommand
+    ? mergeRsbuildConfig(baseConfig, devConfig)
+    : mergeRsbuildConfig(baseConfig, prodConfig);

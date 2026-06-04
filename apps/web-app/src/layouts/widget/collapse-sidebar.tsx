@@ -3,21 +3,21 @@ import { useSidebar } from "@rap/components-ui/sidebar";
 import { PanelLeft, PanelRight } from "lucide-react";
 
 export function CollapseSidebarFeature(props: React.ComponentProps<"button">) {
-	const { toggleSidebar, state } = useSidebar();
+  const { toggleSidebar, state } = useSidebar();
 
-	return (
-		<Button
-			variant="ghost"
-			size="icon"
-			onClick={toggleSidebar}
-			title={state === "collapsed" ? "展开侧边栏" : "收起侧边栏"}
-			{...props}
-		>
-			{state === "collapsed" ? (
-				<PanelRight className="h-4 w-4" />
-			) : (
-				<PanelLeft className="h-4 w-4" />
-			)}
-		</Button>
-	);
+  return (
+    <Button
+      variant="ghost"
+      size="icon"
+      onClick={toggleSidebar}
+      title={state === "collapsed" ? "展开侧边栏" : "收起侧边栏"}
+      {...props}
+    >
+      {state === "collapsed" ? (
+        <PanelRight className="h-4 w-4" />
+      ) : (
+        <PanelLeft className="h-4 w-4" />
+      )}
+    </Button>
+  );
 }

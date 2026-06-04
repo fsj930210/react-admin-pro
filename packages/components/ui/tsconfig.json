@@ -1,15 +1,15 @@
 {
-	"extends": "@rap/tsconfig/web.json",
-	"compilerOptions": {
-		"paths": {
-			"@rap/components-ui/*": ["./src/*"]
-		},
-		"plugins": [
-			{
-				"name": "next"
-			}
-		]
-	},
-	"include": ["."],
-	"exclude": ["node_modules", "dist"]
+  "extends": "@rap/tsconfig/web.json",
+  "compilerOptions": {
+    "paths": {
+      "@rap/components-ui/*": ["./src/*"]
+    },
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ]
+  },
+  "include": ["."],
+  "exclude": ["node_modules", "dist"]
 }

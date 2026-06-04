@@ -2,8 +2,18 @@
 	"name": "@rap/oxc-config",
 	"version": "0.0.1",
 	"type": "module",
+	"devDependencies": {
+		"oxfmt": "catalog:",
+		"oxlint": "catalog:"
+	},
 	"exports": {
-		"./oxlint.json": "./src/oxlint.json",
-		"./oxfmt.json": "./src/oxfmt.json"
+		"./oxfmt": {
+			"default": "./src/oxfmt.config.ts",
+			"types": "./src/oxfmt.config.ts"
+		},
+		"./oxlint": {
+			"default": "./src/oxlint.config.ts",
+			"types": "./src/oxlint.config.ts"
+		}
 	}
 }

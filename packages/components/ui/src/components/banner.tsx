@@ -31,9 +31,7 @@ interface BannerRenderProps {
   onRemove: () => void;
 }
 
-type BannerContent =
-  | React.ReactNode
-  | ((props: BannerRenderProps) => React.ReactNode);
+type BannerContent = React.ReactNode | ((props: BannerRenderProps) => React.ReactNode);
 
 interface BannerData {
   id: string;
@@ -77,7 +75,7 @@ function useStore<T>(store: Store, selector: (state: StoreState) => T): T {
   return React.useSyncExternalStore(
     store.subscribe,
     () => selector(store.getState()),
-    () => selector(store.getState()),
+    () => selector(store.getState())
   );
 }
 
@@ -103,8 +101,7 @@ function useBanner() {
   const storeContext = React.useContext(StoreContext);
 
   return React.useMemo(() => {
-    const onRemove =
-      id && storeContext ? () => storeContext.onBannerRemove(id) : undefined;
+    const onRemove = id && storeContext ? () => storeContext.onBannerRemove(id) : undefined;
 
     return {
       id,
@@ -124,12 +121,7 @@ interface BannersProps {
 }
 
 function Banners(props: BannersProps) {
-  const {
-    children,
-    maxVisible = 1,
-    side = "top",
-    container: containerProp,
-  } = props;
+  const { children, maxVisible = 1, side = "top", container: containerProp } = props;
 
   const stateRef = useLazyRef<StoreState>(() => ({
     banners: [],
@@ -137,9 +129,7 @@ function Banners(props: BannersProps) {
     heights: new Map(),
   }));
   const listenersRef = useLazyRef<Set<() => void>>(() => new Set());
-  const timeoutsRef = useLazyRef<Map<string, ReturnType<typeof setTimeout>>>(
-    () => new Map(),
-  );
+  const timeoutsRef = useLazyRef<Map<string, ReturnType<typeof setTimeout>>>(() => new Map());
 
   const store: Store = React.useMemo(
     () => ({
@@ -160,7 +150,7 @@ function Banners(props: BannersProps) {
 
         const banners = [...stateRef.current.banners];
         const insertIndex = banners.findIndex(
-          (b) => (b.priority ?? DEFAULT_BANNER_PRIORITY) < priority,
+          (b) => (b.priority ?? DEFAULT_BANNER_PRIORITY) < priority
         );
 
         if (insertIndex === -1) {
@@ -197,9 +187,7 @@ function Banners(props: BannersProps) {
         stateRef.current.removing = newRemoving;
 
         banner.onDismiss?.();
-        stateRef.current.banners = stateRef.current.banners.filter(
-          (b) => b.id !== id,
-        );
+        stateRef.current.banners = stateRef.current.banners.filter((b) => b.id !== id);
         store.notify();
       },
       onBannersClear: () => {
@@ -237,7 +225,7 @@ function Banners(props: BannersProps) {
         store.notify();
       },
     }),
-    [stateRef, listenersRef, timeoutsRef],
+    [stateRef, listenersRef, timeoutsRef]
   );
 
   const banners = useStore(store, (state) => state.banners);
@@ -264,7 +252,7 @@ function Banners(props: BannersProps) {
             data-side={side}
             className={cn(
               "pointer-events-none fixed right-0 left-0 isolate z-50",
-              side === "top" ? "top-0" : "bottom-0",
+              side === "top" ? "top-0" : "bottom-0"
             )}
             style={{
               height: totalHeight > 0 ? totalHeight : "auto",
@@ -272,15 +260,10 @@ function Banners(props: BannersProps) {
             }}
           >
             {visibleBanners.map((banner, index) => (
-              <BannerImpl
-                key={banner.id}
-                banner={banner}
-                side={side}
-                index={index}
-              />
+              <BannerImpl key={banner.id} banner={banner} side={side} index={index} />
             ))}
           </div>,
-          container,
+          container
         )}
     </StoreContext.Provider>
   );
@@ -297,7 +280,7 @@ function useBanners() {
       onBannersClear: store.onBannersClear,
       banners,
     }),
-    [store, banners],
+    [store, banners]
   );
 }
 
@@ -308,17 +291,15 @@ const bannerVariants = cva(
       variant: {
         default: "bg-card text-card-foreground",
         info: "bg-blue-50 text-blue-900 dark:bg-blue-950 dark:text-blue-50",
-        success:
-          "bg-green-50 text-green-900 dark:bg-green-950 dark:text-green-50",
-        warning:
-          "bg-yellow-50 text-yellow-900 dark:bg-yellow-950 dark:text-yellow-50",
+        success: "bg-green-50 text-green-900 dark:bg-green-950 dark:text-green-50",
+        warning: "bg-yellow-50 text-yellow-900 dark:bg-yellow-950 dark:text-yellow-50",
         destructive: "bg-red-50 text-red-900 dark:bg-red-950 dark:text-red-50",
       },
     },
     defaultVariants: {
       variant: "default",
     },
-  },
+  }
 );
 
 interface BannerImplProps {
@@ -366,28 +347,22 @@ function BannerImpl(props: BannerImplProps) {
   React.useEffect(() => {
     if (!removing) return;
     store.onHeightRemove(banner.id);
-    const timeoutId = setTimeout(
-      () => store.onBannerRemove(banner.id),
-      BANNER_ANIMATION_DURATION,
-    );
+    const timeoutId = setTimeout(() => store.onBannerRemove(banner.id), BANNER_ANIMATION_DURATION);
     return () => clearTimeout(timeoutId);
   }, [removing, store, banner.id]);
 
   const onClose = React.useCallback(
     () => store.onRemovingChange(banner.id, true),
-    [store, banner.id],
+    [store, banner.id]
   );
 
-  const onRemove = React.useCallback(
-    () => store.onBannerRemove(banner.id),
-    [store, banner.id],
-  );
+  const onRemove = React.useCallback(() => store.onBannerRemove(banner.id), [store, banner.id]);
 
   const dismissible = banner.dismissible ?? DEFAULT_BANNER_DISMISSIBLE;
 
   const contextValue = React.useMemo<BannerContextValue>(
     () => ({ id: banner.id, variant: banner.variant, dismissible, onClose }),
-    [banner.id, banner.variant, dismissible, onClose],
+    [banner.id, banner.variant, dismissible, onClose]
   );
 
   const renderProps = React.useMemo<BannerRenderProps>(
@@ -398,7 +373,7 @@ function BannerImpl(props: BannerImplProps) {
       onClose,
       onRemove,
     }),
-    [banner.id, banner.variant, dismissible, onClose, onRemove],
+    [banner.id, banner.variant, dismissible, onClose, onRemove]
   );
 
   const currentOffset = removing ? offsetBeforeRemoveRef.current : offset;
@@ -411,9 +386,7 @@ function BannerImpl(props: BannerImplProps) {
         ? `translateY(calc(${currentOffset}px - 100%))`
         : `translateY(calc(-${currentOffset}px + 100%))`;
     }
-    return isTop
-      ? `translateY(${currentOffset}px)`
-      : `translateY(-${currentOffset}px)`;
+    return isTop ? `translateY(${currentOffset}px)` : `translateY(-${currentOffset}px)`;
   }
 
   return (
@@ -441,9 +414,7 @@ function BannerImpl(props: BannerImplProps) {
           transition: `transform ${BANNER_ANIMATION_DURATION}ms cubic-bezier(0.32, 0.72, 0, 1), opacity ${removing ? BANNER_ANIMATION_DURATION / 2 : BANNER_ANIMATION_DURATION}ms ease`,
         }}
       >
-        {typeof banner.content === "function"
-          ? banner.content(renderProps)
-          : banner.content}
+        {typeof banner.content === "function" ? banner.content(renderProps) : banner.content}
       </div>
     </BannerContext.Provider>
   );
@@ -495,7 +466,7 @@ function Banner(props: BannerProps) {
       listenersRef.current.add(cb);
       return () => listenersRef.current.delete(cb);
     },
-    [listenersRef],
+    [listenersRef]
   );
 
   const getSnapshot = React.useCallback(() => openRef.current, [openRef]);
@@ -553,7 +524,7 @@ function Banner(props: BannerProps) {
       dismissible,
       onClose,
     }),
-    [variant, dismissible, onClose],
+    [variant, dismissible, onClose]
   );
 
   if (!open || isInsideStore) return null;
@@ -645,8 +616,7 @@ function BannerActions(props: DivProps) {
 function BannerClose(props: React.ComponentProps<typeof Button>) {
   const { onClick: onClickProp, disabled, children, ...closeProps } = props;
 
-  const { dismissible = DEFAULT_BANNER_DISMISSIBLE, onClose } =
-    useBannerContext("BannerClose");
+  const { dismissible = DEFAULT_BANNER_DISMISSIBLE, onClose } = useBannerContext("BannerClose");
 
   const isDisabled = disabled ?? !dismissible;
 
@@ -656,7 +626,7 @@ function BannerClose(props: React.ComponentProps<typeof Button>) {
       if (event.defaultPrevented || isDisabled) return;
       onClose?.();
     },
-    [onClickProp, isDisabled, onClose],
+    [onClickProp, isDisabled, onClose]
   );
 
   return (

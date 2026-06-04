@@ -23,82 +23,82 @@ import { TreeTableDataGridDemo } from "./-tree-table";
 import { VirtualDataGridDemo } from "./-virtual";
 
 export const Route = createFileRoute("/(layouts)/components/table/")({
-	component: TableDemoContainer,
+  component: TableDemoContainer,
 });
 
 const groups = {
-	core: [
-		["basic", "Basic", BasicDataGrid],
-		["remote", "Remote", RemoteDataGridDemo],
-		["local", "Local", LocalDataGridDemo],
-		["no-scroll", "No scroll", NoScrollDataGridDemo],
-		["grouped-header", "Grouped header", GroupedHeaderDataGridDemo],
-		["selection", "Selection", RowSelectionDataGridDemo],
-		["expand", "Expand", ExpandingDataGridDemo],
-		["menu", "Context menu", ColumnMenuDataGridDemo],
-		["column-order", "Column order", ColumnOrderDataGridDemo],
-		["column-dnd", "Column DnD", ColumnDndDataGridDemo],
-		["grouped-order", "Grouped order", GroupedColumnOrderDataGridDemo],
-		["events", "Events", EventsDataGridDemo],
-		["stable-columns", "Stable columns", StableColumnsDataGridDemo],
-	],
-	extensions: [
-		["virtual", "Virtual", VirtualDataGridDemo],
-		["row-order", "Row order", RowOrderDataGridDemo],
-		["row-dnd", "Row DnD", RowDndDataGridDemo],
-		["editable-cell", "Editable cell", EditableCellDataGridDemo],
-		["editable-row", "Editable row", EditableRowDataGridDemo],
-		["tree", "Tree table", TreeTableDataGridDemo],
-		["infinite", "Infinite", InfiniteDataGridDemo],
-	],
+  core: [
+    ["basic", "Basic", BasicDataGrid],
+    ["remote", "Remote", RemoteDataGridDemo],
+    ["local", "Local", LocalDataGridDemo],
+    ["no-scroll", "No scroll", NoScrollDataGridDemo],
+    ["grouped-header", "Grouped header", GroupedHeaderDataGridDemo],
+    ["selection", "Selection", RowSelectionDataGridDemo],
+    ["expand", "Expand", ExpandingDataGridDemo],
+    ["menu", "Context menu", ColumnMenuDataGridDemo],
+    ["column-order", "Column order", ColumnOrderDataGridDemo],
+    ["column-dnd", "Column DnD", ColumnDndDataGridDemo],
+    ["grouped-order", "Grouped order", GroupedColumnOrderDataGridDemo],
+    ["events", "Events", EventsDataGridDemo],
+    ["stable-columns", "Stable columns", StableColumnsDataGridDemo],
+  ],
+  extensions: [
+    ["virtual", "Virtual", VirtualDataGridDemo],
+    ["row-order", "Row order", RowOrderDataGridDemo],
+    ["row-dnd", "Row DnD", RowDndDataGridDemo],
+    ["editable-cell", "Editable cell", EditableCellDataGridDemo],
+    ["editable-row", "Editable row", EditableRowDataGridDemo],
+    ["tree", "Tree table", TreeTableDataGridDemo],
+    ["infinite", "Infinite", InfiniteDataGridDemo],
+  ],
 } as const;
 
 function TableDemoContainer() {
-	const [group, setGroup] = useState<"core" | "extensions">("core");
-	const [demo, setDemo] = useState("basic");
-	const demos = groups[group];
-	const ActiveDemo = demos.find(([key]) => key === demo)?.[2] ?? demos[0][2];
+  const [group, setGroup] = useState<"core" | "extensions">("core");
+  const [demo, setDemo] = useState("basic");
+  const demos = groups[group];
+  const ActiveDemo = demos.find(([key]) => key === demo)?.[2] ?? demos[0][2];
 
-	return (
-		<div className="space-y-6 p-6">
-			<div>
-				<h1 className="text-2xl font-bold">DataGrid</h1>
-				<p className="text-sm text-muted-foreground">
-					核心能力内置，低频能力通过插槽和外部状态扩展。Demo 按需渲染，避免大表格互相拖慢交互。
-				</p>
-			</div>
-			<Tabs
-				value={group}
-				onValueChange={(value) => {
-					const nextGroup = value as "core" | "extensions";
-					setGroup(nextGroup);
-					setDemo(groups[nextGroup][0][0]);
-				}}
-			>
-				<TabsList>
-					<TabsTrigger value="core">Core</TabsTrigger>
-					<TabsTrigger value="extensions">Extensions</TabsTrigger>
-				</TabsList>
-				<TabsContent value={group} className="space-y-4">
-					<div className="flex flex-wrap gap-2">
-						{demos.map(([key, label]) => (
-							<button
-								key={key}
-								type="button"
-								className={
-									key === demo
-										? "rounded-md bg-primary px-3 py-1.5 text-sm text-primary-foreground"
-										: "rounded-md border px-3 py-1.5 text-sm"
-								}
-								onClick={() => setDemo(key)}
-							>
-								{label}
-							</button>
-						))}
-					</div>
-					<ActiveDemo />
-				</TabsContent>
-			</Tabs>
-		</div>
-	);
+  return (
+    <div className="space-y-6 p-6">
+      <div>
+        <h1 className="text-2xl font-bold">DataGrid</h1>
+        <p className="text-sm text-muted-foreground">
+          核心能力内置，低频能力通过插槽和外部状态扩展。Demo 按需渲染，避免大表格互相拖慢交互。
+        </p>
+      </div>
+      <Tabs
+        value={group}
+        onValueChange={(value) => {
+          const nextGroup = value as "core" | "extensions";
+          setGroup(nextGroup);
+          setDemo(groups[nextGroup][0][0]);
+        }}
+      >
+        <TabsList>
+          <TabsTrigger value="core">Core</TabsTrigger>
+          <TabsTrigger value="extensions">Extensions</TabsTrigger>
+        </TabsList>
+        <TabsContent value={group} className="space-y-4">
+          <div className="flex flex-wrap gap-2">
+            {demos.map(([key, label]) => (
+              <button
+                key={key}
+                type="button"
+                className={
+                  key === demo
+                    ? "rounded-md bg-primary px-3 py-1.5 text-sm text-primary-foreground"
+                    : "rounded-md border px-3 py-1.5 text-sm"
+                }
+                onClick={() => setDemo(key)}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+          <ActiveDemo />
+        </TabsContent>
+      </Tabs>
+    </div>
+  );
 }

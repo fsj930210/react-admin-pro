@@ -5,42 +5,42 @@ import { Search } from "lucide-react";
 import { useRef, useState } from "react";
 
 interface sidebarSearchProps {
-	onChange?: (value: string) => void;
+  onChange?: (value: string) => void | Promise<void>;
 }
 export function SidebarSearch({ onChange }: sidebarSearchProps) {
-	const { state, toggleSidebar } = useSidebar();
-	const searchRef = useRef<HTMLInputElement>(null);
-	const [searchKeyword, setSearchKeyword] = useState("");
+  const { state, toggleSidebar } = useSidebar();
+  const searchRef = useRef<HTMLInputElement>(null);
+  const [searchKeyword, setSearchKeyword] = useState("");
 
-	const handleInputChange = (value: string) => {
-		setSearchKeyword(value);
-		onChange?.(value);
-	};
+  const handleInputChange = (value: string) => {
+    setSearchKeyword(value);
+    onChange?.(value);
+  };
 
-	const handleClearSearch = () => {
-		setSearchKeyword("");
-		onChange?.("");
-	};
-	return (
-		<div className="flex-center px-2 py-1">
-			<Input
-				placeholder="搜索菜单"
-				ref={searchRef as React.RefObject<HTMLInputElement>}
-				className={cn("w-full", state === "collapsed" ? "hidden" : "")}
-				onValueChange={handleInputChange}
-				value={searchKeyword}
-				onClear={handleClearSearch}
-				allowClear
-			/>
-			<Search
-				className={cn("size-5 cursor-pointer", state === "expanded" ? "hidden" : "")}
-				onClick={() => {
-					toggleSidebar();
-					requestAnimationFrame(() => {
-						searchRef.current?.focus?.();
-					});
-				}}
-			/>
-		</div>
-	);
+  const handleClearSearch = () => {
+    setSearchKeyword("");
+    onChange?.("");
+  };
+  return (
+    <div className="flex-center px-2 py-1">
+      <Input
+        placeholder="搜索菜单"
+        ref={searchRef as React.RefObject<HTMLInputElement>}
+        className={cn("w-full", state === "collapsed" ? "hidden" : "")}
+        onValueChange={handleInputChange}
+        value={searchKeyword}
+        onClear={handleClearSearch}
+        allowClear
+      />
+      <Search
+        className={cn("size-5 cursor-pointer", state === "expanded" ? "hidden" : "")}
+        onClick={() => {
+          toggleSidebar();
+          requestAnimationFrame(() => {
+            searchRef.current?.focus?.();
+          });
+        }}
+      />
+    </div>
+  );
 }

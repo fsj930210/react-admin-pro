@@ -19,23 +19,28 @@ export function useCopyToClipboard({
 
     if (!value) return;
 
-    navigator.clipboard.writeText(value).then(() => {
-      if (timeoutIdRef.current) {
-        clearTimeout(timeoutIdRef.current);
-      }
-      setIsCopied(true);
+    navigator.clipboard.writeText(value).then(
+      () => {
+        if (timeoutIdRef.current) {
+          clearTimeout(timeoutIdRef.current);
+        }
+        setIsCopied(true);
 
-      if (onCopy) {
-        onCopy();
-      }
+        if (onCopy) {
+          onCopy();
+        }
 
-      if (timeout !== 0) {
-        timeoutIdRef.current = setTimeout(() => {
-          setIsCopied(false);
-          timeoutIdRef.current = null;
-        }, timeout);
+        if (timeout !== 0) {
+          timeoutIdRef.current = setTimeout(() => {
+            setIsCopied(false);
+            timeoutIdRef.current = null;
+          }, timeout);
+        }
+      },
+      () => {
+        setIsCopied(false);
       }
-    }, console.error);
+    );
   };
 
   // Cleanup timeout on unmount

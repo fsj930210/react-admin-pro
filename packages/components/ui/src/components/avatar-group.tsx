@@ -44,8 +44,7 @@ const avatarGroupVariants = cva("flex items-center", {
 });
 
 interface AvatarGroupProps
-  extends Omit<React.ComponentProps<"div">, "dir">,
-  VariantProps<typeof avatarGroupVariants> {
+  extends Omit<React.ComponentProps<"div">, "dir">, VariantProps<typeof avatarGroupVariants> {
   size?: number;
   max?: number;
   asChild?: boolean;
@@ -67,14 +66,10 @@ function AvatarGroup(props: AvatarGroupProps) {
     ...rootProps
   } = props;
 
-  const childrenArray = React.Children.toArray(children).filter(
-    React.isValidElement,
-  );
+  const childrenArray = React.Children.toArray(children).filter(React.isValidElement);
   const itemCount = childrenArray.length;
   const shouldTruncate = max && itemCount > max;
-  const visibleItems = shouldTruncate
-    ? childrenArray.slice(0, max - 1)
-    : childrenArray;
+  const visibleItems = shouldTruncate ? childrenArray.slice(0, max - 1) : childrenArray;
   const overflowCount = shouldTruncate ? itemCount - (max - 1) : 0;
   const totalRenderedItems = shouldTruncate ? max : itemCount;
 
@@ -124,8 +119,9 @@ function AvatarGroup(props: AvatarGroupProps) {
 }
 
 interface AvatarGroupItemProps
-  extends Omit<React.ComponentProps<typeof SlotPrimitive.Slot>, "dir">,
-  VariantProps<typeof avatarGroupVariants> {
+  extends
+    Omit<React.ComponentProps<typeof SlotPrimitive.Slot>, "dir">,
+    VariantProps<typeof avatarGroupVariants> {
   child: React.ReactNode;
   index: number;
   itemCount: number;
@@ -203,10 +199,7 @@ function AvatarGroupItem(props: AvatarGroupItemProps) {
   return (
     <SlotPrimitive.Slot
       data-slot="avatar-group-item"
-      className={cn(
-        "size-full shrink-0 overflow-hidden rounded-full [&_img]:size-full",
-        className,
-      )}
+      className={cn("size-full shrink-0 overflow-hidden rounded-full [&_img]:size-full", className)}
       style={{
         ...maskStyle,
         ...style,

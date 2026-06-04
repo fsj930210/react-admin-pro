@@ -1,36 +1,34 @@
-import ky, { 
-	type KyInstance, 
-	type Options as KyOptions, 
-	type KyResponse, 
-	type SearchParamsOption,
-	type BeforeRequestHook,
-	type AfterResponseHook
-} from 'ky';
-import { toast } from 'sonner';
+import ky, {
+  type KyInstance,
+  type Options as KyOptions,
+  type KyResponse,
+  type SearchParamsOption,
+  type BeforeRequestHook,
+  type AfterResponseHook,
+} from "ky";
+import { toast } from "sonner";
 
+export type { Options as KyOptions } from "ky";
+export type { AfterResponseHook } from "ky";
+export type { BeforeRequestHook } from "ky";
 
-export type {Options as KyOptions} from 'ky';
-export type { AfterResponseHook } from 'ky';
-export type { BeforeRequestHook } from 'ky';
-
-export const DEFAULT_SUCCESS_CODE = '0000000000';
+export const DEFAULT_SUCCESS_CODE = "0000000000";
 export const ContentType = {
-  json: 'application/json',
-  form: 'application/x-www-form-urlencoded;charset=UTF-8',
-  upload: 'multipart/form-data',
-  download: 'application/octet-stream',
-  downloadZip: 'application/zip',
-  stream: 'text/event-stream',
+  json: "application/json",
+  form: "application/x-www-form-urlencoded;charset=UTF-8",
+  upload: "multipart/form-data",
+  download: "application/octet-stream",
+  downloadZip: "application/zip",
+  stream: "text/event-stream",
 } as const;
 
-export type ResponseType = 'json' | 'blob' | 'text' | 'arrayBuffer' | 'FormData' | 'bytes';
-
+export type ResponseType = "json" | "blob" | "text" | "arrayBuffer" | "FormData" | "bytes";
 
 export interface DefaultAuthConfig {
   enabled?: boolean;
   tokenStorageKey?: string;
   headerKey?: string;
-	defaultType?: string;
+  defaultType?: string;
   getTokenHeaderValue?: () => string;
 }
 
@@ -46,31 +44,30 @@ export interface FetchOptions extends KyOptions {
    */
   params?: SearchParamsOption;
 
-
-	data?: BodyInit | unknown | null;
+  data?: BodyInit | unknown | null;
   /**
    * 是否将请求体转换为JSON
    */
   bodyStringify?: boolean;
-  
+
   /**
    * 是否弹出错误
    * @default true
    */
   silent?: boolean;
-  
+
   /**
    * 是否移除 Content-Type 头部
    * @description 用于 multipart/form-data 等场景，让浏览器或库自动设置正确的 Content-Type
    * @default false
    */
   removeContentType?: boolean;
-  
+
   /**
    * 认证相关配置
    */
   defaultAuthConfig?: DefaultAuthConfig;
-  
+
   /**
    * JSON响应相关配置
    */
@@ -86,34 +83,33 @@ export interface ApiResponse<T = unknown> {
   data: T;
 }
 
-function getDefaultAuthHeader(tokenStorageKey: string, defaultType: string): string{
-  if (typeof window === 'undefined') return '';
-  const token =  localStorage.getItem(tokenStorageKey);
-	if (token) {
-		return `${defaultType} ${token}`;
-	}
-	return ''
+function getDefaultAuthHeader(tokenStorageKey: string, defaultType: string): string {
+  if (typeof window === "undefined") return "";
+  const token = localStorage.getItem(tokenStorageKey);
+  if (token) {
+    return `${defaultType} ${token}`;
+  }
+  return "";
 }
 
-function beforeRequestDefaultAuthorization(
-  options: FetchOptions
-): BeforeRequestHook {
-	return (state) => {
-		const { request } = state;
-		const { 
-			enabled, 
-			tokenStorageKey = 'token', 
-			headerKey = 'Authorization', 
-			defaultType = 'Bearer', 
-			getTokenHeaderValue 
-		} = options.defaultAuthConfig || {};
-		if (!enabled) return;
-		const getTokenFn = getTokenHeaderValue || (() => getDefaultAuthHeader(tokenStorageKey, defaultType));
-		const token = getTokenFn();
-		if (token) {
-			request.headers.set(headerKey, token);
-		}
-	}
+function beforeRequestDefaultAuthorization(options: FetchOptions): BeforeRequestHook {
+  return (state) => {
+    const { request } = state;
+    const {
+      enabled,
+      tokenStorageKey = "token",
+      headerKey = "Authorization",
+      defaultType = "Bearer",
+      getTokenHeaderValue,
+    } = options.defaultAuthConfig || {};
+    if (!enabled) return;
+    const getTokenFn =
+      getTokenHeaderValue || (() => getDefaultAuthHeader(tokenStorageKey, defaultType));
+    const token = getTokenFn();
+    if (token) {
+      request.headers.set(headerKey, token);
+    }
+  };
 }
 
 /**
@@ -121,8 +117,8 @@ function beforeRequestDefaultAuthorization(
  */
 const beforeRequestRemoveContentType: BeforeRequestHook = (state) => {
   const { request } = state;
-  if (request.headers.has('Content-Type')) {
-    request.headers.delete('Content-Type');
+  if (request.headers.has("Content-Type")) {
+    request.headers.delete("Content-Type");
   }
 };
 
@@ -130,48 +126,47 @@ const beforeRequestRemoveContentType: BeforeRequestHook = (state) => {
  * 错误提示处理
  */
 function beforeErrorToast({ silent = true }: FetchOptions) {
-	return async (error: any) => {
-		if (!silent) {
-			const { response } = error;
-			if (response) {
-				try {
-					const body = await response.json();
-					error.message = body.message || error.message;
-				} catch (e: any){
-					error.message = e.message || error.message;
-				}
-				toast.error(error.message || '请求失败');
-			}
-			return error;
-		}
-	}
+  return async (error: any) => {
+    if (!silent) {
+      const { response } = error;
+      if (response) {
+        try {
+          const body = await response.json();
+          error.message = body.message || error.message;
+        } catch (e: any) {
+          error.message = e.message || error.message;
+        }
+        toast.error(error.message || "请求失败");
+      }
+      return error;
+    }
+  };
 }
 
-
 function afterResponseDefaultJson(options: FetchOptions): AfterResponseHook {
-	return async ({ request: _request, options: _options, response}) => {
-		const { silent } = options
-		const { enabled, defaultSuccessCode = DEFAULT_SUCCESS_CODE } = options.defaultJsonConfig || {};
-		if (!enabled) return response;
-		try {
-			const clonedResponse =  response.clone();
-			if (clonedResponse.status >= 200 && clonedResponse.status < 300) {
-				const body = await clonedResponse.json();
-				if (body.code !== defaultSuccessCode) {
-					if (!silent) {
-						toast.error(body.message || '请求失败');
-					}
-					return Promise.reject(body);
-				}
-				return body;
-			}
-		} catch (e: any){
-			if (!silent) {
-				toast.error(e?.message || '请求失败');
-			}
-			return Promise.reject(e);
-		}
-	}
+  return async ({ request: _request, options: _options, response }) => {
+    const { silent } = options;
+    const { enabled, defaultSuccessCode = DEFAULT_SUCCESS_CODE } = options.defaultJsonConfig || {};
+    if (!enabled) return response;
+    try {
+      const clonedResponse = response.clone();
+      if (clonedResponse.status >= 200 && clonedResponse.status < 300) {
+        const body = await clonedResponse.json();
+        if (body.code !== defaultSuccessCode) {
+          if (!silent) {
+            toast.error(body.message || "请求失败");
+          }
+          return Promise.reject(body);
+        }
+        return body;
+      }
+    } catch (e: any) {
+      if (!silent) {
+        toast.error(e?.message || "请求失败");
+      }
+      return Promise.reject(e);
+    }
+  };
 }
 /**
  * HTTP 请求客户端类
@@ -184,9 +179,9 @@ export class FetchClient {
     // 设置默认配置
     const defaultAuthConfig: DefaultAuthConfig = {
       enabled: true,
-      tokenStorageKey: 'token',
-      headerKey: 'Authorization',
-      defaultType: 'Bearer',
+      tokenStorageKey: "token",
+      headerKey: "Authorization",
+      defaultType: "Bearer",
       getTokenHeaderValue: undefined,
     };
 
@@ -202,10 +197,10 @@ export class FetchClient {
       defaultJsonConfig: { ...defaultJsonConfig, ...options.defaultJsonConfig },
       ...options,
     };
-    const { 
-      params,
-      bodyStringify,
-      silent,
+    const {
+      params: _params,
+      bodyStringify: _bodyStringify,
+      silent: _silent,
       removeContentType,
       ...restOptions
     } = this.defaultOptions;
@@ -218,9 +213,7 @@ export class FetchClient {
           ...(removeContentType ? [beforeRequestRemoveContentType] : []),
           ...(restOptions.hooks?.beforeRequest || []),
         ].filter(Boolean),
-        afterResponse: [
-          ...(restOptions.hooks?.afterResponse || []),
-        ].filter(Boolean),
+        afterResponse: [...(restOptions.hooks?.afterResponse || [])].filter(Boolean),
         beforeError: [
           ...(restOptions.hooks?.beforeError || []),
           beforeErrorToast(this.defaultOptions),
@@ -232,32 +225,23 @@ export class FetchClient {
   /**
    * 核心请求方法，只返回原始response
    */
-  private async request<T = unknown>(
-    url: string,
-    options: FetchOptions
-  ): Promise<KyResponse<T>> {
+  private async request<T = unknown>(url: string, options: FetchOptions): Promise<KyResponse<T>> {
     const mergedOptions: FetchOptions = {
       ...this.defaultOptions,
       ...options,
     };
 
-    const { 
-      params,
-			data,
-      bodyStringify = true,
-			credentials = 'include',
-    } = mergedOptions;
-
+    const { params, data, bodyStringify = true, credentials = "include" } = mergedOptions;
 
     if (params) {
       mergedOptions.searchParams = params;
     }
-		if (bodyStringify) {
-			mergedOptions.json = data;
-		} else {
-			mergedOptions.body = data as BodyInit;
-		}
-		mergedOptions.credentials = credentials;
+    if (bodyStringify) {
+      mergedOptions.json = data;
+    } else {
+      mergedOptions.body = data as BodyInit;
+    }
+    mergedOptions.credentials = credentials;
     return this.client<T>(url, mergedOptions);
   }
 
@@ -265,30 +249,24 @@ export class FetchClient {
    * 获取JSON响应
    * @returns 具体类型的响应数据
    */
-  async fetchJson<T = unknown>(
-    url: string,
-    options: FetchOptions
-  ): Promise<ApiResponse<T>> {
+  async fetchJson<T = unknown>(url: string, options: FetchOptions): Promise<ApiResponse<T>> {
     const response = await this.request<T>(url, {
-		...options,
-		hooks: {
-			...options.hooks,
-			afterResponse: [
-				afterResponseDefaultJson({...this.defaultOptions, ...options}),
-				...(options.hooks?.afterResponse || []),
-			],
-		}
-	});
+      ...options,
+      hooks: {
+        ...options.hooks,
+        afterResponse: [
+          afterResponseDefaultJson({ ...this.defaultOptions, ...options }),
+          ...(options.hooks?.afterResponse || []),
+        ],
+      },
+    });
     return response.json<ApiResponse<T>>();
   }
 
   /**
    * 获取Blob响应
    */
-  async fetchBlob(
-    url: string,
-    options: FetchOptions & { method: string }
-  ): Promise<Blob> {
+  async fetchBlob(url: string, options: FetchOptions & { method: string }): Promise<Blob> {
     const response = await this.request(url, options);
     return response.blob();
   }
@@ -307,30 +285,21 @@ export class FetchClient {
   /**
    * 获取Text响应
    */
-  async fetchText(
-    url: string,
-    options: FetchOptions
-  ): Promise<string> {
+  async fetchText(url: string, options: FetchOptions): Promise<string> {
     const response = await this.request(url, options);
     return response.text();
   }
   /**
    * 获取Bytes响应
    */
-  async fetchBytes(
-    url: string,
-    options: FetchOptions
-  ): Promise<Uint8Array> {
+  async fetchBytes(url: string, options: FetchOptions): Promise<Uint8Array> {
     const response = await this.request(url, options);
     return response.bytes();
   }
-	  /**
+  /**
    * 获取FormData响应
    */
-  async fetchFormData(
-    url: string,
-    options: FetchOptions
-  ):  Promise<FormData> {
+  async fetchFormData(url: string, options: FetchOptions): Promise<FormData> {
     const response = await this.request(url, options);
     return response.formData();
   }
@@ -338,35 +307,35 @@ export class FetchClient {
    * GET 请求
    */
   get<T = unknown>(url: string, options?: FetchOptions): Promise<ApiResponse<T>> {
-    return this.fetchJson<T>(url, { ...options, method: 'get' });
+    return this.fetchJson<T>(url, { ...options, method: "get" });
   }
 
   /**
    * POST 请求
    */
   post<T = unknown>(url: string, options?: FetchOptions): Promise<ApiResponse<T>> {
-    return this.fetchJson<T>(url, { ...options, method: 'post' });
+    return this.fetchJson<T>(url, { ...options, method: "post" });
   }
 
   /**
    * PUT 请求
    */
   put<T = unknown>(url: string, options?: FetchOptions): Promise<ApiResponse<T>> {
-    return this.fetchJson<T>(url, { ...options, method: 'put' });
+    return this.fetchJson<T>(url, { ...options, method: "put" });
   }
 
   /**
    * PATCH 请求
    */
   patch<T = unknown>(url: string, options?: FetchOptions): Promise<ApiResponse<T>> {
-    return this.fetchJson<T>(url, { ...options, method: 'patch' });
+    return this.fetchJson<T>(url, { ...options, method: "patch" });
   }
 
   /**
    * DELETE 请求
    */
   delete<T = unknown>(url: string, options?: FetchOptions): Promise<ApiResponse<T>> {
-    return this.fetchJson<T>(url, { ...options, method: 'delete' });
+    return this.fetchJson<T>(url, { ...options, method: "delete" });
   }
 }
 
@@ -381,4 +350,3 @@ export function createFetchClient(options?: FetchOptions): FetchClient {
  * 默认HTTP客户端实例
  */
 export const fetchClient = createFetchClient();
-

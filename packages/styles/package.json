@@ -1,21 +1,26 @@
 {
-	"name": "@rap/styles",
-	"version": "0.0.1",
-	"description": "Shared styles and CSS utilities for React Admin Pro",
-	"keywords": [
-		"tailwindcss",
-		"css",
-		"styles",
-		"utility-classes",
-		"animations"
-	],
-	"devDependencies": {
-		"tailwindcss": "catalog:",
-		"tw-animate-css": "catalog:"
-	},
-	"type": "module",
-	"exports": {
-		"./globals.css": "./src/globals.css",
-		"./utility.css": "./src/utility.css"
-	}
+  "name": "@rap/styles",
+  "version": "0.0.1",
+  "description": "Shared styles and CSS utilities for React Admin Pro",
+  "keywords": [
+    "tailwindcss",
+    "css",
+    "styles",
+    "utility-classes",
+    "animations"
+  ],
+  "scripts": {
+    "lint": "oxfmt --check -c ./oxfmt.config.ts . && oxlint -c ./oxlint.config.ts . --no-error-on-unmatched-pattern",
+    "lint:fix": "oxlint -c ./oxlint.config.ts . --fix --no-error-on-unmatched-pattern && oxfmt --write -c ./oxfmt.config.ts ."
+  },
+  "devDependencies": {
+    "@rap/oxc-config": "workspace:*",
+    "tailwindcss": "catalog:",
+    "tw-animate-css": "catalog:"
+  },
+  "type": "module",
+  "exports": {
+    "./globals.css": "./src/globals.css",
+    "./utility.css": "./src/utility.css"
+  }
 }

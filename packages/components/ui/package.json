@@ -1,30 +1,18 @@
 {
   "name": "@rap/components-ui",
   "version": "0.0.1",
+  "private": true,
   "description": "Core UI components for React Admin Pro based on Radix UI primitives",
   "keywords": [
-    "react",
-    "ui-components",
-    "radix-ui",
-    "shadcn",
-    "design-system",
     "accessibility",
-    "tailwindcss"
+    "design-system",
+    "radix-ui",
+    "react",
+    "shadcn",
+    "tailwindcss",
+    "ui-components"
   ],
   "type": "module",
-  "private": true,
-  "scripts": {},
-  "devDependencies": {
-    "@rap/tailwindcss-config": "workspace:*",
-    "@rap/tsconfig": "workspace:*",
-    "@tailwindcss/typography": "catalog:",
-    "@types/qrcode": "catalog:",
-    "@types/react": "catalog:",
-    "@types/react-dom": "catalog:",
-    "tw-animate-css": "catalog:",
-    "react": "catalog:",
-    "react-dom": "catalog:"
-  },
   "exports": {
     "./*": "./src/components/*.tsx",
     "./tree": "./src/components/tree/index.tsx",
@@ -32,23 +20,29 @@
     "./tree/types": "./src/components/tree/types.ts",
     "./sidebar": "./src/components/sidebar/index.tsx",
     "./minimal-tiptap": "./src/components/minimal-tiptap/index.ts",
-    "./theme-provider": "./src/components/theme-provider/index.tsx"
+    "./theme-provider": "./src/components/theme-provider/index.tsx",
+    "./data-grid": "./src/components/data-grid/index.ts",
+    "./animator": "./src/components/animator/index.tsx"
+  },
+  "scripts": {
+    "lint": "oxfmt --check -c ./oxfmt.config.ts . && oxlint -c ./oxlint.config.ts .",
+    "lint:fix": "oxlint -c ./oxlint.config.ts . --fix && oxfmt --write -c ./oxfmt.config.ts ."
   },
   "dependencies": {
     "@diceui/checkbox-group": "catalog:",
     "@diceui/listbox": "catalog:",
     "@diceui/mention": "catalog:",
     "@diceui/tags-input": "catalog:",
-    "@dnd-kit/core": "catalog:",
-    "@dnd-kit/modifiers": "catalog:",
-    "@dnd-kit/sortable": "catalog:",
-    "@dnd-kit/utilities": "catalog:",
+    "@dnd-kit/abstract": "catalog:",
+    "@dnd-kit/helpers": "catalog:",
+    "@dnd-kit/react": "catalog:",
     "@floating-ui/react-dom": "catalog:",
     "@iconify/react": "catalog:",
     "@rap/hooks": "workspace:*",
     "@rap/styles": "workspace:*",
     "@rap/utils": "workspace:*",
     "@tanstack/react-form": "catalog:",
+    "@tanstack/react-table": "catalog:",
     "@tanstack/react-virtual": "catalog:",
     "@tiptap/extension-bubble-menu": "catalog:",
     "@tiptap/extension-code-block-lowlight": "catalog:",
@@ -70,10 +64,13 @@
     "date-fns": "catalog:",
     "date-fns-tz": "catalog:",
     "embla-carousel-react": "catalog:",
+    "framer-motion": "catalog:",
     "input-otp": "catalog:",
     "lowlight": "catalog:",
     "lucide-react": "catalog:",
     "media-chrome": "catalog:",
+    "overlayscrollbars": "catalog:",
+    "overlayscrollbars-react": "catalog:",
     "qrcode": "catalog:",
     "radix-ui": "catalog:",
     "react-day-picker": "catalog:",
@@ -84,8 +81,19 @@
     "tailwind-merge": "catalog:",
     "vaul": "catalog:",
     "zod": "catalog:"
-  }
-  ,
+  },
+  "devDependencies": {
+    "@rap/oxc-config": "workspace:*",
+    "@rap/tailwindcss-config": "workspace:*",
+    "@rap/tsconfig": "workspace:*",
+    "@tailwindcss/typography": "catalog:",
+    "@types/qrcode": "catalog:",
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
+    "react": "catalog:",
+    "react-dom": "catalog:",
+    "tw-animate-css": "catalog:"
+  },
   "peerDependencies": {
     "react": "catalog:",
     "react-dom": "catalog:"

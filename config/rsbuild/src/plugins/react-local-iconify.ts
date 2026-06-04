@@ -1,6 +1,7 @@
 import type { RsbuildPlugin } from '@rsbuild/core';
 // import type { Compiler } from '@rspack/core';
 import { rspack } from '@rsbuild/core';
+import { join } from 'node:path';
 import {
   importDirectory,
   cleanupSVG,
@@ -23,6 +24,7 @@ type UserOptions = {
 
 // 这里不能用Virtual:，rsbuild会报错unhandled scheme 所以使其看起来像npm包，主要是为了统一vite和rsbuild
 const VIRTUAL_MODULE_ID = 'virtual-react-local-iconify';
+const VIRTUAL_MODULE_PATH = join(process.cwd(), 'node_modules', VIRTUAL_MODULE_ID, 'index.ts');
 
 async function createReactLocalIconifyIcon(options: UserOptions) {
   let bundle = "import { addCollection } from '" + options.resolver + "';\n\n";
@@ -81,17 +83,15 @@ export function pluginReactLocalIconify(userOptions: UserOptions): RsbuildPlugin
     name: 'rsbuild:react-local-iconify',
     async setup(api) {
 			const content = await createReactLocalIconifyIcon(userOptions) || '';
-			const pkg = {
-				name: VIRTUAL_MODULE_ID,
-				version: '1.0.0',
-				main: 'index.ts',
-				peerDependencies: { [userOptions.resolver]: '*' },
-			}
 			const virtualModulesPlugin = new rspack.experiments.VirtualModulesPlugin({
-			[`node_modules/${VIRTUAL_MODULE_ID}/package.json`]: JSON.stringify(pkg),
-			[`node_modules/${VIRTUAL_MODULE_ID}/index.ts`]: content,
+			[VIRTUAL_MODULE_PATH]: content,
 		});
       api.modifyRspackConfig((config) => {
+        config.resolve ??= {};
+        config.resolve.alias = {
+          ...(config.resolve.alias || {}),
+          [VIRTUAL_MODULE_ID]: VIRTUAL_MODULE_PATH,
+        };
         config.plugins.push(virtualModulesPlugin);
       });
     },

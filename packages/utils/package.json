@@ -1,46 +1,50 @@
 {
-	"name": "@rap/utils",
-	"version": "0.0.1",
-	"description": "Utility functions for React Admin Pro",
-	"keywords": [
-		"utils",
-		"helpers",
-		"utility-functions",
-		"tailwind-merge",
-		"classnames"
-	],
-	"private": true,
-	"type": "module",
-	"dependencies": {
-		"clsx": "catalog:",
-		"ky": "catalog:",
-		"sonner": "catalog:",
-		"tailwind-merge": "catalog:"
-	},
-	"exports": {
-		".": {
-			"types": "./src/utils.ts",
-			"default": "./src/utils.ts"
-		},
-		"./compose-refs": {
-			"types": "./src/compose-refs.ts",
-			"default": "./src/compose-refs.ts"
-		},
-		"./fetch": {
-			"types": "./src/fetch.ts",
-			"default": "./src/fetch.ts"
-		},
-		"./storage": {
-			"types": "./src/storage.ts",
-			"default": "./src/storage.ts"
-		}
-	},
-	"devDependencies": {
-		"@rap/tsconfig": "workspace:*"
-	}
-	,
-	"peerDependencies": {
-		"react": "catalog:",
-		"react-dom": "catalog:"
-	}
+  "name": "@rap/utils",
+  "version": "0.0.1",
+  "description": "Utility functions for React Admin Pro",
+  "keywords": [
+    "utils",
+    "helpers",
+    "utility-functions",
+    "tailwind-merge",
+    "classnames"
+  ],
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "lint": "oxfmt --check -c ./oxfmt.config.ts . && oxlint -c ./oxlint.config.ts .",
+    "lint:fix": "oxlint -c ./oxlint.config.ts . --fix && oxfmt --write -c ./oxfmt.config.ts ."
+  },
+  "dependencies": {
+    "clsx": "catalog:",
+    "ky": "catalog:",
+    "sonner": "catalog:",
+    "tailwind-merge": "catalog:"
+  },
+  "exports": {
+    ".": {
+      "types": "./src/utils.ts",
+      "default": "./src/utils.ts"
+    },
+    "./compose-refs": {
+      "types": "./src/compose-refs.ts",
+      "default": "./src/compose-refs.ts"
+    },
+    "./fetch": {
+      "types": "./src/fetch.ts",
+      "default": "./src/fetch.ts"
+    },
+    "./storage": {
+      "types": "./src/storage.ts",
+      "default": "./src/storage.ts"
+    }
+  },
+  "devDependencies": {
+    "@rap/oxc-config": "workspace:*",
+    "@rap/tsconfig": "workspace:*"
+  },
+  "peerDependencies": {
+    "react": "catalog:",
+    "react-dom": "catalog:"
+  }
 }

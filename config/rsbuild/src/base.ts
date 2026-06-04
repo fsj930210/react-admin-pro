@@ -14,6 +14,7 @@ import { pluginReactLocalIconify } from './plugins/react-local-iconify'
 export function defineRsbuildBaseConfig(options: RsbuildConfig = {}) {
 	const root = process.cwd();
 	const srcDir = path.resolve(root, "./src");
+	const isDevCommand = process.argv.includes("dev");
 
 	// 基础配置
 	const baseConfig = defineRsbuildConfig({
@@ -59,9 +60,13 @@ export function defineRsbuildBaseConfig(options: RsbuildConfig = {}) {
 						quoteStyle: "double",
 						semicolons: true,
 					}),
-					codeInspectorPlugin({
-						bundler: 'rspack',
-					}),
+					...(isDevCommand
+						? [
+								codeInspectorPlugin({
+									bundler: 'rspack',
+								}),
+							]
+						: []),
 				],
 			},
 		},

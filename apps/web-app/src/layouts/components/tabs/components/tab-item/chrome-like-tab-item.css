@@ -1,48 +1,48 @@
 .app-tabs-chrome-tab-item.active + .app-tabs-chrome-tab-item {
-	.app-tabs-chrome-tab-item-divider {
-		opacity: 0;
-	}
+  .app-tabs-chrome-tab-item-divider {
+    opacity: 0;
+  }
 }
 /* biome-ignore lint:style/noDescendingSpecificity */
 .app-tabs-chrome-tab-item {
-	&:last-child {
-		&::after {
-			content: "";
-			position: absolute;
-			top: 50%;
-			transform: translateY(-50%);
-			right: 0;
-			bottom: 0;
-			width: 1px;
-			height: calc(var(--spacing) * 3.5);
-			background-color: var(--app-tabs-border);
-			transition: background-color 0.2s ease-in-out;
-		}
-	}
-	&.active {
-		&::after {
-			opacity: 0;
-		}
-	}
+  &:last-child {
+    &::after {
+      content: "";
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      right: 0;
+      bottom: 0;
+      width: 1px;
+      height: calc(var(--spacing) * 3.5);
+      background-color: var(--app-tabs-border);
+      transition: background-color 0.2s ease-in-out;
+    }
+  }
+  &.active {
+    &::after {
+      opacity: 0;
+    }
+  }
 }
 @media (hover: hover) {
-	.app-tabs-chrome-tab-item:not(.active) {
-		&:hover {
-			.app-tabs-chrome-tab-item-divider {
-				opacity: 0;
-			}
-			&:last-child {
-				&:hover {
-					&::after {
-						background-color: transparent;
-					}
-				}
-			}
-			& + .app-tabs-chrome-tab-item {
-				.app-tabs-chrome-tab-item-divider {
-					opacity: 0;
-				}
-			}
-		}
-	}
+  .app-tabs-chrome-tab-item:not(.active) {
+    &:hover {
+      .app-tabs-chrome-tab-item-divider {
+        opacity: 0;
+      }
+      &:last-child {
+        &:hover {
+          &::after {
+            background-color: transparent;
+          }
+        }
+      }
+      & + .app-tabs-chrome-tab-item {
+        .app-tabs-chrome-tab-item-divider {
+          opacity: 0;
+        }
+      }
+    }
+  }
 }

@@ -13,6 +13,8 @@ import { pluginReactLocalIconify } from './plugins/react-local-iconify.ts';
 
 export function defineViteConfig(config: UserConfig = {}) {
   const root = process.cwd();
+  const isProduction = process.env.NODE_ENV === "production";
+  const shouldAnalyze = process.env.BUNDLE_ANALYZE === "true";
   
   // 基础配置
   const baseConfig = defineConfig({
@@ -25,9 +27,10 @@ export function defineViteConfig(config: UserConfig = {}) {
         quoteStyle: "double",
         semicolons: true,
       }),
-			codeInspectorPlugin({
-        bundler: 'vite',
-      }),
+      !isProduction &&
+        codeInspectorPlugin({
+          bundler: "vite",
+        }),
       react(),
       tailwindcss(),
       svgr(),
@@ -35,9 +38,13 @@ export function defineViteConfig(config: UserConfig = {}) {
         ...viteCompression(),
         apply: "build",
       },
-      visualizer({
-        open: true,
-      }),
+      shouldAnalyze &&
+        visualizer({
+          filename: "stats.html",
+          gzipSize: true,
+          brotliSize: true,
+          open: true,
+        }),
       pluginReactLocalIconify({
         resolver: '@iconify/react',
         configs: [

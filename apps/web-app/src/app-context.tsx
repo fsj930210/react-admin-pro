@@ -4,32 +4,32 @@ import { createContext, type ReactNode, use } from "react";
 
 export type AppEventType = "reload-tab" | "remove-tab" | "maximize-tab";
 export interface AppEvent<T> {
-	type: AppEventType;
-	payload: T;
+  type: AppEventType;
+  payload: T;
 }
 export interface AppContextValue {
-	eventBus: EventEmitter<AppEvent<any>>;
+  eventBus: EventEmitter<AppEvent<any>>;
 }
 
 const AppContext = createContext<AppContextValue | undefined>(undefined);
 
 export interface AppProviderProps {
-	children: ReactNode;
-	eventBus: EventEmitter<AppEvent<any>>;
+  children: ReactNode;
+  eventBus: EventEmitter<AppEvent<any>>;
 }
 
 export function AppProvider({ children, eventBus }: AppProviderProps) {
-	const contextValue: AppContextValue = {
-		eventBus,
-	};
+  const contextValue: AppContextValue = {
+    eventBus,
+  };
 
-	return <AppContext value={contextValue}>{children}</AppContext>;
+  return <AppContext value={contextValue}>{children}</AppContext>;
 }
 
 export function useAppContext() {
-	const context = use(AppContext);
-	if (context === undefined) {
-		throw new Error("useAppContext must be used within a AppProvider");
-	}
-	return context;
+  const context = use(AppContext);
+  if (context === undefined) {
+    throw new Error("useAppContext must be used within a AppProvider");
+  }
+  return context;
 }
