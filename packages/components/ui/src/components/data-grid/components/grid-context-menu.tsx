@@ -193,7 +193,7 @@ function SubMenu({
       <div
         className={cn(
           "absolute top-0 left-full z-111 min-w-36 pl-1 opacity-0",
-          visible ? "visible opacity-100" : "invisible",
+          visible ? "visible opacity-100" : "invisible"
         )}
       >
         <div
@@ -227,7 +227,7 @@ function MenuButton({
       disabled={disabled}
       className={cn(
         "flex h-8 w-full items-center gap-2 rounded-sm px-2 text-left hover:bg-accent",
-        disabled && "pointer-events-none opacity-50",
+        disabled && "pointer-events-none opacity-50"
       )}
       onClick={onClick}
     >

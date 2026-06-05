@@ -1,4 +1,4 @@
-import { createContext, type ReactNode, use } from "react";
+import { createContext, type ReactNode, use, useMemo } from "react";
 import type { IUserInfoResponseData } from "@/service/auth";
 import type { MenuService } from "../service/menuService";
 import type { MenuItem } from "../types";
@@ -18,10 +18,20 @@ interface LayoutProviderProps {
   userInfo: IUserInfoResponseData | null;
 }
 
-export function LayoutProvider({ children, ...rest }: LayoutProviderProps) {
-  const contextValue: LayoutContextValue = {
-    ...rest,
-  };
+export function LayoutProvider({
+  children,
+  menuService,
+  userMenus,
+  userInfo,
+}: LayoutProviderProps) {
+  const contextValue: LayoutContextValue = useMemo(
+    () => ({
+      menuService,
+      userMenus,
+      userInfo,
+    }),
+    [menuService, userInfo, userMenus]
+  );
 
   return <LayoutContext value={contextValue}>{children}</LayoutContext>;
 }

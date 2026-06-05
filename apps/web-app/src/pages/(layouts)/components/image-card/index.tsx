@@ -1,16 +1,16 @@
 import {
-  ImageCardGrid,
-  ImageCardGridContent,
-  ImageCardGridImage,
-  ImageCardGridItem,
-} from "@rap/components-ui/image-card-grid";
+  ImageCard,
+  ImageCardContent,
+  ImageCardImage,
+  ImageCardItem,
+} from "@rap/components-ui/image-card";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@rap/components-ui/card";
 import { Badge } from "@rap/components-ui/badge";
 import { createFileRoute } from "@tanstack/react-router";
 import { Camera, MapPin, Clock3 } from "lucide-react";
 import type { ReactNode } from "react";
 
-export const Route = createFileRoute("/(layouts)/components/image-card-grid/")({
+export const Route = createFileRoute("/(layouts)/components/image-card/")({
   component: RouteComponent,
 });
 
@@ -160,9 +160,9 @@ function Section({
 
 function CaptureCard({ item, imageFit }: { item: CaptureItem; imageFit?: "contain" | "cover" }) {
   return (
-    <ImageCardGridItem>
-      <ImageCardGridImage src={item.image} alt={item.camera} fit={imageFit} />
-      <ImageCardGridContent className="flex flex-col gap-2">
+    <ImageCardItem>
+      <ImageCardImage src={item.image} alt={item.camera} fit={imageFit} />
+      <ImageCardContent className="flex flex-col gap-2">
         <div className="flex min-w-0 items-center justify-between gap-2">
           <div className="flex min-w-0 items-center gap-1.5 font-medium">
             <Camera className="size-4 shrink-0 text-muted-foreground" />
@@ -180,8 +180,8 @@ function CaptureCard({ item, imageFit }: { item: CaptureItem; imageFit?: "contai
           <MapPin className="size-3.5 shrink-0" />
           <span className="truncate">{item.location}</span>
         </div>
-      </ImageCardGridContent>
-    </ImageCardGridItem>
+      </ImageCardContent>
+    </ImageCardItem>
   );
 }
 
@@ -191,11 +191,11 @@ function ContainDemo() {
       title="Capture List"
       description="Default contain thumbnails keep every original image complete while all cards remain the same size."
     >
-      <ImageCardGrid itemWidth={240} contentHeight={92} gap={16}>
+      <ImageCard itemWidth={240} contentHeight={92} gap={16}>
         {captures.map((item) => (
           <CaptureCard key={item.id} item={item} />
         ))}
-      </ImageCardGrid>
+      </ImageCard>
     </Section>
   );
 }
@@ -209,19 +209,19 @@ function FitComparisonDemo() {
       <div className="grid gap-6 xl:grid-cols-2">
         <div className="space-y-3">
           <div className="text-sm font-medium">contain</div>
-          <ImageCardGrid itemWidth={180} contentHeight={72} gap={12}>
+          <ImageCard itemWidth={180} contentHeight={72} gap={12}>
             {captures.slice(0, 4).map((item) => (
               <CaptureCard key={item.id} item={item} />
             ))}
-          </ImageCardGrid>
+          </ImageCard>
         </div>
         <div className="space-y-3">
           <div className="text-sm font-medium">cover</div>
-          <ImageCardGrid itemWidth={180} contentHeight={72} gap={12} imageFit="cover">
+          <ImageCard itemWidth={180} contentHeight={72} gap={12} imageFit="cover">
             {captures.slice(0, 4).map((item) => (
               <CaptureCard key={item.id} imageFit="cover" item={item} />
             ))}
-          </ImageCardGrid>
+          </ImageCard>
         </div>
       </div>
     </Section>
@@ -237,19 +237,19 @@ function WidthDemo() {
       <div className="grid gap-6 lg:grid-cols-[minmax(0,0.72fr)_minmax(0,1fr)]">
         <div className="space-y-3">
           <div className="text-sm font-medium">Narrow container</div>
-          <ImageCardGrid itemWidth={150} contentHeight={68} gap={10}>
+          <ImageCard itemWidth={150} contentHeight={68} gap={10}>
             {captures.slice(0, 6).map((item) => (
               <CaptureCard key={item.id} item={item} />
             ))}
-          </ImageCardGrid>
+          </ImageCard>
         </div>
         <div className="space-y-3">
           <div className="text-sm font-medium">Wide container</div>
-          <ImageCardGrid itemWidth={220} contentHeight={82} gap={14} maxColumns={4}>
+          <ImageCard itemWidth={220} contentHeight={82} gap={14} maxColumns={4}>
             {captures.slice(0, 6).map((item) => (
               <CaptureCard key={item.id} item={item} />
             ))}
-          </ImageCardGrid>
+          </ImageCard>
         </div>
       </div>
     </Section>
@@ -260,7 +260,7 @@ function RouteComponent() {
   return (
     <div className="container mx-auto space-y-6 p-6">
       <div>
-        <h1 className="font-semibold text-2xl tracking-tight">ImageCardGrid</h1>
+        <h1 className="font-semibold text-2xl tracking-tight">ImageCard</h1>
         <p className="mt-2 max-w-3xl text-muted-foreground text-sm">
           A responsive image-card grid for capture lists, asset galleries, and thumbnail metadata
           cards.

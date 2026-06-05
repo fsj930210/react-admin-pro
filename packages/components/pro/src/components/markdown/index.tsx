@@ -136,11 +136,7 @@ function createDefaultComponents(components?: Components): Components {
   };
 }
 
-function MarkdownBase({
-  value,
-  enableGfm = true,
-  baseComponents,
-}: MarkdownContentProps) {
+function MarkdownBase({ value, enableGfm = true, baseComponents }: MarkdownContentProps) {
   const remarkPlugins = useMemo(() => (enableGfm ? [remarkGfm] : []), [enableGfm]);
 
   return (
@@ -169,20 +165,21 @@ export function MarkdownRenderer({
     return emptyFallback;
   }
 
-  const content = enableCodeHighlight || enableRawHtml ? (
-    <Suspense fallback={loadingFallback}>
-      <MarkdownEnhanced
-        value={markdown}
-        enableGfm={enableGfm}
-        enableCodeHighlight={enableCodeHighlight}
-        enableRawHtml={enableRawHtml}
-        sanitizeRawHtml={sanitizeRawHtml}
-        baseComponents={baseComponents}
-      />
-    </Suspense>
-  ) : (
-    <MarkdownBase value={markdown} enableGfm={enableGfm} baseComponents={baseComponents} />
-  );
+  const content =
+    enableCodeHighlight || enableRawHtml ? (
+      <Suspense fallback={loadingFallback}>
+        <MarkdownEnhanced
+          value={markdown}
+          enableGfm={enableGfm}
+          enableCodeHighlight={enableCodeHighlight}
+          enableRawHtml={enableRawHtml}
+          sanitizeRawHtml={sanitizeRawHtml}
+          baseComponents={baseComponents}
+        />
+      </Suspense>
+    ) : (
+      <MarkdownBase value={markdown} enableGfm={enableGfm} baseComponents={baseComponents} />
+    );
 
   return (
     <div className={cn("max-w-none text-foreground", className)}>

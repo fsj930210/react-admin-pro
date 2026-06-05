@@ -8,6 +8,30 @@ import type { AppTabItem } from "../types";
 const TABS_CACHE_KEY = "layout-tabs-data";
 const SELECTED_TAB_CACHE_KEY = "layout-selected-tab";
 
+function isSameBadge(left: AppTabItem["badge"], right: AppTabItem["badge"]) {
+  if (left === right) return true;
+  if (!left || !right) return false;
+
+  return (
+    left.type === right.type &&
+    left.text === right.text &&
+    left.color === right.color &&
+    left.customColor === right.customColor
+  );
+}
+
+function syncTabLocaleText(tab: AppTabItem, menu: AppTabItem): AppTabItem {
+  const unchanged = tab.title === menu.title && isSameBadge(tab.badge, menu.badge);
+
+  if (unchanged) return tab;
+
+  return {
+    ...tab,
+    title: menu.title,
+    badge: menu.badge,
+  };
+}
+
 export function useTabs(scrollToTab: (tabKey: string) => void) {
   const navigate = useNavigate();
   const { menuService } = useLayout();
@@ -31,7 +55,7 @@ export function useTabs(scrollToTab: (tabKey: string) => void) {
   ) => {
     _setActiveTab((prevActiveTab) => {
       const newActiveTab = typeof tabItem === "function" ? tabItem(prevActiveTab) : tabItem;
-      storage.setItem(SELECTED_TAB_CACHE_KEY, activeTab);
+      storage.setItem(SELECTED_TAB_CACHE_KEY, newActiveTab);
       return newActiveTab;
     });
   };
@@ -45,10 +69,23 @@ export function useTabs(scrollToTab: (tabKey: string) => void) {
 
   const addTab = (tabItem: AppTabItem) => {
     setTabs((prevTabs) => {
-      if (prevTabs.some((tab) => tab.id === tabItem.id)) return prevTabs;
+      if (prevTabs.some((tab) => tab.id === tabItem.id)) {
+        let changed = false;
+        const nextTabs = prevTabs.map((tab) => {
+          if (tab.id !== tabItem.id) return tab;
+
+          const nextTab = syncTabLocaleText(tab, tabItem);
+          changed ||= nextTab !== tab;
+          return nextTab;
+        });
+
+        return changed ? nextTabs : prevTabs;
+      }
       return [...prevTabs, tabItem];
     });
-    setActiveTab(tabItem);
+    setActiveTab((prevTab) =>
+      prevTab?.id === tabItem.id ? syncTabLocaleText(prevTab, tabItem) : tabItem
+    );
     scrollToTab?.(tabItem.id);
   };
   const handleTabItemClick = (item: AppTabItem) => {
@@ -67,12 +104,38 @@ export function useTabs(scrollToTab: (tabKey: string) => void) {
     }
     const selectedTab = menuService.findMenuByUrl(pathname);
     if (selectedTab) {
-      selectedTab.fullUrl = fullUrl;
+      const tabItem = {
+        ...selectedTab,
+        fullUrl,
+      };
       queueMicrotask(() => {
-        addTab(selectedTab);
+        addTab(tabItem);
       });
     }
-  }, [fullUrl, pathname]);
+  }, [fullUrl, menuService, pathname]);
+
+  useEffect(() => {
+    setTabs((prevTabs) => {
+      let changed = false;
+      const nextTabs = prevTabs.map((tab) => {
+        const menu = menuService.findMenuForTab(tab);
+        if (!menu) return tab;
+
+        const nextTab = syncTabLocaleText(tab, menu);
+        changed ||= nextTab !== tab;
+        return nextTab;
+      });
+
+      return changed ? nextTabs : prevTabs;
+    });
+
+    setActiveTab((prevTab) => {
+      if (!prevTab) return prevTab;
+
+      const menu = menuService.findMenuForTab(prevTab);
+      return menu ? syncTabLocaleText(prevTab, menu) : prevTab;
+    });
+  }, [menuService]);
 
   return {
     activeTab,

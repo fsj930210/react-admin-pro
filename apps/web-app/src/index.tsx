@@ -2,7 +2,11 @@
 
 import { ClickScrollPlugin, OverlayScrollbars } from "overlayscrollbars";
 import ReactDOM from "react-dom/client";
+import { initI18n } from "@rap/i18n";
+import { registerProI18n } from "@rap/components-pro/i18n";
+import { registerUiI18n } from "@rap/components-ui/i18n";
 import { APP_BASE_PATH } from "@/config";
+import { registerWebAppI18n } from "@/i18n";
 import App from "./App";
 import "virtual-react-local-iconify";
 import "@rap/styles/globals.css";
@@ -52,7 +56,10 @@ const prepareMock = async () => {
 const rootEl = document.getElementById("root");
 if (rootEl) {
   const root = ReactDOM.createRoot(rootEl);
-  prepareMock().then(() => {
+  Promise.all([prepareMock(), initI18n()]).then(() => {
+    registerUiI18n();
+    registerProI18n();
+    registerWebAppI18n();
     root.render(<App />);
   });
 }

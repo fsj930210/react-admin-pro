@@ -77,6 +77,7 @@ export const ImageEditBlock: React.FC<ImageEditBlockProps> = ({ editor, close })
       <input
         type="file"
         accept="image/*"
+        aria-label="Upload image files"
         ref={fileInputRef}
         multiple
         className="hidden"

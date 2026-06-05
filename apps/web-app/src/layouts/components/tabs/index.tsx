@@ -1,4 +1,5 @@
 import { Button } from "@rap/components-ui/button";
+import { useTranslation } from "@rap/i18n";
 import { cn } from "@rap/utils";
 import { ChevronLeft, ChevronRight, LayoutGrid, Maximize, Minimize, RotateCw } from "lucide-react";
 import { TabsContextMenu } from "./components/context-menu";
@@ -39,6 +40,7 @@ export function AppTabs({
   showMaximize = true,
   showContextMenu = true,
 }: AppTabsProps) {
+  const { t } = useTranslation("webApp");
   const {
     containerRef,
     canScrollLeft,
@@ -180,7 +182,7 @@ export function AppTabs({
               size="icon"
               className="cursor-pointer"
               onClick={() => handleReloadTab(activeTab)}
-              title="刷新"
+              title={t("tabs.reload")}
             >
               <RotateCw className="size-4" />
             </Button>
@@ -194,7 +196,7 @@ export function AppTabs({
               size="icon"
               className="cursor-pointer"
               onClick={() => handleMaximizeTab(activeTab)}
-              title={isMaximized ? "向下还原" : "最大化"}
+              title={isMaximized ? t("tabs.restore") : t("tabs.maximize")}
             >
               {isMaximized ? <Minimize className="size-4" /> : <Maximize className="size-4" />}
             </Button>

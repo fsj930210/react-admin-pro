@@ -37,13 +37,14 @@ import { Route as layoutsFeaturesThemeIndexRouteImport } from "./pages/(layouts)
 import { Route as layoutsFeaturesResizeIndexRouteImport } from "./pages/(layouts)/features/resize/index";
 import { Route as layoutsFeaturesMoveIndexRouteImport } from "./pages/(layouts)/features/move/index";
 import { Route as layoutsFeaturesMinimaxIndexRouteImport } from "./pages/(layouts)/features/minimax/index";
+import { Route as layoutsComponentsWatermarkIndexRouteImport } from "./pages/(layouts)/components/watermark/index";
 import { Route as layoutsComponentsTreeIndexRouteImport } from "./pages/(layouts)/components/tree/index";
 import { Route as layoutsComponentsTransferIndexRouteImport } from "./pages/(layouts)/components/transfer/index";
 import { Route as layoutsComponentsTableIndexRouteImport } from "./pages/(layouts)/components/table/index";
 import { Route as layoutsComponentsSelectorIndexRouteImport } from "./pages/(layouts)/components/selector/index";
 import { Route as layoutsComponentsRichTextIndexRouteImport } from "./pages/(layouts)/components/rich-text/index";
 import { Route as layoutsComponentsInputIndexRouteImport } from "./pages/(layouts)/components/input/index";
-import { Route as layoutsComponentsImageCardGridIndexRouteImport } from "./pages/(layouts)/components/image-card-grid/index";
+import { Route as layoutsComponentsImageCardIndexRouteImport } from "./pages/(layouts)/components/image-card/index";
 import { Route as layoutsComponentsIconIndexRouteImport } from "./pages/(layouts)/components/icon/index";
 import { Route as layoutsNestedMenuNestedMenu2NestedMenu21RouteImport } from "./pages/(layouts)/nested-menu/nested-menu-2/nested-menu-2-1";
 import { Route as layoutsNestedMenuNestedMenu1NestedMenu13RouteImport } from "./pages/(layouts)/nested-menu/nested-menu-1/nested-menu-1-3";
@@ -203,6 +204,12 @@ const layoutsFeaturesMinimaxIndexRoute =
     path: "/features/minimax/",
     getParentRoute: () => layoutsRouteRoute,
   } as any);
+const layoutsComponentsWatermarkIndexRoute =
+  layoutsComponentsWatermarkIndexRouteImport.update({
+    id: "/components/watermark/",
+    path: "/components/watermark/",
+    getParentRoute: () => layoutsRouteRoute,
+  } as any);
 const layoutsComponentsTreeIndexRoute =
   layoutsComponentsTreeIndexRouteImport.update({
     id: "/components/tree/",
@@ -239,10 +246,10 @@ const layoutsComponentsInputIndexRoute =
     path: "/components/input/",
     getParentRoute: () => layoutsRouteRoute,
   } as any);
-const layoutsComponentsImageCardGridIndexRoute =
-  layoutsComponentsImageCardGridIndexRouteImport.update({
-    id: "/components/image-card-grid/",
-    path: "/components/image-card-grid/",
+const layoutsComponentsImageCardIndexRoute =
+  layoutsComponentsImageCardIndexRouteImport.update({
+    id: "/components/image-card/",
+    path: "/components/image-card/",
     getParentRoute: () => layoutsRouteRoute,
   } as any);
 const layoutsComponentsIconIndexRoute =
@@ -311,13 +318,14 @@ export interface FileRoutesByFullPath {
   "/nested-menu/nested-menu-1/nested-menu-1-3": typeof layoutsNestedMenuNestedMenu1NestedMenu13Route;
   "/nested-menu/nested-menu-2/nested-menu-2-1": typeof layoutsNestedMenuNestedMenu2NestedMenu21Route;
   "/components/icon/": typeof layoutsComponentsIconIndexRoute;
-  "/components/image-card-grid/": typeof layoutsComponentsImageCardGridIndexRoute;
+  "/components/image-card/": typeof layoutsComponentsImageCardIndexRoute;
   "/components/input/": typeof layoutsComponentsInputIndexRoute;
   "/components/rich-text/": typeof layoutsComponentsRichTextIndexRoute;
   "/components/selector/": typeof layoutsComponentsSelectorIndexRoute;
   "/components/table/": typeof layoutsComponentsTableIndexRoute;
   "/components/transfer/": typeof layoutsComponentsTransferIndexRoute;
   "/components/tree/": typeof layoutsComponentsTreeIndexRoute;
+  "/components/watermark/": typeof layoutsComponentsWatermarkIndexRoute;
   "/features/minimax/": typeof layoutsFeaturesMinimaxIndexRoute;
   "/features/move/": typeof layoutsFeaturesMoveIndexRoute;
   "/features/resize/": typeof layoutsFeaturesResizeIndexRoute;
@@ -355,13 +363,14 @@ export interface FileRoutesByTo {
   "/nested-menu/nested-menu-1/nested-menu-1-3": typeof layoutsNestedMenuNestedMenu1NestedMenu13Route;
   "/nested-menu/nested-menu-2/nested-menu-2-1": typeof layoutsNestedMenuNestedMenu2NestedMenu21Route;
   "/components/icon": typeof layoutsComponentsIconIndexRoute;
-  "/components/image-card-grid": typeof layoutsComponentsImageCardGridIndexRoute;
+  "/components/image-card": typeof layoutsComponentsImageCardIndexRoute;
   "/components/input": typeof layoutsComponentsInputIndexRoute;
   "/components/rich-text": typeof layoutsComponentsRichTextIndexRoute;
   "/components/selector": typeof layoutsComponentsSelectorIndexRoute;
   "/components/table": typeof layoutsComponentsTableIndexRoute;
   "/components/transfer": typeof layoutsComponentsTransferIndexRoute;
   "/components/tree": typeof layoutsComponentsTreeIndexRoute;
+  "/components/watermark": typeof layoutsComponentsWatermarkIndexRoute;
   "/features/minimax": typeof layoutsFeaturesMinimaxIndexRoute;
   "/features/move": typeof layoutsFeaturesMoveIndexRoute;
   "/features/resize": typeof layoutsFeaturesResizeIndexRoute;
@@ -401,13 +410,14 @@ export interface FileRoutesById {
   "/(layouts)/nested-menu/nested-menu-1/nested-menu-1-3": typeof layoutsNestedMenuNestedMenu1NestedMenu13Route;
   "/(layouts)/nested-menu/nested-menu-2/nested-menu-2-1": typeof layoutsNestedMenuNestedMenu2NestedMenu21Route;
   "/(layouts)/components/icon/": typeof layoutsComponentsIconIndexRoute;
-  "/(layouts)/components/image-card-grid/": typeof layoutsComponentsImageCardGridIndexRoute;
+  "/(layouts)/components/image-card/": typeof layoutsComponentsImageCardIndexRoute;
   "/(layouts)/components/input/": typeof layoutsComponentsInputIndexRoute;
   "/(layouts)/components/rich-text/": typeof layoutsComponentsRichTextIndexRoute;
   "/(layouts)/components/selector/": typeof layoutsComponentsSelectorIndexRoute;
   "/(layouts)/components/table/": typeof layoutsComponentsTableIndexRoute;
   "/(layouts)/components/transfer/": typeof layoutsComponentsTransferIndexRoute;
   "/(layouts)/components/tree/": typeof layoutsComponentsTreeIndexRoute;
+  "/(layouts)/components/watermark/": typeof layoutsComponentsWatermarkIndexRoute;
   "/(layouts)/features/minimax/": typeof layoutsFeaturesMinimaxIndexRoute;
   "/(layouts)/features/move/": typeof layoutsFeaturesMoveIndexRoute;
   "/(layouts)/features/resize/": typeof layoutsFeaturesResizeIndexRoute;
@@ -447,13 +457,14 @@ export interface FileRouteTypes {
     | "/nested-menu/nested-menu-1/nested-menu-1-3"
     | "/nested-menu/nested-menu-2/nested-menu-2-1"
     | "/components/icon/"
-    | "/components/image-card-grid/"
+    | "/components/image-card/"
     | "/components/input/"
     | "/components/rich-text/"
     | "/components/selector/"
     | "/components/table/"
     | "/components/transfer/"
     | "/components/tree/"
+    | "/components/watermark/"
     | "/features/minimax/"
     | "/features/move/"
     | "/features/resize/"
@@ -491,13 +502,14 @@ export interface FileRouteTypes {
     | "/nested-menu/nested-menu-1/nested-menu-1-3"
     | "/nested-menu/nested-menu-2/nested-menu-2-1"
     | "/components/icon"
-    | "/components/image-card-grid"
+    | "/components/image-card"
     | "/components/input"
     | "/components/rich-text"
     | "/components/selector"
     | "/components/table"
     | "/components/transfer"
     | "/components/tree"
+    | "/components/watermark"
     | "/features/minimax"
     | "/features/move"
     | "/features/resize"
@@ -536,13 +548,14 @@ export interface FileRouteTypes {
     | "/(layouts)/nested-menu/nested-menu-1/nested-menu-1-3"
     | "/(layouts)/nested-menu/nested-menu-2/nested-menu-2-1"
     | "/(layouts)/components/icon/"
-    | "/(layouts)/components/image-card-grid/"
+    | "/(layouts)/components/image-card/"
     | "/(layouts)/components/input/"
     | "/(layouts)/components/rich-text/"
     | "/(layouts)/components/selector/"
     | "/(layouts)/components/table/"
     | "/(layouts)/components/transfer/"
     | "/(layouts)/components/tree/"
+    | "/(layouts)/components/watermark/"
     | "/(layouts)/features/minimax/"
     | "/(layouts)/features/move/"
     | "/(layouts)/features/resize/"
@@ -768,6 +781,13 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof layoutsFeaturesMinimaxIndexRouteImport;
       parentRoute: typeof layoutsRouteRoute;
     };
+    "/(layouts)/components/watermark/": {
+      id: "/(layouts)/components/watermark/";
+      path: "/components/watermark";
+      fullPath: "/components/watermark/";
+      preLoaderRoute: typeof layoutsComponentsWatermarkIndexRouteImport;
+      parentRoute: typeof layoutsRouteRoute;
+    };
     "/(layouts)/components/tree/": {
       id: "/(layouts)/components/tree/";
       path: "/components/tree";
@@ -810,11 +830,11 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof layoutsComponentsInputIndexRouteImport;
       parentRoute: typeof layoutsRouteRoute;
     };
-    "/(layouts)/components/image-card-grid/": {
-      id: "/(layouts)/components/image-card-grid/";
-      path: "/components/image-card-grid";
-      fullPath: "/components/image-card-grid/";
-      preLoaderRoute: typeof layoutsComponentsImageCardGridIndexRouteImport;
+    "/(layouts)/components/image-card/": {
+      id: "/(layouts)/components/image-card/";
+      path: "/components/image-card";
+      fullPath: "/components/image-card/";
+      preLoaderRoute: typeof layoutsComponentsImageCardIndexRouteImport;
       parentRoute: typeof layoutsRouteRoute;
     };
     "/(layouts)/components/icon/": {
@@ -891,13 +911,14 @@ interface layoutsRouteRouteChildren {
   layoutsNestedMenuNestedMenu1NestedMenu13Route: typeof layoutsNestedMenuNestedMenu1NestedMenu13Route;
   layoutsNestedMenuNestedMenu2NestedMenu21Route: typeof layoutsNestedMenuNestedMenu2NestedMenu21Route;
   layoutsComponentsIconIndexRoute: typeof layoutsComponentsIconIndexRoute;
-  layoutsComponentsImageCardGridIndexRoute: typeof layoutsComponentsImageCardGridIndexRoute;
+  layoutsComponentsImageCardIndexRoute: typeof layoutsComponentsImageCardIndexRoute;
   layoutsComponentsInputIndexRoute: typeof layoutsComponentsInputIndexRoute;
   layoutsComponentsRichTextIndexRoute: typeof layoutsComponentsRichTextIndexRoute;
   layoutsComponentsSelectorIndexRoute: typeof layoutsComponentsSelectorIndexRoute;
   layoutsComponentsTableIndexRoute: typeof layoutsComponentsTableIndexRoute;
   layoutsComponentsTransferIndexRoute: typeof layoutsComponentsTransferIndexRoute;
   layoutsComponentsTreeIndexRoute: typeof layoutsComponentsTreeIndexRoute;
+  layoutsComponentsWatermarkIndexRoute: typeof layoutsComponentsWatermarkIndexRoute;
   layoutsFeaturesMinimaxIndexRoute: typeof layoutsFeaturesMinimaxIndexRoute;
   layoutsFeaturesMoveIndexRoute: typeof layoutsFeaturesMoveIndexRoute;
   layoutsFeaturesResizeIndexRoute: typeof layoutsFeaturesResizeIndexRoute;
@@ -937,14 +958,14 @@ const layoutsRouteRouteChildren: layoutsRouteRouteChildren = {
   layoutsNestedMenuNestedMenu2NestedMenu21Route:
     layoutsNestedMenuNestedMenu2NestedMenu21Route,
   layoutsComponentsIconIndexRoute: layoutsComponentsIconIndexRoute,
-  layoutsComponentsImageCardGridIndexRoute:
-    layoutsComponentsImageCardGridIndexRoute,
+  layoutsComponentsImageCardIndexRoute: layoutsComponentsImageCardIndexRoute,
   layoutsComponentsInputIndexRoute: layoutsComponentsInputIndexRoute,
   layoutsComponentsRichTextIndexRoute: layoutsComponentsRichTextIndexRoute,
   layoutsComponentsSelectorIndexRoute: layoutsComponentsSelectorIndexRoute,
   layoutsComponentsTableIndexRoute: layoutsComponentsTableIndexRoute,
   layoutsComponentsTransferIndexRoute: layoutsComponentsTransferIndexRoute,
   layoutsComponentsTreeIndexRoute: layoutsComponentsTreeIndexRoute,
+  layoutsComponentsWatermarkIndexRoute: layoutsComponentsWatermarkIndexRoute,
   layoutsFeaturesMinimaxIndexRoute: layoutsFeaturesMinimaxIndexRoute,
   layoutsFeaturesMoveIndexRoute: layoutsFeaturesMoveIndexRoute,
   layoutsFeaturesResizeIndexRoute: layoutsFeaturesResizeIndexRoute,

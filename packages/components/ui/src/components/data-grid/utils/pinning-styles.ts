@@ -135,7 +135,9 @@ function getPinnedOffset<TData>(
   }
 
   const offsetColumns =
-    pinned === "left" ? visiblePinnedColumns.slice(0, index) : visiblePinnedColumns.slice(index + 1);
+    pinned === "left"
+      ? visiblePinnedColumns.slice(0, index)
+      : visiblePinnedColumns.slice(index + 1);
 
   return offsetColumns.reduce((total, item) => total + item.getSize(), 0);
 }

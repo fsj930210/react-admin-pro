@@ -1,5 +1,6 @@
 import React from "react";
 import { useControllableState } from "@rap/hooks/use-controllable-state";
+import { useTranslation } from "@rap/i18n";
 import {
   Pagination as UIPagination,
   PaginationContent,
@@ -90,6 +91,8 @@ const Pagination = ({
   itemRender,
   hideOnSinglePage,
 }: PaginationProps) => {
+  const { t } = useTranslation("pro");
+
   if (total === 0) return null;
 
   if (hideOnSinglePage && Math.ceil(total / (pageSize || defaultPageSize)) <= 1) return null;
@@ -203,16 +206,16 @@ const Pagination = ({
               <PaginationPrevious
                 disabled={!hasPrev || disabled}
                 onClick={() => handlePageChange(current - 1)}
-                title="上一页"
-                aria-label="上一页"
+                title={t("pagination.previous")}
+                aria-label={t("pagination.previous")}
               />
             )
           ) : (
             <PaginationPrevious
               disabled={!hasPrev || disabled}
               onClick={() => handlePageChange(current - 1)}
-              title="上一页"
-              aria-label="上一页"
+              title={t("pagination.previous")}
+              aria-label={t("pagination.previous")}
             />
           )}
         </PaginationItem>
@@ -229,8 +232,10 @@ const Pagination = ({
                   isActive={pageItem === current}
                   disabled={disabled}
                   onClick={() => handlePageChange(pageItem as number)}
-                  title={`第${pageItem}页`}
-                  aria-label={`第${pageItem}页${pageItem === current ? "，当前页" : ""}`}
+                  title={t("pagination.page", { page: pageItem })}
+                  aria-label={`${t("pagination.page", { page: pageItem })}${
+                    pageItem === current ? t("pagination.currentPage") : ""
+                  }`}
                 >
                   {pageItem}
                 </PaginationLink>
@@ -240,8 +245,10 @@ const Pagination = ({
                 isActive={pageItem === current}
                 disabled={disabled}
                 onClick={() => handlePageChange(pageItem as number)}
-                title={`第${pageItem}页`}
-                aria-label={`第${pageItem}页${pageItem === current ? "，当前页" : ""}`}
+                title={t("pagination.page", { page: pageItem })}
+                aria-label={`${t("pagination.page", { page: pageItem })}${
+                  pageItem === current ? t("pagination.currentPage") : ""
+                }`}
               >
                 {pageItem}
               </PaginationLink>
@@ -257,16 +264,16 @@ const Pagination = ({
               <PaginationNext
                 disabled={!hasNext || disabled}
                 onClick={() => handlePageChange(current + 1)}
-                title="下一页"
-                aria-label="下一页"
+                title={t("pagination.next")}
+                aria-label={t("pagination.next")}
               />
             )
           ) : (
             <PaginationNext
               disabled={!hasNext || disabled}
               onClick={() => handlePageChange(current + 1)}
-              title="下一页"
-              aria-label="下一页"
+              title={t("pagination.next")}
+              aria-label={t("pagination.next")}
             />
           )}
         </PaginationItem>
@@ -283,7 +290,7 @@ const Pagination = ({
             <SelectContent>
               {pageSizeOptions.map((size) => (
                 <SelectItem key={size} value={String(size)}>
-                  {size}条/页
+                  {t("pagination.pageSize", { size })}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -292,7 +299,7 @@ const Pagination = ({
 
         {showQuickJumper && totalPages > 0 && (
           <span className="flex items-center gap-2 text-sm text-muted-foreground">
-            <span>跳至</span>
+            <span>{t("pagination.jumpTo")}</span>
             <Input
               type="number"
               min={1}
@@ -311,7 +318,7 @@ const Pagination = ({
               disabled={disabled}
               className="w-16 text-center"
             />
-            <span>页，共 {totalPages} 页</span>
+            <span>{t("pagination.totalPages", { total: totalPages })}</span>
           </span>
         )}
       </PaginationContent>

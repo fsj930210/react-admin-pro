@@ -44,6 +44,7 @@
     "@rap/components-pro": "workspace:*",
     "@rap/components-ui": "workspace:*",
     "@rap/hooks": "workspace:*",
+    "@rap/i18n": "workspace:*",
     "@rap/mock-config": "workspace:*",
     "@rap/styles": "workspace:*",
     "@rap/utils": "workspace:*",

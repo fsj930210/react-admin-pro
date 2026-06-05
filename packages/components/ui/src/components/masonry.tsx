@@ -431,7 +431,7 @@ function onDeepMemo<T extends unknown[], U>(
     if (typeof obj === "function") {
       try {
         cache = new (obj as new () => Cache)();
-      } catch (_err) {
+      } catch {
         cache = new Map<CacheKey, unknown>();
       }
     } else {
@@ -602,9 +602,9 @@ function usePositioner(
     );
 
     const intervalTree = createIntervalTree();
-    const columnHeights: number[] = new Array(computedColumnCount).fill(0);
+    const columnHeights: number[] = Array.from({ length: computedColumnCount }, () => 0);
     const items: (PositionerItem | undefined)[] = [];
-    const columnItems: number[][] = new Array(computedColumnCount).fill(0).map(() => []);
+    const columnItems: number[][] = Array.from({ length: computedColumnCount }, () => []);
 
     for (let i = 0; i < computedColumnCount; i++) {
       columnHeights[i] = 0;
@@ -673,7 +673,7 @@ function usePositioner(
       },
       get: (index: number) => items[index],
       update: (updates: number[]) => {
-        const columns: (number | undefined)[] = new Array(computedColumnCount);
+        const columns: (number | undefined)[] = Array.from({ length: computedColumnCount });
         let i = 0;
         let j = 0;
 
@@ -1298,7 +1298,7 @@ function MasonryViewport(props: DivProps) {
 
   const validChildren = React.Children.toArray(children).filter(
     (child): child is React.ReactElement<MasonryItemPropsWithRef> =>
-      React.isValidElement(child) && (child.type === MasonryItem || child.type === MasonryItem)
+      React.isValidElement(child) && child.type === MasonryItem
   );
   const itemCount = validChildren.length;
 

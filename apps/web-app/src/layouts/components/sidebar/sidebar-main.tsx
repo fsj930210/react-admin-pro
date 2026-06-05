@@ -12,7 +12,7 @@ import {
 } from "@rap/components-ui/sidebar";
 import { cn } from "@rap/utils";
 import { ChevronRight } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useMenu } from "@/layouts/hooks/useMenu";
 import { MenuService } from "@/layouts/service/menuService";
 import type { MenuItem } from "@/layouts/types";
@@ -31,7 +31,7 @@ export function SidebarMain({
   menus = [],
   disableCollapsedDropdown = false,
 }: SidebarMainProps) {
-  const menuService = new MenuService(menus);
+  const menuService = useMemo(() => new MenuService(menus), [menus]);
   const { openKeys, selectedMenu, updateOpenKeys, handleMenuItemClick, toggleMenuOpen } = useMenu({
     menuService,
   });
@@ -42,8 +42,7 @@ export function SidebarMain({
   const handleInputChange = async (value: string) => {
     const requestId = (searchRequestIdRef.current += 1);
     if (value) {
-      const { expandKeys, menus, searchKeywords } = (await menuService.searchMenus(value))
-        .menuTree;
+      const { expandKeys, menus, searchKeywords } = (await menuService.searchMenus(value)).menuTree;
       if (requestId !== searchRequestIdRef.current) return;
       updateOpenKeys(expandKeys);
       setDisplayMenus(menus);

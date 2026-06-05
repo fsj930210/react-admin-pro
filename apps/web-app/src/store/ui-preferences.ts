@@ -63,8 +63,7 @@ const readStoredTheme = (preferences: UIPreferences): AppTheme | undefined => {
 
   try {
     const storedTheme = window.localStorage.getItem(APP_THEME_STORAGE_KEY);
-    return storedTheme &&
-      preferences.appearance.availableThemes.includes(storedTheme as AppTheme)
+    return storedTheme && preferences.appearance.availableThemes.includes(storedTheme as AppTheme)
       ? (storedTheme as AppTheme)
       : undefined;
   } catch {

@@ -8,12 +8,12 @@ import { cn, useComposedRefs } from "@rap/utils";
 
 type GapValue = number | { column?: number; row?: number };
 
-interface ImageCardGridLayout {
+interface ImageCardLayout {
   columns: number;
   itemWidth: number;
 }
 
-interface ImageCardGridProps extends React.ComponentProps<"div"> {
+interface ImageCardProps extends React.ComponentProps<"div"> {
   itemWidth?: number;
   minItemWidth?: number;
   maxItemWidth?: number;
@@ -25,22 +25,27 @@ interface ImageCardGridProps extends React.ComponentProps<"div"> {
   asChild?: boolean;
 }
 
-interface ImageCardGridItemProps extends React.ComponentProps<"div"> {
+interface ImageCardItemProps extends React.ComponentProps<"div"> {
   asChild?: boolean;
 }
 
-interface ImageCardGridImageProps extends Omit<React.ComponentProps<"img">, "children"> {
+interface ImageCardImageProps extends Omit<React.ComponentProps<"img">, "children"> {
   wrapperClassName?: string;
   wrapperStyle?: React.CSSProperties;
   fit?: React.CSSProperties["objectFit"];
   ratio?: number;
 }
 
-interface ImageCardGridContentProps extends React.ComponentProps<"div"> {
+interface ImageCardContentProps extends React.ComponentProps<"div"> {
   asChild?: boolean;
 }
 
-type ImageCardGridStyle = React.CSSProperties & {
+type ImageCardGridProps = ImageCardProps;
+type ImageCardGridItemProps = ImageCardItemProps;
+type ImageCardGridImageProps = ImageCardImageProps;
+type ImageCardGridContentProps = ImageCardContentProps;
+
+type ImageCardStyle = React.CSSProperties & {
   "--image-card-grid-column-gap"?: string;
   "--image-card-grid-row-gap"?: string;
   "--image-card-grid-item-width"?: string;
@@ -107,7 +112,7 @@ function computeGridLayout(
   maxWidth: number,
   columnGap: number,
   maxColumns?: number
-): ImageCardGridLayout {
+): ImageCardLayout {
   if (containerWidth <= 0) {
     return { columns: 1, itemWidth: preferredWidth };
   }
@@ -198,7 +203,7 @@ function useElementWidth<T extends HTMLElement>() {
   return [setNode, width] as const;
 }
 
-function ImageCardGrid(props: ImageCardGridProps) {
+function ImageCard(props: ImageCardProps) {
   const {
     itemWidth: itemWidthProp = DEFAULT_ITEM_WIDTH,
     minItemWidth,
@@ -225,7 +230,7 @@ function ImageCardGrid(props: ImageCardGridProps) {
     [containerWidth, itemWidth, min, max, gapValue.column, maxColumns]
   );
 
-  const gridStyle: ImageCardGridStyle = {
+  const gridStyle: ImageCardStyle = {
     "--image-card-grid-column-gap": `${gapValue.column}px`,
     "--image-card-grid-row-gap": `${gapValue.row}px`,
     "--image-card-grid-item-width": `${layout.itemWidth}px`,
@@ -255,7 +260,7 @@ function ImageCardGrid(props: ImageCardGridProps) {
   );
 }
 
-function ImageCardGridItem(props: ImageCardGridItemProps) {
+function ImageCardItem(props: ImageCardItemProps) {
   const { asChild, className, ...itemProps } = props;
   const ItemPrimitive = asChild ? SlotPrimitive.Slot : "div";
 
@@ -272,7 +277,7 @@ function ImageCardGridItem(props: ImageCardGridItemProps) {
   );
 }
 
-function ImageCardGridImage(props: ImageCardGridImageProps) {
+function ImageCardImage(props: ImageCardImageProps) {
   const {
     wrapperClassName,
     wrapperStyle,
@@ -284,7 +289,7 @@ function ImageCardGridImage(props: ImageCardGridImageProps) {
     ...imageProps
   } = props;
 
-  const imageWrapperStyle: ImageCardGridStyle = {
+  const imageWrapperStyle: ImageCardStyle = {
     "--image-card-grid-image-ratio": ratio,
     "--image-card-grid-image-fit": fit,
     aspectRatio: "var(--image-card-grid-image-ratio)",
@@ -311,7 +316,7 @@ function ImageCardGridImage(props: ImageCardGridImageProps) {
   );
 }
 
-function ImageCardGridContent(props: ImageCardGridContentProps) {
+function ImageCardContent(props: ImageCardContentProps) {
   const { asChild, className, ...contentProps } = props;
   const ContentPrimitive = asChild ? SlotPrimitive.Slot : "div";
 
@@ -324,11 +329,24 @@ function ImageCardGridContent(props: ImageCardGridContentProps) {
   );
 }
 
+const ImageCardGrid = ImageCard;
+const ImageCardGridItem = ImageCardItem;
+const ImageCardGridImage = ImageCardImage;
+const ImageCardGridContent = ImageCardContent;
+
 export {
+  ImageCard,
+  ImageCardItem,
+  ImageCardImage,
+  ImageCardContent,
   ImageCardGrid,
   ImageCardGridItem,
   ImageCardGridImage,
   ImageCardGridContent,
+  type ImageCardProps,
+  type ImageCardItemProps,
+  type ImageCardImageProps,
+  type ImageCardContentProps,
   type ImageCardGridProps,
   type ImageCardGridItemProps,
   type ImageCardGridImageProps,

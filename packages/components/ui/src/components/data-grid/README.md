@@ -55,7 +55,7 @@ const columns: ColumnDef<User>[] = [
       setPageSize(nextPageSize);
     },
   }}
-/>;
+/>
 ```
 
 远程接口示例见 `apps/web-app/src/pages/(layouts)/components/table/-remote-data.tsx`，它使用 `apps/web-app/src/service/table.ts` 中的 `fetchUsers`。
@@ -72,7 +72,7 @@ const columns: ColumnDef<User>[] = [
   sorting={{ mode: "local" }}
   filtering={{ mode: "local" }}
   pagination={{ mode: "local", defaultPageSize: 10 }}
-/>;
+/>
 ```
 
 ### 行选择
@@ -90,7 +90,7 @@ const columns: ColumnDef<User>[] = [
     checkStrictly: false,
     getCheckboxProps: (record) => ({ disabled: record.status === "left" }),
   }}
-/>;
+/>
 ```
 
 `checkStrictly` 默认为 `true`。设为 `false` 时父子行选择会联动，并显示半选态。
@@ -106,7 +106,7 @@ const columns: ColumnDef<User>[] = [
     getSubRows: (record) => record.children,
     expandedRowRender: (record) => <div>{record.name}</div>,
   }}
-/>;
+/>
 ```
 
 树表格示例见 `-tree-table.tsx`，展开行示例见 `-expanding.tsx`。
@@ -116,9 +116,7 @@ const columns: ColumnDef<User>[] = [
 列固定初始值放在 `column.meta.pinned`；运行时状态使用 `columnPinning`。
 
 ```tsx
-const columns = [
-  { accessorKey: "name", header: "Name", meta: { pinned: "left", ellipsis: true } },
-];
+const columns = [{ accessorKey: "name", header: "Name", meta: { pinned: "left", ellipsis: true } }];
 
 <DataGrid
   rowKey="id"
@@ -145,7 +143,7 @@ const columns = [
     onDoubleClick: () => console.log(column.id),
   })}
   onScroll={(_, info) => console.log(info.scrollTop)}
-/>;
+/>
 ```
 
 用户事件会先执行。如果用户调用 `event.preventDefault()`，内部默认行为会停止，例如内置右键菜单不会打开。
@@ -159,7 +157,7 @@ const columns = [
   components={{
     body: ({ children }) => children,
   }}
-/>;
+/>
 ```
 
 ### 功能列顺序
@@ -177,7 +175,7 @@ const columns = [
     order: ["__rap_data_grid_selection__", "__rap_data_grid_expand__", "__row_dnd_handle__"],
     columns: [rowDndHandleColumn],
   }}
-/>;
+/>
 ```
 
 ## 扩展能力

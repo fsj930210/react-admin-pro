@@ -3,6 +3,7 @@ import type { IconifyJSON } from "@iconify/react";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { X } from "lucide-react";
 import { useControllableState } from "@rap/hooks/use-controllable-state";
+import { useTranslation } from "@rap/i18n";
 import { Button } from "@rap/components-ui/button";
 import { Input } from "@rap/components-ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@rap/components-ui/popover";
@@ -145,6 +146,7 @@ export interface IconSelectProps {
 }
 
 export function IconSelect(props: IconSelectProps) {
+  const { t } = useTranslation("pro");
   const { iconSet, value, columns = 6, iconSize = 20, onChange } = props;
   const safeColumns = Math.max(1, columns);
   const listRef = useRef<HTMLDivElement>(null);
@@ -187,7 +189,7 @@ export function IconSelect(props: IconSelectProps) {
       <div className="mb-2">
         <Input
           type="text"
-          placeholder="搜索图标"
+          placeholder={t("icon.searchPlaceholder")}
           value={searchKeyword}
           onChange={handleSearch}
           className="w-full"
@@ -195,7 +197,7 @@ export function IconSelect(props: IconSelectProps) {
       </div>
       <div ref={listRef} className="relative h-full flex-1 overflow-auto">
         {filteredIconNames.length === 0 ? (
-          <div className="p-4 text-center text-muted-foreground">未找到图标</div>
+          <div className="p-4 text-center text-muted-foreground">{t("icon.noResults")}</div>
         ) : (
           <div
             style={{
@@ -267,6 +269,7 @@ export interface IconViewProps {
 }
 
 export function IconView(props: IconViewProps) {
+  const { t } = useTranslation("pro");
   const { columns, defaultIconSet, disableDefaultIconSets, iconSets, iconSize, onIconSetChange } =
     props;
   const [value, setValue] = useControllableState(props);
@@ -309,7 +312,7 @@ export function IconView(props: IconViewProps) {
   if (!allIconSets.length) {
     return (
       <div className="flex size-full items-center justify-center text-sm text-muted-foreground">
-        暂无图标集
+        {t("icon.emptySets")}
       </div>
     );
   }
@@ -356,7 +359,7 @@ export interface IconPickerProps extends IconViewProps {
 }
 
 export function IconPicker({
-  placeholder = "请选择图标",
+  placeholder,
   disabled,
   clearable = true,
   className,
@@ -367,6 +370,7 @@ export function IconPicker({
   onOpenChange,
   ...iconViewProps
 }: IconPickerProps) {
+  const { t } = useTranslation("pro");
   const [value, setValue] = useControllableState(iconViewProps);
   const [open, setOpen] = useControllableState({
     value: openProp,
@@ -397,7 +401,9 @@ export function IconPicker({
             className="min-w-0 flex-1 justify-start"
           >
             {value ? <Icon icon={value} size={18} /> : null}
-            <span className="min-w-0 truncate text-left">{value || placeholder}</span>
+            <span className="min-w-0 truncate text-left">
+              {value || placeholder || t("icon.selectPlaceholder")}
+            </span>
           </Button>
         </PopoverTrigger>
         <PopoverContent
@@ -417,7 +423,7 @@ export function IconPicker({
           size="icon"
           disabled={disabled}
           onClick={handleClear}
-          aria-label="清空图标"
+          aria-label={t("icon.clear")}
         >
           <X />
         </Button>

@@ -2,9 +2,8 @@ import type { DragEndEvent } from "@dnd-kit/abstract";
 import { RestrictToVerticalAxis } from "@dnd-kit/abstract/modifiers";
 import { Button } from "@rap/components-ui/button";
 import { Input } from "@rap/components-ui/input";
-import {
-  Sortable,
-} from "@rap/components-ui/sortable";
+import { Sortable } from "@rap/components-ui/sortable";
+import { useTranslation } from "@rap/i18n";
 import { cn } from "@rap/utils";
 import type { Column, Table } from "@tanstack/react-table";
 import { Check, GripVertical, RefreshCw } from "lucide-react";
@@ -22,6 +21,7 @@ interface DataGridColumnToggleProps<TData> {
 }
 
 export function DataGridColumnToggle<TData>({ table }: DataGridColumnToggleProps<TData>) {
+  const { t } = useTranslation("ui");
   const [search, setSearch] = useState("");
   const model = useMemo(() => createColumnOrderModel(table), [table]);
   const columnOrder = table.getState().columnOrder;
@@ -48,7 +48,7 @@ export function DataGridColumnToggle<TData>({ table }: DataGridColumnToggleProps
       <div className="w-64 space-y-2 p-2">
         <Input
           type="text"
-          placeholder="Search columns..."
+          placeholder={t("dataGrid.columnToggle.searchPlaceholder")}
           value={search}
           onChange={(event) => setSearch(event.target.value)}
           className="h-8 text-sm"
@@ -73,7 +73,7 @@ export function DataGridColumnToggle<TData>({ table }: DataGridColumnToggleProps
             onClick={() => table.setColumnOrder(model.leafIds)}
           >
             <RefreshCw className="size-3.5" />
-            Reset column order
+            {t("dataGrid.columnToggle.resetOrder")}
           </Button>
         </div>
       </div>
@@ -299,10 +299,7 @@ function getNearestTargetId(
     })
     .filter(
       (item): item is { id: string; rect: DOMRect } =>
-        Boolean(item.id) &&
-        item.id !== sourceId &&
-        item.rect.width > 0 &&
-        item.rect.height > 0
+        Boolean(item.id) && item.id !== sourceId && item.rect.width > 0 && item.rect.height > 0
     );
 
   const containing = candidates.find(

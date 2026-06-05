@@ -1,10 +1,13 @@
 import { useQueries } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import { lazy, Suspense, type ComponentType } from "react";
+import { lazy, Suspense, type ComponentType, useMemo } from "react";
+import { useTranslation } from "@rap/i18n";
 import { LayoutProvider } from "@/layouts/context/layout-context";
 import { MenuService } from "@/layouts/service/menuService";
 import { VerticalLayout } from "@/layouts/ui/vertical-layout";
 import { VerticalLayoutSkeleton } from "@/layouts/ui/vertical-layout/skeleton";
+import type { MenuItem } from "@/layouts/types";
+import { localizeMenuTree } from "@/layouts/utils/localize-menu";
 import { fetchUserInfo, fetchUserMenus } from "@/service/auth";
 import { useUIPreferences } from "@/store/ui-preferences";
 
@@ -102,11 +105,15 @@ const LayoutSkeletonStrategies: Record<LayoutType, LayoutComponent> = {
   "mix-vertical": MixVerticalLayoutSkeleton,
   "mix-double-column": MixDoubleColumnLayoutSkeleton,
 };
+
+const EMPTY_MENUS: MenuItem[] = [];
+
 interface LayoutProps {
   type?: LayoutType;
 }
 function Layout({ type = "vertical" }: LayoutProps) {
   const preferences = useUIPreferences("preferences");
+  const { t } = useTranslation("webApp");
   const queryResults = useQueries({
     queries: [
       {
@@ -120,10 +127,11 @@ function Layout({ type = "vertical" }: LayoutProps) {
     ],
   });
   const [userInfoResult, userMenusResult] = queryResults;
-  const menus = userMenusResult.data?.data ?? [];
+  const rawMenus = userMenusResult.data?.data ?? EMPTY_MENUS;
+  const menus = useMemo(() => localizeMenuTree(rawMenus, t), [rawMenus, t]);
   const userInfo = userInfoResult.data?.data ?? null;
   const loading = queryResults.some((result) => result.isLoading);
-  const menuService = new MenuService(menus);
+  const menuService = useMemo(() => new MenuService(menus), [menus]);
   const resolvedType = preferences.layout.mode || type;
   const LayoutComponent =
     LayoutComponentStrategies[resolvedType] || LayoutComponentStrategies.vertical;

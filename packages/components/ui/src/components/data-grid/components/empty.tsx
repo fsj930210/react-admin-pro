@@ -1,4 +1,5 @@
 import type React from "react";
+import { useTranslation } from "@rap/i18n";
 
 export interface EmptyProps {
   text?: string;
@@ -7,6 +8,8 @@ export interface EmptyProps {
 }
 
 export function Empty({ text, icon, render, ...rest }: EmptyProps & React.ComponentProps<"div">) {
+  const { t } = useTranslation("ui");
+
   return (
     <div className="size-full flex-center p-4" {...rest}>
       {render ? (
@@ -14,7 +17,7 @@ export function Empty({ text, icon, render, ...rest }: EmptyProps & React.Compon
       ) : (
         <>
           {icon || <EmptyIcon className="text-[64px]" />}
-          <div className="mt-2 text-sm text-muted-foreground">{text || "暂无数据"}</div>
+          <div className="mt-2 text-sm text-muted-foreground">{text || t("dataGrid.empty")}</div>
         </>
       )}
     </div>

@@ -1,4 +1,5 @@
 import { When } from "@rap/components-ui/when";
+import { useTranslation } from "@rap/i18n";
 import { cn } from "@rap/utils";
 import type { Table } from "@tanstack/react-table";
 import type * as React from "react";
@@ -71,6 +72,7 @@ export function DataGridPagination<TData>({
   total,
   loading,
 }: DataGridPaginationProps<TData>) {
+  const { t } = useTranslation("ui");
   const paginationConfig = config || {};
   const state = table.getState().pagination;
   const resolvedTotal =
@@ -124,8 +126,8 @@ export function DataGridPagination<TData>({
               <PaginationPrevious
                 disabled={current <= 1 || disabled}
                 onClick={() => setPage(current - 1)}
-                title="上一页"
-                aria-label="上一页"
+                title={t("dataGrid.pagination.previous")}
+                aria-label={t("dataGrid.pagination.previous")}
               />
             </PaginationItem>
 
@@ -149,8 +151,8 @@ export function DataGridPagination<TData>({
               <PaginationNext
                 disabled={current >= totalPages || disabled}
                 onClick={() => setPage(current + 1)}
-                title="下一页"
-                aria-label="下一页"
+                title={t("dataGrid.pagination.next")}
+                aria-label={t("dataGrid.pagination.next")}
               />
             </PaginationItem>
 
@@ -167,7 +169,7 @@ export function DataGridPagination<TData>({
                   <SelectContent>
                     {pageSizeOptions.map((option) => (
                       <SelectItem key={option} value={String(option)}>
-                        {option} / 页
+                        {t("dataGrid.pagination.pageSize", { size: option })}
                       </SelectItem>
                     ))}
                   </SelectContent>

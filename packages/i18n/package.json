@@ -1,0 +1,36 @@
+{
+  "name": "@rap/i18n",
+  "version": "0.0.1",
+  "description": "Shared internationalization runtime for React Admin Pro",
+  "keywords": [
+    "i18n",
+    "internationalization",
+    "react",
+    "i18next"
+  ],
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "lint": "oxfmt --check -c ./oxfmt.config.ts . && oxlint -c ./oxlint.config.ts .",
+    "lint:fix": "oxlint -c ./oxlint.config.ts . --fix && oxfmt --write -c ./oxfmt.config.ts ."
+  },
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    }
+  },
+  "dependencies": {
+    "i18next": "catalog:",
+    "react-i18next": "catalog:"
+  },
+  "devDependencies": {
+    "@rap/oxc-config": "workspace:*",
+    "@rap/tsconfig": "workspace:*",
+    "@types/react": "catalog:",
+    "react": "catalog:"
+  },
+  "peerDependencies": {
+    "react": "catalog:"
+  }
+}

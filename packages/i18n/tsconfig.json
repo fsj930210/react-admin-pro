@@ -1,0 +1,10 @@
+{
+  "extends": "@rap/tsconfig/web.json",
+  "compilerOptions": {
+    "paths": {
+      "@rap/i18n": ["./src/index.ts"]
+    }
+  },
+  "include": ["."],
+  "exclude": ["node_modules", "dist"]
+}

@@ -10,6 +10,7 @@ import {
 } from "@rap/components-ui/dropdown-menu";
 import { SidebarMenu, SidebarMenuButton, SidebarMenuItem } from "@rap/components-ui/sidebar";
 import { useIsMobile } from "@rap/hooks/use-mobile";
+import { useTranslation } from "@rap/i18n";
 import { cn } from "@rap/utils";
 import { BadgeCheck, Bell, ChevronsUpDown, CreditCard, LogOut, Sparkles } from "lucide-react";
 import { useLayout } from "@/layouts/context/layout-context";
@@ -31,6 +32,7 @@ interface UserProps {
 
 export function User({ dropdownMenuTriggerClassName }: UserProps) {
   const isMobile = useIsMobile();
+  const { t } = useTranslation("webApp");
   const { userInfo } = useLayout();
   const { logoutMutation } = useAuth();
 
@@ -77,22 +79,22 @@ export function User({ dropdownMenuTriggerClassName }: UserProps) {
         <DropdownMenuGroup>
           <DropdownMenuItem>
             <Sparkles />
-            Upgrade to Pro
+            {t("header.upgradeToPro")}
           </DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
           <DropdownMenuItem>
             <BadgeCheck />
-            Account
+            {t("header.account")}
           </DropdownMenuItem>
           <DropdownMenuItem>
             <CreditCard />
-            Billing
+            {t("header.billing")}
           </DropdownMenuItem>
           <DropdownMenuItem>
             <Bell />
-            Notifications
+            {t("header.notifications")}
           </DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
@@ -101,7 +103,7 @@ export function User({ dropdownMenuTriggerClassName }: UserProps) {
           disabled={logoutMutation.isPending}
         >
           <LogOut />
-          {logoutMutation.isPending ? "Logging out..." : "Log out"}
+          {logoutMutation.isPending ? t("header.loggingOut") : t("header.logout")}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

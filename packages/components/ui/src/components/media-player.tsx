@@ -597,43 +597,33 @@ function MediaPlayerImpl(props: MediaPlayerProps) {
     const mediaElement = mediaRef.current;
     if (!mediaElement) return;
 
+    const handleTimeUpdate = () => onTimeUpdate?.(mediaElement.currentTime);
+    const handleVolumeChange = () => {
+      onVolumeChange?.(mediaElement.volume);
+      onMuted?.(mediaElement.muted);
+    };
+    const handleMediaError = () => onMediaError?.(mediaElement.error);
+    const handleFullscreenChange = () => onFullscreenChange?.(!!document.fullscreenElement);
+
     if (onPlay) mediaElement.addEventListener("play", onPlay);
     if (onPause) mediaElement.addEventListener("pause", onPause);
     if (onEnded) mediaElement.addEventListener("ended", onEnded);
-    if (onTimeUpdate)
-      mediaElement.addEventListener("timeupdate", () => onTimeUpdate?.(mediaElement.currentTime));
-    if (onVolumeChange)
-      mediaElement.addEventListener("volumechange", () => {
-        onVolumeChange?.(mediaElement.volume);
-        onMuted?.(mediaElement.muted);
-      });
-    if (onMediaError)
-      mediaElement.addEventListener("error", () => onMediaError?.(mediaElement.error));
+    if (onTimeUpdate) mediaElement.addEventListener("timeupdate", handleTimeUpdate);
+    if (onVolumeChange) mediaElement.addEventListener("volumechange", handleVolumeChange);
+    if (onMediaError) mediaElement.addEventListener("error", handleMediaError);
     if (onFullscreenChange) {
-      document.addEventListener("fullscreenchange", () =>
-        onFullscreenChange?.(!!document.fullscreenElement)
-      );
+      document.addEventListener("fullscreenchange", handleFullscreenChange);
     }
 
     return () => {
       if (onPlay) mediaElement.removeEventListener("play", onPlay);
       if (onPause) mediaElement.removeEventListener("pause", onPause);
       if (onEnded) mediaElement.removeEventListener("ended", onEnded);
-      if (onTimeUpdate)
-        mediaElement.removeEventListener("timeupdate", () =>
-          onTimeUpdate?.(mediaElement.currentTime)
-        );
-      if (onVolumeChange)
-        mediaElement.removeEventListener("volumechange", () => {
-          onVolumeChange?.(mediaElement.volume);
-          onMuted?.(mediaElement.muted);
-        });
-      if (onMediaError)
-        mediaElement.removeEventListener("error", () => onMediaError?.(mediaElement.error));
+      if (onTimeUpdate) mediaElement.removeEventListener("timeupdate", handleTimeUpdate);
+      if (onVolumeChange) mediaElement.removeEventListener("volumechange", handleVolumeChange);
+      if (onMediaError) mediaElement.removeEventListener("error", handleMediaError);
       if (onFullscreenChange) {
-        document.removeEventListener("fullscreenchange", () =>
-          onFullscreenChange?.(!!document.fullscreenElement)
-        );
+        document.removeEventListener("fullscreenchange", handleFullscreenChange);
       }
       if (volumeIndicatorTimeoutRef.current) {
         clearTimeout(volumeIndicatorTimeoutRef.current);

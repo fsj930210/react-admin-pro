@@ -1,7 +1,7 @@
 import { SidebarInset } from "@rap/components-ui/sidebar/index";
 import { cn } from "@rap/utils";
 import { ChevronDown } from "lucide-react";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { AppLogo } from "@/components/app/logo";
 import { AppContent } from "@/layouts/components/content";
 import { AppHeader } from "@/layouts/components/header";
@@ -16,7 +16,7 @@ import { useUIPreferences } from "@/store/ui-preferences";
 export function HorizontalLayout() {
   const { userMenus } = useLayout();
   const preferences = useUIPreferences("preferences");
-  const menuService = new MenuService(userMenus);
+  const menuService = useMemo(() => new MenuService(userMenus), [userMenus]);
   const { handleMenuItemClick } = useMenu({ menuService });
 
   return (

@@ -14,6 +14,7 @@
   ],
   "type": "module",
   "exports": {
+    "./image-card": "./src/components/image-card.tsx",
     "./*": "./src/components/*.tsx",
     "./tree": "./src/components/tree/index.tsx",
     "./tree/features": "./src/components/tree/features/index.ts",
@@ -22,6 +23,7 @@
     "./minimal-tiptap": "./src/components/minimal-tiptap/index.ts",
     "./theme-provider": "./src/components/theme-provider/index.tsx",
     "./data-grid": "./src/components/data-grid/index.ts",
+    "./i18n": "./src/i18n/index.ts",
     "./animator": "./src/components/animator/index.tsx"
   },
   "scripts": {
@@ -39,6 +41,7 @@
     "@floating-ui/react-dom": "catalog:",
     "@iconify/react": "catalog:",
     "@rap/hooks": "workspace:*",
+    "@rap/i18n": "workspace:*",
     "@rap/styles": "workspace:*",
     "@rap/utils": "workspace:*",
     "@tanstack/react-form": "catalog:",
@@ -61,8 +64,7 @@
     "class-variance-authority": "catalog:",
     "clsx": "catalog:",
     "cmdk": "catalog:",
-    "date-fns": "catalog:",
-    "date-fns-tz": "catalog:",
+    "dayjs": "catalog:",
     "embla-carousel-react": "catalog:",
     "framer-motion": "catalog:",
     "input-otp": "catalog:",

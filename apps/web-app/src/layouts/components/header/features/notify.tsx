@@ -6,6 +6,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@rap/components-ui/dropdown-menu";
+import { useTranslation } from "@rap/i18n";
 import { Bell } from "lucide-react";
 
 interface NotifyFeatureProps {
@@ -13,10 +14,26 @@ interface NotifyFeatureProps {
 }
 
 export function NotifyFeature({ className }: NotifyFeatureProps) {
+  const { t } = useTranslation("webApp");
   const notifications = [
-    { id: 1, title: "新消息", content: "您有一条新消息", time: "2分钟前" },
-    { id: 2, title: "系统通知", content: "系统维护通知", time: "1小时前" },
-    { id: 3, title: "待办事项", content: "您的待办事项提醒", time: "昨天" },
+    {
+      id: 1,
+      title: t("header.notificationItems.newMessageTitle"),
+      content: t("header.notificationItems.newMessageContent"),
+      time: t("header.notificationItems.twoMinutesAgo"),
+    },
+    {
+      id: 2,
+      title: t("header.notificationItems.systemTitle"),
+      content: t("header.notificationItems.systemContent"),
+      time: t("header.notificationItems.oneHourAgo"),
+    },
+    {
+      id: 3,
+      title: t("header.notificationItems.todoTitle"),
+      content: t("header.notificationItems.todoContent"),
+      time: t("header.notificationItems.yesterday"),
+    },
   ];
 
   return (
@@ -34,7 +51,9 @@ export function NotifyFeature({ className }: NotifyFeatureProps) {
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-80">
         <div className="p-2">
-          <h3 className="font-semibold mb-2">通知 ({notifications.length})</h3>
+          <h3 className="font-semibold mb-2">
+            {t("header.notifications")} ({notifications.length})
+          </h3>
           {notifications.map((notification) => (
             <DropdownMenuItem
               key={notification.id}

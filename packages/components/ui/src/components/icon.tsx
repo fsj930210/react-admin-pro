@@ -31,7 +31,13 @@ export function IconifyIcon({
 
 export type ImageIconProps = React.ImgHTMLAttributes<HTMLImageElement> & IconWrapperProps;
 
-export function ImageIcon({ title = "", wrapperClassName, wrapperStyle, ...rest }: ImageIconProps) {
+export function ImageIcon({
+  title = "",
+  alt = title,
+  wrapperClassName,
+  wrapperStyle,
+  ...rest
+}: ImageIconProps) {
   return (
     <span
       style={wrapperStyle}
@@ -40,7 +46,7 @@ export function ImageIcon({ title = "", wrapperClassName, wrapperStyle, ...rest 
       aria-label={title}
       data-slot="icon"
     >
-      <img {...rest} />
+      <img alt={alt} {...rest} />
     </span>
   );
 }

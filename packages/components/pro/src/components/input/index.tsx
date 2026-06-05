@@ -1,5 +1,6 @@
 import * as React from "react";
 import { Eye, EyeOff, XCircle } from "lucide-react";
+import { useTranslation } from "@rap/i18n";
 
 import {
   InputGroup,
@@ -86,6 +87,7 @@ export function Input({
   disabled,
   ...props
 }: InputProps) {
+  const { t } = useTranslation("pro");
   const inputRef = React.useRef<HTMLInputElement>(null);
   const skipNextValueChangeRef = React.useRef(false);
   const isControlled = value !== undefined;
@@ -185,7 +187,7 @@ export function Input({
             onClick={handleClear}
             className={cn("hover:bg-transparent focus-visible:ring-0", clearButtonClassName)}
             type="button"
-            aria-label={clearConfig.ariaLabel ?? "Clear input"}
+            aria-label={clearConfig.ariaLabel ?? t("input.clear")}
           >
             {clearConfig.icon ?? <XCircle className="size-4 text-muted-foreground" />}
           </InputGroupButton>

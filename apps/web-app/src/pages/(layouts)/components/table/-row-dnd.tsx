@@ -1,7 +1,5 @@
 import { DataGrid } from "@rap/components-ui/data-grid";
-import {
-  Sortable,
-} from "@rap/components-ui/sortable";
+import { Sortable } from "@rap/components-ui/sortable";
 import { GripVertical } from "lucide-react";
 import { type ComponentProps, type ReactNode, useMemo, useState } from "react";
 import { DemoTitle } from "./-basic";
@@ -25,7 +23,7 @@ export function RowDndDataGridDemo() {
         pinned: "left" as const,
       },
     }),
-    [],
+    []
   );
   const ids = data.map((row) => row.id);
 
@@ -76,7 +74,7 @@ function SortableRows({ children }: { children?: ReactNode }) {
 
 function SortableRow({ style, ...props }: ComponentProps<"div">) {
   const id = String(
-    (props as ComponentProps<"div"> & { "data-row-id"?: string })["data-row-id"] ?? "",
+    (props as ComponentProps<"div"> & { "data-row-id"?: string })["data-row-id"] ?? ""
   );
 
   return (

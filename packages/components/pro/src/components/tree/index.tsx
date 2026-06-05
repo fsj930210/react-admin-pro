@@ -31,6 +31,7 @@ import type {
   TreeKey,
   TreeNode,
 } from "@rap/components-ui/tree/types";
+import { useTranslation } from "@rap/i18n";
 import { cn } from "@rap/utils";
 import * as React from "react";
 
@@ -214,6 +215,8 @@ function DefaultTreeItem({
   onDrop?: React.DragEventHandler<HTMLDivElement>;
   onDragEnd?: React.DragEventHandler<HTMLDivElement>;
 }) {
+  const { t } = useTranslation("pro");
+
   return (
     <TreeItem
       key={item.key}
@@ -228,8 +231,12 @@ function DefaultTreeItem({
       <TreeTrigger item={item} />
       {checkable && <TreeCheckbox item={item} />}
       <TreeLabel item={item}>{labelRender ?? ((node) => node.node.label)}</TreeLabel>
-      {Boolean(item.loading) && <span className="ml-2 text-xs text-muted-foreground">Loading</span>}
-      {Boolean(item.loadError) && <span className="ml-2 text-xs text-destructive">Failed</span>}
+      {Boolean(item.loading) && (
+        <span className="ml-2 text-xs text-muted-foreground">{t("tree.loading")}</span>
+      )}
+      {Boolean(item.loadError) && (
+        <span className="ml-2 text-xs text-destructive">{t("tree.failed")}</span>
+      )}
       {extraRender?.(item, tree)}
       <TreeDropIndicator item={item} intent={dropIntent} />
     </TreeItem>
