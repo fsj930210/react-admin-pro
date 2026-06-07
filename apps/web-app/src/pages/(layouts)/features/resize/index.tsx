@@ -156,5 +156,3 @@ function ResizeFeaturePage() {
     </div>
   );
 }
-
-export default ResizeFeaturePage;

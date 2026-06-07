@@ -70,5 +70,3 @@ function MinimaxFeaturePage() {
     </div>
   );
 }
-
-export default MinimaxFeaturePage;

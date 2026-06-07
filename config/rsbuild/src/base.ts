@@ -15,13 +15,14 @@ export function defineRsbuildBaseConfig(options: RsbuildConfig = {}) {
 	const root = process.cwd();
 	const srcDir = path.resolve(root, "./src");
 	const isDevCommand = process.argv.includes("dev");
+	const enableCodeInspector = process.env.RAP_CODE_INSPECTOR === "true";
 
 	// 基础配置
 	const baseConfig = defineRsbuildConfig({
 		plugins: [
 			pluginReact(),
 			pluginSvgr(),
-			pluginTypeCheck(),
+			...(isDevCommand ? [] : [pluginTypeCheck()]),
 			pluginReactLocalIconify({
 				resolver: '@iconify/react',
 				configs: [
@@ -60,7 +61,7 @@ export function defineRsbuildBaseConfig(options: RsbuildConfig = {}) {
 						quoteStyle: "double",
 						semicolons: true,
 					}),
-					...(isDevCommand
+					...(isDevCommand && enableCodeInspector
 						? [
 								codeInspectorPlugin({
 									bundler: 'rspack',

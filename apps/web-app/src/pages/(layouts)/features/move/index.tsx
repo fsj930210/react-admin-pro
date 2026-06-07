@@ -132,5 +132,3 @@ function MoveFeaturePage() {
     </div>
   );
 }
-
-export default MoveFeaturePage;

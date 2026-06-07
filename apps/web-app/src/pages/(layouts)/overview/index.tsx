@@ -207,7 +207,7 @@ function AddMenuModal({
   );
 }
 
-export function OverviewPage() {
+function OverviewPage() {
   const { userMenus } = useLayout();
   const navigate = useNavigate();
   const [quickMenus, setQuickMenus] = useState<MenuItem[]>([]);
