@@ -45,7 +45,7 @@ export function ClassicBreadcrumb({ data, onBreadcrumbItemClick, mode }: Breadcr
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="start">
                       {item.children
-                        ?.filter((child) => child.id !== data[data.length - 1]?.id)
+                        ?.filter((child) => child.id !== data[index + 1]?.id)
                         .map((child) => (
                           <DropdownMenuItem
                             key={child.id}

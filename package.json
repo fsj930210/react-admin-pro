@@ -43,16 +43,16 @@
 	"devDependencies": {
 		"@rap/commitlint-config": "workspace:*",
 		"@rap/oxc-config": "workspace:*",
+		"@types/node": "catalog:",
+		"@types/react": "catalog:",
+		"@types/react-dom": "catalog:",
 		"commitlint": "catalog:",
 		"husky": "catalog:",
 		"oxfmt": "catalog:",
 		"oxlint": "catalog:",
-		"turbo": "catalog:",
-		"typescript": "catalog:",
-		"@types/node": "catalog:",
 		"react": "catalog:",
 		"react-dom": "catalog:",
-		"@types/react": "catalog:",
-		"@types/react-dom": "catalog:"
+		"turbo": "catalog:",
+		"typescript": "^6.0.3"
 	}
 }

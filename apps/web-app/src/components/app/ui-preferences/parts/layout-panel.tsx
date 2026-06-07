@@ -1,4 +1,3 @@
-import { Button } from "@rap/components-ui/button";
 import {
   Select,
   SelectContent,
@@ -7,7 +6,6 @@ import {
   SelectValue,
 } from "@rap/components-ui/select";
 import { Switch } from "@rap/components-ui/switch";
-import { useState } from "react";
 import type { ContentWidthMode, LayoutMode } from "@/config/ui-preferences";
 import { contentWidthOptions, layoutOptions } from "./options";
 import {
@@ -21,46 +19,29 @@ import {
 import type { PreferencesPanelProps } from "./types";
 
 export function LayoutPanel({ preferences, updatePreferences }: PreferencesPanelProps) {
-  const [layoutModeDraft, setLayoutModeDraft] = useState<LayoutMode>();
-  const selectedLayoutMode = layoutModeDraft ?? preferences.layout.mode;
-
-  const applyLayoutMode = () => {
-    updatePreferences((draft) => {
-      draft.layout.mode = selectedLayoutMode;
-    });
-    setLayoutModeDraft(undefined);
-    window.setTimeout(() => window.location.reload(), 80);
-  };
-
   return (
     <div className="space-y-6">
       <Section title="布局模式">
-        <Field label="默认布局" description="切换布局会刷新页面。">
-          <div className="flex items-center gap-2">
-            <Select
-              value={selectedLayoutMode}
-              onValueChange={(value) => setLayoutModeDraft(value as LayoutMode)}
-            >
-              <SelectTrigger className="w-32">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent className={selectContentClassName}>
-                {layoutOptions.map((item) => (
-                  <SelectItem key={item.value} value={item.value}>
-                    {item.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Button
-              type="button"
-              size="sm"
-              disabled={selectedLayoutMode === preferences.layout.mode}
-              onClick={applyLayoutMode}
-            >
-              应用
-            </Button>
-          </div>
+        <Field label="默认布局">
+          <Select
+            value={preferences.layout.mode}
+            onValueChange={(value) =>
+              updatePreferences((draft) => {
+                draft.layout.mode = value as LayoutMode;
+              })
+            }
+          >
+            <SelectTrigger className={controlClassName}>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent className={selectContentClassName}>
+              {layoutOptions.map((item) => (
+                <SelectItem key={item.value} value={item.value}>
+                  {item.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </Field>
         <Field label="内容宽度">
           <Select
@@ -216,6 +197,33 @@ export function LayoutPanel({ preferences, updatePreferences }: PreferencesPanel
             onCheckedChange={(checked) =>
               updatePreferences((draft) => {
                 draft.layout.footer.enabled = checked;
+              })
+            }
+          />
+        </Field>
+        <Field label="底栏随内容滚动" description="开启后底栏进入内容滚动区">
+          <Switch
+            aria-label="底栏随内容滚动"
+            checked={preferences.layout.footer.scrollWithContent}
+            disabled={!preferences.layout.footer.enabled}
+            onCheckedChange={(checked) =>
+              updatePreferences((draft) => {
+                draft.layout.footer.scrollWithContent = checked;
+              })
+            }
+          />
+        </Field>
+        <Field label="底栏高度">
+          <input
+            aria-label="底栏高度"
+            type="number"
+            value={preferences.layout.footer.height}
+            min={32}
+            max={120}
+            className={numberInputClassName}
+            onChange={(event) =>
+              updatePreferences((draft) => {
+                draft.layout.footer.height = Number(event.target.value);
               })
             }
           />

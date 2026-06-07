@@ -28,7 +28,7 @@ export function defineRsbuildProdConfig(options: RsbuildConfig = {}) {
 							priority: 40,
 						},
 						echarts: {
-							test: /node_modules[\\/](echarts|zrender|echarts-for-react)[\\/]/,
+							test: /node_modules[\\/](echarts|zrender)[\\/]/,
 							name: "echarts",
 							chunks: "all",
 							priority: 30,
@@ -36,6 +36,12 @@ export function defineRsbuildProdConfig(options: RsbuildConfig = {}) {
 						tiptap: {
 							test: /node_modules[\\/](@tiptap|prosemirror-[^\\/]+|lowlight|highlight\.js|marked|linkifyjs|orderedmap)[\\/]/,
 							name: "tiptap",
+							chunks: "all",
+							priority: 30,
+						},
+						pinyin: {
+							test: /node_modules[\\/]pinyin-pro[\\/]/,
+							name: "pinyin-pro",
 							chunks: "all",
 							priority: 30,
 						},

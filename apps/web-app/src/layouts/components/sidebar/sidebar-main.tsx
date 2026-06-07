@@ -12,9 +12,10 @@ import {
 } from "@rap/components-ui/sidebar";
 import { cn } from "@rap/utils";
 import { ChevronRight } from "lucide-react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useState } from "react";
+import { useLayout } from "@/layouts/context/layout-context";
 import { useMenu } from "@/layouts/hooks/useMenu";
-import { MenuService } from "@/layouts/service/menuService";
+import type { HighlightPart } from "@/layouts/service/menuService";
 import type { MenuItem } from "@/layouts/types";
 import { DropdownSubmenu } from "../menu/dropdown-submenu";
 import { MenuItemContent } from "../menu/menu-item-content";
@@ -31,40 +32,54 @@ export function SidebarMain({
   menus = [],
   disableCollapsedDropdown = false,
 }: SidebarMainProps) {
-  const menuService = useMemo(() => new MenuService(menus), [menus]);
+  const { menuService } = useLayout();
   const { openKeys, selectedMenu, updateOpenKeys, handleMenuItemClick, toggleMenuOpen } = useMenu({
     menuService,
   });
-  const [displayMenus, setDisplayMenus] = useState(menus);
-  const [searchKeywords, setSearchKeywords] = useState<string[]>([]);
-  const searchRequestIdRef = useRef(0);
+  const [searchState, setSearchState] = useState<{
+    keyword: string;
+    visibleIds: Set<string> | null;
+    searchKeywords: string[];
+    highlightsById: Map<string, HighlightPart[]>;
+  }>({
+    keyword: "",
+    visibleIds: null,
+    searchKeywords: [],
+    highlightsById: new Map(),
+  });
 
-  const handleInputChange = async (value: string) => {
-    const requestId = (searchRequestIdRef.current += 1);
-    if (value) {
-      const { expandKeys, menus, searchKeywords } = (await menuService.searchMenus(value)).menuTree;
-      if (requestId !== searchRequestIdRef.current) return;
-      updateOpenKeys(expandKeys);
-      setDisplayMenus(menus);
-      setSearchKeywords(searchKeywords);
-    } else {
-      setDisplayMenus(menus);
-      setSearchKeywords([]);
+  const handleInputChange = (value: string) => {
+    const keyword = value.trim();
+    if (!keyword) {
+      setSearchState({
+        keyword: "",
+        visibleIds: null,
+        searchKeywords: [],
+        highlightsById: new Map(),
+      });
+      return;
     }
+
+    const result = menuService.searchSidebar(keyword);
+    updateOpenKeys(result.expandedIds);
+    setSearchState({
+      keyword,
+      visibleIds: result.visibleIds,
+      searchKeywords: result.searchKeywords,
+      highlightsById: result.highlightsById,
+    });
   };
-  useEffect(() => {
-    // eslint-disable-next-line @eslint-react/set-state-in-effect, react-hooks/set-state-in-effect
-    setDisplayMenus(menus);
-  }, [menus]);
 
   return (
     <SidebarMenu className="overflow-x-hidden h-full">
       {showSearch && <SidebarSearch onChange={handleInputChange} />}
-      {displayMenus.map((item: MenuItem) => (
+      {menus.map((item: MenuItem) => (
         <SidebarMenuItemContent
           key={item.id}
           item={item}
-          searchKeywords={searchKeywords}
+          searchKeywords={searchState.searchKeywords}
+          visibleIds={searchState.visibleIds}
+          highlightsById={searchState.highlightsById}
           openKeys={openKeys}
           selectedMenu={selectedMenu}
           toggleMenuOpen={toggleMenuOpen}
@@ -80,6 +95,8 @@ export function SidebarMain({
 interface SidebarMenuItemContentProps {
   item: MenuItem;
   searchKeywords?: string[];
+  visibleIds?: Set<string> | null;
+  highlightsById?: Map<string, HighlightPart[]>;
   selectedMenu: MenuItem | null;
   openKeys: string[];
   level: number;
@@ -93,6 +110,8 @@ function SidebarMenuItemContent(props: SidebarMenuItemContentProps) {
     item,
     selectedMenu,
     searchKeywords,
+    visibleIds,
+    highlightsById,
     openKeys,
     level = 0,
     onItemClick,
@@ -103,6 +122,7 @@ function SidebarMenuItemContent(props: SidebarMenuItemContentProps) {
   const { state: sidebarState } = useSidebar();
   const isCollapsed = sidebarState === "collapsed";
 
+  if (visibleIds && !visibleIds.has(item.id)) return null;
   if (item.hidden || item.status !== "enabled" || item.type === "button") return null;
   if (!children || !children.length) {
     return (
@@ -115,7 +135,11 @@ function SidebarMenuItemContent(props: SidebarMenuItemContentProps) {
             paddingLeft: `calc(var(--spacing) * 4 + var(--spacing) * 4 * ${level})`,
           }}
         >
-          <MenuItemContent item={item} searchKeywords={searchKeywords} />
+          <MenuItemContent
+            item={item}
+            searchKeywords={searchKeywords}
+            highlightParts={highlightsById?.get(item.id)}
+          />
         </SidebarMenuButton>
       </SidebarMenuItem>
     );
@@ -129,7 +153,11 @@ function SidebarMenuItemContent(props: SidebarMenuItemContentProps) {
             isActive={selectedMenu?.id === item.id}
             className="flex items-center justify-center p-0"
           >
-            <MenuItemContent item={item} searchKeywords={searchKeywords} />
+            <MenuItemContent
+              item={item}
+              searchKeywords={searchKeywords}
+              highlightParts={highlightsById?.get(item.id)}
+            />
           </SidebarMenuButton>
         </DropdownSubmenu>
       </SidebarMenuItem>
@@ -150,7 +178,11 @@ function SidebarMenuItemContent(props: SidebarMenuItemContentProps) {
               paddingLeft: `calc(var(--spacing) * 4 + var(--spacing) * 4 * ${level})`,
             }}
           >
-            <MenuItemContent item={item} searchKeywords={searchKeywords} />
+            <MenuItemContent
+              item={item}
+              searchKeywords={searchKeywords}
+              highlightParts={highlightsById?.get(item.id)}
+            />
             <ChevronRight className="size-4 transition-transform duration-200 ease-in-out" />
           </SidebarMenuButton>
         </CollapsibleTrigger>

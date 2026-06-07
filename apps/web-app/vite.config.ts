@@ -27,7 +27,7 @@ export default ({ mode }: UserConfig) => {
               },
               {
                 name: "echarts",
-                test: /[\\/]node_modules[\\/](echarts|zrender|echarts-for-react)[\\/]/,
+                test: /[\\/]node_modules[\\/](echarts|zrender)[\\/]/,
               },
               {
                 name: "tanstack-router-query",

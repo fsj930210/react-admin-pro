@@ -2,14 +2,32 @@
 interface HighlightTextProps {
   text: string;
   searchKeywords: string[];
+  highlightParts?: Array<{ text: string; matched: boolean }>;
   highlightColor?: string;
 }
 
 export function MenuItemHighlightText({
   text,
   searchKeywords,
+  highlightParts,
   highlightColor = "text-blue-500",
 }: HighlightTextProps) {
+  if (highlightParts && highlightParts.length > 0) {
+    return (
+      <span>
+        {highlightParts.map((part, index) =>
+          part.matched ? (
+            <span key={`${part.text}_${index}`} className={highlightColor}>
+              {part.text}
+            </span>
+          ) : (
+            <span key={`${part.text}_${index}`}>{part.text}</span>
+          )
+        )}
+      </span>
+    );
+  }
+
   if (!searchKeywords || searchKeywords.length === 0) {
     return <span>{text}</span>;
   }

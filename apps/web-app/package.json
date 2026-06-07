@@ -56,7 +56,6 @@
     "@tanstack/react-table": "catalog:",
     "class-variance-authority": "catalog:",
     "echarts": "catalog:",
-    "echarts-for-react": "catalog:",
     "highlight.js": "catalog:",
     "lodash-es": "catalog:",
     "lucide-react": "catalog:",

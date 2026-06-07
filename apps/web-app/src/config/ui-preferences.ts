@@ -57,6 +57,7 @@ export interface UIPreferences {
     footer: {
       enabled: boolean;
       height: number;
+      scrollWithContent: boolean;
       text: string;
     };
   };
@@ -145,6 +146,7 @@ export const DEFAULT_UI_PREFERENCES: UIPreferences = {
     footer: {
       enabled: true,
       height: 56,
+      scrollWithContent: false,
       text: "React Admin Pro",
     },
   },
@@ -170,7 +172,7 @@ export const DEFAULT_UI_PREFERENCES: UIPreferences = {
   },
   templatePreview: {
     enabled: true,
-    persist: false,
+    persist: true,
     storageKey: "rap-ui-preferences-preview",
     panelOpen: false,
   },

@@ -1,11 +1,9 @@
 import { bfsSearch, traverseTree } from "@rap/utils";
+import { pinyin } from "pinyin-pro";
 import type { FlatMenuItem, MenuItem } from "../types";
-import type { pinyin as pinyinFunction } from "pinyin-pro";
-
-type Pinyin = typeof pinyinFunction;
 
 interface MenuSearchListResult {
-  menus: MenuSearchListItem[];
+  menus: FlatMenuItem[];
   searchKeywords: string[];
 }
 
@@ -24,58 +22,233 @@ export interface MenuSearchListItem extends FlatMenuItem {
   searchKeywords: string[];
 }
 
+interface AppSearchListResult {
+  menus: MenuSearchListItem[];
+  searchKeywords: string[];
+}
+
+export interface HighlightPart {
+  text: string;
+  matched: boolean;
+}
+
+export interface SidebarSearchResult {
+  visibleIds: Set<string>;
+  matchedIds: Set<string>;
+  expandedIds: string[];
+  searchKeywords: string[];
+  highlightsById: Map<string, HighlightPart[]>;
+}
+
 interface MenuSearchIndexItem {
   item: FlatMenuItem;
   titleLower: string;
   codeLower: string;
   url: string;
   urlLower: string;
-  pinyinFull?: string;
-  pinyinInitials?: string;
+  pinyinFull: string;
+  pinyinInitials: string;
+  pinyinWords: string;
 }
 
-let pinyinLoader: Promise<Pinyin> | null = null;
+function normalizeUrl(url = "") {
+  return url.split("?")[0].split("#")[0].replace(/\/$/, "");
+}
 
-function loadPinyin(): Promise<Pinyin> {
-  pinyinLoader ??= import("pinyin-pro").then((module) => module.pinyin);
-  return pinyinLoader;
+function normalizeSearchText(value: string) {
+  return value.trim().toLowerCase();
+}
+
+function normalizePinyinText(value: string) {
+  return normalizeSearchText(value).replace(/\s+/g, "");
+}
+
+function getMenuUrl(item: Pick<MenuItem, "fullUrl" | "url">) {
+  return item.fullUrl ?? item.url ?? "";
+}
+
+function splitTextByMatches(text: string, keywords: string[]): HighlightPart[] {
+  const filteredKeywords = Array.from(new Set(keywords.filter(Boolean))).sort(
+    (a, b) => b.length - a.length
+  );
+
+  if (filteredKeywords.length === 0) return [{ text, matched: false }];
+
+  const regex = new RegExp(
+    `(${filteredKeywords.map((keyword) => keyword.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|")})`,
+    "gi"
+  );
+
+  return text
+    .split(regex)
+    .filter(Boolean)
+    .map((part) => ({
+      text: part,
+      matched: filteredKeywords.some((keyword) => part.toLowerCase() === keyword.toLowerCase()),
+    }));
 }
 
 export class MenuService {
-  menus: MenuItem[];
-  private cachedFlatMenus: FlatMenuItem[] | null = null;
-  private cachedSearchIndex: MenuSearchIndexItem[] | null = null;
-  private cachedPinyinSearchIndex: Promise<MenuSearchIndexItem[]> | null = null;
+  readonly menus: MenuItem[];
+  readonly flatMenus: FlatMenuItem[];
+  private readonly menuById = new Map<string, FlatMenuItem>();
+  private readonly menuByCode = new Map<string, FlatMenuItem>();
+  private readonly menuByUrl = new Map<string, FlatMenuItem>();
+  private readonly childrenByParentId = new Map<string | null, MenuItem[]>();
+  private readonly ancestorIdsById = new Map<string, string[]>();
+  private readonly firstChildMenuById = new Map<string, MenuItem | null>();
+  private readonly searchIndex: MenuSearchIndexItem[];
 
   constructor(menus: MenuItem[]) {
     this.menus = menus;
+    this.flatMenus = this.flattenMenus(menus);
+    this.indexMenus();
+    this.searchIndex = this.createSearchIndex();
   }
+
   private flattenMenus(menuList: MenuItem[] = []): FlatMenuItem[] {
     const result: FlatMenuItem[] = [];
 
     traverseTree(menuList, (menu, currentLevel, path) => {
-      const codePath = path.map((node) => node.code);
-      const flatMenu: FlatMenuItem = {
+      result.push({
         ...menu,
         level: currentLevel,
-        path: codePath,
-      };
-      result.push(flatMenu);
+        path: path.map((node) => node.code),
+      });
     });
 
     return result;
   }
 
-  get flatMenus() {
-    this.cachedFlatMenus ??= this.flattenMenus(this.menus);
-    return this.cachedFlatMenus;
+  private indexMenus() {
+    for (const item of this.flatMenus) {
+      this.menuById.set(item.id, item);
+      this.menuByCode.set(item.code, item);
+
+      const menuUrl = normalizeUrl(getMenuUrl(item));
+      if (menuUrl) this.menuByUrl.set(menuUrl, item);
+
+      const siblings = this.childrenByParentId.get(item.parentId) ?? [];
+      siblings.push(item);
+      this.childrenByParentId.set(item.parentId, siblings);
+    }
+
+    for (const item of this.flatMenus) {
+      this.ancestorIdsById.set(item.id, this.findAncestorIds(item.id));
+      this.firstChildMenuById.set(item.id, this.findFirstChildMenu(item));
+    }
   }
+
+  private createSearchIndex(): MenuSearchIndexItem[] {
+    return this.flatMenus.map((item) => {
+      const titlePinyin = pinyin(item.title, {
+        type: "array",
+        toneType: "none",
+        v: true,
+      });
+      const url = getMenuUrl(item);
+
+      return {
+        item,
+        titleLower: item.title.toLowerCase(),
+        codeLower: item.code.toLowerCase(),
+        url,
+        urlLower: url.toLowerCase(),
+        pinyinFull: titlePinyin.join("").toLowerCase(),
+        pinyinInitials: titlePinyin
+          .map((word) => word.charAt(0))
+          .join("")
+          .toLowerCase(),
+        pinyinWords: titlePinyin.join(" ").toLowerCase(),
+      };
+    });
+  }
+
+  private findAncestorIds(menuId: string): string[] {
+    const ancestorIds: string[] = [];
+    let current = this.menuById.get(menuId);
+
+    while (current?.parentId) {
+      const parent = this.menuById.get(current.parentId);
+      if (!parent) break;
+      ancestorIds.unshift(parent.id);
+      current = parent;
+    }
+
+    return ancestorIds;
+  }
+
+  private getTextMatchTexts(searchKeyword: string, sourceText: string): string[] {
+    const matchTexts: string[] = [];
+    if (!searchKeyword || !sourceText) return matchTexts;
+
+    const key = normalizeSearchText(searchKeyword);
+    const textLower = sourceText.toLowerCase();
+    const keyLen = key.length;
+    let start = textLower.indexOf(key);
+
+    while (start > -1) {
+      const realText = sourceText.substring(start, start + keyLen);
+      if (!matchTexts.includes(realText)) matchTexts.push(realText);
+      start = textLower.indexOf(key, start + keyLen);
+    }
+
+    return matchTexts;
+  }
+
+  private getSearchMatchTexts(indexItem: MenuSearchIndexItem, searchKeyword: string) {
+    const pinyinKeyword = normalizePinyinText(searchKeyword);
+    const titleMatchTexts = this.getTextMatchTexts(searchKeyword, indexItem.item.title);
+    const codeMatchTexts = this.getTextMatchTexts(searchKeyword, indexItem.item.code);
+    const urlMatchTexts = this.getTextMatchTexts(searchKeyword, indexItem.url);
+    const pinyinMatched =
+      !!pinyinKeyword &&
+      (indexItem.pinyinFull.includes(pinyinKeyword) ||
+        indexItem.pinyinInitials.includes(pinyinKeyword) ||
+        indexItem.pinyinWords.includes(searchKeyword));
+    const searchKeywords = [...titleMatchTexts, ...codeMatchTexts, ...urlMatchTexts];
+
+    if (pinyinMatched && titleMatchTexts.length === 0) {
+      searchKeywords.push(indexItem.item.title);
+    }
+
+    return Array.from(new Set(searchKeywords));
+  }
+
+  private getMatchedIndexItems(keyword: string) {
+    const searchKeyword = normalizeSearchText(keyword);
+    if (!searchKeyword) return [];
+
+    return this.searchIndex
+      .map((indexItem) => ({
+        indexItem,
+        searchKeywords: this.getSearchMatchTexts(indexItem, searchKeyword),
+      }))
+      .filter(({ searchKeywords }) => searchKeywords.length > 0);
+  }
+
+  private filterMenuTree(visibleIds: Set<string>, menuList: MenuItem[] = this.menus): MenuItem[] {
+    const result: MenuItem[] = [];
+
+    for (const item of menuList) {
+      if (!visibleIds.has(item.id)) continue;
+
+      const children = item.children ? this.filterMenuTree(visibleIds, item.children) : undefined;
+      result.push({
+        ...item,
+        children: children && children.length > 0 ? children : item.children,
+      });
+    }
+
+    return result;
+  }
+
   findMenuById(menuId: string): MenuItem | null {
-    return this.flatMenus.find((item) => item.id === menuId) ?? null;
+    return this.menuById.get(menuId) ?? null;
   }
 
   findMenuByCode(code: string): MenuItem | null {
-    return this.flatMenus.find((item) => item.code === code) ?? null;
+    return this.menuByCode.get(code) ?? null;
   }
 
   findMenuForTab(tab: Pick<MenuItem, "code" | "id" | "url">): MenuItem | null {
@@ -87,269 +260,133 @@ export class MenuService {
   }
 
   findMenuByUrl(url: string): MenuItem | null {
-    const normalizeUrl = (url: string) => {
-      return url.split("?")[0].split("#")[0].replace(/\/$/, "");
-    };
-    const targetUrl = normalizeUrl(url);
-    return this.flatMenus.find((menu) => normalizeUrl(menu.url ?? "") === targetUrl) ?? null;
+    return this.menuByUrl.get(normalizeUrl(url)) ?? null;
   }
 
   findMenuAncestor(menuId: string): MenuItem[] {
-    const ancestor: MenuItem[] = [];
-    let current = this.findMenuById(menuId);
-
-    while (current) {
-      ancestor.unshift(current);
-      if (current.parentId) {
-        current = this.findMenuById(current.parentId);
-      } else {
-        break;
-      }
-    }
-    return ancestor;
-  }
-  private getTextMatchTexts(searchKeyword: string, sourceText: string): string[] {
-    const matchTexts: string[] = [];
-    if (!searchKeyword || !sourceText) return matchTexts;
-    const key = searchKeyword.trim().toLowerCase();
-    const textLower = sourceText.toLowerCase();
-    const keyLen = key.length;
-    let start = 0;
-    start = textLower.indexOf(key, start);
-    while (start > -1) {
-      const realText = sourceText.substring(start, start + keyLen);
-      if (!matchTexts.includes(realText)) {
-        matchTexts.push(realText);
-      }
-      start += keyLen;
-    }
-    return matchTexts;
+    return (this.ancestorIdsById.get(menuId) ?? [])
+      .map((id) => this.findMenuById(id))
+      .filter(Boolean) as MenuItem[];
   }
 
-  private getPinyinMatchTexts(searchKeyword: string, sourceText: string, pinyin: Pinyin): string[] {
-    const matchTexts: string[] = [];
-    if (!searchKeyword || !sourceText) return matchTexts;
-    const key = searchKeyword.trim().toLowerCase();
-    const keyLen = key.length;
-    const pyArr = pinyin(sourceText, { type: "array", toneType: "none", v: true });
-    const charArr = sourceText.split("");
-    const yunMuWhiteList = [
-      "an",
-      "ang",
-      "ong",
-      "eng",
-      "ing",
-      "ian",
-      "iao",
-      "uan",
-      "uang",
-      "uen",
-      "uei",
-      "iong",
-    ];
-    const isOnlyYunMu = yunMuWhiteList.includes(key);
-    charArr.forEach((char, idx) => {
-      const currPy = pyArr[idx] ?? "";
-      if ((currPy === key || currPy.startsWith(key)) && char && !matchTexts.includes(char)) {
-        matchTexts.push(char);
-      }
-    });
-    if (isOnlyYunMu && matchTexts.length === 0) {
-      charArr.forEach((char, idx) => {
-        const currPy = pyArr[idx] || "";
-        if (currPy === key && char) matchTexts.push(char);
-      });
-    }
-
-    if (keyLen > 1 && !isOnlyYunMu && matchTexts.length === 0) {
-      for (let i = 0; i < pyArr.length; i++) {
-        let currPy = "";
-        let currInitial = "";
-        let currChar = "";
-        for (let j = i; j < pyArr.length; j++) {
-          const py = pyArr[j] ?? "";
-          currPy += py;
-          currInitial += py.charAt(0);
-          currChar += charArr[j];
-          if (currPy === key || currInitial === key) {
-            if (!matchTexts.includes(currChar)) {
-              matchTexts.push(currChar);
-            }
-            break;
-          }
-          if (currPy.length > keyLen && currInitial.length > keyLen) break;
-        }
-      }
-    }
-    return [...new Set(matchTexts)].filter(Boolean);
+  getMenuChildren(parentId: string | null) {
+    return this.childrenByParentId.get(parentId) ?? [];
   }
 
-  private getMenuUrl(item: MenuItem): string {
-    return item.fullUrl ?? item.url ?? "";
+  getMenuUrl(item: Pick<MenuItem, "fullUrl" | "url">): string {
+    return getMenuUrl(item);
   }
 
-  private getSearchIndexBase(): MenuSearchIndexItem[] {
-    this.cachedSearchIndex ??= this.flatMenus.map((item) => {
-      const url = this.getMenuUrl(item);
-      return {
-        item,
-        titleLower: item.title.toLowerCase(),
-        codeLower: item.code.toLowerCase(),
-        url,
-        urlLower: url.toLowerCase(),
-      };
-    });
-    return this.cachedSearchIndex;
-  }
-
-  private getPinyinSearchIndex(): Promise<MenuSearchIndexItem[]> {
-    this.cachedPinyinSearchIndex ??= loadPinyin().then((pinyin) =>
-      this.getSearchIndexBase().map((indexItem) => {
-        const pinyinArray = pinyin(indexItem.item.title, {
-          type: "array",
-          toneType: "none",
-          v: true,
-        });
-
-        return {
-          ...indexItem,
-          pinyinFull: pinyinArray.join("").toLowerCase(),
-          pinyinInitials: pinyinArray
-            .map((item) => item.charAt(0))
-            .join("")
-            .toLowerCase(),
-        };
-      })
-    );
-
-    return this.cachedPinyinSearchIndex;
-  }
-
-  private async searchMenusReturnList(
-    keyword: string,
-    pinyinSearch = true
-  ): Promise<MenuSearchListResult> {
-    if (!keyword.trim()) {
-      return {
-        menus: this.flatMenus.map((item) => ({ ...item, searchKeywords: [] })),
-        searchKeywords: [],
-      };
-    }
-
-    const searchKeyword = keyword.toLowerCase().trim();
+  searchSidebar(keyword: string): SidebarSearchResult {
+    const searchKeyword = normalizeSearchText(keyword);
+    const visibleIds = new Set<string>();
+    const matchedIds = new Set<string>();
+    const expandedIds = new Set<string>();
     const searchKeywords: string[] = [];
-    const matchedMenus: MenuSearchListItem[] = [];
-    const searchIndex = pinyinSearch
-      ? await this.getPinyinSearchIndex()
-      : this.getSearchIndexBase();
+    const highlightsById = new Map<string, HighlightPart[]>();
 
-    for (const indexItem of searchIndex) {
-      const { item, url } = indexItem;
-      const itemSearchKeywords: string[] = [];
-      const titleMatchTexts = this.getTextMatchTexts(searchKeyword, item.title);
-      const codeMatchTexts = this.getTextMatchTexts(searchKeyword, item.code);
-      const urlMatchTexts = this.getTextMatchTexts(searchKeyword, url);
-      const pinyinMatched =
-        !!searchKeyword &&
-        (indexItem.pinyinFull?.includes(searchKeyword) ||
-          indexItem.pinyinInitials?.includes(searchKeyword));
+    if (!searchKeyword) {
+      return {
+        visibleIds,
+        matchedIds,
+        expandedIds: [],
+        searchKeywords: [],
+        highlightsById,
+      };
+    }
 
-      const match =
-        titleMatchTexts.length > 0 ||
-        codeMatchTexts.length > 0 ||
-        urlMatchTexts.length > 0 ||
-        pinyinMatched;
+    for (const { indexItem, searchKeywords: itemSearchKeywords } of this.getMatchedIndexItems(
+      searchKeyword
+    )) {
+      const item = indexItem.item;
+      matchedIds.add(item.id);
+      visibleIds.add(item.id);
+      searchKeywords.push(...itemSearchKeywords);
+      highlightsById.set(item.id, splitTextByMatches(item.title, itemSearchKeywords));
 
-      if (match) {
-        itemSearchKeywords.push(...titleMatchTexts, ...codeMatchTexts, ...urlMatchTexts);
-        if (pinyinMatched && titleMatchTexts.length === 0) {
-          itemSearchKeywords.push(item.title);
-        }
-
-        searchKeywords.push(...itemSearchKeywords);
-        matchedMenus.push({
-          ...item,
-          searchKeywords: Array.from(new Set(itemSearchKeywords)),
-        });
+      for (const ancestorId of this.ancestorIdsById.get(item.id) ?? []) {
+        visibleIds.add(ancestorId);
+        expandedIds.add(ancestorId);
       }
     }
 
-    return { menus: matchedMenus, searchKeywords: Array.from(new Set(searchKeywords)) };
-  }
-
-  private async searchMenusReturnTree(
-    keyword: string,
-    pinyinSearch = true
-  ): Promise<MenuSearchTreeResult> {
-    if (!keyword.trim()) return { menus: this.menus, expandKeys: [], searchKeywords: [] };
-    const searchKeyword = keyword.toLowerCase().trim();
-    const pinyin = pinyinSearch ? await loadPinyin() : null;
-
-    const searchMenuItems = async (items: MenuItem[]) => {
-      const expandKeys: string[] = [];
-      const searchKeywords: string[] = [];
-
-      const searchInMenu = async (menuItems: MenuItem[]): Promise<MenuItem[]> => {
-        const matchedItems: MenuItem[] = [];
-
-        for (const item of menuItems) {
-          const titleMatchTexts = this.getTextMatchTexts(searchKeyword, item.title);
-          const urlMatchTexts = this.getTextMatchTexts(searchKeyword, this.getMenuUrl(item));
-          const pinyinMatchTexts = pinyin
-            ? this.getPinyinMatchTexts(searchKeyword, item.title, pinyin)
-            : [];
-          const match =
-            titleMatchTexts.length > 0 || urlMatchTexts.length > 0 || pinyinMatchTexts.length > 0;
-
-          let matchedChildren: MenuItem[] = [];
-          if (item.children && item.children.length > 0) {
-            matchedChildren = await searchInMenu(item.children);
-          }
-
-          if (match || matchedChildren.length > 0) {
-            if (matchedChildren.length > 0) {
-              expandKeys.push(item.id);
-            }
-
-            matchedItems.push({
-              ...item,
-              children: matchedChildren.length > 0 ? matchedChildren : item.children,
-            });
-
-            searchKeywords.push(...titleMatchTexts, ...urlMatchTexts, ...pinyinMatchTexts);
-          }
-        }
-
-        return matchedItems;
-      };
-
-      const matchedMenus = await searchInMenu(items);
-
-      return {
-        matchedMenus,
-        expandKeys,
-        searchKeywords: Array.from(new Set(searchKeywords)),
-      };
+    return {
+      visibleIds,
+      matchedIds,
+      expandedIds: Array.from(expandedIds),
+      searchKeywords: Array.from(new Set(searchKeywords)),
+      highlightsById,
     };
-
-    const { matchedMenus, expandKeys, searchKeywords } = await searchMenuItems(this.menus);
-
-    return { menus: matchedMenus, expandKeys, searchKeywords };
   }
+
   async searchMenus(keyword: string, pinyinSearch = true): Promise<MenuSearchResult> {
     const [menuList, menuTree] = await Promise.all([
       this.searchMenusReturnList(keyword, pinyinSearch),
       this.searchMenusReturnTree(keyword, pinyinSearch),
     ]);
 
-    return {
-      menuList,
-      menuTree,
-    };
+    return { menuList, menuTree };
   }
 
-  async searchMenuList(keyword: string, pinyinSearch = true): Promise<MenuSearchListResult> {
-    return this.searchMenusReturnList(keyword, pinyinSearch);
+  async searchMenuTree(keyword: string, _pinyinSearch = true): Promise<MenuSearchTreeResult> {
+    return this.searchMenusReturnTree(keyword);
+  }
+
+  async searchMenuList(keyword: string): Promise<AppSearchListResult> {
+    const searchKeyword = normalizeSearchText(keyword);
+    if (!searchKeyword) return { menus: [], searchKeywords: [] };
+
+    const menus: MenuSearchListItem[] = [];
+    const searchKeywords: string[] = [];
+
+    for (const { indexItem, searchKeywords: itemSearchKeywords } of this.getMatchedIndexItems(
+      searchKeyword
+    )) {
+      const item = indexItem.item;
+      searchKeywords.push(...itemSearchKeywords);
+      menus.push({
+        ...item,
+        searchKeywords: itemSearchKeywords,
+      });
+    }
+
+    return { menus, searchKeywords: Array.from(new Set(searchKeywords)) };
+  }
+
+  private async searchMenusReturnList(
+    keyword: string,
+    _pinyinSearch = true
+  ): Promise<MenuSearchListResult> {
+    const searchKeyword = normalizeSearchText(keyword);
+    if (!searchKeyword) return { menus: this.flatMenus, searchKeywords: [] };
+
+    const menus: FlatMenuItem[] = [];
+    const searchKeywords: string[] = [];
+
+    for (const { indexItem, searchKeywords: itemSearchKeywords } of this.getMatchedIndexItems(
+      searchKeyword
+    )) {
+      searchKeywords.push(...itemSearchKeywords);
+      menus.push(indexItem.item);
+    }
+
+    return { menus, searchKeywords: Array.from(new Set(searchKeywords)) };
+  }
+
+  private async searchMenusReturnTree(
+    keyword: string,
+    _pinyinSearch = true
+  ): Promise<MenuSearchTreeResult> {
+    const searchKeyword = normalizeSearchText(keyword);
+    if (!searchKeyword) return { menus: this.menus, expandKeys: [], searchKeywords: [] };
+
+    const searchResult = this.searchSidebar(searchKeyword);
+
+    return {
+      menus: this.filterMenuTree(searchResult.visibleIds),
+      expandKeys: searchResult.expandedIds,
+      searchKeywords: searchResult.searchKeywords,
+    };
   }
 
   findFirstChildMenu(
@@ -359,11 +396,12 @@ export class MenuService {
     if (item.type === "menu" || !item.children || item.children.length === 0) {
       return item;
     }
-    if (comparator) {
-      return comparator(item);
-    }
-    return bfsSearch(item.children, (node) => {
-      return node.type === "menu";
-    });
+
+    if (comparator) return comparator(item);
+
+    const cachedMenu = this.firstChildMenuById.get(item.id);
+    if (cachedMenu !== undefined) return cachedMenu;
+
+    return bfsSearch(item.children, (node) => node.type === "menu");
   }
 }

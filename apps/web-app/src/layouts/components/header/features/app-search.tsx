@@ -1,18 +1,11 @@
 import { Button } from "@rap/components-ui/button";
-import {
-  CommandDialog,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-  CommandShortcut,
-} from "@rap/components-ui/command";
+import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@rap/components-ui/dialog";
 import { Kbd, KbdGroup } from "@rap/components-ui/kbd";
-import { Icon } from "@rap/components-pro/icon";
 import { useTranslation } from "@rap/i18n";
+import { cn } from "@rap/utils";
 import { useNavigate } from "@tanstack/react-router";
 import { Clock, ExternalLink, Search, X } from "lucide-react";
+import type { KeyboardEvent as ReactKeyboardEvent } from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useLayout } from "@/layouts/context/layout-context";
 import type { MenuSearchListItem } from "@/layouts/service/menuService";
@@ -58,10 +51,12 @@ export function AppSearchFeature({ className }: GlobalSearchFeatureProps) {
   const { t } = useTranslation("webApp");
   const navigate = useNavigate();
   const { menuService } = useLayout();
+  const inputRef = useRef<HTMLInputElement>(null);
   const requestIdRef = useRef(0);
   const [open, setOpen] = useState(false);
   const [keyword, setKeyword] = useState("");
   const [menus, setMenus] = useState<MenuSearchListItem[]>([]);
+  const [activeIndex, setActiveIndex] = useState(0);
   const [searchHistory, setSearchHistory] = useState<string[]>(() => readSearchHistory());
 
   const modifierKey = useMemo(() => {
@@ -106,10 +101,32 @@ export function AppSearchFeature({ className }: GlobalSearchFeatureProps) {
     });
   };
 
+  const handleSearchChange = (value: string) => {
+    setKeyword(value);
+    setActiveIndex(0);
+    const searchKeyword = value.trim().toLowerCase();
+    const requestId = (requestIdRef.current += 1);
+
+    if (!searchKeyword) {
+      setMenus([]);
+      return;
+    }
+
+    menuService.searchMenuList(searchKeyword).then((menuList) => {
+      if (requestId !== requestIdRef.current) return;
+      setMenus(menuList.menus);
+    });
+  };
+
   const handleOpenChange = (nextOpen: boolean) => {
     setOpen(nextOpen);
+    if (nextOpen) {
+      requestAnimationFrame(() => {
+        inputRef.current?.focus();
+      });
+    }
     if (!nextOpen) {
-      setKeyword("");
+      handleSearchChange("");
     }
   };
 
@@ -126,32 +143,59 @@ export function AppSearchFeature({ className }: GlobalSearchFeatureProps) {
     navigate({ to: item.openMode === "iframe" ? item.url : (item.fullUrl ?? item.url) });
   };
 
+  const handleInputKeyDown = (event: ReactKeyboardEvent<HTMLInputElement>) => {
+    if (event.key === "Escape") {
+      event.preventDefault();
+      handleOpenChange(false);
+      return;
+    }
+
+    if (displayMenus.length === 0) return;
+
+    if (event.key === "ArrowDown") {
+      event.preventDefault();
+      setActiveIndex((prevIndex) => (prevIndex + 1) % displayMenus.length);
+      return;
+    }
+
+    if (event.key === "ArrowUp") {
+      event.preventDefault();
+      setActiveIndex((prevIndex) => (prevIndex - 1 + displayMenus.length) % displayMenus.length);
+      return;
+    }
+
+    if (event.key === "Enter") {
+      event.preventDefault();
+      const activeMenu = displayMenus[activeIndex] ?? displayMenus[0];
+      if (activeMenu) {
+        handleSelect(activeMenu);
+      }
+    }
+  };
+
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "k") {
         event.preventDefault();
-        setOpen((prevOpen) => !prevOpen);
+        setOpen((prevOpen) => {
+          const nextOpen = !prevOpen;
+          if (nextOpen) {
+            requestAnimationFrame(() => {
+              inputRef.current?.focus();
+            });
+          } else {
+            requestIdRef.current += 1;
+            setKeyword("");
+            setMenus([]);
+          }
+          return nextOpen;
+        });
       }
     };
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
-
-  useEffect(() => {
-    if (!open) return;
-
-    const requestId = (requestIdRef.current += 1);
-    const searchKeyword = keyword.trim().toLowerCase();
-    if (searchKeyword) {
-      setMenus([]);
-    }
-
-    menuService.searchMenuList(searchKeyword).then((menuList) => {
-      if (requestId !== requestIdRef.current) return;
-      setMenus(menuList.menus);
-    });
-  }, [keyword, menuService, open]);
 
   return (
     <>
@@ -166,96 +210,122 @@ export function AppSearchFeature({ className }: GlobalSearchFeatureProps) {
         <Search className="h-4 w-4" />
       </Button>
 
-      <CommandDialog
-        open={open}
-        onOpenChange={handleOpenChange}
-        title={t("header.globalSearch")}
-        description={t("header.searchDescription")}
-        className="top-[18%] translate-y-0 p-0 sm:max-w-2xl"
-        commandProps={{ shouldFilter: false }}
-      >
-        <CommandInput
-          value={keyword}
-          onValueChange={setKeyword}
-          placeholder={t("header.searchPlaceholder")}
-        />
-        <CommandList className="max-h-[420px]">
-          <CommandEmpty>{t("header.searchNoResults")}</CommandEmpty>
-          {showSearchHistory && (
-            <CommandGroup heading={t("header.searchHistoryGroup")}>
-              {searchHistory.map((history) => (
-                <CommandItem
-                  key={history}
-                  value={`history-${history}`}
-                  onSelect={() => setKeyword(history)}
-                  className="gap-3 px-3 py-2"
-                >
-                  <Clock className="size-4 text-muted-foreground" />
-                  <span className="min-w-0 flex-1 truncate">{history}</span>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    className="size-6"
-                    onClick={(event) => {
-                      event.preventDefault();
-                      event.stopPropagation();
-                      removeSearchHistory(history);
-                    }}
-                    aria-label={t("header.searchHistoryRemove")}
-                  >
-                    <X className="size-3.5" />
-                  </Button>
-                </CommandItem>
-              ))}
-            </CommandGroup>
-          )}
-          <CommandGroup heading={t("header.searchMenuGroup")}>
-            {displayMenus.map((item) => {
-              const url = item.fullUrl ?? item.url ?? "";
-              const isNewTab = item.openMode === "newBrowserTab";
+      <Dialog open={open} onOpenChange={handleOpenChange}>
+        <DialogContent
+          className="top-10 max-w-[calc(100vw-2rem)] translate-y-0 overflow-hidden rounded-2xl border bg-background p-0 shadow-2xl sm:max-w-5xl"
+          closable={false}
+        >
+          <DialogTitle className="sr-only">{t("header.globalSearch")}</DialogTitle>
+          <DialogDescription className="sr-only">{t("header.searchDescription")}</DialogDescription>
 
-              return (
-                <CommandItem
-                  key={item.id}
-                  value={`${item.title} ${item.code} ${url}`}
-                  onSelect={() => handleSelect(item)}
-                  className="items-start gap-3 px-3 py-2.5"
-                >
-                  <span className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-md bg-muted text-muted-foreground">
-                    {item.icon ? (
-                      <Icon icon={item.icon} size={17} />
-                    ) : (
-                      <Search className="size-4" />
-                    )}
-                  </span>
-                  <span className="min-w-0 flex-1">
-                    <span className="flex items-center gap-2">
-                      <span className="truncate font-medium">
-                        <HighlightText text={item.title} searchKeywords={item.searchKeywords} />
+          <div className="flex h-20 items-center gap-5 border-b px-6">
+            <Search className="size-6 shrink-0 text-muted-foreground" />
+            <input
+              ref={inputRef}
+              value={keyword}
+              onChange={(event) => handleSearchChange(event.target.value)}
+              onKeyDown={handleInputKeyDown}
+              placeholder={t("header.searchPlaceholder")}
+              aria-label={t("header.globalSearch")}
+              className="h-full min-w-0 flex-1 bg-transparent text-xl text-foreground outline-none placeholder:text-muted-foreground"
+            />
+            <Kbd className="h-10 min-w-12 rounded-lg bg-background px-3 text-base shadow-xs ring-1 ring-border">
+              esc
+            </Kbd>
+          </div>
+
+          <div className="max-h-[min(620px,calc(100vh-13rem))] min-h-14 overflow-y-auto">
+            {showSearchHistory && (
+              <section>
+                <h3 className="border-b px-8 py-6 text-xl font-semibold">
+                  {t("header.searchHistoryGroup")}
+                </h3>
+                {searchHistory.map((history) => (
+                  <div
+                    key={history}
+                    className="flex min-h-18 items-center gap-4 border-b px-8 transition-colors hover:bg-muted/40"
+                  >
+                    <Clock className="size-5 text-muted-foreground" />
+                    <button
+                      type="button"
+                      className="min-w-0 flex-1 truncate text-left text-lg text-foreground"
+                      onClick={() => handleSearchChange(history)}
+                    >
+                      {history}
+                    </button>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className="size-10 text-muted-foreground hover:bg-transparent hover:text-foreground"
+                      onClick={(event) => {
+                        event.preventDefault();
+                        event.stopPropagation();
+                        removeSearchHistory(history);
+                      }}
+                      aria-label={t("header.searchHistoryRemove")}
+                    >
+                      <X className="size-5" />
+                    </Button>
+                  </div>
+                ))}
+              </section>
+            )}
+            {normalizedKeyword && displayMenus.length === 0 && (
+              <div className="px-8 py-16 text-center text-base text-muted-foreground">
+                {t("header.searchNoResults")}
+              </div>
+            )}
+            {displayMenus.length > 0 && (
+              <section>
+                <h3 className="border-b px-8 py-6 text-xl font-semibold">
+                  {t("header.searchMenuGroup")}
+                </h3>
+                {displayMenus.map((item, index) => {
+                  const url = item.fullUrl ?? item.url ?? "";
+                  const isNewTab = item.openMode === "newBrowserTab";
+                  const isActive = displayMenus[activeIndex]?.id === item.id;
+
+                  return (
+                    <button
+                      type="button"
+                      key={item.id}
+                      onClick={() => handleSelect(item)}
+                      onMouseEnter={() => setActiveIndex(index)}
+                      className={cn(
+                        "flex min-h-22 w-full items-center gap-6 border-b px-8 text-left transition-colors",
+                        isActive ? "bg-muted/50" : "hover:bg-muted/40"
+                      )}
+                    >
+                      <span className="min-w-0 flex-1">
+                        <span className="flex items-center gap-2 text-lg font-semibold">
+                          <span className="truncate">
+                            <HighlightText text={item.title} searchKeywords={item.searchKeywords} />
+                          </span>
+                          {isNewTab && <ExternalLink className="size-3.5 text-muted-foreground" />}
+                        </span>
+                        <span className="mt-2 block truncate text-base text-muted-foreground">
+                          <HighlightText text={url} searchKeywords={item.searchKeywords} />
+                        </span>
                       </span>
-                      {isNewTab && <ExternalLink className="size-3.5 text-muted-foreground" />}
-                    </span>
-                    <span className="mt-0.5 block truncate text-xs text-muted-foreground">
-                      <HighlightText text={url} searchKeywords={item.searchKeywords} />
-                    </span>
-                  </span>
-                  <CommandShortcut className="mt-1 tracking-normal">
-                    {getOpenModeText(item, t)}
-                  </CommandShortcut>
-                </CommandItem>
-              );
-            })}
-          </CommandGroup>
-        </CommandList>
-        <div className="flex items-center justify-between border-t px-3 py-2 text-xs text-muted-foreground">
-          <span>{t("header.searchFooterTip")}</span>
-          <KbdGroup>
-            <Kbd>{modifierKey}</Kbd>
-            <Kbd>K</Kbd>
-          </KbdGroup>
-        </div>
-      </CommandDialog>
+                      <span className="ml-4 shrink-0 text-sm text-muted-foreground">
+                        {getOpenModeText(item, t)}
+                      </span>
+                    </button>
+                  );
+                })}
+              </section>
+            )}
+          </div>
+          <div className="flex h-14 items-center justify-between border-t px-8 text-sm text-muted-foreground">
+            <span>{t("header.searchFooterTip")}</span>
+            <KbdGroup>
+              <Kbd>{modifierKey}</Kbd>
+              <Kbd>K</Kbd>
+            </KbdGroup>
+          </div>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }

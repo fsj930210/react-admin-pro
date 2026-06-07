@@ -15,6 +15,8 @@ interface AppContentProps {
 export const AppContent = ({ className = "", showTabs = true }: AppContentProps) => {
   const { eventBus } = useAppContext();
   const preferences = useUIPreferences("preferences");
+  const footerEnabled = preferences.layout.footer.enabled;
+  const footerScrolls = footerEnabled && preferences.layout.footer.scrollWithContent;
   const { isMaximized, handleMaximize, handleRestore } = useMinimax();
   const routeKeepAliveRef = useRef<RouteKeepAliveRef>(null);
   eventBus.useSubscription((event: AppEvent<string | string[]>) => {
@@ -37,7 +39,7 @@ export const AppContent = ({ className = "", showTabs = true }: AppContentProps)
 
   return (
     <div
-      className={`flex flex-col flex-1 bg-muted overflow-hidden ${isMaximized ? "fixed top-0 left-0 z-99 w-screen h-screen" : ""} ${className}`}
+      className={`flex min-h-0 flex-1 flex-col overflow-hidden bg-muted ${isMaximized ? "fixed top-0 left-0 z-99 h-screen w-screen" : ""} ${className}`}
     >
       {showTabs && preferences.tabs.enabled && (
         <AppTabs
@@ -49,14 +51,19 @@ export const AppContent = ({ className = "", showTabs = true }: AppContentProps)
           showRefresh={preferences.tabs.showRefresh}
         />
       )}
-      <main className="flex-1 overflow-hidden bg-app-content p-(--app-content-padding)">
+      <main className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden bg-app-content p-(--app-content-padding)">
         <div
-          className={`h-full ${preferences.layout.contentWidth === "fixed" ? "mx-auto w-full max-w-(--app-max-content-width)" : ""}`}
+          className={`min-h-full ${preferences.layout.contentWidth === "fixed" ? "mx-auto w-full max-w-(--app-max-content-width)" : ""}`}
         >
-          <RouteKeepAlive fallback={<ContentSkeleton />} ref={routeKeepAliveRef} />
+          <div className={footerScrolls ? "flex min-h-full flex-col" : "h-full"}>
+            <div className={footerScrolls ? "min-h-0 flex-1" : "h-full"}>
+              <RouteKeepAlive fallback={<ContentSkeleton />} ref={routeKeepAliveRef} />
+            </div>
+            {footerScrolls && <Footer />}
+          </div>
         </div>
       </main>
-      {preferences.layout.footer.enabled && <Footer />}
+      {footerEnabled && !footerScrolls && <Footer />}
     </div>
   );
 };
