@@ -22,15 +22,25 @@ export function MenuItemContent({
   iconSize = 16,
 }: MenuItemContentProps) {
   return (
-    <span className={cn("flex items-center size-full gap-1", className)}>
-      {item.icon && <Icon icon={item.icon} size={iconSize} />}
-      <MenuItemHighlightText
-        key={item.id}
-        text={item.title}
-        searchKeywords={searchKeywords}
-        highlightParts={highlightParts}
-      />
-      {showBadge && item.badge && <MenuItemBadge badge={item.badge} />}
+    <span className={cn("flex size-full min-w-0 items-center gap-1", className)}>
+      {item.icon && (
+        <span className="shrink-0">
+          <Icon icon={item.icon} size={iconSize} />
+        </span>
+      )}
+      <span className="min-w-0 flex-1 truncate" title={item.title}>
+        <MenuItemHighlightText
+          key={item.id}
+          text={item.title}
+          searchKeywords={searchKeywords}
+          highlightParts={highlightParts}
+        />
+      </span>
+      {showBadge && item.badge && (
+        <span className="shrink-0">
+          <MenuItemBadge badge={item.badge} />
+        </span>
+      )}
     </span>
   );
 }

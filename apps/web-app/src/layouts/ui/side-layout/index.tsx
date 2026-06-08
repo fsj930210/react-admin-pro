@@ -1,15 +1,8 @@
-import {
-  Sidebar,
-  SidebarContent,
-  SidebarInset,
-  SidebarProvider,
-  SidebarRail,
-} from "@rap/components-ui/sidebar";
+import { SidebarInset, SidebarProvider } from "@rap/components-ui/sidebar";
 import { AppContent } from "@/layouts/components/content";
 import { AppHeader } from "@/layouts/components/header";
-import { SidebarFooter } from "@/layouts/components/sidebar/sidebar-footer";
-import { SidebarMain } from "@/layouts/components/sidebar/sidebar-main";
 import { useLayout } from "@/layouts/context/layout-context";
+import { NavigationSidebar } from "@/layouts/navigation/navigation-sidebar";
 import { useUIPreferences } from "@/store/ui-preferences";
 
 export function SideLayout() {
@@ -22,7 +15,7 @@ export function SideLayout() {
       collapsedWidth={`${preferences.layout.sidebar.collapsedWidth}px`}
     >
       <AppHeader
-        leftFeatures={["logo", "breadcrumb"]}
+        leftFeatures={["collapse-sidebar", "logo", "breadcrumb"]}
         rightFeatures={preferences.layout.header.rightFeatures}
         className="border-b h-(--app-header-height)"
       />
@@ -38,21 +31,11 @@ export function SideLayout() {
 
 function SideLayoutSidebar() {
   const { userMenus } = useLayout();
-  const preferences = useUIPreferences("preferences");
   return (
-    <Sidebar
-      collapsible={preferences.layout.sidebar.collapsible ? "icon" : "none"}
+    <NavigationSidebar
+      menus={userMenus}
+      showHeader={false}
       className="top-(--app-header-height) h-[calc(100%-var(--app-header-height))]"
-    >
-      <SidebarContent>
-        <SidebarMain menus={userMenus} />
-      </SidebarContent>
-      <SidebarFooter />
-      <SidebarRail
-        enableDrag={preferences.layout.sidebar.resizable}
-        minResizeWidth={`${preferences.layout.sidebar.minWidth}px`}
-        maxResizeWidth={`${preferences.layout.sidebar.maxWidth}px`}
-      />
-    </Sidebar>
+    />
   );
 }

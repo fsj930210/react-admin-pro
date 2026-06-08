@@ -1,4 +1,7 @@
 import React, { useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
+import { icons as carbonIcons } from "@iconify-json/carbon";
+import { icons as lucideIcons } from "@iconify-json/lucide";
+import { icons as riIcons } from "@iconify-json/ri";
 import type { IconifyJSON } from "@iconify/react";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { X } from "lucide-react";
@@ -8,6 +11,7 @@ import { Button } from "@rap/components-ui/button";
 import { Input } from "@rap/components-ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@rap/components-ui/popover";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@rap/components-ui/tabs";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@rap/components-ui/tooltip";
 import { IconifyIcon, ImageIcon, type IconWrapperProps } from "@rap/components-ui/icon";
 
 type IconSize = number | string;
@@ -111,29 +115,16 @@ export interface IconSet {
 
 const defaultIconSets: IconSet[] = [
   {
-    prefix: "sample",
-    icons: {
-      prefix: "sample",
-      icons: {
-        home: {
-          body: '<path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m3 11l9-8l9 8v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/>',
-        },
-        search: {
-          body: '<path fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="2" d="m21 21l-4.3-4.3M10.5 18a7.5 7.5 0 1 1 0-15a7.5 7.5 0 0 1 0 15Z"/>',
-        },
-        user: {
-          body: '<path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 21a8 8 0 0 0-16 0M12 11a4 4 0 1 0 0-8a4 4 0 0 0 0 8Z"/>',
-        },
-        bell: {
-          body: '<path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9Zm-4.3 12a2 2 0 0 1-3.4 0"/>',
-        },
-        settings: {
-          body: '<path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15.5a3.5 3.5 0 1 0 0-7a3.5 3.5 0 0 0 0 7Zm7.4-1.5a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.9-.3a1.7 1.7 0 0 0-1 1.6V20a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1-1.6a1.7 1.7 0 0 0-1.9.3l-.1.1A2 2 0 1 1 4.2 16l.1-.1a1.7 1.7 0 0 0 .3-1.9a1.7 1.7 0 0 0-1.6-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.6-1a1.7 1.7 0 0 0-.3-1.9L4.2 6A2 2 0 1 1 7 3.2l.1.1a1.7 1.7 0 0 0 1.9.3a1.7 1.7 0 0 0 1-1.6V2a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.6a1.7 1.7 0 0 0 1.9-.3l.1-.1A2 2 0 1 1 19.8 6l-.1.1a1.7 1.7 0 0 0-.3 1.9a1.7 1.7 0 0 0 1.6 1h.1a2 2 0 1 1 0 4H21a1.7 1.7 0 0 0-1.6 1Z"/>',
-        },
-      },
-      width: 24,
-      height: 24,
-    },
+    prefix: "lucide",
+    icons: lucideIcons,
+  },
+  {
+    prefix: "carbon",
+    icons: carbonIcons,
+  },
+  {
+    prefix: "ri",
+    icons: riIcons,
   },
 ];
 
@@ -142,16 +133,20 @@ export interface IconSelectProps {
   value?: string;
   columns?: number;
   iconSize?: IconSize;
+  itemSize?: number;
+  gap?: number;
   onChange?: (value: string) => void;
 }
 
 export function IconSelect(props: IconSelectProps) {
   const { t } = useTranslation("pro");
-  const { iconSet, value, columns = 6, iconSize = 20, onChange } = props;
-  const safeColumns = Math.max(1, columns);
+  const { iconSet, value, columns, iconSize = 18, itemSize = 32, gap = 6, onChange } = props;
   const listRef = useRef<HTMLDivElement>(null);
   const [searchKeyword, setSearchKeyword] = useState("");
+  const [listWidth, setListWidth] = useState(0);
   const deferredSearchKeyword = useDeferredValue(searchKeyword);
+  const measuredColumns = listWidth > 0 ? Math.floor((listWidth + gap) / (itemSize + gap)) : 6;
+  const safeColumns = Math.max(1, columns ?? measuredColumns);
 
   const iconNames = useMemo(() => getIconNames(iconSet.icons), [iconSet.icons]);
 
@@ -169,9 +164,23 @@ export function IconSelect(props: IconSelectProps) {
   const rowVirtualizer = useVirtualizer({
     count: rowCount,
     getScrollElement: () => listRef.current,
-    estimateSize: () => 40,
-    overscan: 8,
+    estimateSize: () => itemSize + gap,
+    overscan: 12,
   });
+
+  useEffect(() => {
+    const list = listRef.current;
+    if (!list) return;
+
+    const observer = new ResizeObserver(([entry]) => {
+      setListWidth(entry.contentRect.width);
+    });
+
+    observer.observe(list);
+    setListWidth(list.clientWidth);
+
+    return () => observer.disconnect();
+  }, []);
 
   const handleSearch = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchKeyword(e.target.value);
@@ -216,14 +225,15 @@ export function IconSelect(props: IconSelectProps) {
                 <div
                   key={virtualRow.key}
                   style={{
-                    gridTemplateColumns: `repeat(${safeColumns}, minmax(0, 1fr))`,
+                    gap,
+                    gridTemplateColumns: `repeat(${safeColumns}, ${itemSize}px)`,
                     position: "absolute",
                     top: 0,
                     left: 0,
                     width: "100%",
                     transform: `translateY(${virtualRow.start}px)`,
                   }}
-                  className="grid gap-2 px-2"
+                  className="grid px-1"
                   data-index={virtualRow.index}
                   ref={rowVirtualizer.measureElement}
                 >
@@ -232,18 +242,24 @@ export function IconSelect(props: IconSelectProps) {
                     const active = iconValue === value;
 
                     return (
-                      <button
-                        key={name}
-                        type="button"
-                        onClick={() => handleIconClick(name)}
-                        title={iconValue}
-                        aria-label={iconValue}
-                        className={`flex aspect-square items-center justify-center rounded-md p-1 transition-colors ${
-                          active ? "bg-primary text-primary-foreground" : "hover:bg-muted"
-                        }`}
-                      >
-                        <Icon icon={iconValue} size={iconSize} />
-                      </button>
+                      <Tooltip key={name}>
+                        <TooltipTrigger asChild>
+                          <button
+                            type="button"
+                            onClick={() => handleIconClick(name)}
+                            aria-label={iconValue}
+                            style={{ width: itemSize, height: itemSize }}
+                            className={`flex aspect-square items-center justify-center rounded-md p-1 transition-colors ${
+                              active ? "bg-primary text-primary-foreground" : "hover:bg-muted"
+                            }`}
+                          >
+                            <Icon icon={iconValue} size={iconSize} />
+                          </button>
+                        </TooltipTrigger>
+                        <TooltipContent side="top" sideOffset={4}>
+                          {iconValue}
+                        </TooltipContent>
+                      </Tooltip>
                     );
                   })}
                 </div>
@@ -264,14 +280,24 @@ export interface IconViewProps {
   defaultIconSet?: string;
   columns?: number;
   iconSize?: IconSize;
+  itemSize?: number;
+  gap?: number;
   onChange?: (value: string) => void;
   onIconSetChange?: (key: string) => void;
 }
 
 export function IconView(props: IconViewProps) {
   const { t } = useTranslation("pro");
-  const { columns, defaultIconSet, disableDefaultIconSets, iconSets, iconSize, onIconSetChange } =
-    props;
+  const {
+    columns,
+    defaultIconSet,
+    disableDefaultIconSets,
+    gap,
+    iconSets,
+    iconSize,
+    itemSize,
+    onIconSetChange,
+  } = props;
   const [value, setValue] = useControllableState(props);
   const [activeKey, setActiveKey] = useState(defaultIconSet || "");
 
@@ -335,7 +361,9 @@ export function IconView(props: IconViewProps) {
                 iconSet={set}
                 value={value}
                 columns={columns}
+                gap={gap}
                 iconSize={iconSize}
+                itemSize={itemSize}
                 onChange={setValue}
               />
             </TabsContent>

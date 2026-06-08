@@ -104,7 +104,7 @@ function DropdownSubmenuContent({
 
   return (
     <DropdownMenuSub>
-      <DropdownMenuSubTrigger className="cursor-pointer bg-red" asChild>
+      <DropdownMenuSubTrigger className="cursor-pointer" asChild>
         <MenuItemContent item={item} searchKeywords={searchKeywords} />
       </DropdownMenuSubTrigger>
       <DropdownMenuPortal>

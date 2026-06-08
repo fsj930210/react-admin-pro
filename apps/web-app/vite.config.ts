@@ -41,6 +41,14 @@ export default ({ mode }: UserConfig) => {
                 name: "radix",
                 test: /[\\/]node_modules[\\/]@radix-ui[\\/]/,
               },
+              {
+                name: "iconify-icons",
+                test: /[\\/]node_modules[\\/]@iconify-json[\\/]/,
+              },
+              {
+                name: "iconify",
+                test: /[\\/]node_modules[\\/]@iconify[\\/]/,
+              },
             ],
           },
           chunkFileNames: "static/js/[name]-[hash].js",

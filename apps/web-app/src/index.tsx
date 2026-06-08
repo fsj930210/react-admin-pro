@@ -6,6 +6,7 @@ import { initI18n } from "@rap/i18n";
 import { registerProI18n } from "@rap/components-pro/i18n";
 import { registerUiI18n } from "@rap/components-ui/i18n";
 import { APP_BASE_PATH } from "@/config";
+import { registerIconifyCollections } from "@/icons/iconify";
 import { registerWebAppI18n } from "@/i18n";
 import App from "./App";
 import "virtual-react-local-iconify";
@@ -15,6 +16,7 @@ import "./styles/global.css";
 import "overlayscrollbars/overlayscrollbars.css";
 
 OverlayScrollbars.plugin(ClickScrollPlugin);
+registerIconifyCollections();
 
 const mockMode = import.meta.env.RAP_WEB_APP_ENABLE_MOCK || "";
 

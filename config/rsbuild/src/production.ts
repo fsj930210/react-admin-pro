@@ -21,6 +21,12 @@ export function defineRsbuildProdConfig(options: RsbuildConfig = {}) {
 							name: "react",
 							chunks: "all",
 						},
+						iconifyIcons: {
+							test: /node_modules[\\/]@iconify-json[\\/]/,
+							name: "iconify-icons",
+							chunks: "all",
+							priority: 45,
+						},
 						iconify: {
 							test: /node_modules[\\/](@iconify|@iconify-json)[\\/]/,
 							name: "iconify",

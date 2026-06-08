@@ -31,12 +31,7 @@ interface AnchorProps extends Omit<React.ComponentProps<"nav">, "onClick" | "onC
   onChange?: (activeKey: string, item?: AnchorItem) => void;
 }
 
-interface AnchorInkStyle {
-  top?: React.CSSProperties["top"];
-  left?: React.CSSProperties["left"];
-  width?: React.CSSProperties["width"];
-  height?: React.CSSProperties["height"];
-}
+type AnchorInkStyle = React.CSSProperties;
 
 interface AnchorFlatItem {
   item: AnchorItem;

@@ -1,95 +1,47 @@
-import { SidebarInset } from "@rap/components-ui/sidebar/index";
-import { cn } from "@rap/utils";
-import { ChevronDown } from "lucide-react";
-import { useState } from "react";
+import { SidebarInset, SidebarProvider, SidebarTrigger } from "@rap/components-ui/sidebar/index";
 import { AppLogo } from "@/components/app/logo";
 import { AppContent } from "@/layouts/components/content";
 import { AppHeader } from "@/layouts/components/header";
-import { DropdownSubmenu } from "@/layouts/components/menu/dropdown-submenu";
-import { MenuItemContent } from "@/layouts/components/menu/menu-item-content";
 import { useLayout } from "@/layouts/context/layout-context";
-import { useMenu } from "@/layouts/hooks/useMenu";
-import type { MenuItem } from "@/layouts/types";
+import { MobileNavigationSidebar } from "@/layouts/navigation/mobile-navigation-sidebar";
+import { NavigationHorizontal } from "@/layouts/navigation/navigation-horizontal";
+import { useNavigationSelection } from "@/layouts/navigation/use-navigation-selection";
 import { useUIPreferences } from "@/store/ui-preferences";
 
 export function HorizontalLayout() {
-  const { menuService, userMenus } = useLayout();
+  const { userMenus } = useLayout();
   const preferences = useUIPreferences("preferences");
-  const { handleMenuItemClick } = useMenu({ menuService });
+  const { activeTopMenu, selectMenu } = useNavigationSelection();
 
   return (
-    <SidebarInset className="overflow-hidden  min-w-0">
-      <AppHeader
-        rightFeatures={preferences.layout.header.rightFeatures}
-        className="h-(--app-header-height)"
-        leftRender={
-          <div className="flex items-center w-full">
-            <div className="mr-6">
-              <AppLogo />
+    <SidebarProvider
+      className="h-full min-h-auto overflow-hidden"
+      defaultOpen={!preferences.layout.sidebar.defaultCollapsed}
+      defaultWidth={`${preferences.layout.sidebar.width}px`}
+      collapsedWidth={`${preferences.layout.sidebar.collapsedWidth}px`}
+    >
+      <MobileNavigationSidebar menus={userMenus} />
+      <SidebarInset className="overflow-hidden min-w-0">
+        <AppHeader
+          rightFeatures={preferences.layout.header.rightFeatures}
+          className="h-(--app-header-height)"
+          leftRender={
+            <div className="flex min-w-0 flex-1 items-center gap-2 overflow-hidden">
+              <SidebarTrigger className="md:hidden" />
+              <div className="mr-2 shrink-0 md:mr-4">
+                <AppLogo showTitle={false} />
+              </div>
+              <NavigationHorizontal
+                className="hidden md:flex"
+                menus={userMenus}
+                activeItem={activeTopMenu}
+                onSelect={selectMenu}
+              />
             </div>
-            <HorizontalMenu
-              className="flex-1"
-              menus={userMenus}
-              onMenuItemClick={handleMenuItemClick}
-            />
-          </div>
-        }
-      />
-      <AppContent />
-    </SidebarInset>
-  );
-}
-
-interface HorizontalMenuProps {
-  menus: MenuItem[];
-  className?: string;
-  onMenuItemClick?: (menu: MenuItem) => void;
-}
-
-function HorizontalMenu({ menus, onMenuItemClick, className }: HorizontalMenuProps) {
-  return (
-    <nav className={cn("flex items-center gap-1", className)}>
-      {menus.map((item) => (
-        <HorizontalMenuItem key={item.id} item={item} onMenuItemClick={onMenuItemClick} />
-      ))}
-    </nav>
-  );
-}
-
-interface HorizontalMenuItemProps {
-  item: MenuItem;
-  onMenuItemClick?: (menu: MenuItem) => void;
-}
-
-function HorizontalMenuItem({ item, onMenuItemClick }: HorizontalMenuItemProps) {
-  const [isOpen, setIsOpen] = useState(false);
-  if (item.hidden || item.status !== "enabled" || item.type === "button") return null;
-  const { children } = item;
-
-  return (
-    <div className="relative">
-      <DropdownSubmenu
-        item={item}
-        side="bottom"
-        align="start"
-        open={isOpen}
-        onOpenChange={(open) => setIsOpen(open)}
-        onItemClick={onMenuItemClick}
-        showBadge={false}
-        sideOffset={2}
-      >
-        <div className="px-4 py-2 text-sm font-medium text-foreground/80 hover:text-foreground hover:bg-accent rounded-md transition-colors flex items-center gap-1 cursor-pointer">
-          <MenuItemContent item={item} showBadge={false} />
-          {children && (
-            <ChevronDown
-              className={cn(
-                "size-4 transition-transform duration-200 ease-in-out",
-                isOpen ? "rotate-180" : ""
-              )}
-            />
-          )}
-        </div>
-      </DropdownSubmenu>
-    </div>
+          }
+        />
+        <AppContent />
+      </SidebarInset>
+    </SidebarProvider>
   );
 }

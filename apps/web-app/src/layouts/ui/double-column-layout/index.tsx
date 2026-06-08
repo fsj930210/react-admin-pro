@@ -1,66 +1,23 @@
-import {
-  Sidebar,
-  SidebarContent,
-  SidebarFooter,
-  SidebarInset,
-  SidebarProvider,
-  SidebarRail,
-  useSidebar,
-} from "@rap/components-ui/sidebar";
-import { cn } from "@rap/utils";
-import { useNavigate, useRouterState } from "@tanstack/react-router";
-import { ChevronsLeft, ChevronsRight } from "lucide-react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { SidebarInset, SidebarProvider } from "@rap/components-ui/sidebar";
+import { useResponsive } from "@rap/hooks/use-media-query";
 import { AppLogo } from "@/components/app/logo";
 import { AppContent } from "@/layouts/components/content";
 import { AppHeader } from "@/layouts/components/header";
-import { MenuItemContent } from "@/layouts/components/menu/menu-item-content";
-import { SidebarMain } from "@/layouts/components/sidebar/sidebar-main";
 import { User } from "@/layouts/components/sidebar/sidebar-user";
 import { useLayout } from "@/layouts/context/layout-context";
-import { MenuService } from "@/layouts/service/menuService";
-import type { MenuItem } from "@/layouts/types";
+import { MobileNavigationSidebar } from "@/layouts/navigation/mobile-navigation-sidebar";
+import { NavigationRail } from "@/layouts/navigation/navigation-rail";
+import { NavigationSidebar } from "@/layouts/navigation/navigation-sidebar";
+import { useNavigationSelection } from "@/layouts/navigation/use-navigation-selection";
 import { useUIPreferences } from "@/store/ui-preferences";
 
 export function DoubleColumnLayout() {
   const preferences = useUIPreferences("preferences");
-  const navigate = useNavigate();
-  const pathname = useRouterState({
-    select: (state) => state.location.pathname,
-  });
   const { userMenus } = useLayout();
-  const menuService = useMemo(() => new MenuService(userMenus), [userMenus]);
-  const [selectedFistLevelMenu, setSelectedFistLevelMenu] = useState<MenuItem | null>(null);
-  const isMenuItemClickRef = useRef(false);
+  const { activeTopMenu, selectMenu } = useNavigationSelection();
+  const { isMobile } = useResponsive();
+  const secondLevelMenus = activeTopMenu?.children ?? [];
 
-  useEffect(() => {
-    if (isMenuItemClickRef.current) {
-      isMenuItemClickRef.current = false;
-      return;
-    }
-    queueMicrotask(() => {
-      const currentMenu = menuService.findMenuByUrl(pathname);
-      if (currentMenu) {
-        const ancestorMenus = menuService.findMenuAncestor(currentMenu.id);
-        if (ancestorMenus.length > 0) {
-          setSelectedFistLevelMenu(ancestorMenus[0]);
-        }
-      }
-    });
-  }, [pathname, menuService]);
-
-  const handleMenuItemClick = (menu: MenuItem) => {
-    isMenuItemClickRef.current = true;
-    setSelectedFistLevelMenu(menu);
-    if (menu.type === "menu") {
-      navigate({ to: menu.url });
-    } else if (menu.type === "dir") {
-      const firstChildMenu = menuService.findFirstChildMenu(menu);
-      if (firstChildMenu) {
-        navigate({ to: firstChildMenu.url });
-      }
-    }
-  };
   return (
     <SidebarProvider
       className="h-full"
@@ -68,110 +25,39 @@ export function DoubleColumnLayout() {
       defaultWidth={`${preferences.layout.sidebar.width}px`}
       collapsedWidth={`${preferences.layout.sidebar.collapsedWidth}px`}
     >
-      <DoubleColumnLayoutSidebar
-        selectedFistLevelMenu={selectedFistLevelMenu}
-        onMenuItemClick={handleMenuItemClick}
-        userMenus={userMenus}
-      />
+      <MobileNavigationSidebar menus={userMenus} />
+      {!isMobile && (
+        <div className="hidden h-full md:flex">
+          <div className="flex h-full w-22 shrink-0 flex-col items-center border-r py-2">
+            <AppLogo showTitle={false} />
+            <NavigationRail
+              className="min-h-0 flex-1 border-r-0 py-0"
+              menus={userMenus}
+              activeItem={activeTopMenu}
+              onSelect={selectMenu}
+              itemHeight="h-15"
+            />
+            <User />
+          </div>
+          {secondLevelMenus.length > 0 && (
+            <NavigationSidebar
+              menus={secondLevelMenus}
+              showHeader={false}
+              showFooter={false}
+              showSearch={false}
+              className="h-full left-22"
+            />
+          )}
+        </div>
+      )}
       <SidebarInset className="h-full min-h-auto overflow-hidden min-w-0">
         <AppHeader
-          leftFeatures={preferences.layout.header.leftFeatures}
+          leftFeatures={["collapse-sidebar", ...preferences.layout.header.leftFeatures]}
           rightFeatures={preferences.layout.header.rightFeatures}
           className="h-(--app-header-height)"
         />
         <AppContent />
       </SidebarInset>
     </SidebarProvider>
-  );
-}
-
-interface FirstLevelMenuProps {
-  menus: MenuItem[];
-  selectedItem?: MenuItem | null;
-  onMenuItemClick?: (item: MenuItem) => void;
-}
-function FirstLevelMenu({ menus, selectedItem, onMenuItemClick }: FirstLevelMenuProps) {
-  return (
-    <div className="flex flex-col items-center py-2 w-22 h-full border-r">
-      <AppLogo showTitle={false} />
-      <ol className="flex flex-col flex-1 w-full mt-2">
-        {menus.map((item) => (
-          <li key={item.id} className="my-1 mx-2">
-            <button
-              type="button"
-              className={cn(
-                "flex-center h-15 w-full cursor-pointer hover:bg-sidebar-accent hover:text-sidebar-accent-foreground p-0 text-sm whitespace-nowrap overflow-hidden rounded-md",
-                selectedItem?.id === item.id
-                  ? "bg-sidebar-accent text-sidebar-accent-foreground"
-                  : ""
-              )}
-              onClick={() => onMenuItemClick?.(item)}
-            >
-              <MenuItemContent
-                item={item}
-                searchKeywords={[]}
-                showBadge={false}
-                className="flex-col justify-center"
-                iconSize={20}
-              />
-            </button>
-          </li>
-        ))}
-      </ol>
-      <User />
-    </div>
-  );
-}
-
-interface DoubleColumnLayoutSidebarProps {
-  selectedFistLevelMenu: MenuItem | null;
-  userMenus: MenuItem[];
-  onMenuItemClick: (menu: MenuItem) => void;
-}
-
-function DoubleColumnLayoutSidebar({
-  selectedFistLevelMenu,
-  onMenuItemClick,
-  userMenus,
-}: DoubleColumnLayoutSidebarProps) {
-  const secondLevelMenus = selectedFistLevelMenu?.children ?? [];
-  const { state, toggleSidebar } = useSidebar();
-  const preferences = useUIPreferences("preferences");
-  return (
-    <div className="flex">
-      <FirstLevelMenu
-        menus={userMenus || []}
-        onMenuItemClick={onMenuItemClick}
-        selectedItem={selectedFistLevelMenu}
-      />
-      {secondLevelMenus.length > 0 && (
-        <Sidebar
-          collapsible={preferences.layout.sidebar.collapsible ? "icon" : "none"}
-          className={`h-full left-22 flex-1 transition-all duration-300`}
-        >
-          <SidebarContent>
-            <SidebarMain menus={secondLevelMenus} showSearch={false} />
-          </SidebarContent>
-          <SidebarFooter>
-            <button
-              className="flex-center size-6 rounded-xs cursor-pointer bg-muted"
-              onClick={toggleSidebar}
-              type="button"
-            >
-              {state === "collapsed" ? (
-                <ChevronsRight className="size-4" />
-              ) : (
-                <ChevronsLeft className="size-4" />
-              )}
-            </button>
-          </SidebarFooter>
-          <SidebarRail
-            enableDrag={preferences.layout.sidebar.resizable}
-            minResizeWidth={`${preferences.layout.sidebar.minWidth}px`}
-            maxResizeWidth={`${preferences.layout.sidebar.maxWidth}px`}
-          />
-        </Sidebar>
-      )}
-    </div>
   );
 }

@@ -37,11 +37,11 @@ catalog:
   '@tanstack/react-form': ^1.33.0
   '@tanstack/react-query': 5.101.0
   '@tanstack/react-query-devtools': 5.101.0
-  '@tanstack/react-router': ^1.170.11
+  '@tanstack/react-router': ^1.170.15
   '@tanstack/react-router-devtools': ^1.167.0
   '@tanstack/react-table': ^8.21.3
   '@tanstack/react-virtual': ^3.14.2
-  '@tanstack/router-plugin': 1.168.14
+  '@tanstack/router-plugin': 1.168.18
   '@tiptap/extension-bubble-menu': ^3.26.0
   '@tiptap/extension-code-block-lowlight': ^3.26.0
   '@tiptap/extension-color': ^3.26.0
@@ -57,16 +57,16 @@ catalog:
   '@tiptap/react': ^3.26.0
   '@tiptap/starter-kit': ^3.26.0
   '@types/lodash-es': ^4.17.12
-  '@types/node': 25.9.1
+  '@types/node': 25.9.2
   '@types/qrcode': ^1.5.6
-  '@types/react': 19.2.16
+  '@types/react': 19.2.17
   '@types/react-dom': 19.2.3
   '@vitejs/plugin-react': ^6.0.2
   browserslist: ^4.28.2
   class-variance-authority: 0.7.1
   clsx: 2.1.1
   cmdk: ^1.1.1
-  code-inspector-plugin: 1.5.1
+  code-inspector-plugin: 1.5.3
   commitlint: ^21.0.2
   dayjs: ^1.11.21
   echarts: ^6.1.0
@@ -90,7 +90,7 @@ catalog:
   oxlint: ^1.68.0
   pinyin-pro: ^3.28.1
   qrcode: ^1.5.4
-  radix-ui: ^1.4.3
+  radix-ui: ^1.5.0
   react: 19.2.7
   react-day-picker: ^10.0.1
   react-dom: 19.2.7
@@ -119,3 +119,12 @@ catalog:
 catalogMode: prefer
 
 cleanupUnusedCatalogs: true
+
+minimumReleaseAgeExclude:
+  - '@code-inspector/core@1.5.3'
+  - '@code-inspector/esbuild@1.5.3'
+  - '@code-inspector/mako@1.5.3'
+  - '@code-inspector/turbopack@1.5.3'
+  - '@code-inspector/vite@1.5.3'
+  - '@code-inspector/webpack@1.5.3'
+  - code-inspector-plugin@1.5.3

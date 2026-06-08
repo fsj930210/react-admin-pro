@@ -2,17 +2,18 @@
 
 import { useCallback, useSyncExternalStore } from "react";
 
-const BREAKPOINTS = {
+export const BREAKPOINTS = {
   "2xl": 1536,
   "3xl": 1600,
   "4xl": 2000,
   lg: 1024,
-  md: 800,
+  md: 768,
   sm: 640,
   xl: 1280,
+  xs: 0,
 } as const;
 
-type Breakpoint = keyof typeof BREAKPOINTS;
+export type Breakpoint = keyof typeof BREAKPOINTS;
 
 type BreakpointQuery = Breakpoint | `max-${Breakpoint}` | `${Breakpoint}:max-${Breakpoint}`;
 
@@ -82,6 +83,43 @@ export function useMediaQuery(query: BreakpointQuery | MediaQueryInput | (string
   }, [mediaQuery]);
 
   return useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
+}
+
+export function useBreakpoint(): Breakpoint {
+  const is4xl = useMediaQuery("4xl");
+  const is3xl = useMediaQuery("3xl");
+  const is2xl = useMediaQuery("2xl");
+  const isXl = useMediaQuery("xl");
+  const isLg = useMediaQuery("lg");
+  const isMd = useMediaQuery("md");
+  const isSm = useMediaQuery("sm");
+
+  if (is4xl) return "4xl";
+  if (is3xl) return "3xl";
+  if (is2xl) return "2xl";
+  if (isXl) return "xl";
+  if (isLg) return "lg";
+  if (isMd) return "md";
+  if (isSm) return "sm";
+  return "xs";
+}
+
+export function useResponsive() {
+  const breakpoint = useBreakpoint();
+  const isMobile = useMediaQuery("max-md");
+  const isTablet = useMediaQuery("md:max-lg");
+  const isDesktop = useMediaQuery("lg");
+  const isWide = useMediaQuery("2xl");
+  const isTouch = useMediaQuery({ pointer: "coarse" });
+
+  return {
+    breakpoint,
+    isMobile,
+    isTablet,
+    isDesktop,
+    isWide,
+    isTouch,
+  };
 }
 
 export function useIsMobile(): boolean {
