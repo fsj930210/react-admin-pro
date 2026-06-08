@@ -1,1 +1,1 @@
-declare module "*.css";
+declare module "spark-md5";

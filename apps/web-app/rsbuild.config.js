@@ -26,13 +26,7 @@ const devConfig = defineRsbuildDevConfig({
   tools: {
     rspack: {
       watchOptions: {
-        ignored: [
-          "/node_modules/",
-          "**/.turbo",
-          "**/dist",
-          "**/build",
-          "**/src/routeTree.gen.ts",
-        ],
+        ignored: ["/node_modules/", "**/.turbo", "**/dist", "**/build", "**/src/routeTree.gen.ts"],
         aggregateTimeout: 200,
         poll: 100,
       },

@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="900" viewBox="0 0 1440 900">
+  <defs><style>.bg{fill:#f6f7f9}.panel{fill:#fff;stroke:#d9dee7}.soft{fill:#f8fafc;stroke:#e2e8f0}.line{stroke:#e5e7eb}.text{font-family:Inter,Arial,"Microsoft YaHei",sans-serif;fill:#111827}.muted{fill:#6b7280}.blue{fill:#2563eb}.btn{fill:#fff;stroke:#cbd5e1}.btnP{fill:#2563eb}.title{font-size:28px;font-weight:700}.label{font-size:18px;font-weight:700}.small{font-size:14px}.xs{font-size:12px}.call{fill:#eef2ff;stroke:#6366f1;stroke-width:2}.callText{fill:#3730a3;font-size:14px;font-weight:700}</style></defs>
+  <rect class="bg" width="1440" height="900"/>
+  <rect x="40" y="32" width="1360" height="828" rx="8" class="panel"/>
+  <text x="72" y="88" class="text title">组织用户</text>
+  <text x="72" y="118" class="text muted small">左侧条件 / 组织树，右侧数据列表</text>
+  <rect x="58" y="46" width="124" height="86" rx="8" class="call" fill-opacity=".25"/><text x="72" y="48" class="callText">1 Page</text>
+
+  <rect x="72" y="152" width="300" height="668" rx="8" class="panel"/>
+  <text x="94" y="184" class="text label">2 ProSearchBar (left)</text>
+  <text x="94" y="210" class="text muted xs">复杂条件固定在左侧，移动端可变抽屉</text>
+  <rect x="94" y="238" width="236" height="40" rx="6" class="soft"/><text x="112" y="263" class="text muted small">用户姓名</text>
+  <rect x="94" y="294" width="236" height="40" rx="6" class="soft"/><text x="112" y="319" class="text muted small">角色</text>
+  <rect x="94" y="350" width="236" height="40" rx="6" class="soft"/><text x="112" y="375" class="text muted small">创建时间</text>
+  <rect x="94" y="406" width="104" height="38" rx="6" class="btnP"/><text x="132" y="430" class="text small" fill="#fff">查询</text>
+  <rect x="210" y="406" width="104" height="38" rx="6" class="btn"/><text x="248" y="430" class="text muted small">重置</text>
+
+  <rect x="394" y="152" width="260" height="668" rx="8" class="panel"/>
+  <text x="416" y="184" class="text label">3 SplitLayout aside</text>
+  <text x="416" y="210" class="text muted xs">组织树 / 分类树 / 筛选面板</text>
+  <rect x="416" y="236" width="210" height="36" rx="6" class="soft"/><text x="436" y="259" class="text muted small">搜索组织</text>
+  <g class="text small">
+    <text x="426" y="310">▾ 总公司</text>
+    <text x="450" y="348">▾ 研发中心</text>
+    <text x="474" y="386">前端组</text>
+    <text x="474" y="424">后端组</text>
+    <text x="450" y="462">▸ 销售中心</text>
+    <text x="450" y="500">▸ 财务中心</text>
+  </g>
+  <line x1="652" y1="152" x2="652" y2="820" class="line"/>
+  <rect x="650" y="440" width="8" height="80" rx="4" fill="#cbd5e1"/>
+  <text x="418" y="792" class="text muted xs">可折叠 / 可 resize；移动端可变 drawer</text>
+
+  <rect x="680" y="152" width="688" height="76" rx="8" class="panel"/>
+  <text x="704" y="184" class="text label">4 Toolbar / ProButtonGroup</text>
+  <rect x="704" y="194" width="80" height="30" rx="6" class="btnP"/><text x="730" y="214" class="text xs" fill="#fff">新建</text>
+  <rect x="794" y="194" width="80" height="30" rx="6" class="btn"/><text x="820" y="214" class="text muted xs">删除</text>
+  <rect x="884" y="194" width="80" height="30" rx="6" class="btn"/><text x="910" y="214" class="text muted xs">导出</text>
+  <rect x="1140" y="194" width="200" height="30" rx="6" class="soft"/><text x="1160" y="214" class="text muted xs">KeywordSearch</text>
+
+  <rect x="680" y="248" width="688" height="572" rx="8" class="panel"/>
+  <text x="704" y="282" class="text label">5 ProDataGrid / DataGrid</text>
+  <rect x="704" y="308" width="640" height="48" class="soft"/>
+  <text x="724" y="338" class="text small">姓名</text><text x="900" y="338" class="text small">部门</text><text x="1060" y="338" class="text small">状态</text><text x="1220" y="338" class="text small">操作</text>
+  <line x1="704" y1="356" x2="1344" y2="356" class="line"/>
+  <g class="text small">
+    <text x="724" y="398">张三</text><text x="900" y="398">前端组</text><text x="1060" y="398">启用</text><text x="1220" y="398" fill="#2563eb">编辑</text>
+    <text x="724" y="448">李四</text><text x="900" y="448">后端组</text><text x="1060" y="448">启用</text><text x="1220" y="448" fill="#2563eb">编辑</text>
+    <text x="724" y="498">王五</text><text x="900" y="498">财务中心</text><text x="1060" y="498">停用</text><text x="1220" y="498" fill="#2563eb">编辑</text>
+  </g>
+  <line x1="704" y1="418" x2="1344" y2="418" class="line"/><line x1="704" y1="468" x2="1344" y2="468" class="line"/>
+  <text x="704" y="790" class="text muted xs">SearchBar top/left 都可用；SplitLayout 与 DataGrid 解耦，不绑定组织树业务。</text>
+</svg>

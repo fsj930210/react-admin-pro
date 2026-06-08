@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="900" viewBox="0 0 1440 900">
+  <defs><style>.bg{fill:#f6f7f9}.panel{fill:#fff;stroke:#d9dee7}.soft{fill:#f8fafc;stroke:#e2e8f0}.line{stroke:#e5e7eb}.text{font-family:Inter,Arial,"Microsoft YaHei",sans-serif;fill:#111827}.muted{fill:#6b7280}.blue{fill:#2563eb}.btn{fill:#fff;stroke:#cbd5e1}.btnP{fill:#2563eb}.title{font-size:28px;font-weight:700}.label{font-size:18px;font-weight:700}.small{font-size:14px}.xs{font-size:12px}.call{fill:#ecfdf5;stroke:#10b981;stroke-width:2}.callText{fill:#047857;font-size:14px;font-weight:700}.mask{fill:#0f172a;opacity:.18}</style></defs>
+  <rect class="bg" width="1440" height="900"/>
+  <rect x="40" y="32" width="1360" height="828" rx="8" class="panel"/>
+  <text x="72" y="88" class="text title">用户管理</text>
+  <rect x="72" y="130" width="760" height="620" rx="8" class="panel"/>
+  <text x="96" y="166" class="text label">背景列表页 / ProDataGrid</text>
+  <rect x="96" y="198" width="700" height="48" class="soft"/>
+  <text x="116" y="228" class="text small">姓名</text><text x="320" y="228" class="text small">手机号</text><text x="540" y="228" class="text small">状态</text>
+  <line x1="96" y1="246" x2="796" y2="246" class="line"/>
+  <text x="116" y="292" class="text small">张三</text><text x="320" y="292" class="text small">13800000001</text><text x="540" y="292" class="text small">启用</text>
+  <text x="116" y="342" class="text small">李四</text><text x="320" y="342" class="text small">13800000002</text><text x="540" y="342" class="text small">停用</text>
+  <rect class="mask" x="40" y="32" width="1360" height="828" rx="8"/>
+
+  <rect x="516" y="32" width="884" height="828" rx="0" class="panel"/>
+  <rect x="516" y="32" width="884" height="76" class="soft"/>
+  <text x="546" y="80" class="text label">1 PageOverlay</text>
+  <rect x="546" y="58" width="36" height="32" rx="6" class="btn"/>
+  <text x="558" y="80" class="text small">←</text>
+  <text x="600" y="80" class="text title" font-size="24">新建用户</text>
+  <text x="760" y="80" class="text muted small">覆盖当前页面，不跳路由，不像 Modal 那么局促</text>
+  <line x1="516" y1="108" x2="1400" y2="108" class="line"/>
+  <rect x="530" y="42" width="156" height="58" rx="8" class="call" fill-opacity=".25"/><text x="544" y="44" class="callText">2 PageHeader</text>
+
+  <rect x="556" y="136" width="804" height="584" rx="8" class="panel"/>
+  <text x="582" y="172" class="text label">3 ProForm / FormItem</text>
+  <text x="582" y="198" class="text muted xs">values/errors/dirty/submit/reset 由 ProForm 管；字段 UI 用户自己写</text>
+  <text x="582" y="244" class="text small">基础信息</text>
+  <rect x="582" y="266" width="340" height="42" rx="6" class="soft"/><text x="602" y="292" class="text muted small">用户名</text>
+  <rect x="946" y="266" width="340" height="42" rx="6" class="soft"/><text x="966" y="292" class="text muted small">手机号</text>
+  <rect x="582" y="336" width="340" height="42" rx="6" class="soft"/><text x="602" y="362" class="text muted small">角色</text>
+  <rect x="946" y="336" width="340" height="42" rx="6" class="soft"/><text x="966" y="362" class="text muted small">组织</text>
+  <text x="582" y="434" class="text small">扩展属性</text>
+  <rect x="582" y="456" width="704" height="42" rx="6" class="soft"/><text x="602" y="482" class="text muted small">邮箱</text>
+  <rect x="582" y="526" width="704" height="112" rx="6" class="soft"/><text x="602" y="552" class="text muted small">备注 / 自定义表单区</text>
+
+  <rect x="516" y="760" width="884" height="100" class="soft"/>
+  <text x="546" y="792" class="text label">4 PageFooter / StickyFooter</text>
+  <rect x="1134" y="792" width="86" height="40" rx="6" class="btn"/><text x="1162" y="818" class="text muted small">取消</text>
+  <rect x="1234" y="792" width="86" height="40" rx="6" class="btnP"/><text x="1262" y="818" class="text small" fill="#fff">保存</text>
+  <text x="546" y="830" class="text muted xs">动画复用 Animator；可 slide/fade/none，组件名不绑定动画。</text>
+</svg>

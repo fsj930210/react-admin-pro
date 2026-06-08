@@ -278,3 +278,139 @@ export function PasswordInput({
 }
 
 PasswordInput.displayName = "PasswordInput";
+
+export interface InputNumberProps extends Omit<
+  InputProps,
+  "value" | "defaultValue" | "onChange" | "type" | "onValueChange"
+> {
+  value?: number | string | null;
+  defaultValue?: number | string;
+  onChange?: (value: number | string | null) => void;
+  min?: number;
+  max?: number;
+  step?: number;
+  precision?: number;
+  stringMode?: boolean;
+  controls?: boolean;
+  keyboard?: boolean;
+  formatter?: (value: string) => string;
+  parser?: (value: string) => string;
+}
+
+function toText(value: InputNumberProps["value"]) {
+  return value === null || value === undefined ? "" : String(value);
+}
+
+function normalizeNumberText(
+  text: string,
+  props: Pick<InputNumberProps, "min" | "max" | "precision">
+) {
+  if (text.trim() === "" || text === "-" || text === ".") return "";
+  const parsed = Number(text);
+  if (Number.isNaN(parsed)) return text;
+  let next = parsed;
+  if (props.min !== undefined) next = Math.max(props.min, next);
+  if (props.max !== undefined) next = Math.min(props.max, next);
+  if (props.precision !== undefined) return next.toFixed(props.precision);
+  return String(next);
+}
+
+export function InputNumber({
+  value,
+  defaultValue,
+  onChange,
+  min,
+  max,
+  step = 1,
+  precision,
+  stringMode,
+  controls = true,
+  keyboard = true,
+  formatter,
+  parser,
+  onBlur,
+  onKeyDown,
+  suffix,
+  ...props
+}: InputNumberProps) {
+  const isControlled = value !== undefined;
+  const [innerValue, setInnerValue] = React.useState(toText(defaultValue));
+  const text = isControlled ? toText(value) : innerValue;
+  const displayText = formatter ? formatter(text) : text;
+
+  const emit = (nextText: string) => {
+    if (!isControlled) setInnerValue(nextText);
+    if (nextText === "") {
+      onChange?.(null);
+      return;
+    }
+    onChange?.(stringMode ? nextText : Number(nextText));
+  };
+
+  const commit = (rawText: string) => {
+    const parsed = parser ? parser(rawText) : rawText;
+    const next = normalizeNumberText(parsed, { min, max, precision });
+    emit(next);
+  };
+
+  const stepBy = (direction: 1 | -1) => {
+    const current = Number(parser ? parser(displayText) : text) || 0;
+    commit(String(current + step * direction));
+  };
+
+  return (
+    <Input
+      {...props}
+      type="text"
+      inputMode="decimal"
+      value={displayText}
+      onValueChange={(next) => {
+        const parsed = parser ? parser(next) : next;
+        if (/^-?\d*(\.\d*)?$/.test(parsed) || parsed === "") {
+          if (!isControlled) setInnerValue(parsed);
+          onChange?.(parsed === "" ? null : stringMode ? parsed : Number(parsed));
+        }
+      }}
+      onBlur={(event) => {
+        commit(event.target.value);
+        onBlur?.(event);
+      }}
+      onKeyDown={(event) => {
+        if (keyboard && event.key === "ArrowUp") {
+          event.preventDefault();
+          stepBy(1);
+        }
+        if (keyboard && event.key === "ArrowDown") {
+          event.preventDefault();
+          stepBy(-1);
+        }
+        onKeyDown?.(event);
+      }}
+      suffix={
+        <>
+          {suffix}
+          {controls ? (
+            <span className="flex flex-col border-l">
+              <button
+                type="button"
+                className="px-1 text-[10px] leading-3 hover:bg-accent"
+                onClick={() => stepBy(1)}
+              >
+                ⌃
+              </button>
+              <button
+                type="button"
+                className="px-1 text-[10px] leading-3 hover:bg-accent"
+                onClick={() => stepBy(-1)}
+              >
+                ⌄
+              </button>
+            </span>
+          ) : null}
+        </>
+      }
+    />
+  );
+}
+
+InputNumber.displayName = "InputNumber";
