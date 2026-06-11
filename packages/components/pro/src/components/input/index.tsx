@@ -1,69 +1,62 @@
-import * as React from "react";
-import { Eye, EyeOff, XCircle } from "lucide-react";
+import React from "react";
+import { ChevronDown, ChevronUp, Eye, EyeOff, Minus, Plus, XCircle } from "lucide-react";
 import { useTranslation } from "@rap/i18n";
-
+import { Input as UIInput } from "@rap/components-ui/input";
 import {
   InputGroup,
   InputGroupAddon,
   InputGroupButton,
   InputGroupInput,
-  InputGroupText,
 } from "@rap/components-ui/input-group";
+import { Space } from "@rap/components-ui/space";
+import { Choose, Otherwise, When } from "@rap/components-ui/when";
 import { cn } from "@rap/utils";
+import { useControllableState } from "@rap/hooks/use-controllable-state";
 
-type InputValue = string | number | readonly string[];
-
-type ClearConfig = {
-  icon?: React.ReactNode;
-  ariaLabel?: string;
-};
-
-export interface InputProps extends Omit<
-  React.ComponentPropsWithoutRef<typeof InputGroupInput>,
-  "prefix"
-> {
-  ref?: React.Ref<HTMLInputElement>;
-  prefix?: React.ReactNode;
-  suffix?: React.ReactNode;
-  addonBefore?: React.ReactNode;
-  addonAfter?: React.ReactNode;
-  allowClear?: boolean | ClearConfig;
-  onClear?: () => void;
-  onValueChange?: (value: string) => void;
-  inputClassName?: string;
-  prefixClassName?: string;
-  suffixClassName?: string;
-  addonClassName?: string;
-  clearButtonClassName?: string;
+export interface InputAffixRenderContext {
+  value: string;
+  focused: boolean;
+  disabled: boolean;
+  showClear: boolean;
+  clear: () => void;
+  clearIcon: React.ReactNode;
 }
 
-const setRef = (ref: React.Ref<HTMLInputElement> | undefined, value: HTMLInputElement | null) => {
-  if (!ref) {
-    return;
-  }
+export type InputAffix = React.ReactNode | ((ctx: InputAffixRenderContext) => React.ReactNode);
 
-  if (typeof ref === "function") {
-    ref(value);
-    return;
-  }
+function InputClearButton({
+  clearIcon,
+  onClear,
+}: {
+  clearIcon: React.ReactNode;
+  onClear: () => void;
+}) {
+  const { t } = useTranslation("pro");
 
-  ref.current = value;
-};
+  return (
+    <InputGroupButton
+      size="icon-xs"
+      aria-label={t("input.clear")}
+      onMouseDown={(event) => {
+        event.preventDefault();
+      }}
+      onClick={onClear}
+      className="rounded-full"
+    >
+      {clearIcon}
+    </InputGroupButton>
+  );
+}
 
-const getValueText = (value: InputValue | undefined) => {
-  if (value === undefined) {
-    return "";
-  }
-
-  return Array.isArray(value) ? value.join(",") : String(value);
-};
-
-const getClearConfig = (allowClear: InputProps["allowClear"]): ClearConfig => {
-  if (typeof allowClear === "object") {
-    return allowClear;
-  }
-
-  return {};
+export type InputProps = Omit<React.ComponentProps<typeof UIInput>, "suffix" | "prefix"> & {
+  prefix?: InputAffix;
+  suffix?: InputAffix;
+  addonBefore?: React.ReactNode;
+  addonAfter?: React.ReactNode;
+  rootClassName?: string;
+  allowClear?: boolean | { icon?: React.ReactNode };
+  onClear?: () => void;
+  onPressEnter?: (e: React.KeyboardEvent<HTMLInputElement>) => void;
 };
 
 export function Input({
@@ -72,250 +65,267 @@ export function Input({
   defaultValue,
   onChange,
   onClear,
-  onValueChange,
+  onPressEnter,
   prefix,
   suffix,
-  addonBefore,
   addonAfter,
+  addonBefore,
   allowClear,
   className,
-  inputClassName,
-  prefixClassName,
-  suffixClassName,
-  addonClassName,
-  clearButtonClassName,
+  rootClassName,
   disabled,
   ...props
 }: InputProps) {
   const { t } = useTranslation("pro");
-  const inputRef = React.useRef<HTMLInputElement>(null);
-  const skipNextValueChangeRef = React.useRef(false);
-  const isControlled = value !== undefined;
-  const [innerValue, setInnerValue] = React.useState(() => getValueText(defaultValue));
+  const [val, setVal] = useControllableState({ value, defaultValue, onChange });
+  const hasIcon = !!prefix || !!suffix || !!allowClear;
+  const clearIcon =
+    typeof allowClear !== "boolean" && allowClear?.icon ? allowClear.icon : <XCircle />;
+  const hasAddon = !!addonBefore || !!addonAfter;
+  const [focused, setFocused] = React.useState(false);
+  const showClear = !!allowClear && !!val && !disabled && (!suffix || focused);
 
-  const handleInputRef = React.useCallback(
-    (node: HTMLInputElement | null) => {
-      inputRef.current = node;
-      setRef(ref, node);
-    },
-    [ref]
-  );
-
-  const currentValue = isControlled ? getValueText(value) : innerValue;
-  const showClear = Boolean(allowClear && !disabled && currentValue.length > 0);
-  const clearConfig = getClearConfig(allowClear);
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === "Enter") {
+      onPressEnter?.(event);
+    }
+    props.onKeyDown?.(event);
+  };
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (!isControlled) {
-      setInnerValue(event.target.value);
-    }
-
-    if (skipNextValueChangeRef.current) {
-      skipNextValueChangeRef.current = false;
-    } else {
-      onValueChange?.(event.target.value);
-    }
-
-    onChange?.(event);
+    setVal(event.target.value, event);
   };
 
   const handleClear = () => {
-    if (disabled) {
-      return;
-    }
-
-    const input = inputRef.current;
-
-    if (!isControlled) {
-      setInnerValue("");
-    }
-
-    onValueChange?.("");
-
-    if (input) {
-      const nativeValueSetter = Object.getOwnPropertyDescriptor(
-        window.HTMLInputElement.prototype,
-        "value"
-      )?.set;
-
-      nativeValueSetter?.call(input, "");
-      skipNextValueChangeRef.current = true;
-      input.dispatchEvent(new Event("input", { bubbles: true }));
-      skipNextValueChangeRef.current = false;
-      input.focus();
-    }
-
+    setVal("");
     onClear?.();
   };
 
+  const affixContext: InputAffixRenderContext = {
+    value: String(val ?? ""),
+    focused,
+    disabled: !!disabled,
+    showClear,
+    clear: handleClear,
+    clearIcon,
+  };
+
+  const renderAffix = (affix: InputAffix | undefined) => {
+    if (typeof affix === "function") {
+      return affix(affixContext);
+    }
+    return affix;
+  };
+
+  const renderAddon = (addon: React.ReactNode) => {
+    if (React.isValidElement(addon)) {
+      return addon;
+    }
+    return <Space.Addon>{addon}</Space.Addon>;
+  };
+
+  const suffixContent =
+    typeof suffix === "function" ? (
+      renderAffix(suffix)
+    ) : (
+      <When condition={showClear} fallback={renderAffix(suffix)}>
+        <InputClearButton clearIcon={clearIcon} onClear={handleClear} />
+      </When>
+    );
+
+  const control = (
+    <Choose>
+      <When condition={!hasIcon}>
+        <UIInput
+          {...props}
+          className={cn(className, !hasAddon && rootClassName, hasAddon && "flex-1")}
+          disabled={disabled}
+          ref={ref}
+          value={val ?? ""}
+          onChange={handleChange}
+          onFocus={(e) => {
+            setFocused(true);
+            props?.onFocus?.(e);
+          }}
+          onBlur={(e) => {
+            setFocused(false);
+            props?.onBlur?.(e);
+          }}
+          onKeyDown={handleKeyDown}
+        />
+      </When>
+      <Otherwise>
+        <InputGroup className={cn(!hasAddon && rootClassName)}>
+          <When condition={!!prefix}>
+            <InputGroupAddon align="inline-start">{renderAffix(prefix)}</InputGroupAddon>
+          </When>
+          <InputGroupInput
+            {...props}
+            className={cn(className, "peer")}
+            disabled={disabled}
+            ref={ref}
+            value={val ?? ""}
+            onFocus={(e) => {
+              setFocused(true);
+              props?.onFocus?.(e);
+            }}
+            onBlur={(e) => {
+              setFocused(false);
+              props?.onBlur?.(e);
+            }}
+            onChange={handleChange}
+            onKeyDown={handleKeyDown}
+          />
+          <When condition={!!suffix || showClear}>
+            <InputGroupAddon align="inline-end">{suffixContent}</InputGroupAddon>
+          </When>
+        </InputGroup>
+      </Otherwise>
+    </Choose>
+  );
+
   return (
-    <InputGroup data-disabled={disabled} className={cn("items-center", className)}>
-      {addonBefore && (
-        <InputGroupAddon
-          align="inline-start"
-          className={cn("self-stretch border-r bg-muted/40 px-3 text-foreground", addonClassName)}
-        >
-          <InputGroupText>{addonBefore}</InputGroupText>
-        </InputGroupAddon>
-      )}
-
-      {prefix && (
-        <InputGroupAddon align="inline-start" className={cn("shrink-0 gap-1.5", prefixClassName)}>
-          <InputGroupText>{prefix}</InputGroupText>
-        </InputGroupAddon>
-      )}
-
-      <InputGroupInput
-        ref={handleInputRef}
-        value={isControlled ? value : innerValue}
-        onChange={handleChange}
-        disabled={disabled}
-        className={cn(
-          "h-full py-1.5 leading-5",
-          (prefix || addonBefore) && "pl-0",
-          (suffix || addonAfter || showClear) && "pr-0",
-          inputClassName
-        )}
-        {...props}
-      />
-
-      {showClear && (
-        <InputGroupAddon align="inline-end" className="shrink-0">
-          <InputGroupButton
-            variant="ghost"
-            size="icon-sm"
-            onClick={handleClear}
-            className={cn("hover:bg-transparent focus-visible:ring-0", clearButtonClassName)}
-            type="button"
-            aria-label={clearConfig.ariaLabel ?? t("input.clear")}
-          >
-            {clearConfig.icon ?? <XCircle className="size-4 text-muted-foreground" />}
-          </InputGroupButton>
-        </InputGroupAddon>
-      )}
-
-      {suffix && (
-        <InputGroupAddon align="inline-end" className={cn("shrink-0 gap-1.5", suffixClassName)}>
-          <InputGroupText>{suffix}</InputGroupText>
-        </InputGroupAddon>
-      )}
-
-      {addonAfter && (
-        <InputGroupAddon
-          align="inline-end"
-          className={cn("self-stretch border-l bg-muted/40 px-3 text-foreground", addonClassName)}
-        >
-          <InputGroupText>{addonAfter}</InputGroupText>
-        </InputGroupAddon>
-      )}
-    </InputGroup>
+    <Choose>
+      <When condition={hasAddon}>
+        <Space.Compact block className={rootClassName}>
+          <When condition={!!addonBefore}>{renderAddon(addonBefore)}</When>
+          {control}
+          <When condition={!!addonAfter}>{renderAddon(addonAfter)}</When>
+        </Space.Compact>
+      </When>
+      <Otherwise>{control}</Otherwise>
+    </Choose>
   );
 }
 
 Input.displayName = "Input";
 
-export interface PasswordInputProps extends Omit<InputProps, "type" | "suffix"> {
+export interface VisibilityToggle {
   visible?: boolean;
-  defaultVisible?: boolean;
   onVisibleChange?: (visible: boolean) => void;
-  visibilityToggleClassName?: string;
-  visibilityIcons?: {
-    visible?: React.ReactNode;
-    hidden?: React.ReactNode;
-  };
 }
 
-export function PasswordInput({
-  visible,
-  defaultVisible = false,
-  onVisibleChange,
-  visibilityToggleClassName,
-  visibilityIcons,
-  disabled,
-  ...props
-}: PasswordInputProps) {
-  const isControlled = visible !== undefined;
-  const [innerVisible, setInnerVisible] = React.useState(defaultVisible);
-  const currentVisible = isControlled ? visible : innerVisible;
+export interface PasswordInputProps extends Omit<InputProps, "type"> {
+  iconRender?: (visible: boolean) => React.ReactNode;
+  visibilityToggle?: boolean | VisibilityToggle;
+}
+
+export function PasswordInput(props: PasswordInputProps) {
+  const { iconRender, visibilityToggle = true, suffix, disabled, ...restProps } = props;
+  const [innerVisible, setInnerVisible] = React.useState(false);
+  const visibilityToggleConfig =
+    typeof visibilityToggle === "object" ? visibilityToggle : undefined;
+  const visibleProp = visibilityToggleConfig?.visible;
+  const visible = visibleProp ?? innerVisible;
+  const visibleIcon = iconRender ? iconRender(visible) : visible ? <Eye /> : <EyeOff />;
+  const showVisibilityToggle = visibilityToggle !== false;
 
   const handleVisibleChange = () => {
-    if (disabled) {
-      return;
+    const next = !visible;
+
+    if (visibleProp === undefined) {
+      setInnerVisible(next);
     }
-
-    const nextVisible = !currentVisible;
-
-    if (!isControlled) {
-      setInnerVisible(nextVisible);
-    }
-
-    onVisibleChange?.(nextVisible);
+    visibilityToggleConfig?.onVisibleChange?.(next);
   };
 
   return (
     <Input
-      type={currentVisible ? "text" : "password"}
+      {...restProps}
       disabled={disabled}
-      suffix={
-        <InputGroupButton
-          variant="ghost"
-          size="icon-sm"
-          type="button"
-          disabled={disabled}
-          aria-label={currentVisible ? "Hide password" : "Show password"}
-          aria-pressed={currentVisible}
-          onClick={handleVisibleChange}
-          className={cn("hover:bg-transparent focus-visible:ring-0", visibilityToggleClassName)}
-        >
-          {currentVisible
-            ? (visibilityIcons?.visible ?? <EyeOff className="size-4 text-muted-foreground" />)
-            : (visibilityIcons?.hidden ?? <Eye className="size-4 text-muted-foreground" />)}
-        </InputGroupButton>
-      }
-      {...props}
+      type={visible ? "text" : "password"}
+      suffix={(ctx) => (
+        <Space size="xs" className="min-w-0">
+          <When
+            condition={ctx.showClear}
+            fallback={typeof suffix === "function" ? suffix(ctx) : suffix}
+          >
+            <InputClearButton clearIcon={ctx.clearIcon} onClear={ctx.clear} />
+          </When>
+          <When condition={showVisibilityToggle}>
+            <InputGroupButton
+              size="icon-xs"
+              aria-label={visible ? "Hide password" : "Show password"}
+              onMouseDown={(event) => {
+                event.preventDefault();
+              }}
+              onClick={handleVisibleChange}
+              disabled={disabled}
+            >
+              {visibleIcon}
+            </InputGroupButton>
+          </When>
+        </Space>
+      )}
     />
   );
 }
 
-PasswordInput.displayName = "PasswordInput";
-
-export interface InputNumberProps extends Omit<
-  InputProps,
-  "value" | "defaultValue" | "onChange" | "type" | "onValueChange"
-> {
-  value?: number | string | null;
-  defaultValue?: number | string;
-  onChange?: (value: number | string | null) => void;
+export interface NumberInputProps
+  extends Omit<InputProps, "value" | "defaultValue" | "onChange" | "type" | "allowClear" | "onClear"> {
+  value?: number;
+  defaultValue?: number;
+  onChange?: (value?: number) => void;
   min?: number;
   max?: number;
   step?: number;
   precision?: number;
-  stringMode?: boolean;
-  controls?: boolean;
+  formatter?: (value?: number) => string;
+  parser?: (input: string) => number | undefined;
   keyboard?: boolean;
-  formatter?: (value: string) => string;
-  parser?: (value: string) => string;
+  controls?: boolean | { upIcon?: React.ReactNode; downIcon?: React.ReactNode };
+  mode?: "input" | "spinner";
+  onStep?: (
+    value: number,
+    info: {
+      offset: number;
+      type: "up" | "down";
+    }
+  ) => void;
 }
 
-function toText(value: InputNumberProps["value"]) {
-  return value === null || value === undefined ? "" : String(value);
+type MaybeNumber = number | undefined;
+
+function defaultParseNumber(input: string): MaybeNumber {
+  if (!canParseNumber(input)) return undefined;
+
+  const next = Number(input);
+  return Number.isFinite(next) ? next : undefined;
 }
 
-function normalizeNumberText(
-  text: string,
-  props: Pick<InputNumberProps, "min" | "max" | "precision">
-) {
-  if (text.trim() === "" || text === "-" || text === ".") return "";
-  const parsed = Number(text);
-  if (Number.isNaN(parsed)) return text;
-  let next = parsed;
-  if (props.min !== undefined) next = Math.max(props.min, next);
-  if (props.max !== undefined) next = Math.min(props.max, next);
-  if (props.precision !== undefined) return next.toFixed(props.precision);
-  return String(next);
+function sanitizeNumberInput(input: string) {
+  let next = input.replace(/[^\d.-]/g, "");
+  const isNegative = next.startsWith("-");
+
+  next = next.replace(/-/g, "");
+
+  if (isNegative) {
+    next = `-${next}`;
+  }
+
+  const [integer = "", ...decimalParts] = next.split(".");
+
+  return decimalParts.length ? `${integer}.${decimalParts.join("")}` : integer;
 }
 
-export function InputNumber({
+function canParseNumber(input: string) {
+  return input.trim() !== "" && Number.isFinite(Number(input));
+}
+
+function getPrecision(value: number) {
+  const valueString = String(value);
+  const decimalIndex = valueString.indexOf(".");
+
+  return decimalIndex >= 0 ? valueString.length - decimalIndex - 1 : 0;
+}
+
+function formatNumberValue(value: MaybeNumber, precision?: number) {
+  if (value === undefined) return "";
+  if (precision === undefined) return String(value);
+  return value.toFixed(precision);
+}
+
+export function NumberInput({
   value,
   defaultValue,
   onChange,
@@ -323,94 +333,211 @@ export function InputNumber({
   max,
   step = 1,
   precision,
-  stringMode,
-  controls = true,
-  keyboard = true,
   formatter,
-  parser,
+  parser = defaultParseNumber,
+  keyboard = true,
+  controls,
+  mode = "input",
+  onStep,
   onBlur,
   onKeyDown,
-  suffix,
+  readOnly,
+  disabled,
   ...props
-}: InputNumberProps) {
-  const isControlled = value !== undefined;
-  const [innerValue, setInnerValue] = React.useState(toText(defaultValue));
-  const text = isControlled ? toText(value) : innerValue;
-  const displayText = formatter ? formatter(text) : text;
+}: NumberInputProps) {
+  const [numberValue, setNumberValue] = useControllableState<MaybeNumber>({
+    value,
+    defaultValue,
+    onChange,
+  });
+  const [inputValue, setInputValue] = React.useState(() =>
+    formatter ? formatter(numberValue) : formatNumberValue(numberValue, precision)
+  );
+  const [focused, setFocused] = React.useState(false);
+  const isOutOfRange =
+    numberValue !== undefined &&
+    ((min !== undefined && numberValue < min) || (max !== undefined && numberValue > max));
 
-  const emit = (nextText: string) => {
-    if (!isControlled) setInnerValue(nextText);
-    if (nextText === "") {
-      onChange?.(null);
-      return;
+  const normalizeValue = (next: MaybeNumber) => {
+    if (next === undefined) return undefined;
+
+    let normalized = next;
+
+    if (min !== undefined && normalized < min) {
+      normalized = min;
     }
-    onChange?.(stringMode ? nextText : Number(nextText));
+    if (max !== undefined && normalized > max) {
+      normalized = max;
+    }
+    if (precision !== undefined) {
+      normalized = Number(normalized.toFixed(precision));
+    }
+
+    return normalized;
   };
 
-  const commit = (rawText: string) => {
-    const parsed = parser ? parser(rawText) : rawText;
-    const next = normalizeNumberText(parsed, { min, max, precision });
-    emit(next);
+  const updateValue = (next: MaybeNumber) => {
+    const normalized = normalizeValue(next);
+    setNumberValue(normalized);
+
+    return normalized;
   };
 
-  const stepBy = (direction: 1 | -1) => {
-    const current = Number(parser ? parser(displayText) : text) || 0;
-    commit(String(current + step * direction));
+  const formatInputValue = (next: MaybeNumber) => {
+    return formatter ? formatter(next) : formatNumberValue(next, precision);
   };
 
-  return (
+  const handleChange = (next: string | React.ChangeEvent<HTMLInputElement>) => {
+    const nextInput = sanitizeNumberInput(typeof next === "string" ? next : next.target.value);
+
+    setInputValue(nextInput);
+
+  };
+
+  const handleBlur = (event: React.FocusEvent<HTMLInputElement>) => {
+    setFocused(false);
+    const next = updateValue(parser(inputValue));
+    setInputValue(formatInputValue(next));
+    onBlur?.(event);
+  };
+
+  const handleStep = (type: "up" | "down") => {
+    if (disabled || readOnly) return;
+
+    const current = canParseNumber(inputValue) ? parser(inputValue) ?? min ?? 0 : numberValue ?? min ?? 0;
+    const offset = type === "up" ? step : -step;
+    const stepPrecision = Math.max(getPrecision(current), getPrecision(Number(step)), precision ?? 0);
+    const next = normalizeValue(Number((current + offset).toFixed(stepPrecision))) ?? current;
+
+    setNumberValue(next);
+    setInputValue(formatInputValue(next));
+    onStep?.(next, { offset, type });
+  };
+
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (keyboard) {
+      if (event.key === "ArrowUp") {
+        event.preventDefault();
+        handleStep("up");
+      }
+      if (event.key === "ArrowDown") {
+        event.preventDefault();
+        handleStep("down");
+      }
+    }
+
+    onKeyDown?.(event);
+  };
+
+  const controlsConfig = typeof controls === "object" ? controls : undefined;
+  const showControls = controls !== false;
+  const canStepDown =
+    !disabled &&
+    !readOnly &&
+    (min === undefined || (parser(inputValue) ?? numberValue ?? 0) > min);
+  const canStepUp =
+    !disabled &&
+    !readOnly &&
+    (max === undefined || (parser(inputValue) ?? numberValue ?? 0) < max);
+  const controlSuffix = showControls ? (
+    <div
+      className={cn(
+        "pointer-events-none absolute top-0 right-0 flex h-full w-7 flex-col overflow-hidden rounded-r-md border-l border-input bg-background opacity-0 transition-opacity group-hover/input-group:pointer-events-auto group-hover/input-group:opacity-100",
+        focused && "pointer-events-auto opacity-100"
+      )}
+    >
+      <InputGroupButton
+        size="icon-xs"
+        className="h-auto w-full flex-1 rounded-none p-0 text-muted-foreground hover:bg-accent hover:text-accent-foreground disabled:pointer-events-none disabled:opacity-40 [&_svg]:size-3"
+        disabled={!canStepUp}
+        onMouseDown={(event) => {
+          event.preventDefault();
+        }}
+        onClick={() => {
+          handleStep("up");
+        }}
+      >
+        {controlsConfig?.upIcon ?? <ChevronUp className="size-3" />}
+      </InputGroupButton>
+      <InputGroupButton
+        size="icon-xs"
+        className="h-auto w-full flex-1 rounded-none border-t border-input p-0 text-muted-foreground hover:bg-accent hover:text-accent-foreground disabled:pointer-events-none disabled:opacity-40 [&_svg]:size-3"
+        disabled={!canStepDown}
+        onMouseDown={(event) => {
+          event.preventDefault();
+        }}
+        onClick={() => {
+          handleStep("down");
+        }}
+      >
+        {controlsConfig?.downIcon ?? <ChevronDown className="size-3" />}
+      </InputGroupButton>
+    </div>
+  ) : null;
+  const input = (
     <Input
       {...props}
+      disabled={disabled}
+      readOnly={readOnly}
+      rootClassName={mode === "spinner" ? undefined : props.rootClassName}
+      value={inputValue}
       type="text"
       inputMode="decimal"
-      value={displayText}
-      onValueChange={(next) => {
-        const parsed = parser ? parser(next) : next;
-        if (/^-?\d*(\.\d*)?$/.test(parsed) || parsed === "") {
-          if (!isControlled) setInnerValue(parsed);
-          onChange?.(parsed === "" ? null : stringMode ? parsed : Number(parsed));
-        }
-      }}
-      onBlur={(event) => {
-        commit(event.target.value);
-        onBlur?.(event);
-      }}
-      onKeyDown={(event) => {
-        if (keyboard && event.key === "ArrowUp") {
-          event.preventDefault();
-          stepBy(1);
-        }
-        if (keyboard && event.key === "ArrowDown") {
-          event.preventDefault();
-          stepBy(-1);
-        }
-        onKeyDown?.(event);
-      }}
+      aria-invalid={props["aria-invalid"] || isOutOfRange || undefined}
       suffix={
-        <>
-          {suffix}
-          {controls ? (
-            <span className="flex flex-col border-l">
-              <button
-                type="button"
-                className="px-1 text-[10px] leading-3 hover:bg-accent"
-                onClick={() => stepBy(1)}
-              >
-                ⌃
-              </button>
-              <button
-                type="button"
-                className="px-1 text-[10px] leading-3 hover:bg-accent"
-                onClick={() => stepBy(-1)}
-              >
-                ⌄
-              </button>
-            </span>
-          ) : null}
-        </>
+        mode === "input" && (showControls || props.suffix)
+          ? (ctx) => (
+              <Space size="xs" className="min-w-0">
+                {typeof props.suffix === "function" ? props.suffix(ctx) : props.suffix}
+                {controlSuffix}
+              </Space>
+            )
+          : props.suffix
       }
+      onChange={handleChange}
+      onFocus={(event) => {
+        setFocused(true);
+        props.onFocus?.(event);
+      }}
+      onBlur={handleBlur}
+      onKeyDown={handleKeyDown}
     />
   );
-}
 
-InputNumber.displayName = "InputNumber";
+  return (
+    <Choose>
+      <When condition={mode === "spinner" && showControls}>
+        <Space.Compact block className={props.rootClassName}>
+          <InputGroupButton
+            variant="outline"
+            size="icon-sm"
+            disabled={!canStepDown}
+            onMouseDown={(event) => {
+              event.preventDefault();
+            }}
+            onClick={() => {
+              handleStep("down");
+            }}
+          >
+            {controlsConfig?.downIcon ?? <Minus />}
+          </InputGroupButton>
+          {input}
+          <InputGroupButton
+            variant="outline"
+            size="icon-sm"
+            disabled={!canStepUp}
+            onMouseDown={(event) => {
+              event.preventDefault();
+            }}
+            onClick={() => {
+              handleStep("up");
+            }}
+          >
+            {controlsConfig?.upIcon ?? <Plus />}
+          </InputGroupButton>
+        </Space.Compact>
+      </When>
+      <Otherwise>{input}</Otherwise>
+    </Choose>
+  );
+}
