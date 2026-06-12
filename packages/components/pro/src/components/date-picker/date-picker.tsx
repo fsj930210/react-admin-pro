@@ -9,7 +9,7 @@ import { usePickerPanelController } from "./hooks/use-picker-panel-controller";
 import { PickerPanel } from "./picker-panel";
 import { PickerTrigger } from "./picker-trigger";
 import type { DatePickerProps, Dayjs, PickerMode, PickerPanelMode, PickerPreset } from "./types";
-import { formatValue, parseValue } from "./utils";
+import { formatPickerValue, parseValue } from "./utils";
 
 function getDefaultPanelMode(mode: PickerMode): PickerPanelMode {
   if (mode === "year") return "year";
@@ -83,7 +83,7 @@ function DatePicker(props: DatePickerProps) {
   const [draftText, setDraftText] = useState<string | null>(null);
 
   const mergedFormat = format ?? DEFAULT_FORMATS[mode] ?? DEFAULT_FORMATS.date;
-  const displayText = draftText ?? formatValue(value, mergedFormat, mergedFormat);
+  const displayText = draftText ?? formatPickerValue(value, mode, format, mergedFormat);
   const mergedViewDate = viewDate;
   const panelController = usePickerPanelController({
     panelMode,
@@ -107,7 +107,7 @@ function DatePicker(props: DatePickerProps) {
     if (mode === "month") next = date.startOf("month");
     if (mode === "year") next = date.startOf("year");
     if (mode === "quarter") next = date.startOf("quarter");
-    if (mode === "week") next = date.startOf("isoWeek");
+    if (mode === "week") next = date.startOf("week");
     commitValue(next);
     if (mode !== "month" && mode !== "year" && mode !== "quarter") {
       changeOpen(false);
@@ -133,28 +133,31 @@ function DatePicker(props: DatePickerProps) {
   return (
     <Popover open={openState} onOpenChange={changeOpen}>
       <PopoverTrigger asChild>
-        <div className={cn("inline-flex w-full", className)}>
-          <PickerTrigger
-            open={openState}
-            value={displayText}
-            placeholder={placeholder}
-            disabled={disabled}
-            readOnly={readOnly}
-            allowClear={allowClear}
-            prefix={prefix}
-            suffix={suffix}
-            icon={icon}
-            inputClassName={inputClassName}
-            onValueChange={handleInputChange}
-            onOpenRequest={() => changeOpen(true)}
-            onClear={() => {
-              commitValue(null);
-              onClear?.();
-            }}
-          />
-        </div>
+        <PickerTrigger
+          open={openState}
+          value={displayText}
+          placeholder={placeholder}
+          disabled={disabled}
+          readOnly={readOnly}
+          allowClear={allowClear}
+          prefix={prefix}
+          suffix={suffix}
+          icon={icon}
+          className={cn("inline-flex w-full", className)}
+          inputClassName={inputClassName}
+          onValueChange={handleInputChange}
+          onOpenRequest={() => changeOpen(true)}
+          onClear={() => {
+            commitValue(null);
+            onClear?.();
+          }}
+        />
       </PopoverTrigger>
-      <PopoverContent className={cn("w-auto p-0", popupClassName)} align="start" sideOffset={0}>
+      <PopoverContent
+        className={cn("w-[var(--radix-popover-trigger-width)] min-w-[320px] p-0", popupClassName)}
+        align="start"
+        sideOffset={0}
+      >
         <PickerPanel
           pickerMode={mode}
           panelMode={panelMode}

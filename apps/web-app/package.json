@@ -58,6 +58,7 @@
     "@tanstack/react-router": "catalog:",
     "@tanstack/react-table": "catalog:",
     "class-variance-authority": "catalog:",
+    "dayjs": "catalog:",
     "echarts": "catalog:",
     "highlight.js": "catalog:",
     "lodash-es": "catalog:",

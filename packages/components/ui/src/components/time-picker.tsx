@@ -1419,6 +1419,46 @@ function useTimePickerGroupContext(consumerName: string) {
 
 interface TimePickerContentProps extends DivProps, React.ComponentProps<typeof PopoverContent> {}
 
+function TimePickerPanel(props: DivProps) {
+  const { className, ...panelProps } = props;
+  const columnsRef = React.useRef<Map<string, Omit<ColumnData, "id">>>(new Map());
+
+  const onColumnRegister = React.useCallback((column: ColumnData) => {
+    columnsRef.current.set(column.id, column);
+  }, []);
+
+  const onColumnUnregister = React.useCallback((id: string) => {
+    columnsRef.current.delete(id);
+  }, []);
+
+  const getColumns = React.useCallback(() => {
+    const columns = Array.from(columnsRef.current.entries())
+      .map(([id, { ref, getSelectedItemRef, getItems }]) => ({
+        id,
+        ref,
+        getSelectedItemRef,
+        getItems,
+      }))
+      .filter((c) => c.ref.current !== null);
+    return sortNodes(columns);
+  }, []);
+
+  const groupContextValue = React.useMemo<TimePickerGroupContextValue>(
+    () => ({
+      getColumns,
+      onColumnRegister,
+      onColumnUnregister,
+    }),
+    [getColumns, onColumnRegister, onColumnUnregister]
+  );
+
+  return (
+    <TimePickerGroupContext.Provider value={groupContextValue}>
+      <div data-slot="time-picker-panel" {...panelProps} className={cn("flex w-auto p-0", className)} />
+    </TimePickerGroupContext.Provider>
+  );
+}
+
 function TimePickerContent(props: TimePickerContentProps) {
   const {
     side = "bottom",
@@ -1644,6 +1684,13 @@ function TimePickerColumnItem(props: TimePickerColumnItemProps) {
   const columnContext = useTimePickerColumnContext(COLUMN_ITEM_NAME);
   const groupContext = useTimePickerGroupContext(COLUMN_ITEM_NAME);
 
+  const scrollItemToTop = React.useCallback(() => {
+    const item = itemRef.current;
+    const column = item?.closest<HTMLElement>("[data-slot='time-picker-hour'], [data-slot='time-picker-minute'], [data-slot='time-picker-second'], [data-slot='time-picker-period']");
+    if (!item || !column) return;
+    column.scrollTop = item.offsetTop - column.offsetTop;
+  }, []);
+
   useIsomorphicLayoutEffect(() => {
     columnContext.onItemRegister(value, itemRef, selected);
     return () => columnContext.onItemUnregister(value);
@@ -1651,9 +1698,9 @@ function TimePickerColumnItem(props: TimePickerColumnItemProps) {
 
   useIsomorphicLayoutEffect(() => {
     if (selected && itemRef.current) {
-      itemRef.current.scrollIntoView({ block: "nearest" });
+      scrollItemToTop();
     }
-  }, [selected]);
+  }, [selected, scrollItemToTop]);
 
   const onClick = React.useCallback(
     (event: React.MouseEvent<ColumnItemElement>) => {
@@ -1661,8 +1708,9 @@ function TimePickerColumnItem(props: TimePickerColumnItemProps) {
       if (event.defaultPrevented) return;
 
       itemRef.current?.focus();
+      scrollItemToTop();
     },
-    [itemProps]
+    [itemProps, scrollItemToTop]
   );
 
   const onKeyDown = React.useCallback(
@@ -1746,8 +1794,8 @@ function TimePickerColumnItem(props: TimePickerColumnItemProps) {
       ref={composedRef}
       data-selected={selected ? "" : undefined}
       className={cn(
-        "w-full rounded px-3 py-1.5 text-left text-sm hover:bg-accent hover:text-accent-foreground focus:border-ring focus:outline-none focus:ring-[3px] focus:ring-ring/50",
-        "data-selected:bg-primary data-selected:text-primary-foreground data-selected:hover:bg-primary data-selected:hover:text-primary-foreground",
+        "w-full rounded px-3 py-1.5 text-center text-sm hover:bg-accent hover:text-accent-foreground focus:border-ring focus:outline-none focus:ring-[3px] focus:ring-ring/50",
+        "data-selected:bg-accent data-selected:text-accent-foreground data-selected:hover:bg-accent data-selected:hover:text-accent-foreground",
         className
       )}
       onClick={onClick}
@@ -1834,7 +1882,7 @@ function TimePickerHour(props: TimePickerHourProps) {
       data-slot="time-picker-hour"
       {...hourProps}
       className={cn(
-        "scrollbar-none flex max-h-[200px] flex-col gap-1 overflow-y-auto p-1",
+        "scrollbar-none flex max-h-[200px] flex-col gap-1 overflow-y-auto p-1 after:h-[calc(100%-2.25rem)] after:shrink-0 after:content-['']",
         className
       )}
     >
@@ -1900,7 +1948,7 @@ function TimePickerMinute(props: TimePickerMinuteProps) {
       data-slot="time-picker-minute"
       {...minuteProps}
       className={cn(
-        "scrollbar-none flex max-h-[200px] flex-col gap-1 overflow-y-auto p-1",
+        "scrollbar-none flex max-h-[200px] flex-col gap-1 overflow-y-auto p-1 after:h-[calc(100%-2.25rem)] after:shrink-0 after:content-['']",
         className
       )}
     >
@@ -1968,7 +2016,7 @@ function TimePickerSecond(props: TimePickerSecondProps) {
       data-slot="time-picker-second"
       {...secondProps}
       className={cn(
-        "scrollbar-none flex max-h-[200px] flex-col gap-1 overflow-y-auto p-1",
+        "scrollbar-none flex max-h-[200px] flex-col gap-1 overflow-y-auto p-1 after:h-[calc(100%-2.25rem)] after:shrink-0 after:content-['']",
         className
       )}
     >
@@ -2112,6 +2160,7 @@ export {
   TimePickerInputGroup,
   TimePickerLabel,
   TimePickerMinute,
+  TimePickerPanel,
   TimePickerPeriod,
   //
   type TimePickerProps,

@@ -1,6 +1,6 @@
 import { Button } from "@rap/components-ui/button";
 import { cn } from "@rap/utils";
-import { CalendarDays, XCircle } from "lucide-react";
+import { ArrowRight, CalendarDays, XCircle } from "lucide-react";
 import type { ComponentProps, ReactNode, RefObject } from "react";
 import { RangeTriggerField } from "./range-trigger-field";
 
@@ -91,7 +91,9 @@ function RangePickerTrigger(props: RangePickerTriggerProps) {
           onFocus={onStartFocus}
           onBlur={onStartBlur}
         />
-        <span className="shrink-0 px-2 text-muted-foreground">{separator ?? "->"}</span>
+        <span className="flex shrink-0 items-center px-2 text-muted-foreground">
+          {separator ?? <ArrowRight className="size-4" strokeWidth={1.8} />}
+        </span>
         <RangeTriggerField
           value={endValue}
           placeholder={endPlaceholder}

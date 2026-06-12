@@ -4,6 +4,7 @@ import { PickerBody } from "./picker-body";
 import { PickerFooter } from "./picker-footer";
 import { PickerHeader } from "./picker-header";
 import { PickerPresets } from "./picker-presets";
+import { getYearPageStart } from "./utils";
 import type {
   Dayjs,
   PickerCellRenderInfo,
@@ -47,8 +48,23 @@ interface PickerPanelProps {
 }
 
 function getDecadeLabel(viewDate: Dayjs) {
-  const startYear = Math.floor(viewDate.year() / 10) * 10;
-  return `${startYear}-${startYear + 9}`;
+  const startYear = getYearPageStart(viewDate.year());
+  return `${startYear}-${startYear + 11}`;
+}
+
+function getPanelOffsetDate(viewDate: Dayjs, panelMode: PickerPanelMode) {
+  if (panelMode === "date") return viewDate.add(1, "month");
+  if (panelMode === "year") return viewDate.add(12, "year");
+  return viewDate.add(1, "year");
+}
+
+function getHeaderLabels(viewDate: Dayjs, panelMode: PickerPanelMode) {
+  return {
+    yearLabel: `${viewDate.year()}年`,
+    monthLabel: `${viewDate.month() + 1}月`,
+    rangeLabel: getDecadeLabel(viewDate),
+    showMonthClick: panelMode === "date",
+  };
 }
 
 function PickerPanel(props: PickerPanelProps) {
@@ -83,7 +99,7 @@ function PickerPanel(props: PickerPanelProps) {
     className,
   } = props;
 
-  const isRange = Array.isArray(value);
+  const isRange = activeRangePart !== undefined || Array.isArray(value);
   const context: PickerPanelContext = {
     mode: isRange ? "range" : "single",
     pickerMode,
@@ -100,7 +116,7 @@ function PickerPanel(props: PickerPanelProps) {
 
   function handlePanelSelect(date: Dayjs) {
     if (pickerMode === "week") {
-      onSelect(date.startOf("isoWeek"));
+      onSelect(date.startOf("week"));
       if (!isRange) {
         close();
       }
@@ -108,23 +124,27 @@ function PickerPanel(props: PickerPanelProps) {
     }
 
     if (panelMode === "year") {
-      setViewDate(date);
       if (pickerMode === "year") {
         onSelect(date.startOf("year"));
-        close();
+        if (!isRange) {
+          close();
+        }
         return;
       }
+      setViewDate(date);
       setPanelMode(pickerMode === "quarter" ? "quarter" : "month");
       return;
     }
 
     if (panelMode === "month") {
-      setViewDate(date);
       if (pickerMode === "month") {
         onSelect(date.startOf("month"));
-        close();
+        if (!isRange) {
+          close();
+        }
         return;
       }
+      setViewDate(date);
       if (pickerMode === "quarter") {
         setPanelMode("quarter");
         return;
@@ -136,76 +156,87 @@ function PickerPanel(props: PickerPanelProps) {
     if (panelMode === "quarter") {
       setViewDate(date);
       onSelect(date.startOf("quarter"));
-      close();
+      if (!isRange) {
+        close();
+      }
       return;
     }
 
     onSelect(date);
   }
 
-  const panelBody =
-    panelMode === "date" && numberOfMonths === 2 ? (
-      <div className="flex min-w-max divide-x">
-        <PickerBody
-          pickerMode={pickerMode}
-          panelMode={panelMode}
-          viewDate={viewDate}
-          value={value}
-          hoverValue={hoverValue}
-          disabledDate={disabledDate}
-          renderCell={renderCell}
-          onSelect={handlePanelSelect}
-          onHover={onHover}
-          className="min-w-[280px] flex-1"
-        />
-        <PickerBody
-          pickerMode={pickerMode}
-          panelMode={panelMode}
-          viewDate={viewDate.add(1, "month")}
-          value={value}
-          hoverValue={hoverValue}
-          disabledDate={disabledDate}
-          renderCell={renderCell}
-          onSelect={handlePanelSelect}
-          onHover={onHover}
-          className="min-w-[280px] flex-1"
-        />
-      </div>
-    ) : (
-      <PickerBody
-        pickerMode={pickerMode}
-        panelMode={panelMode}
-        viewDate={viewDate}
-        value={value}
-        hoverValue={hoverValue}
-        disabledDate={disabledDate}
-        renderCell={renderCell}
-        onSelect={handlePanelSelect}
-        onHover={onHover}
-      />
-    );
+  const showDoublePanel = numberOfMonths === 2;
+  const nextPanelDate = getPanelOffsetDate(viewDate, panelMode);
+  const currentHeaderLabels = getHeaderLabels(viewDate, panelMode);
+  const nextHeaderLabels = getHeaderLabels(nextPanelDate, panelMode);
 
-  const panel = (
-    <div
-      className={cn(
-        "min-w-[320px] w-max overflow-hidden rounded-md border bg-popover text-popover-foreground shadow-lg",
-        className,
-      )}
-    >
-      <PickerHeader
-        panelMode={panelMode}
-        yearLabel={`${viewDate.year()}年`}
-        monthLabel={`${viewDate.month() + 1}月`}
-        rangeLabel={getDecadeLabel(viewDate)}
-        onPrev={onPrevMonth}
-        onNext={onNextMonth}
-        onDoublePrev={panelMode === "year" ? onPrevDecade : onPrevYear}
-        onDoubleNext={panelMode === "year" ? onNextDecade : onNextYear}
-        onYearClick={panelMode === "year" ? undefined : () => setPanelMode("year")}
-        onMonthClick={panelMode === "date" ? () => setPanelMode("month") : undefined}
-      />
+  const renderPanelBody = (date: Dayjs, bodyClassName?: string) => (
+    <PickerBody
+      pickerMode={pickerMode}
+      panelMode={panelMode}
+      viewDate={date}
+      value={value}
+      hoverValue={hoverValue}
+      disabledDate={disabledDate}
+      renderCell={renderCell}
+      onSelect={handlePanelSelect}
+      onHover={onHover}
+      className={bodyClassName}
+    />
+  );
+
+  const panelBody = showDoublePanel ? (
+    <div className="flex min-w-max divide-x">
+      <div className={cn("min-w-[280px] flex-1", panelMode !== "date" && "min-w-[320px]")}>
+        <PickerHeader
+          panelMode={panelMode}
+          {...currentHeaderLabels}
+          onPrev={onPrevMonth}
+          onNext={onNextMonth}
+          onDoublePrev={panelMode === "year" ? onPrevDecade : onPrevYear}
+          onDoubleNext={panelMode === "year" ? onNextDecade : onNextYear}
+          onYearClick={panelMode === "year" ? undefined : () => setPanelMode("year")}
+          onMonthClick={currentHeaderLabels.showMonthClick ? () => setPanelMode("month") : undefined}
+          showNextControls={false}
+        />
+        {renderPanelBody(viewDate)}
+      </div>
+      <div className={cn("min-w-[280px] flex-1", panelMode !== "date" && "min-w-[320px]")}>
+        <PickerHeader
+          panelMode={panelMode}
+          {...nextHeaderLabels}
+          onPrev={() => setViewDate(nextPanelDate.subtract(1, "month"))}
+          onNext={onNextMonth}
+          onDoublePrev={() => setViewDate(nextPanelDate.subtract(panelMode === "year" ? 12 : 1, "year"))}
+          onDoubleNext={panelMode === "year" ? onNextDecade : onNextYear}
+          onYearClick={panelMode === "year" ? undefined : () => setPanelMode("year")}
+          onMonthClick={nextHeaderLabels.showMonthClick ? () => setPanelMode("month") : undefined}
+          showPrevControls={false}
+        />
+        {renderPanelBody(nextPanelDate)}
+      </div>
+    </div>
+  ) : (
+    renderPanelBody(viewDate)
+  );
+
+  const header = showDoublePanel ? null : (
+    <PickerHeader
+      panelMode={panelMode}
+      {...currentHeaderLabels}
+      onPrev={onPrevMonth}
+      onNext={onNextMonth}
+      onDoublePrev={panelMode === "year" ? onPrevDecade : onPrevYear}
+      onDoubleNext={panelMode === "year" ? onNextDecade : onNextYear}
+      onYearClick={panelMode === "year" ? undefined : () => setPanelMode("year")}
+      onMonthClick={currentHeaderLabels.showMonthClick ? () => setPanelMode("month") : undefined}
+    />
+  );
+  const hasPresets = !!presets?.length;
+  const panelContent = (
+    <div className="min-w-0 flex-1">
+      {header}
       {panelBody}
-      <PickerPresets presets={presets} onPick={onPresetPick} />
       <PickerFooter
         context={context}
         footer={footer}
@@ -213,6 +244,18 @@ function PickerPanel(props: PickerPanelProps) {
         onToday={onToday}
         onClear={onClear}
       />
+    </div>
+  );
+
+  const panel = (
+    <div
+      className={cn(
+        "flex w-full min-w-[320px] overflow-hidden rounded-md border bg-popover text-popover-foreground shadow-lg",
+        className,
+      )}
+    >
+      {hasPresets ? <PickerPresets presets={presets} onPick={onPresetPick} /> : null}
+      {panelContent}
     </div>
   );
 

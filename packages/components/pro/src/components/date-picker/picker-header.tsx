@@ -15,6 +15,8 @@ interface PickerHeaderProps {
   onDoubleNext?: () => void;
   onYearClick?: () => void;
   onMonthClick?: () => void;
+  showPrevControls?: boolean;
+  showNextControls?: boolean;
   className?: string;
 }
 
@@ -30,6 +32,8 @@ function PickerHeader(props: PickerHeaderProps) {
     onDoubleNext,
     onYearClick,
     onMonthClick,
+    showPrevControls = true,
+    showNextControls = true,
     className,
   } = props;
 
@@ -73,25 +77,37 @@ function PickerHeader(props: PickerHeaderProps) {
   return (
     <div className={cn("flex items-center justify-between border-b px-2 py-2", className)}>
       <div className="flex items-center gap-1">
-        <Button type="button" variant="ghost" size="icon-sm" onClick={onDoublePrev}>
-          <ChevronsLeft className="size-4" />
-        </Button>
-        {showSingleArrows ? (
-          <Button type="button" variant="ghost" size="icon-sm" onClick={onPrev}>
-            <ChevronLeft className="size-4" />
-          </Button>
-        ) : null}
+        {showPrevControls ? (
+          <>
+            <Button type="button" variant="ghost" size="icon-sm" onClick={onDoublePrev}>
+              <ChevronsLeft className="size-4" />
+            </Button>
+            {showSingleArrows ? (
+              <Button type="button" variant="ghost" size="icon-sm" onClick={onPrev}>
+                <ChevronLeft className="size-4" />
+              </Button>
+            ) : null}
+          </>
+        ) : (
+          <span className={cn("block", showSingleArrows ? "w-[60px]" : "w-7")} />
+        )}
       </div>
       <div className="flex items-center justify-center text-sm font-medium">{title}</div>
       <div className="flex items-center gap-1">
-        {showSingleArrows ? (
-          <Button type="button" variant="ghost" size="icon-sm" onClick={onNext}>
-            <ChevronRight className="size-4" />
-          </Button>
-        ) : null}
-        <Button type="button" variant="ghost" size="icon-sm" onClick={onDoubleNext}>
-          <ChevronsRight className="size-4" />
-        </Button>
+        {showNextControls ? (
+          <>
+            {showSingleArrows ? (
+              <Button type="button" variant="ghost" size="icon-sm" onClick={onNext}>
+                <ChevronRight className="size-4" />
+              </Button>
+            ) : null}
+            <Button type="button" variant="ghost" size="icon-sm" onClick={onDoubleNext}>
+              <ChevronsRight className="size-4" />
+            </Button>
+          </>
+        ) : (
+          <span className={cn("block", showSingleArrows ? "w-[60px]" : "w-7")} />
+        )}
       </div>
     </div>
   );

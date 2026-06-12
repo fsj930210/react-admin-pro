@@ -20,17 +20,18 @@ interface DatePanelProps {
 
 function DatePanel(props: DatePanelProps) {
   const { pickerMode, viewDate, value, hoverValue, disabledDate, renderCell, onSelect, onHover, className } = props;
-  const start = Array.isArray(value) ? value[0] : value;
-  const end = Array.isArray(value) ? value[1] : null;
+  const isRange = Array.isArray(value);
+  const start = isRange ? value[0] : value;
+  const end = isRange ? value[1] : null;
   const grid = buildDateGrid(viewDate);
-  const hoverStart = start && !end ? start.startOf("day") : null;
+  const hoverStart = isRange && start && !end ? start.startOf("day") : null;
   const hoverEnd = hoverValue && hoverStart ? hoverValue.startOf("day") : null;
-  const hoveredWeekStart = pickerMode === "week" && hoverValue ? hoverValue.startOf("isoWeek") : null;
-  const hoveredWeekEnd = pickerMode === "week" && hoverValue ? hoverValue.endOf("isoWeek") : null;
-  const selectedWeekStart = pickerMode === "week" && start ? start.startOf("isoWeek") : null;
-  const selectedWeekEnd = pickerMode === "week" && start ? start.endOf("isoWeek") : null;
-  const rangeWeekStart = pickerMode === "week" && start ? start.startOf("isoWeek") : null;
-  const rangeWeekEnd = pickerMode === "week" && end ? end.endOf("isoWeek") : null;
+  const hoveredWeekStart = pickerMode === "week" && hoverValue ? hoverValue.startOf("week") : null;
+  const hoveredWeekEnd = pickerMode === "week" && hoverValue ? hoverValue.endOf("week") : null;
+  const selectedWeekStart = pickerMode === "week" && start ? start.startOf("week") : null;
+  const selectedWeekEnd = pickerMode === "week" && start ? start.endOf("week") : null;
+  const rangeWeekStart = pickerMode === "week" && start ? start.startOf("week") : null;
+  const rangeWeekEnd = pickerMode === "week" && end ? end.endOf("week") : null;
 
   return (
     <div className={cn("p-3", className)}>
@@ -48,8 +49,8 @@ function DatePanel(props: DatePanelProps) {
           const disabled = disabledDate?.(current, { from: start ?? undefined, type: "date" }) ?? false;
           const inView = current.month() === viewDate.month();
           const isToday = current.isSame(dayjs(), "day");
-          const rangeStart = !!start && sameDay(current, start);
-          const rangeEnd = !!end && sameDay(current, end);
+          const rangeStart = isRange && !!start && sameDay(current, start);
+          const rangeEnd = isRange && !!end && sameDay(current, end);
           const hover =
             !!hoverStart &&
             !!hoverEnd &&
@@ -81,8 +82,8 @@ function DatePanel(props: DatePanelProps) {
             (current.isSame(hoveredWeekStart, "day") ||
               current.isSame(hoveredWeekEnd, "day") ||
               (current.isAfter(hoveredWeekStart, "day") && current.isBefore(hoveredWeekEnd, "day")));
-          const weekRangeStart = pickerMode === "week" && !!rangeWeekStart ? sameDay(current, rangeWeekStart) : rangeStart;
-          const weekRangeEnd = pickerMode === "week" && !!rangeWeekEnd ? sameDay(current, rangeWeekEnd) : rangeEnd;
+          const weekRangeStart = pickerMode === "week" && isRange && !!rangeWeekStart ? sameDay(current, rangeWeekStart) : rangeStart;
+          const weekRangeEnd = pickerMode === "week" && isRange && !!rangeWeekEnd ? sameDay(current, rangeWeekEnd) : rangeEnd;
           const weekHighlight = weekHover || weekSelected;
           const weekHighlightStart =
             pickerMode === "week" &&
@@ -140,7 +141,7 @@ function DatePanel(props: DatePanelProps) {
                 <PickerCell
                   info={info}
                   className={cn(
-                    "relative z-10 h-9",
+                    "relative z-10 size-9",
                     !inView && "text-muted-foreground/40",
                     weekHighlight &&
                       "rounded-none border-transparent bg-transparent text-primary-foreground hover:bg-transparent hover:text-primary-foreground",

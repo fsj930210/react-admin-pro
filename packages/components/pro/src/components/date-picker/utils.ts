@@ -1,6 +1,7 @@
 import dayjs from "dayjs";
 import advancedFormat from "dayjs/plugin/advancedFormat";
 import isoWeek from "dayjs/plugin/isoWeek";
+import weekOfYear from "dayjs/plugin/weekOfYear";
 import quarterOfYear from "dayjs/plugin/quarterOfYear";
 import customParseFormat from "dayjs/plugin/customParseFormat";
 import { MONTHS, QUARTERS } from "./constants";
@@ -8,6 +9,7 @@ import type { PickerCellRenderInfo, PickerMode, RangeValue } from "./types";
 
 dayjs.extend(advancedFormat);
 dayjs.extend(isoWeek);
+dayjs.extend(weekOfYear);
 dayjs.extend(quarterOfYear);
 dayjs.extend(customParseFormat);
 
@@ -54,7 +56,7 @@ export function mergeTime(base: dayjs.Dayjs, time: dayjs.Dayjs) {
 }
 
 export function getYearPageStart(year: number) {
-  return Math.floor(year / 12) * 12 - 1;
+  return Math.floor(year / 12) * 12;
 }
 
 export function buildYearGrid(viewDate: dayjs.Dayjs) {
@@ -72,7 +74,7 @@ export function buildQuarterGrid() {
 
 export function buildDateGrid(viewDate: dayjs.Dayjs) {
   const startOfMonth = viewDate.startOf("month");
-  const start = startOfMonth.startOf("isoWeek");
+  const start = startOfMonth.startOf("week");
   return Array.from({ length: 42 }, (_, index) => start.add(index, "day"));
 }
 
@@ -80,6 +82,19 @@ export function formatValue(value: dayjs.Dayjs | null, format: string | string[]
   if (!value) return "";
   const formats = Array.isArray(format) ? format : format ? [format] : [fallback];
   return value.format(formats[0]);
+}
+
+export function formatPickerValue(
+  value: dayjs.Dayjs | null,
+  pickerMode: PickerMode,
+  format: string | string[] | undefined,
+  fallback: string,
+) {
+  if (!value) return "";
+  if (pickerMode === "week" && !format) {
+    return `${value.year()}年第${value.week()}周`;
+  }
+  return formatValue(value, format, fallback);
 }
 
 export function parseValue(text: string, format: string | string[] | undefined) {
@@ -100,6 +115,7 @@ export function buildMonthCellInfos(
   onSelect: (date: dayjs.Dayjs) => void,
 ) {
   const start = Array.isArray(value) ? value[0] : value;
+  const end = Array.isArray(value) ? value[1] : null;
 
   return buildMonthGrid().map((month) => {
     const current = viewDate.month(month);
@@ -107,10 +123,13 @@ export function buildMonthCellInfos(
       date: current,
       text: MONTHS[month],
       type: pickerMode,
-      selected: !!start && current.isSame(start, "month"),
+      selected: (!!start && current.isSame(start, "month")) || (!!end && current.isSame(end, "month")),
       disabled: disabledDate?.(current, { from: start ?? undefined, type: "month" }) ?? false,
       today: false,
       inView: true,
+      rangeStart: !!start && current.isSame(start, "month"),
+      rangeEnd: !!end && current.isSame(end, "month"),
+      rangeMiddle: !!start && !!end && current.isAfter(start, "month") && current.isBefore(end, "month"),
       onSelect: () => onSelect(current),
     };
 
@@ -126,6 +145,7 @@ export function buildYearCellInfos(
   onSelect: (date: dayjs.Dayjs) => void,
 ) {
   const start = Array.isArray(value) ? value[0] : value;
+  const end = Array.isArray(value) ? value[1] : null;
 
   return buildYearGrid(viewDate).map((year) => {
     const current = viewDate.year(year);
@@ -133,10 +153,13 @@ export function buildYearCellInfos(
       date: current,
       text: String(year),
       type: pickerMode,
-      selected: !!start && current.isSame(start, "year"),
+      selected: (!!start && current.isSame(start, "year")) || (!!end && current.isSame(end, "year")),
       disabled: disabledDate?.(current, { from: start ?? undefined, type: "year" }) ?? false,
       today: false,
       inView: true,
+      rangeStart: !!start && current.isSame(start, "year"),
+      rangeEnd: !!end && current.isSame(end, "year"),
+      rangeMiddle: !!start && !!end && current.isAfter(start, "year") && current.isBefore(end, "year"),
       onSelect: () => onSelect(current),
     };
 

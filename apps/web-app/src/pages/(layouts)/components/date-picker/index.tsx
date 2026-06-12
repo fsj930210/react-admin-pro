@@ -67,7 +67,7 @@ function ModeSection() {
         </div>
         <div className="space-y-2">
           <FieldLabel>Week</FieldLabel>
-          <DatePicker mode="week" placeholder="Select week" format="GGGG-[W]WW" />
+          <DatePicker mode="week" placeholder="Select week" />
         </div>
         <div className="space-y-2">
           <FieldLabel>Month</FieldLabel>
@@ -107,7 +107,7 @@ function RangeSection() {
             ]}
           />
           <FieldDescription>
-            Current value: {value?.[0]?.format("YYYY-MM-DD") ?? "empty"} {"->"}{" "}
+            Current value: {value?.[0]?.format("YYYY-MM-DD") ?? "empty"} {"→"}{" "}
             {value?.[1]?.format("YYYY-MM-DD") ?? "empty"}
           </FieldDescription>
         </div>
@@ -121,7 +121,15 @@ function RangeSection() {
         </div>
         <div className="space-y-2">
           <FieldLabel>Month Range</FieldLabel>
-          <RangePicker mode="month" placeholder={["Start month", "End month"]} format="YYYY-MM" />
+          <RangePicker mode="month" placeholder={["开始月份", "结束月份"]} format="YYYY-MM" />
+        </div>
+        <div className="space-y-2">
+          <FieldLabel>Week Range</FieldLabel>
+          <RangePicker mode="week" placeholder={["开始周", "结束周"]} />
+        </div>
+        <div className="space-y-2">
+          <FieldLabel>Year Range</FieldLabel>
+          <RangePicker mode="year" placeholder={["开始年份", "结束年份"]} format="YYYY" />
         </div>
       </FieldGroup>
     </DemoSection>

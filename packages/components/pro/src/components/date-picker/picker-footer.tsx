@@ -28,14 +28,14 @@ function PickerFooter(props: PickerFooterProps) {
         <div className="flex items-center gap-2">
           {showToday ? (
             <Button type="button" variant="ghost" size="sm" onClick={onToday}>
-              Today
+              今天
             </Button>
           ) : null}
         </div>
         <div className="flex items-center gap-2">
           {showClear ? (
             <Button type="button" variant="ghost" size="sm" onClick={onClear}>
-              Clear
+              清空
             </Button>
           ) : null}
           {customFooter}

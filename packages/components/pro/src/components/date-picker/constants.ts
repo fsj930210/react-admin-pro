@@ -13,7 +13,7 @@ export const MONTHS = [
   "12月",
 ];
 
-export const WEEKDAYS = ["一", "二", "三", "四", "五", "六", "日"];
+export const WEEKDAYS = ["日", "一", "二", "三", "四", "五", "六"];
 
 export const QUARTERS = ["Q1", "Q2", "Q3", "Q4"];
 
@@ -21,7 +21,7 @@ export const YEARS_PER_PAGE = 12;
 
 export const DEFAULT_FORMATS = {
   date: "YYYY-MM-DD",
-  week: "GGGG-[W]WW",
+  week: "YYYY年第w周",
   month: "YYYY-MM",
   quarter: "YYYY-[Q]Q",
   year: "YYYY",

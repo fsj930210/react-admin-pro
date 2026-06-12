@@ -25,7 +25,7 @@ function PickerCell(props: PickerCellProps) {
       data-range-end={info.rangeEnd}
       data-range-middle={info.rangeMiddle}
       className={cn(
-        "h-8 w-full cursor-pointer rounded-md border border-transparent bg-transparent px-0 py-0 text-sm font-normal shadow-none ring-0",
+        "h-8 w-8 cursor-pointer rounded-md border border-transparent bg-transparent px-0 py-0 text-sm font-normal shadow-none ring-0",
         "hover:bg-accent hover:text-accent-foreground",
         "focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/40",
         info.disabled && "cursor-not-allowed text-muted-foreground/40 hover:bg-transparent hover:text-muted-foreground/40",

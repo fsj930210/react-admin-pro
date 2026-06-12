@@ -10,9 +10,16 @@ import { usePickerPanelController } from "./hooks/use-picker-panel-controller";
 import { PickerPanel } from "./picker-panel";
 import { RangePickerTrigger } from "./range-picker-trigger";
 import type { Dayjs, PickerPreset, RangePickerProps, RangeValue } from "./types";
-import { formatValue, normalizeRange, parseValue } from "./utils";
+import { formatPickerValue, normalizeRange, parseValue } from "./utils";
 
 dayjs.extend(customParseFormat);
+
+function getRangePanelMode(mode: RangePickerProps["mode"]) {
+  if (mode === "year") return "year";
+  if (mode === "month") return "month";
+  if (mode === "quarter") return "quarter";
+  return "date";
+}
 
 function RangePicker(props: RangePickerProps) {
   const {
@@ -25,7 +32,7 @@ function RangePicker(props: RangePickerProps) {
     mode = "date",
     format,
     placeholder = ["Start date", "End date"],
-    separator = "->",
+    separator,
     allowClear = true,
     allowEmpty,
     order = true,
@@ -50,6 +57,7 @@ function RangePicker(props: RangePickerProps) {
     onClear,
   } = props;
   const fallbackViewDate = valueProp?.[0] ?? defaultValue?.[0] ?? dayjs();
+  const defaultPanelMode = getRangePanelMode(mode);
   const {
     value,
     setValue,
@@ -71,11 +79,11 @@ function RangePicker(props: RangePickerProps) {
       open,
       defaultOpen,
       onOpenChange,
-      defaultPanelMode: "date",
+      defaultPanelMode,
       defaultViewDate: fallbackViewDate,
     },
     fallbackViewDate,
-    "date",
+    defaultPanelMode,
   );
   const changeOpen = useMemoizedFn((next: boolean) => {
     if (disabled || readOnly) {
@@ -85,12 +93,13 @@ function RangePicker(props: RangePickerProps) {
   });
   const [draftStart, setDraftStart] = useState<string | null>(null);
   const [draftEnd, setDraftEnd] = useState<string | null>(null);
+  const [panelValue, setPanelValue] = useState<RangeValue>(null);
   const startRef = useRef<HTMLInputElement>(null);
   const endRef = useRef<HTMLInputElement>(null);
 
   const mergedFormat = format ?? DEFAULT_FORMATS[mode] ?? DEFAULT_FORMATS.date;
-  const startText = draftStart ?? formatValue(value?.[0] ?? null, mergedFormat, mergedFormat);
-  const endText = draftEnd ?? formatValue(value?.[1] ?? null, mergedFormat, mergedFormat);
+  const startText = draftStart ?? formatPickerValue(value?.[0] ?? null, mode, format, mergedFormat);
+  const endText = draftEnd ?? formatPickerValue(value?.[1] ?? null, mode, format, mergedFormat);
   const mergedViewDate = viewDate;
   const panelController = usePickerPanelController({
     panelMode,
@@ -99,8 +108,27 @@ function RangePicker(props: RangePickerProps) {
     setViewDate,
   });
 
+  const getModeDate = useMemoizedFn((date: Dayjs) => {
+    if (mode === "month") return date.startOf("month");
+    if (mode === "year") return date.startOf("year");
+    if (mode === "quarter") return date.startOf("quarter");
+    if (mode === "week") return date.startOf("week");
+    return date;
+  });
+
+  const basePickerValue = panelValue ?? value;
+  let pickerValue = basePickerValue;
+
+  if (hoverValue && basePickerValue?.[0] && basePickerValue?.[1]) {
+    pickerValue =
+      activePart === "start"
+        ? (normalizeRange([getModeDate(hoverValue), basePickerValue[1]], order) as RangeValue)
+        : (normalizeRange([basePickerValue[0], getModeDate(hoverValue)], order) as RangeValue);
+  }
+
   const commitValue = useMemoizedFn((next: RangeValue) => {
     const normalized = normalizeRange(next, order);
+    setPanelValue(null);
     setValue(normalized as RangeValue);
     onSelect?.(normalized);
     onCalendarChange?.(normalized);
@@ -112,31 +140,27 @@ function RangePicker(props: RangePickerProps) {
   });
 
   const handleSelect = useMemoizedFn((date: Dayjs) => {
-    if (disabledDate?.(date, { from: value?.[0] ?? undefined, type: mode })) return;
+    if (disabledDate?.(date, { from: pickerValue?.[0] ?? undefined, type: mode })) return;
 
-    const start = value?.[0] ?? null;
-    const end = value?.[1] ?? null;
+    const start = pickerValue?.[0] ?? null;
+    const end = pickerValue?.[1] ?? null;
+    const modeDate = getModeDate(date);
 
     if (activePart === "start" || !start || (start && end)) {
-      let nextStart = date;
-      if (mode === "month") nextStart = date.startOf("month");
-      if (mode === "year") nextStart = date.startOf("year");
-      if (mode === "quarter") nextStart = date.startOf("quarter");
-      if (mode === "week") nextStart = date.startOf("isoWeek");
-      const nextEnd = allowEmpty?.[1] ? end : null;
-      commitValue([nextStart, nextEnd]);
+      const nextValue: RangeValue = [modeDate, null];
+      if (allowEmpty?.[1]) {
+        commitValue(nextValue);
+      } else {
+        setPanelValue(nextValue);
+        onCalendarChange?.(nextValue);
+      }
       setHoverValue(null);
       setActivePart("end");
       queueMicrotask(() => endRef.current?.focus());
       return;
     }
 
-    let nextEnd = date;
-    if (mode === "month") nextEnd = date.startOf("month");
-    if (mode === "year") nextEnd = date.startOf("year");
-    if (mode === "quarter") nextEnd = date.startOf("quarter");
-    if (mode === "week") nextEnd = date.startOf("isoWeek");
-    commitValue([start, nextEnd]);
+    commitValue([start, modeDate]);
     setHoverValue(null);
   });
 
@@ -159,6 +183,7 @@ function RangePicker(props: RangePickerProps) {
     setDraftStart(null);
     setDraftEnd(null);
     setHoverValue(null);
+    setPanelValue(null);
     commitValue(null);
     onClear?.();
   });
@@ -170,48 +195,62 @@ function RangePicker(props: RangePickerProps) {
   });
 
   return (
-    <Popover open={openState} onOpenChange={changeOpen}>
+    <Popover
+      open={openState}
+      onOpenChange={(next) => {
+        if (next) {
+          setPanelValue(value);
+        } else {
+          setPanelValue(null);
+          setHoverValue(null);
+        }
+        changeOpen(next);
+      }}
+    >
       <PopoverTrigger asChild>
-        <div className={cn("inline-flex w-full", className)}>
-          <RangePickerTrigger
-            open={openState}
-            startValue={startText}
-            endValue={endText}
-            startPlaceholder={placeholder[0]}
-            endPlaceholder={placeholder[1]}
-            separator={separator}
-            disabled={disabled}
-            readOnly={readOnly}
-            allowClear={allowClear}
-            prefix={prefix}
-            suffix={suffix}
-            icon={icon}
-            inputClassName={inputClassName}
-            activePart={activePart}
-            startRef={startRef}
-            endRef={endRef}
-            onStartChange={setDraftStart}
-            onEndChange={setDraftEnd}
-            onStartFocus={() => {
-              setActivePart("start");
-              changeOpen(true);
-            }}
-            onEndFocus={() => {
-              setActivePart("end");
-              changeOpen(true);
-            }}
-            onStartBlur={() => draftStart !== null && commitInput("start", draftStart)}
-            onEndBlur={() => draftEnd !== null && commitInput("end", draftEnd)}
-            onClear={handleClear}
-          />
-        </div>
+        <RangePickerTrigger
+          open={openState}
+          startValue={startText}
+          endValue={endText}
+          startPlaceholder={placeholder[0]}
+          endPlaceholder={placeholder[1]}
+          separator={separator}
+          disabled={disabled}
+          readOnly={readOnly}
+          allowClear={allowClear}
+          prefix={prefix}
+          suffix={suffix}
+          icon={icon}
+          className={cn("inline-flex w-full", className)}
+          inputClassName={inputClassName}
+          activePart={activePart}
+          startRef={startRef}
+          endRef={endRef}
+          onStartChange={setDraftStart}
+          onEndChange={setDraftEnd}
+          onStartFocus={() => {
+            setActivePart("start");
+            changeOpen(true);
+          }}
+          onEndFocus={() => {
+            setActivePart("end");
+            changeOpen(true);
+          }}
+          onStartBlur={() => draftStart !== null && commitInput("start", draftStart)}
+          onEndBlur={() => draftEnd !== null && commitInput("end", draftEnd)}
+          onClear={handleClear}
+        />
       </PopoverTrigger>
-      <PopoverContent className={cn("w-auto p-0", popupClassName)} align="start" sideOffset={0}>
+      <PopoverContent
+        className={cn("w-[var(--radix-popover-trigger-width)] min-w-[560px] p-0", popupClassName)}
+        align="start"
+        sideOffset={0}
+      >
         <PickerPanel
           pickerMode={mode}
           panelMode={panelMode}
           viewDate={mergedViewDate}
-          value={value}
+          value={pickerValue}
           hoverValue={hoverValue}
           disabledDate={disabledDate}
           presets={presets}
