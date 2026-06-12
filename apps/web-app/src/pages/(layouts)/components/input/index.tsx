@@ -111,7 +111,7 @@ function AddonInputs() {
               <SelectTrigger className="w-28">
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent position="popper">
                 <SelectItem value="zhejiang">Zhejiang</SelectItem>
                 <SelectItem value="jiangsu">Jiangsu</SelectItem>
                 <SelectItem value="shanghai">Shanghai</SelectItem>
@@ -166,21 +166,8 @@ function NumberInputs() {
   return (
     <DemoSection title="Number Input">
       <div className="grid max-w-xl gap-5">
-        <NumberInput
-          suffix="%"
-          min={0}
-          max={100}
-          precision={2}
-          defaultValue={12.5}
-        />
-        <NumberInput
-          value={value}
-          onChange={setValue}
-          min={0}
-          max={10}
-          step={1}
-          mode="spinner"
-        />
+        <NumberInput suffix="%" min={0} max={100} precision={2} defaultValue={12.5} />
+        <NumberInput value={value} onChange={setValue} min={0} max={10} step={1} mode="spinner" />
         <NumberInput
           prefix="$"
           defaultValue={1234}

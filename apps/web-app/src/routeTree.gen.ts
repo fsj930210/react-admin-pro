@@ -42,10 +42,12 @@ import { Route as layoutsComponentsTreeIndexRouteImport } from "./pages/(layouts
 import { Route as layoutsComponentsTransferIndexRouteImport } from "./pages/(layouts)/components/transfer/index";
 import { Route as layoutsComponentsTableIndexRouteImport } from "./pages/(layouts)/components/table/index";
 import { Route as layoutsComponentsSelectorIndexRouteImport } from "./pages/(layouts)/components/selector/index";
+import { Route as layoutsComponentsSelectIndexRouteImport } from "./pages/(layouts)/components/select/index";
 import { Route as layoutsComponentsRichTextIndexRouteImport } from "./pages/(layouts)/components/rich-text/index";
 import { Route as layoutsComponentsInputIndexRouteImport } from "./pages/(layouts)/components/input/index";
 import { Route as layoutsComponentsImageCardIndexRouteImport } from "./pages/(layouts)/components/image-card/index";
 import { Route as layoutsComponentsIconIndexRouteImport } from "./pages/(layouts)/components/icon/index";
+import { Route as layoutsComponentsDatePickerIndexRouteImport } from "./pages/(layouts)/components/date-picker/index";
 import { Route as layoutsNestedMenuNestedMenu2NestedMenu21RouteImport } from "./pages/(layouts)/nested-menu/nested-menu-2/nested-menu-2-1";
 import { Route as layoutsNestedMenuNestedMenu1NestedMenu13RouteImport } from "./pages/(layouts)/nested-menu/nested-menu-1/nested-menu-1-3";
 import { Route as layoutsNestedMenuNestedMenu1NestedMenu11RouteImport } from "./pages/(layouts)/nested-menu/nested-menu-1/nested-menu-1-1";
@@ -234,6 +236,12 @@ const layoutsComponentsSelectorIndexRoute =
     path: "/components/selector/",
     getParentRoute: () => layoutsRouteRoute,
   } as any);
+const layoutsComponentsSelectIndexRoute =
+  layoutsComponentsSelectIndexRouteImport.update({
+    id: "/components/select/",
+    path: "/components/select/",
+    getParentRoute: () => layoutsRouteRoute,
+  } as any);
 const layoutsComponentsRichTextIndexRoute =
   layoutsComponentsRichTextIndexRouteImport.update({
     id: "/components/rich-text/",
@@ -256,6 +264,12 @@ const layoutsComponentsIconIndexRoute =
   layoutsComponentsIconIndexRouteImport.update({
     id: "/components/icon/",
     path: "/components/icon/",
+    getParentRoute: () => layoutsRouteRoute,
+  } as any);
+const layoutsComponentsDatePickerIndexRoute =
+  layoutsComponentsDatePickerIndexRouteImport.update({
+    id: "/components/date-picker/",
+    path: "/components/date-picker/",
     getParentRoute: () => layoutsRouteRoute,
   } as any);
 const layoutsNestedMenuNestedMenu2NestedMenu21Route =
@@ -317,10 +331,12 @@ export interface FileRoutesByFullPath {
   "/nested-menu/nested-menu-1/nested-menu-1-1": typeof layoutsNestedMenuNestedMenu1NestedMenu11Route;
   "/nested-menu/nested-menu-1/nested-menu-1-3": typeof layoutsNestedMenuNestedMenu1NestedMenu13Route;
   "/nested-menu/nested-menu-2/nested-menu-2-1": typeof layoutsNestedMenuNestedMenu2NestedMenu21Route;
+  "/components/date-picker/": typeof layoutsComponentsDatePickerIndexRoute;
   "/components/icon/": typeof layoutsComponentsIconIndexRoute;
   "/components/image-card/": typeof layoutsComponentsImageCardIndexRoute;
   "/components/input/": typeof layoutsComponentsInputIndexRoute;
   "/components/rich-text/": typeof layoutsComponentsRichTextIndexRoute;
+  "/components/select/": typeof layoutsComponentsSelectIndexRoute;
   "/components/selector/": typeof layoutsComponentsSelectorIndexRoute;
   "/components/table/": typeof layoutsComponentsTableIndexRoute;
   "/components/transfer/": typeof layoutsComponentsTransferIndexRoute;
@@ -362,10 +378,12 @@ export interface FileRoutesByTo {
   "/nested-menu/nested-menu-1/nested-menu-1-1": typeof layoutsNestedMenuNestedMenu1NestedMenu11Route;
   "/nested-menu/nested-menu-1/nested-menu-1-3": typeof layoutsNestedMenuNestedMenu1NestedMenu13Route;
   "/nested-menu/nested-menu-2/nested-menu-2-1": typeof layoutsNestedMenuNestedMenu2NestedMenu21Route;
+  "/components/date-picker": typeof layoutsComponentsDatePickerIndexRoute;
   "/components/icon": typeof layoutsComponentsIconIndexRoute;
   "/components/image-card": typeof layoutsComponentsImageCardIndexRoute;
   "/components/input": typeof layoutsComponentsInputIndexRoute;
   "/components/rich-text": typeof layoutsComponentsRichTextIndexRoute;
+  "/components/select": typeof layoutsComponentsSelectIndexRoute;
   "/components/selector": typeof layoutsComponentsSelectorIndexRoute;
   "/components/table": typeof layoutsComponentsTableIndexRoute;
   "/components/transfer": typeof layoutsComponentsTransferIndexRoute;
@@ -409,10 +427,12 @@ export interface FileRoutesById {
   "/(layouts)/nested-menu/nested-menu-1/nested-menu-1-1": typeof layoutsNestedMenuNestedMenu1NestedMenu11Route;
   "/(layouts)/nested-menu/nested-menu-1/nested-menu-1-3": typeof layoutsNestedMenuNestedMenu1NestedMenu13Route;
   "/(layouts)/nested-menu/nested-menu-2/nested-menu-2-1": typeof layoutsNestedMenuNestedMenu2NestedMenu21Route;
+  "/(layouts)/components/date-picker/": typeof layoutsComponentsDatePickerIndexRoute;
   "/(layouts)/components/icon/": typeof layoutsComponentsIconIndexRoute;
   "/(layouts)/components/image-card/": typeof layoutsComponentsImageCardIndexRoute;
   "/(layouts)/components/input/": typeof layoutsComponentsInputIndexRoute;
   "/(layouts)/components/rich-text/": typeof layoutsComponentsRichTextIndexRoute;
+  "/(layouts)/components/select/": typeof layoutsComponentsSelectIndexRoute;
   "/(layouts)/components/selector/": typeof layoutsComponentsSelectorIndexRoute;
   "/(layouts)/components/table/": typeof layoutsComponentsTableIndexRoute;
   "/(layouts)/components/transfer/": typeof layoutsComponentsTransferIndexRoute;
@@ -456,10 +476,12 @@ export interface FileRouteTypes {
     | "/nested-menu/nested-menu-1/nested-menu-1-1"
     | "/nested-menu/nested-menu-1/nested-menu-1-3"
     | "/nested-menu/nested-menu-2/nested-menu-2-1"
+    | "/components/date-picker/"
     | "/components/icon/"
     | "/components/image-card/"
     | "/components/input/"
     | "/components/rich-text/"
+    | "/components/select/"
     | "/components/selector/"
     | "/components/table/"
     | "/components/transfer/"
@@ -501,10 +523,12 @@ export interface FileRouteTypes {
     | "/nested-menu/nested-menu-1/nested-menu-1-1"
     | "/nested-menu/nested-menu-1/nested-menu-1-3"
     | "/nested-menu/nested-menu-2/nested-menu-2-1"
+    | "/components/date-picker"
     | "/components/icon"
     | "/components/image-card"
     | "/components/input"
     | "/components/rich-text"
+    | "/components/select"
     | "/components/selector"
     | "/components/table"
     | "/components/transfer"
@@ -547,10 +571,12 @@ export interface FileRouteTypes {
     | "/(layouts)/nested-menu/nested-menu-1/nested-menu-1-1"
     | "/(layouts)/nested-menu/nested-menu-1/nested-menu-1-3"
     | "/(layouts)/nested-menu/nested-menu-2/nested-menu-2-1"
+    | "/(layouts)/components/date-picker/"
     | "/(layouts)/components/icon/"
     | "/(layouts)/components/image-card/"
     | "/(layouts)/components/input/"
     | "/(layouts)/components/rich-text/"
+    | "/(layouts)/components/select/"
     | "/(layouts)/components/selector/"
     | "/(layouts)/components/table/"
     | "/(layouts)/components/transfer/"
@@ -816,6 +842,13 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof layoutsComponentsSelectorIndexRouteImport;
       parentRoute: typeof layoutsRouteRoute;
     };
+    "/(layouts)/components/select/": {
+      id: "/(layouts)/components/select/";
+      path: "/components/select";
+      fullPath: "/components/select/";
+      preLoaderRoute: typeof layoutsComponentsSelectIndexRouteImport;
+      parentRoute: typeof layoutsRouteRoute;
+    };
     "/(layouts)/components/rich-text/": {
       id: "/(layouts)/components/rich-text/";
       path: "/components/rich-text";
@@ -842,6 +875,13 @@ declare module "@tanstack/react-router" {
       path: "/components/icon";
       fullPath: "/components/icon/";
       preLoaderRoute: typeof layoutsComponentsIconIndexRouteImport;
+      parentRoute: typeof layoutsRouteRoute;
+    };
+    "/(layouts)/components/date-picker/": {
+      id: "/(layouts)/components/date-picker/";
+      path: "/components/date-picker";
+      fullPath: "/components/date-picker/";
+      preLoaderRoute: typeof layoutsComponentsDatePickerIndexRouteImport;
       parentRoute: typeof layoutsRouteRoute;
     };
     "/(layouts)/nested-menu/nested-menu-2/nested-menu-2-1": {
@@ -910,10 +950,12 @@ interface layoutsRouteRouteChildren {
   layoutsNestedMenuNestedMenu1NestedMenu11Route: typeof layoutsNestedMenuNestedMenu1NestedMenu11Route;
   layoutsNestedMenuNestedMenu1NestedMenu13Route: typeof layoutsNestedMenuNestedMenu1NestedMenu13Route;
   layoutsNestedMenuNestedMenu2NestedMenu21Route: typeof layoutsNestedMenuNestedMenu2NestedMenu21Route;
+  layoutsComponentsDatePickerIndexRoute: typeof layoutsComponentsDatePickerIndexRoute;
   layoutsComponentsIconIndexRoute: typeof layoutsComponentsIconIndexRoute;
   layoutsComponentsImageCardIndexRoute: typeof layoutsComponentsImageCardIndexRoute;
   layoutsComponentsInputIndexRoute: typeof layoutsComponentsInputIndexRoute;
   layoutsComponentsRichTextIndexRoute: typeof layoutsComponentsRichTextIndexRoute;
+  layoutsComponentsSelectIndexRoute: typeof layoutsComponentsSelectIndexRoute;
   layoutsComponentsSelectorIndexRoute: typeof layoutsComponentsSelectorIndexRoute;
   layoutsComponentsTableIndexRoute: typeof layoutsComponentsTableIndexRoute;
   layoutsComponentsTransferIndexRoute: typeof layoutsComponentsTransferIndexRoute;
@@ -957,10 +999,12 @@ const layoutsRouteRouteChildren: layoutsRouteRouteChildren = {
     layoutsNestedMenuNestedMenu1NestedMenu13Route,
   layoutsNestedMenuNestedMenu2NestedMenu21Route:
     layoutsNestedMenuNestedMenu2NestedMenu21Route,
+  layoutsComponentsDatePickerIndexRoute: layoutsComponentsDatePickerIndexRoute,
   layoutsComponentsIconIndexRoute: layoutsComponentsIconIndexRoute,
   layoutsComponentsImageCardIndexRoute: layoutsComponentsImageCardIndexRoute,
   layoutsComponentsInputIndexRoute: layoutsComponentsInputIndexRoute,
   layoutsComponentsRichTextIndexRoute: layoutsComponentsRichTextIndexRoute,
+  layoutsComponentsSelectIndexRoute: layoutsComponentsSelectIndexRoute,
   layoutsComponentsSelectorIndexRoute: layoutsComponentsSelectorIndexRoute,
   layoutsComponentsTableIndexRoute: layoutsComponentsTableIndexRoute,
   layoutsComponentsTransferIndexRoute: layoutsComponentsTransferIndexRoute,

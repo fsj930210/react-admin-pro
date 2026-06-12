@@ -61,3 +61,132 @@ pnpm build
 ## 许可证
 
 MIT License
+
+## Date Picker
+
+`@rap/components-pro/date-picker` exposes:
+
+- `DatePicker`
+- `RangePicker`
+- `DateTimePicker`
+
+All public values use `dayjs.Dayjs`. Native `Date` is not exposed in the component API.
+
+### Import
+
+```tsx
+import dayjs from "dayjs";
+import { DatePicker, RangePicker, DateTimePicker } from "@rap/components-pro/date-picker";
+```
+
+### DatePicker
+
+```tsx
+function Demo() {
+  const [value, setValue] = useState<dayjs.Dayjs | null>(dayjs());
+
+  return (
+    <DatePicker
+      value={value}
+      onChange={setValue}
+      format="YYYY-MM-DD"
+      placeholder="Select date"
+      allowClear
+    />
+  );
+}
+```
+
+Supported `mode` values:
+
+- `date`
+- `week`
+- `month`
+- `quarter`
+- `year`
+
+```tsx
+<DatePicker mode="month" format="YYYY-MM" />
+<DatePicker mode="year" format="YYYY" />
+<DatePicker mode="quarter" format="YYYY-[Q]Q" />
+<DatePicker mode="week" format="GGGG-[W]WW" />
+```
+
+### RangePicker
+
+```tsx
+function Demo() {
+  const [value, setValue] = useState<[dayjs.Dayjs | null, dayjs.Dayjs | null] | null>([
+    dayjs().subtract(6, "day"),
+    dayjs(),
+  ]);
+
+  return (
+    <RangePicker
+      value={value}
+      onChange={setValue}
+      format="YYYY-MM-DD"
+      placeholder={["Start date", "End date"]}
+      presets={[
+        { label: "Last 7 Days", value: () => [dayjs().subtract(6, "day"), dayjs()] },
+      ]}
+    />
+  );
+}
+```
+
+### DateTimePicker
+
+```tsx
+function Demo() {
+  const [value, setValue] = useState<dayjs.Dayjs | null>(dayjs());
+
+  return (
+    <DateTimePicker
+      value={value}
+      onChange={setValue}
+      format="YYYY-MM-DD HH:mm:ss"
+      showTime
+    />
+  );
+}
+```
+
+`DateTimePicker` reuses the existing `TimePicker` and supports `disabledTime`:
+
+```tsx
+<DateTimePicker
+  format="YYYY-MM-DD HH:mm:ss"
+  showTime
+  disabledTime={(current) => ({
+    disabledHours: () => (current.isSame(dayjs(), "day") ? [0, 1, 2, 3, 4, 5] : []),
+    disabledMinutes: (hour) => (hour === 12 ? [15, 16, 17, 18] : []),
+    disabledSeconds: (hour, minute) => (hour === 12 && minute === 30 ? [10, 11, 12] : []),
+  })}
+/>
+```
+
+### Common Props
+
+- `value`
+- `defaultValue`
+- `onChange`
+- `format`
+- `placeholder`
+- `allowClear`
+- `disabled`
+- `readOnly`
+- `prefix`
+- `suffix`
+- `icon`
+- `disabledDate`
+- `presets`
+- `footer`
+- `renderCell`
+- `renderPanel`
+
+### Demo Route
+
+```txt
+/rap-web-app/components/date-picker
+```

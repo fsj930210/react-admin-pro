@@ -253,6 +253,10 @@ interface TimePickerContextValue {
   };
   min?: string;
   max?: string;
+  disabledHours?: () => number[];
+  disabledMinutes?: (hour: number) => number[];
+  disabledSeconds?: (hour: number, minute: number) => number[];
+  disabledPeriods?: () => Period[];
 }
 
 const TimePickerContext = React.createContext<TimePickerContextValue | null>(null);
@@ -287,6 +291,10 @@ interface TimePickerProps extends DivProps {
   readOnly?: boolean;
   required?: boolean;
   showSeconds?: boolean;
+  disabledHours?: () => number[];
+  disabledMinutes?: (hour: number) => number[];
+  disabledSeconds?: (hour: number, minute: number) => number[];
+  disabledPeriods?: () => Period[];
 }
 
 function TimePicker(props: TimePickerProps) {
@@ -313,6 +321,10 @@ function TimePicker(props: TimePickerProps) {
     readOnly = false,
     required = false,
     showSeconds = false,
+    disabledHours,
+    disabledMinutes,
+    disabledSeconds,
+    disabledPeriods,
     className,
     children,
     id,
@@ -436,6 +448,10 @@ function TimePicker(props: TimePickerProps) {
       segmentPlaceholder: normalizedPlaceholder,
       min,
       max,
+      disabledHours,
+      disabledMinutes,
+      disabledSeconds,
+      disabledPeriods,
     }),
     [
       rootId,
@@ -456,6 +472,10 @@ function TimePicker(props: TimePickerProps) {
       normalizedPlaceholder,
       min,
       max,
+      disabledHours,
+      disabledMinutes,
+      disabledSeconds,
+      disabledPeriods,
     ]
   );
 
@@ -1747,6 +1767,7 @@ function TimePickerHour(props: TimePickerHourProps) {
 
   const { is12Hour, hourStep, showSeconds } = useTimePickerContext(HOUR_NAME);
   const store = useStoreContext(HOUR_NAME);
+  const { disabledHours } = useTimePickerContext(HOUR_NAME);
 
   const value = useStore((state) => state.value);
   const timeValue = parseTimeString(value);
@@ -1804,6 +1825,7 @@ function TimePickerHour(props: TimePickerHourProps) {
   const now = new Date();
   const referenceHour = timeValue?.hour ?? now.getHours();
   const displayHour = is12Hour ? to12Hour(referenceHour).hour : referenceHour;
+  const disabledHourSet = new Set(disabledHours?.() ?? []);
 
   const HourPrimitive = asChild ? SlotPrimitive.Slot : TimePickerColumn;
 
@@ -1821,6 +1843,7 @@ function TimePickerHour(props: TimePickerHourProps) {
           key={hour}
           value={hour}
           selected={displayHour === hour}
+          disabled={disabledHourSet.has(is12Hour ? to24Hour(hour, timeValue?.period ?? to12Hour(referenceHour).period) : hour)}
           format={format}
           onClick={() => onHourSelect(hour)}
         />
@@ -1836,7 +1859,7 @@ interface TimePickerMinuteProps extends DivProps {
 function TimePickerMinute(props: TimePickerMinuteProps) {
   const { asChild, format = "2-digit", className, ...minuteProps } = props;
 
-  const { minuteStep, showSeconds } = useTimePickerContext(MINUTE_NAME);
+  const { minuteStep, showSeconds, disabledMinutes } = useTimePickerContext(MINUTE_NAME);
   const store = useStoreContext(MINUTE_NAME);
 
   const value = useStore((state) => state.value);
@@ -1868,6 +1891,9 @@ function TimePickerMinute(props: TimePickerMinuteProps) {
 
   const now = new Date();
   const referenceMinute = timeValue?.minute ?? now.getMinutes();
+  const disabledMinuteSet = new Set(
+    timeValue?.hour !== undefined ? disabledMinutes?.(timeValue.hour) ?? [] : []
+  );
 
   return (
     <MinutePrimitive
@@ -1883,6 +1909,7 @@ function TimePickerMinute(props: TimePickerMinuteProps) {
           key={minute}
           value={minute}
           selected={referenceMinute === minute}
+          disabled={disabledMinuteSet.has(minute)}
           format={format}
           onClick={() => onMinuteSelect(minute)}
         />
@@ -1898,7 +1925,7 @@ interface TimePickerSecondProps extends DivProps {
 function TimePickerSecond(props: TimePickerSecondProps) {
   const { asChild, format = "2-digit", className, ...secondProps } = props;
 
-  const { secondStep } = useTimePickerContext(SECOND_NAME);
+  const { secondStep, disabledSeconds } = useTimePickerContext(SECOND_NAME);
   const store = useStoreContext(SECOND_NAME);
 
   const value = useStore((state) => state.value);
@@ -1930,6 +1957,11 @@ function TimePickerSecond(props: TimePickerSecondProps) {
 
   const now = new Date();
   const referenceSecond = timeValue?.second ?? now.getSeconds();
+  const disabledSecondSet = new Set(
+    timeValue?.hour !== undefined && timeValue?.minute !== undefined
+      ? disabledSeconds?.(timeValue.hour, timeValue.minute) ?? []
+      : []
+  );
 
   return (
     <SecondPrimitive
@@ -1945,6 +1977,7 @@ function TimePickerSecond(props: TimePickerSecondProps) {
           key={second}
           value={second}
           selected={referenceSecond === second}
+          disabled={disabledSecondSet.has(second)}
           format={format}
           onClick={() => onSecondSelect(second)}
         />
@@ -1956,7 +1989,7 @@ function TimePickerSecond(props: TimePickerSecondProps) {
 function TimePickerPeriod(props: DivProps) {
   const { asChild, className, ...periodProps } = props;
 
-  const { is12Hour, showSeconds } = useTimePickerContext(PERIOD_NAME);
+  const { is12Hour, showSeconds, disabledPeriods } = useTimePickerContext(PERIOD_NAME);
   const store = useStoreContext(PERIOD_NAME);
 
   const value = useStore((state) => state.value);
@@ -1992,6 +2025,7 @@ function TimePickerPeriod(props: DivProps) {
   const now = new Date();
   const referenceHour = timeValue?.hour ?? now.getHours();
   const currentPeriod = to12Hour(referenceHour).period;
+  const disabledPeriodSet = new Set(disabledPeriods?.() ?? []);
 
   const PeriodPrimitive = asChild ? SlotPrimitive.Slot : TimePickerColumn;
 
@@ -2006,6 +2040,7 @@ function TimePickerPeriod(props: DivProps) {
           key={period}
           value={period}
           selected={currentPeriod === period}
+          disabled={disabledPeriodSet.has(period)}
           onClick={() => onPeriodToggle(period)}
         />
       ))}
