@@ -56,21 +56,29 @@ function DateTimePicker(props: DateTimePickerProps) {
     onClear,
   } = props;
   const fallbackViewDate = valueProp ?? defaultValue ?? dayjs();
-  const { value, setValue, open: openState, setOpen, panelMode, setPanelMode, viewDate, setViewDate } =
-    useSinglePickerState(
-      {
-        value: valueProp,
-        defaultValue: defaultValue ?? null,
-        onChange,
-        open,
-        defaultOpen,
-        onOpenChange,
-        defaultPanelMode: "date",
-        defaultViewDate: fallbackViewDate,
-      },
-      fallbackViewDate,
-      "date",
-    );
+  const {
+    value,
+    setValue,
+    open: openState,
+    setOpen,
+    panelMode,
+    setPanelMode,
+    viewDate,
+    setViewDate,
+  } = useSinglePickerState(
+    {
+      value: valueProp,
+      defaultValue: defaultValue ?? null,
+      onChange,
+      open,
+      defaultOpen,
+      onOpenChange,
+      defaultPanelMode: "date",
+      defaultViewDate: fallbackViewDate,
+    },
+    fallbackViewDate,
+    "date"
+  );
   const changeOpen = useMemoizedFn((next: boolean) => {
     if (disabled || readOnly) {
       return;
@@ -141,7 +149,11 @@ function DateTimePicker(props: DateTimePickerProps) {
   const commitDate = useMemoizedFn((date: Dayjs) => {
     if (disabledDate?.(date, { type: "datetime" })) return;
     const base = value ?? mergedViewDate ?? dayjs();
-    const next = date.hour(base.hour()).minute(base.minute()).second(base.second()).millisecond(base.millisecond());
+    const next = date
+      .hour(base.hour())
+      .minute(base.minute())
+      .second(base.second())
+      .millisecond(base.millisecond());
     commitValue(next);
   });
 
@@ -149,8 +161,10 @@ function DateTimePicker(props: DateTimePickerProps) {
     const base = value ?? mergedViewDate ?? dayjs();
     const parts = text.split(":");
     const nextHour = parts[0] && parts[0] !== "--" ? Number.parseInt(parts[0], 10) : base.hour();
-    const nextMinute = parts[1] && parts[1] !== "--" ? Number.parseInt(parts[1], 10) : base.minute();
-    const nextSecond = parts[2] && parts[2] !== "--" ? Number.parseInt(parts[2], 10) : base.second();
+    const nextMinute =
+      parts[1] && parts[1] !== "--" ? Number.parseInt(parts[1], 10) : base.minute();
+    const nextSecond =
+      parts[2] && parts[2] !== "--" ? Number.parseInt(parts[2], 10) : base.second();
 
     if ([nextHour, nextMinute, nextSecond].some((item) => Number.isNaN(item))) return;
     commitValue(base.hour(nextHour).minute(nextMinute).second(nextSecond));
@@ -185,11 +199,15 @@ function DateTimePicker(props: DateTimePickerProps) {
           }}
         />
       </PopoverTrigger>
-      <PopoverContent className={cn("w-max max-w-none p-0", popupClassName)} align="start" sideOffset={0}>
+      <PopoverContent
+        className={cn("w-max max-w-none p-0", popupClassName)}
+        align="start"
+        sideOffset={0}
+      >
         <div
           className={cn(
             "overflow-hidden rounded-md border bg-popover text-popover-foreground shadow-lg",
-            panelClassName,
+            panelClassName
           )}
         >
           <div className="flex items-stretch">
@@ -253,13 +271,18 @@ function DateTimePicker(props: DateTimePickerProps) {
                   }}
                   className={cn(
                     "flex min-h-0 shrink-0 flex-col overflow-hidden border-l",
-                    showTimeSeconds ? "w-[270px]" : "w-[180px]",
+                    showTimeSeconds ? "w-[270px]" : "w-[180px]"
                   )}
                 >
                   <div className="flex shrink-0 items-center justify-center border-b px-2 py-2 text-sm font-medium">
                     <span className="flex h-7 items-center">{timePanelTitle}</span>
                   </div>
-                  <TimePickerPanel className={cn("grid min-h-0 flex-1 overflow-hidden", showTimeSeconds ? "grid-cols-3" : "grid-cols-2")}>
+                  <TimePickerPanel
+                    className={cn(
+                      "grid min-h-0 flex-1 overflow-hidden",
+                      showTimeSeconds ? "grid-cols-3" : "grid-cols-2"
+                    )}
+                  >
                     <TimePickerHour className={timeColumnClassName} />
                     <TimePickerSeparator className="hidden" />
                     <TimePickerMinute className={timeColumnClassName} />

@@ -47,6 +47,7 @@ import { Route as layoutsComponentsRichTextIndexRouteImport } from "./pages/(lay
 import { Route as layoutsComponentsInputIndexRouteImport } from "./pages/(layouts)/components/input/index";
 import { Route as layoutsComponentsImageCardIndexRouteImport } from "./pages/(layouts)/components/image-card/index";
 import { Route as layoutsComponentsIconIndexRouteImport } from "./pages/(layouts)/components/icon/index";
+import { Route as layoutsComponentsDialogIndexRouteImport } from "./pages/(layouts)/components/dialog/index";
 import { Route as layoutsComponentsDatePickerIndexRouteImport } from "./pages/(layouts)/components/date-picker/index";
 import { Route as layoutsNestedMenuNestedMenu2NestedMenu21RouteImport } from "./pages/(layouts)/nested-menu/nested-menu-2/nested-menu-2-1";
 import { Route as layoutsNestedMenuNestedMenu1NestedMenu13RouteImport } from "./pages/(layouts)/nested-menu/nested-menu-1/nested-menu-1-3";
@@ -266,6 +267,12 @@ const layoutsComponentsIconIndexRoute =
     path: "/components/icon/",
     getParentRoute: () => layoutsRouteRoute,
   } as any);
+const layoutsComponentsDialogIndexRoute =
+  layoutsComponentsDialogIndexRouteImport.update({
+    id: "/components/dialog/",
+    path: "/components/dialog/",
+    getParentRoute: () => layoutsRouteRoute,
+  } as any);
 const layoutsComponentsDatePickerIndexRoute =
   layoutsComponentsDatePickerIndexRouteImport.update({
     id: "/components/date-picker/",
@@ -332,6 +339,7 @@ export interface FileRoutesByFullPath {
   "/nested-menu/nested-menu-1/nested-menu-1-3": typeof layoutsNestedMenuNestedMenu1NestedMenu13Route;
   "/nested-menu/nested-menu-2/nested-menu-2-1": typeof layoutsNestedMenuNestedMenu2NestedMenu21Route;
   "/components/date-picker/": typeof layoutsComponentsDatePickerIndexRoute;
+  "/components/dialog/": typeof layoutsComponentsDialogIndexRoute;
   "/components/icon/": typeof layoutsComponentsIconIndexRoute;
   "/components/image-card/": typeof layoutsComponentsImageCardIndexRoute;
   "/components/input/": typeof layoutsComponentsInputIndexRoute;
@@ -379,6 +387,7 @@ export interface FileRoutesByTo {
   "/nested-menu/nested-menu-1/nested-menu-1-3": typeof layoutsNestedMenuNestedMenu1NestedMenu13Route;
   "/nested-menu/nested-menu-2/nested-menu-2-1": typeof layoutsNestedMenuNestedMenu2NestedMenu21Route;
   "/components/date-picker": typeof layoutsComponentsDatePickerIndexRoute;
+  "/components/dialog": typeof layoutsComponentsDialogIndexRoute;
   "/components/icon": typeof layoutsComponentsIconIndexRoute;
   "/components/image-card": typeof layoutsComponentsImageCardIndexRoute;
   "/components/input": typeof layoutsComponentsInputIndexRoute;
@@ -428,6 +437,7 @@ export interface FileRoutesById {
   "/(layouts)/nested-menu/nested-menu-1/nested-menu-1-3": typeof layoutsNestedMenuNestedMenu1NestedMenu13Route;
   "/(layouts)/nested-menu/nested-menu-2/nested-menu-2-1": typeof layoutsNestedMenuNestedMenu2NestedMenu21Route;
   "/(layouts)/components/date-picker/": typeof layoutsComponentsDatePickerIndexRoute;
+  "/(layouts)/components/dialog/": typeof layoutsComponentsDialogIndexRoute;
   "/(layouts)/components/icon/": typeof layoutsComponentsIconIndexRoute;
   "/(layouts)/components/image-card/": typeof layoutsComponentsImageCardIndexRoute;
   "/(layouts)/components/input/": typeof layoutsComponentsInputIndexRoute;
@@ -477,6 +487,7 @@ export interface FileRouteTypes {
     | "/nested-menu/nested-menu-1/nested-menu-1-3"
     | "/nested-menu/nested-menu-2/nested-menu-2-1"
     | "/components/date-picker/"
+    | "/components/dialog/"
     | "/components/icon/"
     | "/components/image-card/"
     | "/components/input/"
@@ -524,6 +535,7 @@ export interface FileRouteTypes {
     | "/nested-menu/nested-menu-1/nested-menu-1-3"
     | "/nested-menu/nested-menu-2/nested-menu-2-1"
     | "/components/date-picker"
+    | "/components/dialog"
     | "/components/icon"
     | "/components/image-card"
     | "/components/input"
@@ -572,6 +584,7 @@ export interface FileRouteTypes {
     | "/(layouts)/nested-menu/nested-menu-1/nested-menu-1-3"
     | "/(layouts)/nested-menu/nested-menu-2/nested-menu-2-1"
     | "/(layouts)/components/date-picker/"
+    | "/(layouts)/components/dialog/"
     | "/(layouts)/components/icon/"
     | "/(layouts)/components/image-card/"
     | "/(layouts)/components/input/"
@@ -877,6 +890,13 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof layoutsComponentsIconIndexRouteImport;
       parentRoute: typeof layoutsRouteRoute;
     };
+    "/(layouts)/components/dialog/": {
+      id: "/(layouts)/components/dialog/";
+      path: "/components/dialog";
+      fullPath: "/components/dialog/";
+      preLoaderRoute: typeof layoutsComponentsDialogIndexRouteImport;
+      parentRoute: typeof layoutsRouteRoute;
+    };
     "/(layouts)/components/date-picker/": {
       id: "/(layouts)/components/date-picker/";
       path: "/components/date-picker";
@@ -951,6 +971,7 @@ interface layoutsRouteRouteChildren {
   layoutsNestedMenuNestedMenu1NestedMenu13Route: typeof layoutsNestedMenuNestedMenu1NestedMenu13Route;
   layoutsNestedMenuNestedMenu2NestedMenu21Route: typeof layoutsNestedMenuNestedMenu2NestedMenu21Route;
   layoutsComponentsDatePickerIndexRoute: typeof layoutsComponentsDatePickerIndexRoute;
+  layoutsComponentsDialogIndexRoute: typeof layoutsComponentsDialogIndexRoute;
   layoutsComponentsIconIndexRoute: typeof layoutsComponentsIconIndexRoute;
   layoutsComponentsImageCardIndexRoute: typeof layoutsComponentsImageCardIndexRoute;
   layoutsComponentsInputIndexRoute: typeof layoutsComponentsInputIndexRoute;
@@ -1000,6 +1021,7 @@ const layoutsRouteRouteChildren: layoutsRouteRouteChildren = {
   layoutsNestedMenuNestedMenu2NestedMenu21Route:
     layoutsNestedMenuNestedMenu2NestedMenu21Route,
   layoutsComponentsDatePickerIndexRoute: layoutsComponentsDatePickerIndexRoute,
+  layoutsComponentsDialogIndexRoute: layoutsComponentsDialogIndexRoute,
   layoutsComponentsIconIndexRoute: layoutsComponentsIconIndexRoute,
   layoutsComponentsImageCardIndexRoute: layoutsComponentsImageCardIndexRoute,
   layoutsComponentsInputIndexRoute: layoutsComponentsInputIndexRoute,

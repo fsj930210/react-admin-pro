@@ -70,13 +70,8 @@ function RangePickerTrigger(props: RangePickerTriggerProps) {
         "hover:border-ring/40",
         disabled && "pointer-events-none cursor-not-allowed opacity-50",
         readOnly && "cursor-not-allowed opacity-50",
-        className,
+        className
       )}
-      onClick={() => {
-        if (!disabled && !readOnly) {
-          (activePart === "start" ? onStartFocus : onEndFocus)();
-        }
-      }}
     >
       {prefix ? <span className="shrink-0 text-muted-foreground">{prefix}</span> : null}
       <div className="flex min-w-0 flex-1 items-center">

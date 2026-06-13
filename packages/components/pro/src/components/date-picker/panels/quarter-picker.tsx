@@ -17,15 +17,41 @@ interface QuarterPickerProps {
 }
 
 function QuarterPicker(props: QuarterPickerProps) {
-  const { pickerMode, viewDate, value, hoverValue, disabledDate, renderCell, onSelect, onHover, className } = props;
-  const cellInfos = buildQuarterCellInfos(viewDate, value, hoverValue, pickerMode, disabledDate, onSelect);
+  const {
+    pickerMode,
+    viewDate,
+    value,
+    hoverValue,
+    disabledDate,
+    renderCell,
+    onSelect,
+    onHover,
+    className,
+  } = props;
+  const cellInfos = buildQuarterCellInfos(
+    viewDate,
+    value,
+    hoverValue,
+    pickerMode,
+    disabledDate,
+    onSelect
+  );
 
   return (
     <div className={cn("grid grid-cols-2 gap-y-3 px-3 py-4", className)}>
       {cellInfos.map(({ key, info, current }) => {
         return (
-          <div key={key} className="flex justify-center" onMouseEnter={() => onHover?.(current)} onMouseLeave={() => onHover?.(null)}>
-            {renderCell ? renderCell(info) : <PickerCell info={info} className="h-8 w-16 rounded-md" />}
+          <div
+            key={key}
+            className="flex justify-center"
+            onMouseEnter={() => onHover?.(current)}
+            onMouseLeave={() => onHover?.(null)}
+          >
+            {renderCell ? (
+              renderCell(info)
+            ) : (
+              <PickerCell info={info} className="h-8 w-16 rounded-md" />
+            )}
           </div>
         );
       })}

@@ -1,18 +1,28 @@
+import { Button } from "@rap/components-ui/button";
 import {
   Dialog,
   DialogContent,
   DialogFooter,
   DialogHeader,
-  DialogTrigger,
 } from "@rap/components-ui/dialog";
 import { useMove, type MoveOptions } from "@rap/hooks/use-move";
 import { cn } from "@rap/utils";
+import type { ComponentProps } from "react";
+import { renderDialogTrigger, useBasicDialog } from "./basic-dialog";
 
 export interface MovableDialogProps {
   children: React.ReactNode;
   triggerChildren?: React.ReactNode;
   header?: React.ReactNode;
-  footer?: React.ReactNode;
+  footer?: React.ReactNode | null;
+  width?: React.CSSProperties["width"];
+  okText?: React.ReactNode;
+  cancelText?: React.ReactNode;
+  okButtonProps?: ComponentProps<typeof Button>;
+  cancelButtonProps?: ComponentProps<typeof Button>;
+  confirmLoading?: boolean;
+  onOk?: () => boolean | void | Promise<boolean | void>;
+  onCancel?: () => void;
   dialogProps?: React.ComponentProps<typeof Dialog>;
   moveOptions?: MoveOptions<HTMLDivElement>;
   contentProps?: React.ComponentProps<typeof DialogContent>;
@@ -25,12 +35,32 @@ export function MovableDialog({
   triggerChildren,
   header,
   footer,
+  width,
+  okText = "确定",
+  cancelText = "取消",
+  okButtonProps,
+  cancelButtonProps,
+  confirmLoading,
+  onOk,
+  onCancel,
   dialogProps,
   moveOptions,
   contentProps,
   headerProps,
   footerProps,
 }: MovableDialogProps) {
+  const dialog = useBasicDialog({
+    dialogProps,
+    footer,
+    okText,
+    cancelText,
+    okButtonProps,
+    cancelButtonProps,
+    confirmLoading,
+    onOk,
+    onCancel,
+    footerProps,
+  });
   const { targetRef, handleRef, transform, isMoving, reset } = useMove<
     HTMLDivElement,
     HTMLDivElement
@@ -40,32 +70,40 @@ export function MovableDialog({
     ...moveOptions,
   });
 
-  const handleOpenChange = (open: boolean) => {
-    if (!open) reset();
-    dialogProps?.onOpenChange?.(open);
+  const handleContentAnimationEnd: React.AnimationEventHandler<HTMLDivElement> = (event) => {
+    contentProps?.onAnimationEnd?.(event);
+    if (event.currentTarget.getAttribute("data-state") === "closed") reset();
   };
 
   return (
-    <Dialog {...dialogProps} onOpenChange={handleOpenChange}>
-      <DialogTrigger asChild>{triggerChildren}</DialogTrigger>
+    <Dialog {...dialogProps} open={dialog.open} onOpenChange={dialog.setOpen}>
+      {renderDialogTrigger(triggerChildren)}
       <DialogContent
         {...contentProps}
         ref={targetRef}
+        onAnimationEnd={handleContentAnimationEnd}
+        className={cn(isMoving && "transition-none! duration-0!", contentProps?.className)}
         style={{
           ...contentProps?.style,
-          transform,
+          width: contentProps?.style?.width ?? width,
+          maxWidth: contentProps?.style?.maxWidth ?? (width ? "none" : undefined),
+          translate: "none",
+          transform: `translate(-50%, -50%) ${transform}`,
           willChange: isMoving ? "transform" : contentProps?.style?.willChange,
         }}
       >
         <DialogHeader
           {...headerProps}
           ref={handleRef}
-          className={cn("select-none cursor-move touch-none", headerProps?.className)}
+          className={cn(
+            "-mx-6 -mt-6 border-b px-6 py-4 select-none cursor-move touch-none",
+            headerProps?.className
+          )}
         >
           {header}
         </DialogHeader>
         {children}
-        {footer && <DialogFooter {...footerProps}>{footer}</DialogFooter>}
+        {dialog.renderFooter()}
       </DialogContent>
     </Dialog>
   );

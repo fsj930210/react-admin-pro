@@ -200,7 +200,9 @@ function PickerPanel(props: PickerPanelProps) {
           onDoublePrev={panelMode === "year" ? onPrevDecade : onPrevYear}
           onDoubleNext={panelMode === "year" ? onNextDecade : onNextYear}
           onYearClick={panelMode === "year" ? undefined : () => setPanelMode("year")}
-          onMonthClick={currentHeaderLabels.showMonthClick ? () => setPanelMode("month") : undefined}
+          onMonthClick={
+            currentHeaderLabels.showMonthClick ? () => setPanelMode("month") : undefined
+          }
           showNextControls={false}
         />
         {renderPanelBody(viewDate)}
@@ -211,7 +213,9 @@ function PickerPanel(props: PickerPanelProps) {
           {...nextHeaderLabels}
           onPrev={() => setViewDate(nextPanelDate.subtract(1, "month"))}
           onNext={onNextMonth}
-          onDoublePrev={() => setViewDate(nextPanelDate.subtract(panelMode === "year" ? 12 : 1, "year"))}
+          onDoublePrev={() =>
+            setViewDate(nextPanelDate.subtract(panelMode === "year" ? 12 : 1, "year"))
+          }
           onDoubleNext={panelMode === "year" ? onNextDecade : onNextYear}
           onYearClick={panelMode === "year" ? undefined : () => setPanelMode("year")}
           onMonthClick={nextHeaderLabels.showMonthClick ? () => setPanelMode("month") : undefined}
@@ -255,7 +259,7 @@ function PickerPanel(props: PickerPanelProps) {
     <div
       className={cn(
         "flex w-full min-w-[320px] overflow-hidden rounded-md border bg-popover text-popover-foreground shadow-lg",
-        className,
+        className
       )}
     >
       {hasPresets ? <PickerPresets presets={presets} onPick={onPresetPick} /> : null}

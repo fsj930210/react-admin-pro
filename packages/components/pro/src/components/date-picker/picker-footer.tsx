@@ -13,7 +13,14 @@ interface PickerFooterProps {
 }
 
 function PickerFooter(props: PickerFooterProps) {
-  const { context, footer, actions = { today: true, clear: true }, onToday, onClear, className } = props;
+  const {
+    context,
+    footer,
+    actions = { today: true, clear: true },
+    onToday,
+    onClear,
+    className,
+  } = props;
   const customFooter = typeof footer === "function" ? footer(context) : footer;
   const showToday = !!actions && actions.today !== false;
   const showClear = !!actions && actions.clear !== false;

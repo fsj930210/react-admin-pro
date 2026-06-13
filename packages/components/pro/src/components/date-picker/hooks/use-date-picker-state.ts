@@ -14,7 +14,11 @@ interface PickerStateProps<T> {
   defaultViewDate?: Dayjs;
 }
 
-function usePickerState<T>(props: PickerStateProps<T>, fallbackViewDate: Dayjs, defaultPanelMode: PickerPanelMode) {
+function usePickerState<T>(
+  props: PickerStateProps<T>,
+  fallbackViewDate: Dayjs,
+  defaultPanelMode: PickerPanelMode
+) {
   const [value, setValue] = useControllableState<T>({
     value: props.value,
     defaultValue: props.defaultValue as T,
@@ -25,7 +29,9 @@ function usePickerState<T>(props: PickerStateProps<T>, fallbackViewDate: Dayjs, 
     defaultValue: props.defaultOpen ?? false,
     onChange: props.onOpenChange,
   });
-  const [panelMode, setPanelMode] = useState<PickerPanelMode>(props.defaultPanelMode ?? defaultPanelMode);
+  const [panelMode, setPanelMode] = useState<PickerPanelMode>(
+    props.defaultPanelMode ?? defaultPanelMode
+  );
   const [viewDate, setViewDate] = useState<Dayjs>(props.defaultViewDate ?? fallbackViewDate);
   const [hoverValue, setHoverValue] = useState<Dayjs | null>(null);
 
@@ -46,12 +52,16 @@ function usePickerState<T>(props: PickerStateProps<T>, fallbackViewDate: Dayjs, 
 function useSinglePickerState<T extends Dayjs | MultipleValue | null = Dayjs | null>(
   props: PickerStateProps<T>,
   fallbackViewDate: Dayjs,
-  defaultPanelMode: PickerPanelMode,
+  defaultPanelMode: PickerPanelMode
 ) {
   return usePickerState<T>(props, fallbackViewDate, defaultPanelMode);
 }
 
-function useRangePickerState(props: PickerStateProps<RangeValue>, fallbackViewDate: Dayjs, defaultPanelMode: PickerPanelMode) {
+function useRangePickerState(
+  props: PickerStateProps<RangeValue>,
+  fallbackViewDate: Dayjs,
+  defaultPanelMode: PickerPanelMode
+) {
   const state = usePickerState<RangeValue>(props, fallbackViewDate, defaultPanelMode);
   const [activePart, setActivePart] = useState<"start" | "end">("start");
 

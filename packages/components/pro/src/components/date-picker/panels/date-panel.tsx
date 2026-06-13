@@ -20,11 +20,25 @@ interface DatePanelProps {
 }
 
 function DatePanel(props: DatePanelProps) {
-  const { pickerMode, viewDate, value, hoverValue, disabledDate, renderCell, onSelect, onHover, className, multiple } = props;
-  const selectedDates = multiple && Array.isArray(value) ? value : null;
-  const isRange = !multiple && Array.isArray(value);
-  const start = isRange ? value[0] : selectedDates ? null : value;
-  const end = isRange ? value[1] : null;
+  const {
+    pickerMode,
+    viewDate,
+    value,
+    hoverValue,
+    disabledDate,
+    renderCell,
+    onSelect,
+    onHover,
+    className,
+    multiple,
+  } = props;
+  const selectedDates = multiple && Array.isArray(value) ? (value as MultipleValue) : null;
+  const rangeValue =
+    !multiple && Array.isArray(value) ? (value as Exclude<RangeValue, null>) : null;
+  const singleValue = !Array.isArray(value) ? value : null;
+  const isRange = !!rangeValue;
+  const start = rangeValue ? rangeValue[0] : selectedDates ? null : singleValue;
+  const end = rangeValue ? rangeValue[1] : null;
   const grid = buildDateGrid(viewDate);
   const hoverStart = isRange && start && !end ? start.startOf("day") : null;
   const hoverEnd = hoverValue && hoverStart ? hoverValue.startOf("day") : null;
@@ -50,7 +64,8 @@ function DatePanel(props: DatePanelProps) {
             ? selectedDates.some((item) => sameDay(current, item))
             : !!start && sameDay(current, start);
           const selectedEnd = !!end && sameDay(current, end);
-          const disabled = disabledDate?.(current, { from: start ?? undefined, type: "date" }) ?? false;
+          const disabled =
+            disabledDate?.(current, { from: start ?? undefined, type: "date" }) ?? false;
           const inView = current.month() === viewDate.month();
           const isToday = current.isSame(dayjs(), "day");
           const rangeStart = isRange && !!start && sameDay(current, start);
@@ -78,16 +93,24 @@ function DatePanel(props: DatePanelProps) {
             !!selectedWeekEnd &&
             (current.isSame(selectedWeekStart, "day") ||
               current.isSame(selectedWeekEnd, "day") ||
-              (current.isAfter(selectedWeekStart, "day") && current.isBefore(selectedWeekEnd, "day")));
+              (current.isAfter(selectedWeekStart, "day") &&
+                current.isBefore(selectedWeekEnd, "day")));
           const weekHover =
             pickerMode === "week" &&
             !!hoveredWeekStart &&
             !!hoveredWeekEnd &&
             (current.isSame(hoveredWeekStart, "day") ||
               current.isSame(hoveredWeekEnd, "day") ||
-              (current.isAfter(hoveredWeekStart, "day") && current.isBefore(hoveredWeekEnd, "day")));
-          const weekRangeStart = pickerMode === "week" && isRange && !!rangeWeekStart ? sameDay(current, rangeWeekStart) : rangeStart;
-          const weekRangeEnd = pickerMode === "week" && isRange && !!rangeWeekEnd ? sameDay(current, rangeWeekEnd) : rangeEnd;
+              (current.isAfter(hoveredWeekStart, "day") &&
+                current.isBefore(hoveredWeekEnd, "day")));
+          const weekRangeStart =
+            pickerMode === "week" && isRange && !!rangeWeekStart
+              ? sameDay(current, rangeWeekStart)
+              : rangeStart;
+          const weekRangeEnd =
+            pickerMode === "week" && isRange && !!rangeWeekEnd
+              ? sameDay(current, rangeWeekEnd)
+              : rangeEnd;
           const weekHighlight = weekHover || weekSelected;
           const weekHighlightStart =
             pickerMode === "week" &&
@@ -134,7 +157,7 @@ function DatePanel(props: DatePanelProps) {
                   hoverEnd &&
                   sameDay(current, hoverEnd) &&
                   !weekHighlight &&
-                  "before:absolute before:inset-y-[2px] before:left-0 before:w-1/2 before:bg-accent/50",
+                  "before:absolute before:inset-y-[2px] before:left-0 before:w-1/2 before:bg-accent/50"
               )}
               onMouseEnter={() => onHover?.(current)}
               onMouseLeave={() => onHover?.(null)}
@@ -148,7 +171,7 @@ function DatePanel(props: DatePanelProps) {
                     "relative z-10 size-9",
                     !inView && "text-muted-foreground/40",
                     weekHighlight &&
-                      "rounded-none border-transparent bg-transparent text-primary-foreground hover:bg-transparent hover:text-primary-foreground",
+                      "rounded-none border-transparent bg-transparent text-primary-foreground hover:bg-transparent hover:text-primary-foreground"
                   )}
                 />
               )}

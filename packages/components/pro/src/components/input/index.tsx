@@ -261,8 +261,10 @@ export function PasswordInput(props: PasswordInputProps) {
   );
 }
 
-export interface NumberInputProps
-  extends Omit<InputProps, "value" | "defaultValue" | "onChange" | "type" | "allowClear" | "onClear"> {
+export interface NumberInputProps extends Omit<
+  InputProps,
+  "value" | "defaultValue" | "onChange" | "type" | "allowClear" | "onClear"
+> {
   value?: number;
   defaultValue?: number;
   onChange?: (value?: number) => void;
@@ -391,7 +393,6 @@ export function NumberInput({
     const nextInput = sanitizeNumberInput(typeof next === "string" ? next : next.target.value);
 
     setInputValue(nextInput);
-
   };
 
   const handleBlur = (event: React.FocusEvent<HTMLInputElement>) => {
@@ -404,9 +405,15 @@ export function NumberInput({
   const handleStep = (type: "up" | "down") => {
     if (disabled || readOnly) return;
 
-    const current = canParseNumber(inputValue) ? parser(inputValue) ?? min ?? 0 : numberValue ?? min ?? 0;
+    const current = canParseNumber(inputValue)
+      ? (parser(inputValue) ?? min ?? 0)
+      : (numberValue ?? min ?? 0);
     const offset = type === "up" ? step : -step;
-    const stepPrecision = Math.max(getPrecision(current), getPrecision(Number(step)), precision ?? 0);
+    const stepPrecision = Math.max(
+      getPrecision(current),
+      getPrecision(Number(step)),
+      precision ?? 0
+    );
     const next = normalizeValue(Number((current + offset).toFixed(stepPrecision))) ?? current;
 
     setNumberValue(next);
@@ -432,13 +439,9 @@ export function NumberInput({
   const controlsConfig = typeof controls === "object" ? controls : undefined;
   const showControls = controls !== false;
   const canStepDown =
-    !disabled &&
-    !readOnly &&
-    (min === undefined || (parser(inputValue) ?? numberValue ?? 0) > min);
+    !disabled && !readOnly && (min === undefined || (parser(inputValue) ?? numberValue ?? 0) > min);
   const canStepUp =
-    !disabled &&
-    !readOnly &&
-    (max === undefined || (parser(inputValue) ?? numberValue ?? 0) < max);
+    !disabled && !readOnly && (max === undefined || (parser(inputValue) ?? numberValue ?? 0) < max);
   const controlSuffix = showControls ? (
     <div
       className={cn(

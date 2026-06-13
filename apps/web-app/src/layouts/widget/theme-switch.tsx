@@ -2,7 +2,8 @@ import { Button } from "@rap/components-ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuItem,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
   DropdownMenuTrigger,
 } from "@rap/components-ui/dropdown-menu";
 import { useTheme } from "@rap/components-ui/theme-provider";
@@ -23,7 +24,7 @@ const themeOptions: Array<{ value: AppTheme; label: string; icon: typeof Sun }> 
 ];
 
 export function ThemeSwitchFeature({ className }: ThemeSwitchFeatureProps) {
-  const { setTheme } = useTheme();
+  const { setTheme, theme } = useTheme();
   const preferences = useUIPreferences("preferences");
   const updatePreferences = useUIPreferences((state) => state.updatePreferences);
 
@@ -43,18 +44,30 @@ export function ThemeSwitchFeature({ className }: ThemeSwitchFeatureProps) {
           <span className="sr-only">切换主题</span>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="center">
-        {themeOptions
-          .filter((item) => preferences.appearance.availableThemes.includes(item.value))
-          .map((item) => {
-            const Icon = item.icon;
-            return (
-              <DropdownMenuItem key={item.value} onClick={() => handleThemeChange(item.value)}>
-                <Icon className="size-4" />
-                {item.label}
-              </DropdownMenuItem>
-            );
-          })}
+      <DropdownMenuContent
+        align="center"
+        className="border-primary/35 bg-popover/95 shadow-lg shadow-primary/10 backdrop-blur"
+      >
+        <DropdownMenuRadioGroup
+          value={theme}
+          onValueChange={(value) => handleThemeChange(value as AppTheme)}
+        >
+          {themeOptions
+            .filter((item) => preferences.appearance.availableThemes.includes(item.value))
+            .map((item) => {
+              const Icon = item.icon;
+              return (
+                <DropdownMenuRadioItem
+                  key={item.value}
+                  value={item.value}
+                  className="data-[state=checked]:bg-primary/15 data-[state=checked]:text-popover-foreground data-[state=checked]:[&_svg]:text-primary"
+                >
+                  <Icon className="size-4" />
+                  {item.label}
+                </DropdownMenuRadioItem>
+              );
+            })}
+        </DropdownMenuRadioGroup>
       </DropdownMenuContent>
     </DropdownMenu>
   );

@@ -202,7 +202,7 @@ const allMenus = [
       {
         id: "date-picker",
         code: "date-picker",
-        title: "Date Picker",
+        title: "日期选择组件",
         url: "/components/date-picker",
         type: "menu" as const,
         icon: "lucide:calendar-days",
@@ -212,6 +212,22 @@ const allMenus = [
         openMode: "currentSystemTab" as const,
         permissions: [],
         order: 10,
+        isActive: true,
+        status: "enabled" as const,
+      },
+      {
+        id: "dialog",
+        code: "dialog",
+        title: "弹窗组件",
+        url: "/components/dialog",
+        type: "menu" as const,
+        icon: "lucide:panel-top-open",
+        parentId: "components",
+        parentCode: "components",
+        hidden: false,
+        openMode: "currentSystemTab" as const,
+        permissions: [],
+        order: 11,
         isActive: true,
         status: "enabled" as const,
       },
@@ -227,7 +243,7 @@ const allMenus = [
         hidden: false,
         openMode: "currentSystemTab" as const,
         permissions: [],
-        order: 11,
+        order: 12,
         isActive: true,
         status: "enabled" as const,
       },
@@ -831,7 +847,7 @@ export default [
     if (!token) {
       return HttpResponse.json(
         { code: "401", message: "unauthorized", data: null },
-        { status: 401, statusText: "unauthorized" }
+        { status: 401, statusText: "unauthorized" },
       );
     }
     const username = token.split(" ")[1] || "";

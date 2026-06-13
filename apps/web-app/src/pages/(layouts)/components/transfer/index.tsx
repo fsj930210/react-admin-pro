@@ -1,5 +1,5 @@
 import { DataGrid } from "@rap/components-ui/data-grid";
-import { ProTree } from "@rap/components-pro/tree";
+import { Tree } from "@rap/components-pro/tree";
 import { Button } from "@rap/components-ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@rap/components-ui/card";
 import {
@@ -250,7 +250,7 @@ function TreeSourcePanelContent() {
     <>
       <SelectorSearch placeholder="搜索组织" />
       <div className="min-h-0 flex-1 overflow-auto rounded-md border p-2">
-        <ProTree
+        <Tree
           data={sourceTree}
           checkable={{ checkStrictly: false }}
           defaultExpandedKeys={["engineering", "business"]}
@@ -297,7 +297,7 @@ function TreeToListTransferDemo() {
   return (
     <Section
       title="Tree to List Transfer"
-      description="左侧使用 ProTree，右侧使用列表；已移动到右侧的节点会从左侧树里移除，不能重复选择。"
+      description="左侧使用 Tree，右侧使用列表；已移动到右侧的节点会从左侧树里移除，不能重复选择。"
     >
       <Transfer<TreeNode>
         dataSource={flatTree}

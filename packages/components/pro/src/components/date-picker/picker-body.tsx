@@ -3,7 +3,14 @@ import { DatePanel } from "./panels/date-panel";
 import { MonthPicker } from "./panels/month-picker";
 import { QuarterPicker } from "./panels/quarter-picker";
 import { YearPicker } from "./panels/year-picker";
-import type { Dayjs, MultipleValue, PickerCellRenderInfo, PickerMode, PickerPanelMode, RangeValue } from "./types";
+import type {
+  Dayjs,
+  MultipleValue,
+  PickerCellRenderInfo,
+  PickerMode,
+  PickerPanelMode,
+  RangeValue,
+} from "./types";
 
 interface PickerBodyProps {
   pickerMode: PickerMode;
@@ -19,16 +26,22 @@ interface PickerBodyProps {
   className?: string;
 }
 
-const PANEL_VIEW_MAP = {
-  year: YearPicker,
-  month: MonthPicker,
-  quarter: QuarterPicker,
-  date: DatePanel,
-} as const;
-
 function PickerBody(props: PickerBodyProps) {
-  const PanelView = PANEL_VIEW_MAP[props.panelMode];
-  return <PanelView {...props} />;
+  if (props.panelMode === "date") {
+    return <DatePanel {...props} />;
+  }
+
+  const value = props.multiple ? null : (props.value as Dayjs | RangeValue | null);
+
+  if (props.panelMode === "year") {
+    return <YearPicker {...props} value={value} />;
+  }
+
+  if (props.panelMode === "month") {
+    return <MonthPicker {...props} value={value} />;
+  }
+
+  return <QuarterPicker {...props} value={value} />;
 }
 
 export { PickerBody };

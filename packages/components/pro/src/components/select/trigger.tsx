@@ -6,8 +6,10 @@ import { cn } from "@rap/utils";
 import { SelectTagList } from "./tag-list";
 import type { SelectInputProps, SelectOption, SelectProps, SelectValue } from "./types";
 
-interface SelectTriggerProps<V extends SelectValue>
-  extends Omit<React.ComponentProps<"div">, "prefix" | "onChange"> {
+interface SelectTriggerProps<V extends SelectValue> extends Omit<
+  React.ComponentProps<"div">,
+  "prefix" | "onChange"
+> {
   rootRef?: React.RefObject<HTMLDivElement | null>;
   multiple: boolean;
   searchable: boolean;
@@ -114,7 +116,7 @@ export function SelectTrigger<V extends SelectValue>({
         "focus-within:border-ring focus-within:ring-[3px] focus-within:ring-ring/45",
         "hover:border-ring/40",
         disabled && "cursor-not-allowed opacity-50",
-        rootClassName,
+        rootClassName
       )}
       role="combobox"
       aria-expanded={open}
@@ -143,7 +145,7 @@ export function SelectTrigger<V extends SelectValue>({
           className={cn(
             "h-9 min-w-0 border-0 !bg-transparent px-0 py-2 text-sm shadow-none ring-0 focus-visible:border-transparent focus-visible:ring-0",
             multiple ? "min-w-16 flex-1" : "flex-1",
-            className,
+            className
           )}
           disabled={disabled}
           value={displayValue}
@@ -161,7 +163,7 @@ export function SelectTrigger<V extends SelectValue>({
           className={cn(
             "min-w-0 flex-1 truncate",
             !selectedLabel && "text-muted-foreground",
-            className,
+            className
           )}
         >
           {!multiple

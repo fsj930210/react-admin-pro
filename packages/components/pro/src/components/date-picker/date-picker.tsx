@@ -8,7 +8,14 @@ import { useSinglePickerState } from "./hooks/use-date-picker-state";
 import { usePickerPanelController } from "./hooks/use-picker-panel-controller";
 import { PickerPanel } from "./picker-panel";
 import { PickerTrigger } from "./picker-trigger";
-import type { DatePickerProps, Dayjs, MultipleValue, PickerMode, PickerPanelMode, PickerPreset } from "./types";
+import type {
+  DatePickerProps,
+  Dayjs,
+  MultipleValue,
+  PickerMode,
+  PickerPanelMode,
+  PickerPreset,
+} from "./types";
 import { formatPickerValue, parseValue, sameDay } from "./utils";
 
 function getDefaultPanelMode(mode: PickerMode): PickerPanelMode {
@@ -82,7 +89,7 @@ function DatePicker(props: DatePickerProps) {
       : Array.isArray(defaultValue)
         ? (defaultValue[0] ?? dayjs())
         : (valueProp ?? defaultValue ?? dayjs()),
-    getDefaultPanelMode(mode),
+    getDefaultPanelMode(mode)
   );
   const changeOpen = useMemoizedFn((next: boolean) => {
     if (disabled || readOnly) {
@@ -93,11 +100,12 @@ function DatePicker(props: DatePickerProps) {
   const [draftText, setDraftText] = useState<string | null>(null);
 
   const mergedFormat = format ?? DEFAULT_FORMATS[mode] ?? DEFAULT_FORMATS.date;
+  const displayFormat = Array.isArray(mergedFormat) ? mergedFormat[0] : mergedFormat;
   const displayText =
     draftText ??
     (multipleDates && Array.isArray(value)
-      ? value.map((item) => formatPickerValue(item, mode, format, mergedFormat)).join(", ")
-      : formatPickerValue(Array.isArray(value) ? null : value, mode, format, mergedFormat));
+      ? value.map((item) => formatPickerValue(item, mode, format, displayFormat)).join(", ")
+      : formatPickerValue(Array.isArray(value) ? null : value, mode, format, displayFormat));
   const mergedViewDate = viewDate;
   const panelController = usePickerPanelController({
     panelMode,

@@ -37,14 +37,14 @@ export function sameQuarter(a: dayjs.Dayjs | null | undefined, b: dayjs.Dayjs | 
 
 export function normalizeRange(
   value: [dayjs.Dayjs | null, dayjs.Dayjs | null] | null,
-  order = true,
-) {
+  order = true
+): RangeValue {
   if (!value) return null;
   const [start, end] = value;
   if (!start && !end) return null;
-  if (!start || !end) return [start, end] as const;
-  if (!order || start.isBefore(end) || start.isSame(end)) return [start, end] as const;
-  return [end, start] as const;
+  if (!start || !end) return [start, end];
+  if (!order || start.isBefore(end) || start.isSame(end)) return [start, end];
+  return [end, start];
 }
 
 export function mergeTime(base: dayjs.Dayjs, time: dayjs.Dayjs) {
@@ -78,7 +78,11 @@ export function buildDateGrid(viewDate: dayjs.Dayjs) {
   return Array.from({ length: 42 }, (_, index) => start.add(index, "day"));
 }
 
-export function formatValue(value: dayjs.Dayjs | null, format: string | string[] | undefined, fallback: string) {
+export function formatValue(
+  value: dayjs.Dayjs | null,
+  format: string | string[] | undefined,
+  fallback: string
+) {
   if (!value) return "";
   const formats = Array.isArray(format) ? format : format ? [format] : [fallback];
   return value.format(formats[0]);
@@ -88,7 +92,7 @@ export function formatPickerValue(
   value: dayjs.Dayjs | null,
   pickerMode: PickerMode,
   format: string | string[] | undefined,
-  fallback: string,
+  fallback: string
 ) {
   if (!value) return "";
   if (pickerMode === "week" && !format) {
@@ -111,8 +115,10 @@ export function buildMonthCellInfos(
   viewDate: dayjs.Dayjs,
   value: dayjs.Dayjs | RangeValue | null,
   pickerMode: PickerMode,
-  disabledDate: ((current: dayjs.Dayjs, info: { from?: dayjs.Dayjs; type: PickerMode }) => boolean) | undefined,
-  onSelect: (date: dayjs.Dayjs) => void,
+  disabledDate:
+    | ((current: dayjs.Dayjs, info: { from?: dayjs.Dayjs; type: PickerMode }) => boolean)
+    | undefined,
+  onSelect: (date: dayjs.Dayjs) => void
 ) {
   const start = Array.isArray(value) ? value[0] : value;
   const end = Array.isArray(value) ? value[1] : null;
@@ -123,13 +129,15 @@ export function buildMonthCellInfos(
       date: current,
       text: MONTHS[month],
       type: pickerMode,
-      selected: (!!start && current.isSame(start, "month")) || (!!end && current.isSame(end, "month")),
+      selected:
+        (!!start && current.isSame(start, "month")) || (!!end && current.isSame(end, "month")),
       disabled: disabledDate?.(current, { from: start ?? undefined, type: "month" }) ?? false,
       today: false,
       inView: true,
       rangeStart: !!start && current.isSame(start, "month"),
       rangeEnd: !!end && current.isSame(end, "month"),
-      rangeMiddle: !!start && !!end && current.isAfter(start, "month") && current.isBefore(end, "month"),
+      rangeMiddle:
+        !!start && !!end && current.isAfter(start, "month") && current.isBefore(end, "month"),
       onSelect: () => onSelect(current),
     };
 
@@ -141,8 +149,10 @@ export function buildYearCellInfos(
   viewDate: dayjs.Dayjs,
   value: dayjs.Dayjs | RangeValue | null,
   pickerMode: PickerMode,
-  disabledDate: ((current: dayjs.Dayjs, info: { from?: dayjs.Dayjs; type: PickerMode }) => boolean) | undefined,
-  onSelect: (date: dayjs.Dayjs) => void,
+  disabledDate:
+    | ((current: dayjs.Dayjs, info: { from?: dayjs.Dayjs; type: PickerMode }) => boolean)
+    | undefined,
+  onSelect: (date: dayjs.Dayjs) => void
 ) {
   const start = Array.isArray(value) ? value[0] : value;
   const end = Array.isArray(value) ? value[1] : null;
@@ -153,13 +163,15 @@ export function buildYearCellInfos(
       date: current,
       text: String(year),
       type: pickerMode,
-      selected: (!!start && current.isSame(start, "year")) || (!!end && current.isSame(end, "year")),
+      selected:
+        (!!start && current.isSame(start, "year")) || (!!end && current.isSame(end, "year")),
       disabled: disabledDate?.(current, { from: start ?? undefined, type: "year" }) ?? false,
       today: false,
       inView: true,
       rangeStart: !!start && current.isSame(start, "year"),
       rangeEnd: !!end && current.isSame(end, "year"),
-      rangeMiddle: !!start && !!end && current.isAfter(start, "year") && current.isBefore(end, "year"),
+      rangeMiddle:
+        !!start && !!end && current.isAfter(start, "year") && current.isBefore(end, "year"),
       onSelect: () => onSelect(current),
     };
 
@@ -172,8 +184,10 @@ export function buildQuarterCellInfos(
   value: dayjs.Dayjs | RangeValue | null,
   hoverValue: dayjs.Dayjs | null | undefined,
   pickerMode: PickerMode,
-  disabledDate: ((current: dayjs.Dayjs, info: { from?: dayjs.Dayjs; type: PickerMode }) => boolean) | undefined,
-  onSelect: (date: dayjs.Dayjs) => void,
+  disabledDate:
+    | ((current: dayjs.Dayjs, info: { from?: dayjs.Dayjs; type: PickerMode }) => boolean)
+    | undefined,
+  onSelect: (date: dayjs.Dayjs) => void
 ) {
   const start = Array.isArray(value) ? value[0] : value;
   const end = Array.isArray(value) ? value[1] : null;
@@ -190,7 +204,8 @@ export function buildQuarterCellInfos(
       inView: true,
       rangeStart: !!start && sameQuarter(current, start),
       rangeEnd: !!end && sameQuarter(current, end),
-      rangeMiddle: !!start && !!end && current.isAfter(start, "quarter") && current.isBefore(end, "quarter"),
+      rangeMiddle:
+        !!start && !!end && current.isAfter(start, "quarter") && current.isBefore(end, "quarter"),
       hover: !!hoverValue && sameQuarter(current, hoverValue),
       onSelect: () => onSelect(current),
     };

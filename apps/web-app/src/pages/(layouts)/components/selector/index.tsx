@@ -1,5 +1,5 @@
 import { DataGrid } from "@rap/components-ui/data-grid";
-import { ProTree } from "@rap/components-pro/tree";
+import { Tree } from "@rap/components-pro/tree";
 import { Button } from "@rap/components-ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@rap/components-ui/card";
 import { FieldGroup, FieldLabel } from "@rap/components-ui/field";
@@ -224,12 +224,12 @@ function TableDemo() {
   );
 }
 
-function ProTreeSelectorContent() {
+function TreeSelectorContent() {
   const api = useSelector<TreeNode>();
 
   return (
     <div className="min-h-0 flex-1 overflow-auto rounded-md border p-2">
-      <ProTree
+      <Tree
         data={treeData}
         checkable={{ checkStrictly: false }}
         defaultExpandedKeys={["engineering", "business"]}
@@ -249,7 +249,7 @@ function TreeDemo() {
 
   return (
     <Section
-      title="ProTree 渲染"
+      title="Tree 渲染"
       description="真实树场景接 pro Tree，Selector 只同步 checkedKeys。"
     >
       <Selector<TreeNode>
@@ -261,7 +261,7 @@ function TreeDemo() {
         getDisabled={(item) => Boolean(item.disabled)}
         onChange={setValue}
       >
-        <ProTreeSelectorContent />
+        <TreeSelectorContent />
         <SelectorCount />
       </Selector>
     </Section>
@@ -397,7 +397,7 @@ function RouteComponent() {
       <div>
         <h1 className="text-3xl font-bold">Selector 组件</h1>
         <p className="mt-2 text-muted-foreground">
-          选择状态内核接真实 List、DataGrid、ProTree、分页和表单场景。
+          选择状态内核接真实 List、DataGrid、Tree、分页和表单场景。
         </p>
       </div>
       <div className="grid gap-6 xl:grid-cols-2">

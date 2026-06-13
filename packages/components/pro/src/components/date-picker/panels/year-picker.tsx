@@ -16,18 +16,29 @@ interface YearPickerProps {
 }
 
 function YearPicker(props: YearPickerProps) {
-  const { pickerMode, viewDate, value, disabledDate, renderCell, onSelect, onHover, className } = props;
+  const { pickerMode, viewDate, value, disabledDate, renderCell, onSelect, onHover, className } =
+    props;
   const cellInfos = buildYearCellInfos(viewDate, value, pickerMode, disabledDate, onSelect);
 
   return (
     <div className={cn("grid grid-cols-3 gap-y-3 px-3 py-4", className)}>
       {cellInfos.map(({ key, info }) => {
         return renderCell ? (
-          <div key={key} className="flex justify-center" onMouseEnter={() => onHover?.(info.date)} onMouseLeave={() => onHover?.(null)}>
+          <div
+            key={key}
+            className="flex justify-center"
+            onMouseEnter={() => onHover?.(info.date)}
+            onMouseLeave={() => onHover?.(null)}
+          >
             {renderCell(info)}
           </div>
         ) : (
-          <div key={key} className="flex justify-center" onMouseEnter={() => onHover?.(info.date)} onMouseLeave={() => onHover?.(null)}>
+          <div
+            key={key}
+            className="flex justify-center"
+            onMouseEnter={() => onHover?.(info.date)}
+            onMouseLeave={() => onHover?.(null)}
+          >
             <PickerCell info={info} className="h-8 w-16 rounded-md" />
           </div>
         );

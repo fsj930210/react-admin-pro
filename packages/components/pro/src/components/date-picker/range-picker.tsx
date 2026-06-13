@@ -83,7 +83,7 @@ function RangePicker(props: RangePickerProps) {
       defaultViewDate: fallbackViewDate,
     },
     fallbackViewDate,
-    defaultPanelMode,
+    defaultPanelMode
   );
   const changeOpen = useMemoizedFn((next: boolean) => {
     if (disabled || readOnly) {
@@ -98,8 +98,10 @@ function RangePicker(props: RangePickerProps) {
   const endRef = useRef<HTMLInputElement>(null);
 
   const mergedFormat = format ?? DEFAULT_FORMATS[mode] ?? DEFAULT_FORMATS.date;
-  const startText = draftStart ?? formatPickerValue(value?.[0] ?? null, mode, format, mergedFormat);
-  const endText = draftEnd ?? formatPickerValue(value?.[1] ?? null, mode, format, mergedFormat);
+  const displayFormat = Array.isArray(mergedFormat) ? mergedFormat[0] : mergedFormat;
+  const startText =
+    draftStart ?? formatPickerValue(value?.[0] ?? null, mode, format, displayFormat);
+  const endText = draftEnd ?? formatPickerValue(value?.[1] ?? null, mode, format, displayFormat);
   const mergedViewDate = viewDate;
   const panelController = usePickerPanelController({
     panelMode,

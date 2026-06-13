@@ -20,7 +20,7 @@ function readField<T>(source: T, key: string, fallback: unknown) {
 }
 
 export function isOptionGroup<V extends SelectValue>(
-  item: SelectData<V>,
+  item: SelectData<V>
 ): item is SelectOptionGroup<V> {
   return Array.isArray((item as SelectOptionGroup<V>).options);
 }
@@ -64,7 +64,7 @@ export function createTagOption(keyword: string): SelectOption<string> {
 
 export function normalizeOptions<V extends SelectValue>(
   options: SelectData<V>[],
-  fieldNames?: SelectFieldNames,
+  fieldNames?: SelectFieldNames
 ): SelectData<V>[] {
   if (!fieldNames) {
     return options.map((item) => {
@@ -89,11 +89,7 @@ export function normalizeOptions<V extends SelectValue>(
 
     if (Array.isArray(children)) {
       return {
-        label: readField(
-          item,
-          labelKey,
-          (item as SelectOptionGroup<V>).label,
-        ) as React.ReactNode,
+        label: readField(item, labelKey, (item as SelectOptionGroup<V>).label) as React.ReactNode,
         raw: (item as SelectOptionGroup<V>).raw ?? item,
         options: normalizeOptions(children as SelectData<V>[], fieldNames)
           .filter((child): child is SelectOption<V> => !isOptionGroup(child))
@@ -135,7 +131,7 @@ export function findOptionByValue<V extends SelectValue>(options: SelectData<V>[
 export function resolveSelectedOption<V extends SelectValue>(
   options: SelectData<V>[],
   value: V,
-  mode: SelectMode,
+  mode: SelectMode
 ) {
   const matched = findOptionByValue(options, value);
   if (matched) return matched;
@@ -156,7 +152,7 @@ export function filterOptions<V extends SelectValue>(
   keyword: string,
   shouldFilter: boolean,
   filterOption: boolean | ((input: string, option: SelectOption<V>) => boolean),
-  mode: SelectMode,
+  mode: SelectMode
 ) {
   const matcher =
     typeof filterOption === "function"
@@ -182,7 +178,7 @@ export function filterOptions<V extends SelectValue>(
 
   if (mode === "tags" && keyword.trim()) {
     const exists = flattenOptions(nextOptions).some(
-      (option) => String(option.value) === keyword.trim(),
+      (option) => String(option.value) === keyword.trim()
     );
     if (!exists) {
       return [createTagOption(keyword.trim()) as SelectOption<V>, ...nextOptions];

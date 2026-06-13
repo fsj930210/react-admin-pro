@@ -1,5 +1,12 @@
-import { ProDraggableTree, ProTree, ProVirtualTree } from "@rap/components-pro/tree";
+import { BasicTree, DraggableTree, Tree, VirtualTree } from "@rap/components-pro/tree";
 import { Button } from "@rap/components-ui/button";
+import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuSeparator,
+  ContextMenuTrigger,
+} from "@rap/components-ui/context-menu";
 import {
   TreeCheckbox,
   TreeDropIndicator,
@@ -29,6 +36,7 @@ import type {
   TreeNode,
 } from "@rap/components-ui/tree/types";
 import { createFileRoute } from "@tanstack/react-router";
+import { Edit3, Plus, Trash2 } from "lucide-react";
 import { useMemo, useRef, useState } from "react";
 import { fetchTreeChildren } from "@/service/tree";
 
@@ -515,15 +523,80 @@ function SortableDemo() {
   );
 }
 
-function ProTreeDemo() {
+function TreeWrapperDemo() {
   const [treeData, setTreeData] = useState(createOrgTree);
   const [checkedKeys, setCheckedKeys] = useState<TreeKey[]>(["platform-web"]);
+  const [contextMessage, setContextMessage] = useState("右键 Tree 节点打开菜单");
 
   return (
-    <div className="grid gap-4 lg:grid-cols-3">
+    <div className="grid gap-4 lg:grid-cols-2 xl:grid-cols-4">
       <div className="space-y-2">
-        <h4 className="text-sm font-medium">ProTree</h4>
-        <ProTree
+        <h4 className="text-sm font-medium">Tree</h4>
+        <Tree
+          data={treeData}
+          defaultExpandedKeys={["company", "platform", "product"]}
+          checkable
+          selectable={{ multiple: true }}
+          checkedKeys={checkedKeys}
+          onCheckedKeysChange={setCheckedKeys}
+          searchable
+          virtual={{ height: 260 }}
+          rowHeight={30}
+          draggable={{
+            canDrag: (item) => !item.disabled,
+          }}
+          onTreeChange={setTreeData}
+          onItemContextMenu={(event, { item }) => {
+            event.preventDefault();
+            setContextMessage(`打开菜单：${item.node.label}`);
+          }}
+          renderItem={({ item, tree, defaultNode }) => (
+            <ContextMenu>
+              <ContextMenuTrigger asChild>{defaultNode}</ContextMenuTrigger>
+              <ContextMenuContent className="w-40">
+                <ContextMenuItem
+                  onClick={() => {
+                    const key = `${item.key}-new-${Date.now()}`;
+                    tree.insertNode(item.key, { key, label: "新节点" });
+                    setTreeData(tree.nodes);
+                    setContextMessage(`添加子节点：${item.node.label}`);
+                  }}
+                >
+                  <Plus className="size-4" />
+                  添加
+                </ContextMenuItem>
+                <ContextMenuItem
+                  onClick={() => {
+                    tree.updateNode(item.key, { label: `${item.node.label} 已编辑` });
+                    setTreeData(tree.nodes);
+                    setContextMessage(`编辑节点：${item.node.label}`);
+                  }}
+                >
+                  <Edit3 className="size-4" />
+                  编辑
+                </ContextMenuItem>
+                <ContextMenuSeparator />
+                <ContextMenuItem
+                  variant="destructive"
+                  disabled={item.parentKey === null}
+                  onClick={() => {
+                    tree.removeNode(item.key);
+                    setTreeData(tree.nodes);
+                    setContextMessage(`删除节点：${item.node.label}`);
+                  }}
+                >
+                  <Trash2 className="size-4" />
+                  删除
+                </ContextMenuItem>
+              </ContextMenuContent>
+            </ContextMenu>
+          )}
+        />
+        <StatePill>{contextMessage}</StatePill>
+      </div>
+      <div className="space-y-2">
+        <h4 className="text-sm font-medium">BasicTree</h4>
+        <BasicTree
           data={treeData}
           defaultExpandedKeys={["company", "platform"]}
           checkable
@@ -534,8 +607,8 @@ function ProTreeDemo() {
         />
       </div>
       <div className="space-y-2">
-        <h4 className="text-sm font-medium">ProVirtualTree</h4>
-        <ProVirtualTree
+        <h4 className="text-sm font-medium">VirtualTree</h4>
+        <VirtualTree
           data={[createTreeNode("pro-virtual", 3, 12)]}
           height={260}
           rowHeight={30}
@@ -545,8 +618,8 @@ function ProTreeDemo() {
         />
       </div>
       <div className="space-y-2">
-        <h4 className="text-sm font-medium">ProDraggableTree</h4>
-        <ProDraggableTree
+        <h4 className="text-sm font-medium">DraggableTree</h4>
+        <DraggableTree
           data={treeData}
           defaultExpandedKeys={["company", "platform", "product"]}
           onTreeChange={setTreeData}
@@ -618,10 +691,10 @@ function TreeComponentPage() {
       </Section>
 
       <Section
-        title="Pro wrappers"
-        description="High-level tree wrappers reduce repeated code while still accepting features and custom rendering."
+        title="Tree wrappers"
+        description="Tree is the complete wrapper; BasicTree, VirtualTree, and DraggableTree stay available for focused usage."
       >
-        <ProTreeDemo />
+        <TreeWrapperDemo />
       </Section>
     </div>
   );

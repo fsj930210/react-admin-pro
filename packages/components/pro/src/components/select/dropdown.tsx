@@ -41,7 +41,7 @@ export function SelectDropdown({
       sideOffset={6}
       className={cn(
         "w-[var(--radix-popover-trigger-width)] rounded-2xl border border-border bg-popover p-2 shadow-xl",
-        popupClassName,
+        popupClassName
       )}
       onOpenAutoFocus={(event) => event.preventDefault()}
       onCloseAutoFocus={(event) => event.preventDefault()}

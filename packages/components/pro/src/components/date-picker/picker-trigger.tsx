@@ -52,13 +52,8 @@ function PickerTrigger(props: PickerTriggerProps) {
         "hover:border-ring/40",
         disabled && "pointer-events-none cursor-not-allowed opacity-50",
         readOnly && "cursor-not-allowed opacity-50",
-        className,
+        className
       )}
-      onClick={() => {
-        if (!disabled && !readOnly) {
-          onOpenRequest();
-        }
-      }}
     >
       {prefix ? <span className="shrink-0 text-muted-foreground">{prefix}</span> : null}
       <UIInput
@@ -69,7 +64,7 @@ function PickerTrigger(props: PickerTriggerProps) {
         readOnly={readOnly}
         className={cn(
           "h-9 flex-1 border-0 !bg-transparent px-0 py-2 text-sm shadow-none ring-0 focus-visible:border-transparent focus-visible:ring-0",
-          inputClassName,
+          inputClassName
         )}
         onFocus={() => {
           if (!disabled && !readOnly) {

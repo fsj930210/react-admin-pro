@@ -54,7 +54,7 @@ function SelectOptionRow<V extends SelectValue>({
         "cursor-pointer rounded-xl border border-transparent px-3 py-2.5 text-sm ring-0",
         "data-highlighted:border-border data-highlighted:bg-accent data-highlighted:text-accent-foreground",
         active && "border-border bg-accent text-accent-foreground",
-        selected && "border-border bg-accent text-accent-foreground",
+        selected && "border-border bg-accent text-accent-foreground"
       )}
       onMouseEnter={() => onActiveOptionChange(row.optionKey)}
       onSelect={() => onOptionSelect(row.optionKey)}
@@ -67,7 +67,7 @@ function SelectOptionRow<V extends SelectValue>({
       <span
         className={cn(
           "flex size-4 items-center justify-center text-primary transition-opacity",
-          selected ? "opacity-100" : "opacity-0",
+          selected ? "opacity-100" : "opacity-0"
         )}
       >
         <Check className={cn("size-4", selected ? "opacity-100" : "opacity-0")} />
@@ -170,7 +170,7 @@ export function SelectOptionList<V extends SelectValue>({
               onActiveOptionChange={onActiveOptionChange}
             />
           ))}
-        </ListboxGroup>,
+        </ListboxGroup>
       );
       continue;
     }
@@ -194,7 +194,7 @@ export function SelectOptionList<V extends SelectValue>({
             onActiveOptionChange={onActiveOptionChange}
           />
         ))}
-      </div>,
+      </div>
     );
   }
 

@@ -26,7 +26,7 @@ function buildChangeContext<V extends SelectValue>(
   multiple: boolean,
   selected: boolean,
   selectedItem?: SelectOption<V>,
-  nextOptions?: SelectOption<V>[],
+  nextOptions?: SelectOption<V>[]
 ): SelectChangeContext<V> {
   if (multiple) {
     return {
@@ -42,7 +42,10 @@ function buildChangeContext<V extends SelectValue>(
   };
 }
 
-export function useSelect<V extends SelectValue>(props: SelectProps<V>, ref?: React.Ref<SelectRef>) {
+export function useSelect<V extends SelectValue>(
+  props: SelectProps<V>,
+  ref?: React.Ref<SelectRef>
+) {
   const {
     value,
     defaultValue,
@@ -90,7 +93,7 @@ export function useSelect<V extends SelectValue>(props: SelectProps<V>, ref?: Re
     inputValue,
     shouldFilter,
     filterOption,
-    mode,
+    mode
   );
   const { rows, optionMap, optionKeys } = buildRows(visibleOptions);
 

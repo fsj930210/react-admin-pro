@@ -16,13 +16,24 @@ interface RangeTriggerFieldProps {
 }
 
 function RangeTriggerField(props: RangeTriggerFieldProps) {
-  const { value, placeholder, active, disabled, readOnly, inputClassName, inputRef, onChange, onFocus, onBlur } = props;
+  const {
+    value,
+    placeholder,
+    active,
+    disabled,
+    readOnly,
+    inputClassName,
+    inputRef,
+    onChange,
+    onFocus,
+    onBlur,
+  } = props;
 
   return (
     <div
       className={cn(
         "flex min-w-0 flex-1 items-center rounded-sm px-1 transition-colors",
-        active && "bg-accent/60",
+        active && "bg-accent/60"
       )}
     >
       <UIInput
@@ -33,7 +44,7 @@ function RangeTriggerField(props: RangeTriggerFieldProps) {
         readOnly={readOnly}
         className={cn(
           "h-9 flex-1 border-0 !bg-transparent px-0 py-2 text-sm shadow-none ring-0 focus-visible:border-transparent focus-visible:ring-0",
-          inputClassName,
+          inputClassName
         )}
         onFocus={onFocus}
         onBlur={onBlur}
