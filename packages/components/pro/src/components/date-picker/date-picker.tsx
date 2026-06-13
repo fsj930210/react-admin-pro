@@ -8,8 +8,8 @@ import { useSinglePickerState } from "./hooks/use-date-picker-state";
 import { usePickerPanelController } from "./hooks/use-picker-panel-controller";
 import { PickerPanel } from "./picker-panel";
 import { PickerTrigger } from "./picker-trigger";
-import type { DatePickerProps, Dayjs, PickerMode, PickerPanelMode, PickerPreset } from "./types";
-import { formatPickerValue, parseValue } from "./utils";
+import type { DatePickerProps, Dayjs, MultipleValue, PickerMode, PickerPanelMode, PickerPreset } from "./types";
+import { formatPickerValue, parseValue, sameDay } from "./utils";
 
 function getDefaultPanelMode(mode: PickerMode): PickerPanelMode {
   if (mode === "year") return "year";
@@ -27,6 +27,7 @@ function DatePicker(props: DatePickerProps) {
     defaultOpen,
     onOpenChange,
     mode = "date",
+    multiple = false,
     format,
     placeholder = "Select date",
     allowClear = true,
@@ -49,6 +50,7 @@ function DatePicker(props: DatePickerProps) {
     onPanelChange,
     onClear,
   } = props;
+  const multipleDates = multiple && mode === "date";
   const {
     value,
     setValue,
@@ -60,18 +62,26 @@ function DatePicker(props: DatePickerProps) {
     setViewDate,
     hoverValue,
     setHoverValue,
-  } = useSinglePickerState(
+  } = useSinglePickerState<Dayjs | MultipleValue | null>(
     {
       value: valueProp,
-      defaultValue: defaultValue ?? null,
+      defaultValue: defaultValue ?? (multipleDates ? [] : null),
       onChange,
       open,
       defaultOpen,
       onOpenChange,
       defaultPanelMode: getDefaultPanelMode(mode),
-      defaultViewDate: valueProp ?? defaultValue ?? dayjs(),
+      defaultViewDate: Array.isArray(valueProp)
+        ? (valueProp[0] ?? dayjs())
+        : Array.isArray(defaultValue)
+          ? (defaultValue[0] ?? dayjs())
+          : (valueProp ?? defaultValue ?? dayjs()),
     },
-    valueProp ?? defaultValue ?? dayjs(),
+    Array.isArray(valueProp)
+      ? (valueProp[0] ?? dayjs())
+      : Array.isArray(defaultValue)
+        ? (defaultValue[0] ?? dayjs())
+        : (valueProp ?? defaultValue ?? dayjs()),
     getDefaultPanelMode(mode),
   );
   const changeOpen = useMemoizedFn((next: boolean) => {
@@ -83,7 +93,11 @@ function DatePicker(props: DatePickerProps) {
   const [draftText, setDraftText] = useState<string | null>(null);
 
   const mergedFormat = format ?? DEFAULT_FORMATS[mode] ?? DEFAULT_FORMATS.date;
-  const displayText = draftText ?? formatPickerValue(value, mode, format, mergedFormat);
+  const displayText =
+    draftText ??
+    (multipleDates && Array.isArray(value)
+      ? value.map((item) => formatPickerValue(item, mode, format, mergedFormat)).join(", ")
+      : formatPickerValue(Array.isArray(value) ? null : value, mode, format, mergedFormat));
   const mergedViewDate = viewDate;
   const panelController = usePickerPanelController({
     panelMode,
@@ -92,10 +106,14 @@ function DatePicker(props: DatePickerProps) {
     setViewDate,
   });
 
-  const commitValue = useMemoizedFn((next: Dayjs | null) => {
+  const commitValue = useMemoizedFn((next: Dayjs | MultipleValue | null) => {
     setValue(next);
     onSelect?.(next);
-    if (next) {
+    if (Array.isArray(next)) {
+      if (next[0]) {
+        setViewDate(next[0]);
+      }
+    } else if (next) {
       setViewDate(next);
     }
     setDraftText(null);
@@ -108,6 +126,12 @@ function DatePicker(props: DatePickerProps) {
     if (mode === "year") next = date.startOf("year");
     if (mode === "quarter") next = date.startOf("quarter");
     if (mode === "week") next = date.startOf("week");
+    if (multipleDates) {
+      const current = Array.isArray(value) ? value : [];
+      const exists = current.some((item) => sameDay(item, next));
+      commitValue(exists ? current.filter((item) => !sameDay(item, next)) : [...current, next]);
+      return;
+    }
     commitValue(next);
     if (mode !== "month" && mode !== "year" && mode !== "quarter") {
       changeOpen(false);
@@ -126,6 +150,11 @@ function DatePicker(props: DatePickerProps) {
     const next = parseValue(text, mergedFormat);
     if (!next) return;
     setViewDate(next);
+    if (multipleDates) {
+      setValue([next]);
+      onSelect?.([next]);
+      return;
+    }
     setValue(next);
     onSelect?.(next);
   });
@@ -163,6 +192,7 @@ function DatePicker(props: DatePickerProps) {
           panelMode={panelMode}
           viewDate={mergedViewDate}
           value={value}
+          multiple={multipleDates}
           disabledDate={disabledDate}
           presets={presets}
           footer={footer}

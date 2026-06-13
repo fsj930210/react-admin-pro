@@ -9,9 +9,10 @@ import {
 } from "@rap/components-ui/time-picker";
 import { Popover, PopoverContent, PopoverTrigger } from "@rap/components-ui/popover";
 import { cn } from "@rap/utils";
+import { useIsomorphicLayoutEffect } from "@rap/hooks/use-isomorphic-layout-effect";
 import dayjs from "dayjs";
 import customParseFormat from "dayjs/plugin/customParseFormat";
-import { useMemo } from "react";
+import { useMemo, useRef } from "react";
 import { DEFAULT_FORMATS } from "./constants";
 import { useSinglePickerState } from "./hooks/use-date-picker-state";
 import { usePickerPanelController } from "./hooks/use-picker-panel-controller";
@@ -78,8 +79,13 @@ function DateTimePicker(props: DateTimePickerProps) {
   });
 
   const inputValue = formatValue(value, format, DEFAULT_FORMATS.datetime);
-  const timeValue = value?.format("HH:mm:ss") ?? "00:00:00";
-  const timePanelTitle = value?.format("HH:mm") ?? "--:--";
+  const timeFormat = (Array.isArray(format) ? format[0] : format) ?? DEFAULT_FORMATS.datetime;
+  const showTimeSeconds = /s/.test(timeFormat);
+  const timeValue = value ?? dayjs();
+  const timePanelTitle = timeValue.format(showTimeSeconds ? "HH:mm:ss" : "HH:mm");
+  const timeColumnClassName = "h-auto min-h-0 max-h-full w-full min-w-0 px-1";
+  const calendarPanelRef = useRef<HTMLDivElement>(null);
+  const timePanelRef = useRef<HTMLDivElement>(null);
   const mergedViewDate = viewDate;
   const panelController = usePickerPanelController({
     panelMode,
@@ -87,6 +93,26 @@ function DateTimePicker(props: DateTimePickerProps) {
     setPanelMode,
     setViewDate,
   });
+
+  const syncTimePanelHeight = useMemoizedFn(() => {
+    const calendarPanel = calendarPanelRef.current?.firstElementChild;
+    const timePanel = timePanelRef.current;
+    if (!(calendarPanel instanceof HTMLElement) || !timePanel) return;
+    timePanel.style.height = `${calendarPanel.offsetHeight}px`;
+  });
+
+  // The time columns are scroll containers with many items; without a measured sibling height
+  // they define the popup height themselves. Sync to the calendar panel's natural height instead.
+  useIsomorphicLayoutEffect(() => {
+    const calendarPanel = calendarPanelRef.current?.firstElementChild;
+    const timePanel = timePanelRef.current;
+    if (!(calendarPanel instanceof HTMLElement) || !timePanel) return;
+
+    syncTimePanelHeight();
+    const resizeObserver = new ResizeObserver(syncTimePanelHeight);
+    resizeObserver.observe(calendarPanel);
+    return () => resizeObserver.disconnect();
+  }, [openState, showTime, syncTimePanelHeight]);
 
   const timeDisabled = useMemo(() => {
     if (!disabledTime) {
@@ -166,8 +192,14 @@ function DateTimePicker(props: DateTimePickerProps) {
             panelClassName,
           )}
         >
-          <div className="flex">
-            <div className="min-w-[320px]">
+          <div className="flex items-stretch">
+            <div
+              ref={(node) => {
+                calendarPanelRef.current = node;
+                queueMicrotask(syncTimePanelHeight);
+              }}
+              className="min-w-[320px]"
+            >
               <PickerPanel
                 pickerMode="datetime"
                 panelMode={panelMode}
@@ -206,6 +238,7 @@ function DateTimePicker(props: DateTimePickerProps) {
             {showTime ? (
               <TimePicker
                 value={timeValue}
+                format={timeFormat}
                 onValueChange={commitTime}
                 disabled={disabled}
                 readOnly={readOnly}
@@ -213,16 +246,29 @@ function DateTimePicker(props: DateTimePickerProps) {
                 disabledMinutes={timeDisabled.disabledMinutes}
                 disabledSeconds={timeDisabled.disabledSeconds}
               >
-                <div className="w-[288px] shrink-0 border-l">
-                  <div className="flex h-10 w-full items-center justify-center border-b text-sm font-medium">
-                    {timePanelTitle}
+                <div
+                  ref={(node) => {
+                    timePanelRef.current = node;
+                    queueMicrotask(syncTimePanelHeight);
+                  }}
+                  className={cn(
+                    "flex min-h-0 shrink-0 flex-col overflow-hidden border-l",
+                    showTimeSeconds ? "w-[270px]" : "w-[180px]",
+                  )}
+                >
+                  <div className="flex shrink-0 items-center justify-center border-b px-2 py-2 text-sm font-medium">
+                    <span className="flex h-7 items-center">{timePanelTitle}</span>
                   </div>
-                  <TimePickerPanel className="w-full">
-                    <TimePickerHour className="h-[236px] w-24 shrink-0 px-1 [&>button]:h-8 [&>button]:shrink-0" />
+                  <TimePickerPanel className={cn("grid min-h-0 flex-1 overflow-hidden", showTimeSeconds ? "grid-cols-3" : "grid-cols-2")}>
+                    <TimePickerHour className={timeColumnClassName} />
                     <TimePickerSeparator className="hidden" />
-                    <TimePickerMinute className="h-[236px] w-24 shrink-0 px-1 [&>button]:h-8 [&>button]:shrink-0" />
-                    <TimePickerSeparator className="hidden" />
-                    <TimePickerSecond className="h-[236px] w-24 shrink-0 px-1 [&>button]:h-8 [&>button]:shrink-0" />
+                    <TimePickerMinute className={timeColumnClassName} />
+                    {showTimeSeconds ? (
+                      <>
+                        <TimePickerSeparator className="hidden" />
+                        <TimePickerSecond className={timeColumnClassName} />
+                      </>
+                    ) : null}
                   </TimePickerPanel>
                 </div>
               </TimePicker>

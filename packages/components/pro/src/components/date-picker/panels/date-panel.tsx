@@ -3,13 +3,14 @@ import dayjs from "dayjs";
 import type { ReactNode } from "react";
 import { WEEKDAYS } from "../constants";
 import { PickerCell } from "../picker-cell";
-import type { Dayjs, PickerCellRenderInfo, PickerMode, RangeValue } from "../types";
+import type { Dayjs, MultipleValue, PickerCellRenderInfo, PickerMode, RangeValue } from "../types";
 import { buildDateGrid, sameDay } from "../utils";
 
 interface DatePanelProps {
   pickerMode: PickerMode;
   viewDate: Dayjs;
-  value: Dayjs | RangeValue | null;
+  value: Dayjs | RangeValue | MultipleValue | null;
+  multiple?: boolean;
   hoverValue?: Dayjs | null;
   disabledDate?: (current: Dayjs, info: { from?: Dayjs; type: PickerMode }) => boolean;
   renderCell?: (info: PickerCellRenderInfo) => ReactNode;
@@ -19,9 +20,10 @@ interface DatePanelProps {
 }
 
 function DatePanel(props: DatePanelProps) {
-  const { pickerMode, viewDate, value, hoverValue, disabledDate, renderCell, onSelect, onHover, className } = props;
-  const isRange = Array.isArray(value);
-  const start = isRange ? value[0] : value;
+  const { pickerMode, viewDate, value, hoverValue, disabledDate, renderCell, onSelect, onHover, className, multiple } = props;
+  const selectedDates = multiple && Array.isArray(value) ? value : null;
+  const isRange = !multiple && Array.isArray(value);
+  const start = isRange ? value[0] : selectedDates ? null : value;
   const end = isRange ? value[1] : null;
   const grid = buildDateGrid(viewDate);
   const hoverStart = isRange && start && !end ? start.startOf("day") : null;
@@ -44,7 +46,9 @@ function DatePanel(props: DatePanelProps) {
       </div>
       <div className="grid grid-cols-7 gap-0">
         {grid.map((current) => {
-          const selected = !!start && sameDay(current, start);
+          const selected = selectedDates
+            ? selectedDates.some((item) => sameDay(current, item))
+            : !!start && sameDay(current, start);
           const selectedEnd = !!end && sameDay(current, end);
           const disabled = disabledDate?.(current, { from: start ?? undefined, type: "date" }) ?? false;
           const inView = current.month() === viewDate.month();

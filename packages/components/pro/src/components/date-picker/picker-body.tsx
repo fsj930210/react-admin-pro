@@ -3,13 +3,14 @@ import { DatePanel } from "./panels/date-panel";
 import { MonthPicker } from "./panels/month-picker";
 import { QuarterPicker } from "./panels/quarter-picker";
 import { YearPicker } from "./panels/year-picker";
-import type { Dayjs, PickerCellRenderInfo, PickerMode, PickerPanelMode, RangeValue } from "./types";
+import type { Dayjs, MultipleValue, PickerCellRenderInfo, PickerMode, PickerPanelMode, RangeValue } from "./types";
 
 interface PickerBodyProps {
   pickerMode: PickerMode;
   panelMode: PickerPanelMode;
   viewDate: Dayjs;
-  value: Dayjs | RangeValue | null;
+  value: Dayjs | RangeValue | MultipleValue | null;
+  multiple?: boolean;
   hoverValue?: Dayjs | null;
   disabledDate?: (current: Dayjs, info: { from?: Dayjs; type: PickerMode }) => boolean;
   renderCell?: (info: PickerCellRenderInfo) => ReactNode;

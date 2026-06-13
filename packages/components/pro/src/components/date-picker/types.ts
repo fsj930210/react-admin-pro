@@ -9,6 +9,7 @@ export type PickerValueType = "single" | "range";
 export type PickerFooterActions = false | { today?: boolean; clear?: boolean };
 
 export type RangeValue = [Dayjs | null, Dayjs | null] | null;
+export type MultipleValue = Dayjs[];
 
 export interface PickerPreset {
   label: ReactNode;
@@ -36,7 +37,7 @@ export interface PickerPanelContext {
   pickerMode: PickerMode;
   panelMode: PickerPanelMode;
   viewDate: Dayjs;
-  value: Dayjs | RangeValue | null;
+  value: Dayjs | RangeValue | MultipleValue | null;
   hoverValue?: Dayjs;
   activeRangePart?: "start" | "end";
   selectDate: (date: Dayjs) => void;
@@ -64,9 +65,10 @@ interface BasePickerProps {
 }
 
 export interface DatePickerProps extends BasePickerProps {
-  value?: Dayjs | null;
-  defaultValue?: Dayjs | null;
-  onChange?: (value: Dayjs | null) => void;
+  value?: Dayjs | MultipleValue | null;
+  defaultValue?: Dayjs | MultipleValue | null;
+  onChange?: (value: Dayjs | MultipleValue | null) => void;
+  multiple?: boolean;
   mode?: Exclude<PickerMode, "time" | "datetime">;
   format?: string | string[];
   placeholder?: string;
@@ -75,7 +77,7 @@ export interface DatePickerProps extends BasePickerProps {
   presets?: PickerPreset[];
   renderCell?: (info: PickerCellRenderInfo) => ReactNode;
   renderPanel?: (panel: ReactNode, context: PickerPanelContext) => ReactNode;
-  onSelect?: (value: Dayjs | null) => void;
+  onSelect?: (value: Dayjs | MultipleValue | null) => void;
   onPanelChange?: (panelMode: PickerPanelMode, viewDate: Dayjs) => void;
 }
 

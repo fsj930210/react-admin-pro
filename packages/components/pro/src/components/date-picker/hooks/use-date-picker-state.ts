@@ -1,7 +1,7 @@
 import { useControllableState } from "@rap/hooks/use-controllable-state";
 import { useMemoizedFn } from "@rap/hooks/use-memoized-fn";
 import { useState } from "react";
-import type { Dayjs, PickerPanelMode, RangeValue } from "../types";
+import type { Dayjs, MultipleValue, PickerPanelMode, RangeValue } from "../types";
 
 interface PickerStateProps<T> {
   value?: T;
@@ -43,8 +43,12 @@ function usePickerState<T>(props: PickerStateProps<T>, fallbackViewDate: Dayjs, 
   };
 }
 
-function useSinglePickerState(props: PickerStateProps<Dayjs | null>, fallbackViewDate: Dayjs, defaultPanelMode: PickerPanelMode) {
-  return usePickerState<Dayjs | null>(props, fallbackViewDate, defaultPanelMode);
+function useSinglePickerState<T extends Dayjs | MultipleValue | null = Dayjs | null>(
+  props: PickerStateProps<T>,
+  fallbackViewDate: Dayjs,
+  defaultPanelMode: PickerPanelMode,
+) {
+  return usePickerState<T>(props, fallbackViewDate, defaultPanelMode);
 }
 
 function useRangePickerState(props: PickerStateProps<RangeValue>, fallbackViewDate: Dayjs, defaultPanelMode: PickerPanelMode) {

@@ -3,12 +3,14 @@
 import { Clock } from "lucide-react";
 import { Slot as SlotPrimitive } from "radix-ui";
 import * as React from "react";
+import dayjs from "dayjs";
 import { useComposedRefs } from "@rap/utils/compose-refs";
 import { cn } from "@rap/utils";
 import { VisuallyHiddenInput } from "./visually-hidden-input";
 import { useAsRef } from "@rap/hooks/use-as-ref";
 import { useIsomorphicLayoutEffect } from "@rap/hooks/use-isomorphic-layout-effect";
 import { useLazyRef } from "@rap/hooks/use-lazy-ref";
+import { Button } from "./button";
 import { Popover, PopoverAnchor, PopoverContent, PopoverTrigger } from "./popover";
 
 const ROOT_NAME = "TimePicker";
@@ -269,10 +271,12 @@ function useTimePickerContext(consumerName: string) {
   return context;
 }
 
+type TimePickerValue = string | dayjs.Dayjs;
+
 interface TimePickerProps extends DivProps {
-  value?: string;
-  defaultValue?: string;
-  onValueChange?: (value: string) => void;
+  value?: TimePickerValue;
+  defaultValue?: TimePickerValue;
+  onValueChange?: (value: string, date: dayjs.Dayjs | null) => void;
   open?: boolean;
   defaultOpen?: boolean;
   onOpenChange?: (open: boolean) => void;
@@ -285,6 +289,7 @@ interface TimePickerProps extends DivProps {
   secondStep?: number;
   segmentPlaceholder?: SegmentPlaceholder;
   locale?: string;
+  format?: string;
   name?: string;
   disabled?: boolean;
   invalid?: boolean;
@@ -314,13 +319,14 @@ function TimePicker(props: TimePickerProps) {
     secondStep = DEFAULT_STEP,
     segmentPlaceholder = DEFAULT_SEGMENT_PLACEHOLDER,
     locale = DEFAULT_LOCALE,
+    format = "HH:mm",
     name,
     asChild,
     disabled = false,
     invalid = false,
     readOnly = false,
     required = false,
-    showSeconds = false,
+    showSeconds,
     disabledHours,
     disabledMinutes,
     disabledSeconds,
@@ -343,9 +349,19 @@ function TimePicker(props: TimePickerProps) {
   const [inputGroup, setInputGroup] = React.useState<InputGroupElement | null>(null);
   const isFormControl = inputGroup ? !!inputGroup.closest("form") : true;
 
+  const formatHasSeconds = /s/.test(format);
+  const mergedShowSeconds = showSeconds ?? formatHasSeconds;
+  const formatTimePickerValue = React.useCallback(
+    (next: TimePickerValue | undefined) => {
+      if (!next) return "";
+      return typeof next === "string" ? next : next.format(mergedShowSeconds ? "HH:mm:ss" : "HH:mm");
+    },
+    [mergedShowSeconds]
+  );
+
   const listenersRef = useLazyRef(() => new Set<() => void>());
   const stateRef = useLazyRef<StoreState>(() => ({
-    value: valueProp ?? defaultValue ?? "",
+    value: formatTimePickerValue(valueProp ?? defaultValue),
     open: open ?? defaultOpen ?? false,
     openedViaFocus: false,
   }));
@@ -364,7 +380,16 @@ function TimePicker(props: TimePickerProps) {
 
         if (key === "value" && typeof value === "string") {
           stateRef.current.value = value;
-          propsRef.current.onValueChange?.(value);
+          const parsed = parseTimeString(value);
+          const nextDate =
+            parsed && parsed.hour !== undefined && parsed.minute !== undefined
+              ? dayjs()
+                  .hour(parsed.hour)
+                  .minute(parsed.minute)
+                  .second(parsed.second ?? 0)
+                  .millisecond(0)
+              : null;
+          propsRef.current.onValueChange?.(value, nextDate);
         } else if (key === "open" && typeof value === "boolean") {
           stateRef.current.open = value;
           propsRef.current.onOpenChange?.(value);
@@ -389,9 +414,9 @@ function TimePicker(props: TimePickerProps) {
 
   useIsomorphicLayoutEffect(() => {
     if (valueProp !== undefined) {
-      store.setState("value", valueProp);
+      store.setState("value", formatTimePickerValue(valueProp));
     }
-  }, [valueProp]);
+  }, [valueProp, formatTimePickerValue]);
 
   useIsomorphicLayoutEffect(() => {
     if (open !== undefined) {
@@ -440,7 +465,7 @@ function TimePicker(props: TimePickerProps) {
       readOnly,
       required,
       invalid,
-      showSeconds,
+      showSeconds: mergedShowSeconds,
       is12Hour,
       minuteStep,
       secondStep,
@@ -464,7 +489,7 @@ function TimePicker(props: TimePickerProps) {
       readOnly,
       required,
       invalid,
-      showSeconds,
+      mergedShowSeconds,
       is12Hour,
       minuteStep,
       secondStep,
@@ -1359,7 +1384,7 @@ function TimePickerInput(props: TimePickerInputProps) {
       disabled={isDisabled}
       readOnly={isReadOnly}
       className={cn(
-        "inline-flex h-full items-center justify-center border-0 bg-transparent text-center text-sm tabular-nums outline-none transition-colors focus:bg-transparent disabled:cursor-not-allowed disabled:opacity-50",
+        "inline-flex h-full items-center justify-center border-0 bg-transparent text-center text-sm tabular-nums outline-none transition-colors focus:bg-transparent disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50",
         className
       )}
       style={{ width: segmentWidth, ...style }}
@@ -1677,18 +1702,55 @@ interface TimePickerColumnItemProps extends ButtonProps {
 }
 
 function TimePickerColumnItem(props: TimePickerColumnItemProps) {
-  const { value, selected = false, format = "numeric", className, ref, ...itemProps } = props;
+  const { value, selected = false, format = "numeric", className, ref, disabled, ...itemProps } = props;
 
   const itemRef = React.useRef<ColumnItemElement | null>(null);
+  const scrollAnimationRef = React.useRef<number | null>(null);
   const composedRef = useComposedRefs(ref, itemRef);
   const columnContext = useTimePickerColumnContext(COLUMN_ITEM_NAME);
   const groupContext = useTimePickerGroupContext(COLUMN_ITEM_NAME);
 
-  const scrollItemToTop = React.useCallback(() => {
+  const scrollItemToTop = React.useCallback((behavior: ScrollBehavior = "auto") => {
     const item = itemRef.current;
     const column = item?.closest<HTMLElement>("[data-slot='time-picker-hour'], [data-slot='time-picker-minute'], [data-slot='time-picker-second'], [data-slot='time-picker-period']");
     if (!item || !column) return;
-    column.scrollTop = item.offsetTop - column.offsetTop;
+    const targetTop = Math.max(item.offsetTop - column.offsetTop - 8, 0);
+
+    if (scrollAnimationRef.current !== null) {
+      window.cancelAnimationFrame(scrollAnimationRef.current);
+      scrollAnimationRef.current = null;
+    }
+
+    if (behavior !== "smooth") {
+      column.scrollTop = targetTop;
+      return;
+    }
+
+    const startTop = column.scrollTop;
+    const distance = targetTop - startTop;
+    const duration = 180;
+    const startTime = window.performance.now();
+
+    if (Math.abs(distance) < 1) {
+      column.scrollTop = targetTop;
+      return;
+    }
+
+    const step = (timestamp: number) => {
+      const progress = Math.min((timestamp - startTime) / duration, 1);
+      const easedProgress = 1 - (1 - progress) ** 3;
+      column.scrollTop = startTop + distance * easedProgress;
+
+      if (progress < 1) {
+        scrollAnimationRef.current = window.requestAnimationFrame(step);
+        return;
+      }
+
+      column.scrollTop = targetTop;
+      scrollAnimationRef.current = null;
+    };
+
+    scrollAnimationRef.current = window.requestAnimationFrame(step);
   }, []);
 
   useIsomorphicLayoutEffect(() => {
@@ -1698,7 +1760,7 @@ function TimePickerColumnItem(props: TimePickerColumnItemProps) {
 
   useIsomorphicLayoutEffect(() => {
     if (selected && itemRef.current) {
-      scrollItemToTop();
+      scrollItemToTop("smooth");
     }
   }, [selected, scrollItemToTop]);
 
@@ -1708,7 +1770,7 @@ function TimePickerColumnItem(props: TimePickerColumnItemProps) {
       if (event.defaultPrevented) return;
 
       itemRef.current?.focus();
-      scrollItemToTop();
+      scrollItemToTop("smooth");
     },
     [itemProps, scrollItemToTop]
   );
@@ -1788,21 +1850,23 @@ function TimePickerColumnItem(props: TimePickerColumnItemProps) {
       : value.toString();
 
   return (
-    <button
+    <Button
       type="button"
+      variant={selected ? "default" : "ghost"}
       {...itemProps}
+      disabled={disabled}
       ref={composedRef}
       data-selected={selected ? "" : undefined}
       className={cn(
-        "w-full rounded px-3 py-1.5 text-center text-sm hover:bg-accent hover:text-accent-foreground focus:border-ring focus:outline-none focus:ring-[3px] focus:ring-ring/50",
-        "data-selected:bg-accent data-selected:text-accent-foreground data-selected:hover:bg-accent data-selected:hover:text-accent-foreground",
+        "h-8 w-full shrink-0 px-3 text-center",
+        selected && "hover:bg-primary hover:text-primary-foreground",
         className
       )}
       onClick={onClick}
       onKeyDown={onKeyDown}
     >
       {formattedValue}
-    </button>
+    </Button>
   );
 }
 
@@ -1882,7 +1946,7 @@ function TimePickerHour(props: TimePickerHourProps) {
       data-slot="time-picker-hour"
       {...hourProps}
       className={cn(
-        "scrollbar-none flex max-h-[200px] flex-col gap-1 overflow-y-auto p-1 after:h-[calc(100%-2.25rem)] after:shrink-0 after:content-['']",
+        "scrollbar-none flex max-h-[200px] flex-col gap-1 overflow-y-auto p-1 after:h-[calc(100%-2rem)] after:shrink-0 after:content-['']",
         className
       )}
     >
@@ -1948,7 +2012,7 @@ function TimePickerMinute(props: TimePickerMinuteProps) {
       data-slot="time-picker-minute"
       {...minuteProps}
       className={cn(
-        "scrollbar-none flex max-h-[200px] flex-col gap-1 overflow-y-auto p-1 after:h-[calc(100%-2.25rem)] after:shrink-0 after:content-['']",
+        "scrollbar-none flex max-h-[200px] flex-col gap-1 overflow-y-auto p-1 after:h-[calc(100%-2rem)] after:shrink-0 after:content-['']",
         className
       )}
     >
@@ -2016,7 +2080,7 @@ function TimePickerSecond(props: TimePickerSecondProps) {
       data-slot="time-picker-second"
       {...secondProps}
       className={cn(
-        "scrollbar-none flex max-h-[200px] flex-col gap-1 overflow-y-auto p-1 after:h-[calc(100%-2.25rem)] after:shrink-0 after:content-['']",
+        "scrollbar-none flex max-h-[200px] flex-col gap-1 overflow-y-auto p-1 after:h-[calc(100%-2rem)] after:shrink-0 after:content-['']",
         className
       )}
     >
@@ -2141,7 +2205,7 @@ function TimePickerClear(props: ButtonProps) {
       disabled={isDisabled}
       {...clearProps}
       className={cn(
-        "inline-flex items-center justify-center rounded-sm font-medium text-sm transition-colors hover:bg-accent hover:text-accent-foreground disabled:pointer-events-none disabled:opacity-50",
+        "inline-flex items-center justify-center rounded-sm font-medium text-sm transition-colors hover:bg-accent hover:text-accent-foreground disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50",
         className
       )}
       onClick={onClick}

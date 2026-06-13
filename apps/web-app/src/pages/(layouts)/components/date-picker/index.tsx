@@ -24,6 +24,10 @@ function DemoSection({ title, children }: { title: string; children: ReactNode }
 
 function BasicSection() {
   const [value, setValue] = useState<dayjs.Dayjs | null>(dayjs());
+  const [multipleValue, setMultipleValue] = useState<dayjs.Dayjs[]>([
+    dayjs(),
+    dayjs().add(2, "day"),
+  ]);
 
   return (
     <DemoSection title="Basic">
@@ -51,6 +55,18 @@ function BasicSection() {
         <div className="space-y-2">
           <FieldLabel>Readonly</FieldLabel>
           <DatePicker readOnly value={dayjs("2026-06-12")} />
+        </div>
+        <div className="space-y-2">
+          <FieldLabel>Multiple</FieldLabel>
+          <DatePicker
+            multiple
+            value={multipleValue}
+            onChange={(next) => setMultipleValue(Array.isArray(next) ? next : [])}
+            format="YYYY-MM-DD"
+          />
+          <FieldDescription>
+            Current value: {multipleValue.map((item) => item.format("YYYY-MM-DD")).join(", ") || "empty"}
+          </FieldDescription>
         </div>
       </FieldGroup>
     </DemoSection>
@@ -198,7 +214,11 @@ function DateTimeSection() {
           </FieldDescription>
         </div>
         <div className="space-y-2">
-          <FieldLabel>Disabled Time</FieldLabel>
+          <FieldLabel>Minute Format</FieldLabel>
+          <DateTimePicker format="YYYY-MM-DD HH:mm" />
+        </div>
+        <div className="space-y-2">
+          <FieldLabel>Disabled Time Options</FieldLabel>
           <DateTimePicker
             format="YYYY-MM-DD HH:mm:ss"
             disabledTime={(current) => ({
@@ -207,6 +227,7 @@ function DateTimeSection() {
               disabledSeconds: (hour, minute) => (hour === 12 && minute === 30 ? [10, 11, 12] : []),
             })}
           />
+          <FieldDescription>Disables selected hours, minutes, and seconds in the time panel.</FieldDescription>
         </div>
       </FieldGroup>
     </DemoSection>

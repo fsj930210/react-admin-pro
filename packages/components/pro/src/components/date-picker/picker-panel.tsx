@@ -7,6 +7,7 @@ import { PickerPresets } from "./picker-presets";
 import { getYearPageStart } from "./utils";
 import type {
   Dayjs,
+  MultipleValue,
   PickerCellRenderInfo,
   PickerFooterActions,
   PickerMode,
@@ -20,7 +21,7 @@ interface PickerPanelProps {
   pickerMode: PickerMode;
   panelMode: PickerPanelMode;
   viewDate: Dayjs;
-  value: Dayjs | RangeValue | null;
+  value: Dayjs | RangeValue | MultipleValue | null;
   hoverValue?: Dayjs | null;
   disabledDate?: (current: Dayjs, info: { from?: Dayjs; type: PickerMode }) => boolean;
   presets?: PickerPreset[];
@@ -44,6 +45,7 @@ interface PickerPanelProps {
   setViewDate: (date: Dayjs) => void;
   numberOfMonths?: 1 | 2;
   activeRangePart?: "start" | "end";
+  multiple?: boolean;
   className?: string;
 }
 
@@ -96,10 +98,11 @@ function PickerPanel(props: PickerPanelProps) {
     setViewDate,
     numberOfMonths = 1,
     activeRangePart,
+    multiple,
     className,
   } = props;
 
-  const isRange = activeRangePart !== undefined || Array.isArray(value);
+  const isRange = activeRangePart !== undefined || (!multiple && Array.isArray(value));
   const context: PickerPanelContext = {
     mode: isRange ? "range" : "single",
     pickerMode,
@@ -176,6 +179,7 @@ function PickerPanel(props: PickerPanelProps) {
       panelMode={panelMode}
       viewDate={date}
       value={value}
+      multiple={multiple}
       hoverValue={hoverValue}
       disabledDate={disabledDate}
       renderCell={renderCell}
