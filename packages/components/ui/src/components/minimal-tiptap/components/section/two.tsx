@@ -1,10 +1,10 @@
-import * as React from "react";
 import type { Editor } from "@tiptap/react";
 import type { FormatAction } from "../../types";
 import type { toggleVariants } from "../../../toggle";
 import type { VariantProps } from "class-variance-authority";
 import { Code, MoreHorizontal, Bold, Italic, Strikethrough, Eraser, Underline } from "lucide-react";
 import { ToolbarSection } from "../toolbar-section";
+import { type FC } from "react";
 
 type TextStyleAction =
   | "bold"
@@ -87,7 +87,7 @@ interface SectionTwoProps extends VariantProps<typeof toggleVariants> {
   mainActionCount?: number;
 }
 
-export const SectionTwo: React.FC<SectionTwoProps> = ({
+export const SectionTwo: FC<SectionTwoProps> = ({
   editor,
   activeActions = formatActions.map((action) => action.value),
   mainActionCount = 2,

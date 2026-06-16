@@ -1,14 +1,14 @@
 // 文档地址 https://www.diceui.com/docs/components/radix/listbox
 import * as ListboxPrimitive from "@diceui/listbox";
 import { Check } from "lucide-react";
-import type * as React from "react";
+import { type ComponentProps } from "react";
 import { cn } from "@rap/utils";
 
 const Listbox = (({
   className,
   orientation = "vertical",
   ...props
-}: React.ComponentProps<typeof ListboxPrimitive.Root>) => {
+}: ComponentProps<typeof ListboxPrimitive.Root>) => {
   return (
     <ListboxPrimitive.Root
       data-slot="listbox"
@@ -23,10 +23,7 @@ const Listbox = (({
   );
 }) as ListboxPrimitive.ListboxRootComponentProps;
 
-function ListboxGroup({
-  className,
-  ...props
-}: React.ComponentProps<typeof ListboxPrimitive.Group>) {
+function ListboxGroup({ className, ...props }: ComponentProps<typeof ListboxPrimitive.Group>) {
   return (
     <ListboxPrimitive.Group
       data-slot="listbox-group"
@@ -39,7 +36,7 @@ function ListboxGroup({
 function ListboxGroupLabel({
   className,
   ...props
-}: React.ComponentProps<typeof ListboxPrimitive.GroupLabel>) {
+}: ComponentProps<typeof ListboxPrimitive.GroupLabel>) {
   return (
     <ListboxPrimitive.GroupLabel
       data-slot="listbox-group-label"
@@ -49,7 +46,7 @@ function ListboxGroupLabel({
   );
 }
 
-function ListboxItem({ className, ...props }: React.ComponentProps<typeof ListboxPrimitive.Item>) {
+function ListboxItem({ className, ...props }: ComponentProps<typeof ListboxPrimitive.Item>) {
   return (
     <ListboxPrimitive.Item
       data-slot="listbox-item"
@@ -62,9 +59,7 @@ function ListboxItem({ className, ...props }: React.ComponentProps<typeof Listbo
   );
 }
 
-function ListboxItemIndicator({
-  ...props
-}: React.ComponentProps<typeof ListboxPrimitive.ItemIndicator>) {
+function ListboxItemIndicator({ ...props }: ComponentProps<typeof ListboxPrimitive.ItemIndicator>) {
   return (
     <ListboxPrimitive.ItemIndicator data-slot="listbox-item-indicator" {...props}>
       <Check className="size-4" />

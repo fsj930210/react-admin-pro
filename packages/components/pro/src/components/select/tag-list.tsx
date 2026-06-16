@@ -1,8 +1,9 @@
-import React, { type ReactNode } from "react";
+import { Fragment, type ReactNode } from "react";
 import { X } from "lucide-react";
 import { Badge } from "@rap/components-ui/badge";
 import { Button } from "@rap/components-ui/button";
 import type { SelectOption, SelectTagRenderInfo, SelectValue } from "./types";
+import * as React from "react";
 
 interface SelectTagListProps<V extends SelectValue> {
   options: SelectOption<V>[];

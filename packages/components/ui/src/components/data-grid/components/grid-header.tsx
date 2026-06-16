@@ -9,7 +9,7 @@ import {
   type HeaderGroup,
   type Table,
 } from "@tanstack/react-table";
-import { type MouseEvent, type Ref, useMemo } from "react";
+import { useMemo, type MouseEvent, type Ref } from "react";
 import type { ColumnOrderingDragState } from "../hooks/use-column-ordering-dnd";
 import type { DataGridElementProps, DataGridProps } from "../types";
 import {

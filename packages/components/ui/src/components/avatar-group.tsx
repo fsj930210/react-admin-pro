@@ -1,8 +1,15 @@
 // 文档地址 https://www.diceui.com/docs/components/radix/avatar-group
 import { cva, type VariantProps } from "class-variance-authority";
 import { Slot as SlotPrimitive } from "radix-ui";
-import * as React from "react";
 import { cn } from "@rap/utils";
+import {
+  Children,
+  isValidElement,
+  useMemo,
+  type CSSProperties,
+  type ComponentProps,
+  type ReactNode,
+} from "react";
 
 const avatarGroupVariants = cva("flex items-center", {
   variants: {
@@ -44,12 +51,12 @@ const avatarGroupVariants = cva("flex items-center", {
 });
 
 interface AvatarGroupProps
-  extends Omit<React.ComponentProps<"div">, "dir">, VariantProps<typeof avatarGroupVariants> {
+  extends Omit<ComponentProps<"div">, "dir">, VariantProps<typeof avatarGroupVariants> {
   size?: number;
   max?: number;
   asChild?: boolean;
   reverse?: boolean;
-  renderOverflow?: (count: number) => React.ReactNode;
+  renderOverflow?: (count: number) => ReactNode;
 }
 
 function AvatarGroup(props: AvatarGroupProps) {
@@ -66,7 +73,7 @@ function AvatarGroup(props: AvatarGroupProps) {
     ...rootProps
   } = props;
 
-  const childrenArray = React.Children.toArray(children).filter(React.isValidElement);
+  const childrenArray = Children.toArray(children).filter(isValidElement);
   const itemCount = childrenArray.length;
   const shouldTruncate = max && itemCount > max;
   const visibleItems = shouldTruncate ? childrenArray.slice(0, max - 1) : childrenArray;
@@ -120,9 +127,9 @@ function AvatarGroup(props: AvatarGroupProps) {
 
 interface AvatarGroupItemProps
   extends
-    Omit<React.ComponentProps<typeof SlotPrimitive.Slot>, "dir">,
+    Omit<ComponentProps<typeof SlotPrimitive.Slot>, "dir">,
     VariantProps<typeof avatarGroupVariants> {
-  child: React.ReactNode;
+  child: ReactNode;
   index: number;
   itemCount: number;
   size: number;
@@ -143,7 +150,8 @@ function AvatarGroupItem(props: AvatarGroupItemProps) {
     ...itemProps
   } = props;
 
-  const maskStyle = React.useMemo<React.CSSProperties>(() => {
+  // useMemo keeps the generated mask style object stable for Slot children; updates when layout inputs change.
+  const maskStyle = useMemo<CSSProperties>(() => {
     let maskImage = "";
 
     let shouldMask = false;

@@ -12,16 +12,33 @@ import {
   shift,
   useFloating,
 } from "@floating-ui/react-dom";
+import {
+  createContext,
+  createElement,
+  use,
+  useEffect,
+  useRef,
+  useState,
+  useSyncExternalStore,
+  type ComponentProps,
+  type ComponentRef,
+  type FocusEvent as ReactFocusEvent,
+  type MouseEvent as ReactMouseEvent,
+  type PointerEvent as ReactPointerEvent,
+  type ReactElement,
+  type ReactNode,
+  type RefObject,
+} from "react";
 import { ChevronLeft, ChevronRight, X } from "lucide-react";
 import { Direction as DirectionPrimitive, Slot as SlotPrimitive } from "radix-ui";
-import * as React from "react";
-import * as ReactDOM from "react-dom";
 import { useComposedRefs } from "@rap/utils/compose-refs";
 import { cn } from "@rap/utils";
 import { useAsRef } from "@rap/hooks/use-as-ref";
 import { useIsomorphicLayoutEffect } from "@rap/hooks/use-isomorphic-layout-effect";
 import { useLazyRef } from "@rap/hooks/use-lazy-ref";
 import { Button } from "./button";
+import { useMemoizedFn } from "@rap/hooks/use-memoized-fn";
+import { createPortal } from "react-dom";
 
 const ROOT_NAME = "Tour";
 const PORTAL_NAME = "TourPortal";
@@ -62,16 +79,16 @@ interface ScrollOffset {
 
 type Boundary = Element | null;
 
-interface DivProps extends React.ComponentProps<"div"> {
+interface DivProps extends ComponentProps<"div"> {
   asChild?: boolean;
 }
 
-type StepElement = React.ComponentRef<typeof TourStep>;
-type CloseElement = React.ComponentRef<typeof TourClose>;
-type PrevElement = React.ComponentRef<typeof TourPrev>;
-type NextElement = React.ComponentRef<typeof TourNext>;
-type SkipElement = React.ComponentRef<typeof TourSkip>;
-type FooterElement = React.ComponentRef<typeof TourFooter>;
+type StepElement = ComponentRef<typeof TourStep>;
+type CloseElement = ComponentRef<typeof TourClose>;
+type PrevElement = ComponentRef<typeof TourPrev>;
+type NextElement = ComponentRef<typeof TourNext>;
+type SkipElement = ComponentRef<typeof TourSkip>;
+type FooterElement = ComponentRef<typeof TourFooter>;
 
 const OPPOSITE_SIDE: Record<Side, Side> = {
   top: "bottom",
@@ -97,7 +114,8 @@ function createFocusGuard() {
 }
 
 function useFocusGuards() {
-  React.useEffect(() => {
+  // Focus guards are DOM sentinels shared across active tour instances.
+  useEffect(() => {
     const edgeGuards = document.querySelectorAll("[data-tour-focus-guard]");
     document.body.insertAdjacentElement("afterbegin", edgeGuards[0] ?? createFocusGuard());
     document.body.insertAdjacentElement("beforeend", edgeGuards[1] ?? createFocusGuard());
@@ -116,18 +134,19 @@ function useFocusGuards() {
 }
 
 function useFocusTrap(
-  containerRef: React.RefObject<HTMLElement | null>,
+  containerRef: RefObject<HTMLElement | null>,
   enabled: boolean,
   tourOpen: boolean,
   onOpenAutoFocus?: (event: OpenAutoFocusEvent) => void,
   onCloseAutoFocus?: (event: CloseAutoFocusEvent) => void
 ) {
-  const lastFocusedElementRef = React.useRef<HTMLElement | null>(null);
+  const lastFocusedElementRef = useRef<HTMLElement | null>(null);
   const onOpenAutoFocusRef = useAsRef(onOpenAutoFocus);
   const onCloseAutoFocusRef = useAsRef(onCloseAutoFocus);
   const tourOpenRef = useAsRef(tourOpen);
 
-  React.useEffect(() => {
+  // The focus trap needs document listeners because focus can leave React's tree.
+  useEffect(() => {
     if (!enabled) return;
 
     const container = containerRef.current;
@@ -252,7 +271,7 @@ function getDataState(open: boolean) {
 }
 
 interface StepData {
-  target: string | React.RefObject<HTMLElement> | HTMLElement;
+  target: string | RefObject<HTMLElement> | HTMLElement;
   align?: Align;
   alignOffset?: number;
   side?: Side;
@@ -286,7 +305,7 @@ interface Store {
 }
 
 function useStore<T>(selector: (state: StoreState) => T, ogStore?: Store | null): T {
-  const contextStore = React.useContext(StoreContext);
+  const contextStore = use(StoreContext);
 
   const store = ogStore ?? contextStore;
 
@@ -294,13 +313,13 @@ function useStore<T>(selector: (state: StoreState) => T, ogStore?: Store | null)
     throw new Error(`\`useStore\` must be used within \`${ROOT_NAME}\``);
   }
 
-  const getSnapshot = React.useCallback(() => selector(store.getState()), [store, selector]);
+  const getSnapshot = useMemoizedFn(() => selector(store.getState()));
 
-  return React.useSyncExternalStore(store.subscribe, getSnapshot, getSnapshot);
+  return useSyncExternalStore(store.subscribe, getSnapshot, getSnapshot);
 }
 
 function getTargetElement(
-  target: string | React.RefObject<HTMLElement> | HTMLElement
+  target: string | RefObject<HTMLElement> | HTMLElement
 ): HTMLElement | null {
   if (typeof target === "string") {
     return document.querySelector(target);
@@ -364,6 +383,61 @@ function getPlacement(side: Side, align: Align): Placement {
   return `${side}-${align}` as Placement;
 }
 
+function getCollisionPadding(padding: StepData["collisionPadding"]) {
+  if (typeof padding === "number") return padding;
+
+  return {
+    top: padding?.top ?? 0,
+    right: padding?.right ?? 0,
+    bottom: padding?.bottom ?? 0,
+    left: padding?.left ?? 0,
+  };
+}
+
+function getCollisionBoundary(boundary: StepData["collisionBoundary"]) {
+  if (Array.isArray(boundary)) return boundary;
+  if (boundary) return [boundary];
+  return [];
+}
+
+function getTourMiddleware(
+  stepData: StepData | undefined,
+  resolvedSideOffset: number,
+  resolvedAlignOffset: number,
+  arrow: HTMLSpanElement | null
+) {
+  if (!stepData) return [];
+
+  const boundary = getCollisionBoundary(stepData.collisionBoundary);
+  const hasExplicitBoundaries = boundary.length > 0;
+  const detectOverflowOptions = {
+    padding: getCollisionPadding(stepData.collisionPadding),
+    boundary: boundary.filter((item): item is Element => item !== null),
+    altBoundary: hasExplicitBoundaries,
+  };
+
+  return [
+    offset({
+      mainAxis: stepData.sideOffset ?? resolvedSideOffset,
+      alignmentAxis: stepData.alignOffset ?? resolvedAlignOffset,
+    }),
+    stepData.avoidCollisions &&
+      shift({
+        mainAxis: true,
+        crossAxis: false,
+        limiter: stepData.sticky === "partial" ? limitShift() : undefined,
+        ...detectOverflowOptions,
+      }),
+    stepData.avoidCollisions && flip({ ...detectOverflowOptions }),
+    arrow && onArrow({ element: arrow, padding: stepData.arrowPadding }),
+    stepData.hideWhenDetached &&
+      hide({
+        strategy: "referenceHidden",
+        ...detectOverflowOptions,
+      }),
+  ].filter(Boolean) as Middleware[];
+}
+
 function updateMask(
   store: Store,
   targetElement: HTMLElement,
@@ -383,10 +457,10 @@ function updateMask(
   store.setState("spotlightRect", { x, y, width, height });
 }
 
-const StoreContext = React.createContext<Store | null>(null);
+const StoreContext = createContext<Store | null>(null);
 
 function useStoreContext(consumerName: string) {
-  const context = React.useContext(StoreContext);
+  const context = use(StoreContext);
   if (!context) {
     throw new Error(`\`${consumerName}\` must be used within \`${ROOT_NAME}\``);
   }
@@ -400,17 +474,17 @@ interface TourContextValue {
   spotlightPadding: number;
   dismissible: boolean;
   modal: boolean;
-  stepFooter?: React.ReactElement;
+  stepFooter?: ReactElement;
   onPointerDownOutside?: (event: PointerDownOutsideEvent) => void;
   onInteractOutside?: (event: InteractOutsideEvent) => void;
   onOpenAutoFocus?: (event: OpenAutoFocusEvent) => void;
   onCloseAutoFocus?: (event: CloseAutoFocusEvent) => void;
 }
 
-const TourContext = React.createContext<TourContextValue | null>(null);
+const TourContext = createContext<TourContextValue | null>(null);
 
 function useTourContext(consumerName: string) {
-  const context = React.useContext(TourContext);
+  const context = use(TourContext);
   if (!context) {
     throw new Error(`\`${consumerName}\` must be used within \`${ROOT_NAME}\``);
   }
@@ -427,27 +501,27 @@ interface StepContextValue {
   onFooterChange: (footer: FooterElement | null) => void;
 }
 
-const StepContext = React.createContext<StepContextValue | null>(null);
+const StepContext = createContext<StepContextValue | null>(null);
 
 function useStepContext(consumerName: string) {
-  const context = React.useContext(StepContext);
+  const context = use(StepContext);
   if (!context) {
     throw new Error(`\`${consumerName}\` must be used within \`${STEP_NAME}\``);
   }
   return context;
 }
 
-const DefaultFooterContext = React.createContext(false);
+const DefaultFooterContext = createContext(false);
 
 interface PortalContextValue {
   portal: HTMLElement | null;
   onPortalChange: (node: HTMLElement | null) => void;
 }
 
-const PortalContext = React.createContext<PortalContextValue | null>(null);
+const PortalContext = createContext<PortalContextValue | null>(null);
 
 function usePortalContext(consumerName: string) {
-  const context = React.useContext(PortalContext);
+  const context = use(PortalContext);
   if (!context) {
     throw new Error(`\`${consumerName}\` must be used within \`${ROOT_NAME}\``);
   }
@@ -455,7 +529,8 @@ function usePortalContext(consumerName: string) {
 }
 
 function useScrollLock(enabled: boolean) {
-  React.useEffect(() => {
+  // Scroll lock writes to document.body, so it must be restored from an effect cleanup.
+  useEffect(() => {
     if (!enabled) return;
 
     const originalStyle = window.getComputedStyle(document.body).overflow;
@@ -503,7 +578,7 @@ interface TourProps extends DivProps {
   scrollOffset?: ScrollOffset;
   dismissible?: boolean;
   modal?: boolean;
-  stepFooter?: React.ReactElement;
+  stepFooter?: ReactElement;
 }
 
 function Tour(props: TourProps) {
@@ -537,9 +612,9 @@ function Tour(props: TourProps) {
 
   const dir = DirectionPrimitive.useDirection(dirProp);
 
-  const [portal, setPortal] = React.useState<HTMLElement | null>(null);
-  const prevOpenRef = React.useRef<boolean | undefined>(undefined);
-  const previouslyFocusedElementRef = React.useRef<HTMLElement | null>(null);
+  const [portal, setPortal] = useState<HTMLElement | null>(null);
+  const prevOpenRef = useRef<boolean | undefined>(undefined);
+  const previouslyFocusedElementRef = useRef<HTMLElement | null>(null);
 
   const stateRef = useLazyRef<StoreState>(() => ({
     open: openProp ?? defaultOpen,
@@ -564,8 +639,8 @@ function Tour(props: TourProps) {
     scrollOffset,
   });
 
-  const store: Store = React.useMemo(
-    () => ({
+  const storeRef = useLazyRef<Store>(() => {
+    const store: Store = {
       subscribe: (cb) => {
         listenersRef.current.add(cb);
         return () => listenersRef.current.delete(cb);
@@ -659,13 +734,16 @@ function Tour(props: TourProps) {
 
         store.notify();
       },
-    }),
-    [stateRef, listenersRef, stepIdsMapRef, stepIdCounterRef, propsRef]
-  );
+    };
+
+    return store;
+  });
+  const store = storeRef.current;
 
   const open = useStore((state) => state.open, store);
 
-  React.useEffect(() => {
+  // Escape is a global keyboard action while the tour is open.
+  useEffect(() => {
     function onKeyDown(event: KeyboardEvent) {
       if (open && event.key === "Escape") {
         if (propsRef.current.onEscapeKeyDown) {
@@ -680,6 +758,8 @@ function Tour(props: TourProps) {
     return () => document.removeEventListener("keydown", onKeyDown);
   }, [store, open, propsRef]);
 
+  // Focus restoration must run with the DOM state that matches the open transition.
+  // Steps register into the shared store so navigation can stay order-based.
   useIsomorphicLayoutEffect(() => {
     const wasOpen = prevOpenRef.current;
 
@@ -713,72 +793,56 @@ function Tour(props: TourProps) {
     prevOpenRef.current = open;
   }, [open, portal, propsRef]);
 
+  // Controlled open state is mirrored into the store before paint.
   useIsomorphicLayoutEffect(() => {
     if (openProp !== undefined) {
       store.setState("open", openProp);
     }
   }, [openProp, store]);
 
+  // Controlled step value is mirrored into the store before paint.
   useIsomorphicLayoutEffect(() => {
     if (valueProp !== undefined) {
       store.setState("value", valueProp);
     }
   }, [valueProp, store]);
 
-  const contextValue = React.useMemo<TourContextValue>(
-    () => ({
-      dir,
-      alignOffset,
-      sideOffset,
-      spotlightPadding,
-      dismissible,
-      modal,
-      stepFooter,
-      onPointerDownOutside,
-      onInteractOutside,
-      onOpenAutoFocus,
-      onCloseAutoFocus,
-    }),
-    [
-      dir,
-      alignOffset,
-      sideOffset,
-      spotlightPadding,
-      dismissible,
-      modal,
-      stepFooter,
-      onPointerDownOutside,
-      onInteractOutside,
-      onOpenAutoFocus,
-      onCloseAutoFocus,
-    ]
-  );
+  const contextValue: TourContextValue = {
+    dir,
+    alignOffset,
+    sideOffset,
+    spotlightPadding,
+    dismissible,
+    modal,
+    stepFooter,
+    onPointerDownOutside,
+    onInteractOutside,
+    onOpenAutoFocus,
+    onCloseAutoFocus,
+  };
 
-  const portalContextValue = React.useMemo<PortalContextValue>(
-    () => ({
-      portal,
-      onPortalChange: setPortal,
-    }),
-    [portal]
-  );
+  const portalContextValue: PortalContextValue = {
+    portal,
+    onPortalChange: setPortal,
+  };
 
   useScrollLock(open && modal);
 
   const RootPrimitive = asChild ? SlotPrimitive.Slot : "div";
 
   return (
-    <StoreContext.Provider value={store}>
-      <TourContext.Provider value={contextValue}>
-        <PortalContext.Provider value={portalContextValue}>
+    <StoreContext value={store}>
+      <TourContext value={contextValue}>
+        <PortalContext value={portalContextValue}>
           <RootPrimitive data-slot="tour" dir={dir} {...rootProps} />
-        </PortalContext.Provider>
-      </TourContext.Provider>
-    </StoreContext.Provider>
+        </PortalContext>
+      </TourContext>
+    </StoreContext>
   );
 }
 
 interface TourStepProps extends DivProps {
-  target: string | React.RefObject<HTMLElement> | HTMLElement;
+  target: string | RefObject<HTMLElement> | HTMLElement;
   side?: Side;
   sideOffset?: number;
   align?: Align;
@@ -824,14 +888,14 @@ function TourStep(props: TourStepProps) {
 
   const store = useStoreContext(STEP_NAME);
 
-  const [arrow, setArrow] = React.useState<HTMLSpanElement | null>(null);
-  const [footer, setFooter] = React.useState<FooterElement | null>(null);
+  const [arrow, setArrow] = useState<HTMLSpanElement | null>(null);
+  const [footer, setFooter] = useState<FooterElement | null>(null);
 
-  const stepRef = React.useRef<StepElement | null>(null);
-  const stepIdRef = React.useRef<string>("");
-  const stepOrderRef = React.useRef<number>(-1);
-  const isPointerInsideReactTreeRef = React.useRef(false);
-  const isFocusInsideReactTreeRef = React.useRef(false);
+  const stepRef = useRef<StepElement | null>(null);
+  const stepIdRef = useRef<string>("");
+  const stepOrderRef = useRef<number>(-1);
+  const isPointerInsideReactTreeRef = useRef(false);
+  const isFocusInsideReactTreeRef = useRef(false);
 
   const open = useStore((state) => state.open);
   const value = useStore((state) => state.value);
@@ -886,56 +950,7 @@ function TourStep(props: TourStepProps) {
 
   const isCurrentStep = stepOrderRef.current === value;
 
-  const middleware = React.useMemo(() => {
-    if (!stepData) return [];
-
-    const mainAxisOffset = stepData.sideOffset ?? resolvedSideOffset;
-    const crossAxisOffset = stepData.alignOffset ?? resolvedAlignOffset;
-
-    const padding =
-      typeof stepData.collisionPadding === "number"
-        ? stepData.collisionPadding
-        : {
-            top: stepData.collisionPadding?.top ?? 0,
-            right: stepData.collisionPadding?.right ?? 0,
-            bottom: stepData.collisionPadding?.bottom ?? 0,
-            left: stepData.collisionPadding?.left ?? 0,
-          };
-
-    const boundary = Array.isArray(stepData.collisionBoundary)
-      ? stepData.collisionBoundary
-      : stepData.collisionBoundary
-        ? [stepData.collisionBoundary]
-        : [];
-    const hasExplicitBoundaries = boundary.length > 0;
-
-    const detectOverflowOptions = {
-      padding,
-      boundary: boundary.filter((b): b is Element => b !== null),
-      altBoundary: hasExplicitBoundaries,
-    };
-
-    return [
-      offset({
-        mainAxis: mainAxisOffset,
-        alignmentAxis: crossAxisOffset,
-      }),
-      stepData.avoidCollisions &&
-        shift({
-          mainAxis: true,
-          crossAxis: false,
-          limiter: stepData.sticky === "partial" ? limitShift() : undefined,
-          ...detectOverflowOptions,
-        }),
-      stepData.avoidCollisions && flip({ ...detectOverflowOptions }),
-      arrow && onArrow({ element: arrow, padding: stepData.arrowPadding }),
-      stepData.hideWhenDetached &&
-        hide({
-          strategy: "referenceHidden",
-          ...detectOverflowOptions,
-        }),
-    ].filter(Boolean) as Middleware[];
-  }, [stepData, resolvedSideOffset, resolvedAlignOffset, arrow]);
+  const middleware = getTourMiddleware(stepData, resolvedSideOffset, resolvedAlignOffset, arrow);
 
   const placement = getPlacement(stepData?.side ?? side, stepData?.align ?? align);
 
@@ -963,20 +978,18 @@ function TourStep(props: TourStepProps) {
   const cannotCenterArrow = middlewareData.arrow?.centerOffset !== 0;
   const isHidden = hideWhenDetached && middlewareData.hide?.referenceHidden;
 
-  const stepContextValue = React.useMemo<StepContextValue>(
-    () => ({
-      arrowX,
-      arrowY,
-      placedAlign,
-      placedSide,
-      shouldHideArrow: cannotCenterArrow,
-      onArrowChange: setArrow,
-      onFooterChange: setFooter,
-    }),
-    [arrowX, arrowY, placedSide, placedAlign, cannotCenterArrow]
-  );
+  const stepContextValue: StepContextValue = {
+    arrowX,
+    arrowY,
+    placedAlign,
+    placedSide,
+    shouldHideArrow: cannotCenterArrow,
+    onArrowChange: setArrow,
+    onFooterChange: setFooter,
+  };
 
-  React.useEffect(() => {
+  // The mask follows viewport resize and scroll outside React's event system.
+  useEffect(() => {
     if (open && targetElement && isCurrentStep) {
       updateMask(store, targetElement, context.spotlightPadding);
 
@@ -1010,7 +1023,8 @@ function TourStep(props: TourStepProps) {
     }
   }, [open, targetElement, isCurrentStep, store, context.spotlightPadding]);
 
-  React.useEffect(() => {
+  // Outside pointer detection is attached to the owner document after mount.
+  useEffect(() => {
     if (!open || !isCurrentStep) return;
 
     const stepElement = stepRef.current;
@@ -1055,7 +1069,8 @@ function TourStep(props: TourStepProps) {
     };
   }, [open, isCurrentStep, store, context]);
 
-  React.useEffect(() => {
+  // Outside focus detection closes dismissible tours when focus moves away.
+  useEffect(() => {
     if (!open || !isCurrentStep) return;
 
     const stepElement = stepRef.current;
@@ -1095,31 +1110,23 @@ function TourStep(props: TourStepProps) {
     };
   }, [open, isCurrentStep, store, context, targetElement]);
 
-  const onPointerDownCapture = React.useCallback(
-    (event: React.PointerEvent<StepElement>) => {
-      onPointerDownCaptureProp?.(event);
-      isPointerInsideReactTreeRef.current = true;
-    },
-    [onPointerDownCaptureProp]
-  );
+  const onPointerDownCapture = useMemoizedFn((event: ReactPointerEvent<StepElement>) => {
+    onPointerDownCaptureProp?.(event);
+    isPointerInsideReactTreeRef.current = true;
+  });
 
-  const onFocusCapture = React.useCallback(
-    (event: React.FocusEvent<StepElement>) => {
-      onFocusCaptureProp?.(event);
-      isFocusInsideReactTreeRef.current = true;
-    },
-    [onFocusCaptureProp]
-  );
+  const onFocusCapture = useMemoizedFn((event: ReactFocusEvent<StepElement>) => {
+    onFocusCaptureProp?.(event);
+    isFocusInsideReactTreeRef.current = true;
+  });
 
-  const onBlurCapture = React.useCallback(
-    (event: React.FocusEvent<StepElement>) => {
-      onBlurCaptureProp?.(event);
-      isFocusInsideReactTreeRef.current = false;
-    },
-    [onBlurCaptureProp]
-  );
+  const onBlurCapture = useMemoizedFn((event: ReactFocusEvent<StepElement>) => {
+    onBlurCaptureProp?.(event);
+    isFocusInsideReactTreeRef.current = false;
+  });
 
-  React.useEffect(() => {
+  // Native capture listeners are needed because the target element can live outside the component tree.
+  useEffect(() => {
     if (!open || !isCurrentStep || !targetElement) return;
 
     function onTargetPointerDownCapture() {
@@ -1161,7 +1168,7 @@ function TourStep(props: TourStepProps) {
   const StepPrimitive = asChild ? SlotPrimitive.Slot : "div";
 
   return (
-    <StepContext.Provider value={stepContextValue}>
+    <StepContext value={stepContextValue}>
       <StepPrimitive
         ref={composedRef}
         data-slot="tour-step"
@@ -1185,13 +1192,9 @@ function TourStep(props: TourStepProps) {
         }}
       >
         {children}
-        {!footer && (
-          <DefaultFooterContext.Provider value={true}>
-            {context.stepFooter}
-          </DefaultFooterContext.Provider>
-        )}
+        {!footer && <DefaultFooterContext value={true}>{context.stepFooter}</DefaultFooterContext>}
       </StepPrimitive>
-    </StepContext.Provider>
+    </StepContext>
   );
 }
 
@@ -1262,7 +1265,7 @@ function TourSpotlightRing(props: TourSpotlightRingProps) {
 }
 
 interface TourPortalProps {
-  children?: React.ReactNode;
+  children?: ReactNode;
   container?: HTMLElement | null;
 }
 
@@ -1271,8 +1274,9 @@ function TourPortal(props: TourPortalProps) {
 
   const portalContext = usePortalContext(PORTAL_NAME);
 
-  const [mounted, setMounted] = React.useState(false);
+  const [mounted, setMounted] = useState(false);
 
+  // Portal container registration depends on document.body and must happen after mount.
   useIsomorphicLayoutEffect(() => {
     setMounted(true);
 
@@ -1288,10 +1292,10 @@ function TourPortal(props: TourPortalProps) {
 
   const portalContainer = container ?? portalContext?.portal ?? document.body;
 
-  return ReactDOM.createPortal(children, portalContainer);
+  return createPortal(children, portalContainer);
 }
 
-interface TourArrowProps extends React.ComponentProps<"svg"> {
+interface TourArrowProps extends ComponentProps<"svg"> {
   width?: number;
   height?: number;
   asChild?: boolean;
@@ -1392,7 +1396,7 @@ function TourDescription(props: DivProps) {
   );
 }
 
-interface TourCloseProps extends React.ComponentProps<"button"> {
+interface TourCloseProps extends ComponentProps<"button"> {
   asChild?: boolean;
 }
 
@@ -1401,15 +1405,12 @@ function TourClose(props: TourCloseProps) {
 
   const store = useStoreContext(CLOSE_NAME);
 
-  const onClick = React.useCallback(
-    (event: React.MouseEvent<CloseElement>) => {
-      onClickProp?.(event);
-      if (event.defaultPrevented) return;
+  const onClick = useMemoizedFn((event: ReactMouseEvent<CloseElement>) => {
+    onClickProp?.(event);
+    if (event.defaultPrevented) return;
 
-      store.setState("open", false);
-    },
-    [store, onClickProp]
-  );
+    store.setState("open", false);
+  });
 
   const ClosePrimitive = asChild ? SlotPrimitive.Slot : "button";
 
@@ -1429,23 +1430,20 @@ function TourClose(props: TourCloseProps) {
   );
 }
 
-function TourPrev(props: React.ComponentProps<typeof Button>) {
+function TourPrev(props: ComponentProps<typeof Button>) {
   const { children, onClick: onClickProp, ...prevButtonProps } = props;
 
   const store = useStoreContext(PREV_NAME);
   const value = useStore((state) => state.value);
 
-  const onClick = React.useCallback(
-    (event: React.MouseEvent<PrevElement>) => {
-      onClickProp?.(event);
-      if (event.defaultPrevented) return;
+  const onClick = useMemoizedFn((event: ReactMouseEvent<PrevElement>) => {
+    onClickProp?.(event);
+    if (event.defaultPrevented) return;
 
-      if (value > 0) {
-        store.setState("value", value - 1);
-      }
-    },
-    [value, store, onClickProp]
-  );
+    if (value > 0) {
+      store.setState("value", value - 1);
+    }
+  });
 
   return (
     <Button
@@ -1467,7 +1465,7 @@ function TourPrev(props: React.ComponentProps<typeof Button>) {
   );
 }
 
-function TourNext(props: React.ComponentProps<typeof Button>) {
+function TourNext(props: ComponentProps<typeof Button>) {
   const { children, onClick: onClickProp, ...nextButtonProps } = props;
   const store = useStoreContext(NEXT_NAME);
   const value = useStore((state) => state.value);
@@ -1475,15 +1473,12 @@ function TourNext(props: React.ComponentProps<typeof Button>) {
 
   const isLastStep = value === steps.length - 1;
 
-  const onClick = React.useCallback(
-    (event: React.MouseEvent<NextElement>) => {
-      onClickProp?.(event);
-      if (event.defaultPrevented) return;
+  const onClick = useMemoizedFn((event: ReactMouseEvent<NextElement>) => {
+    onClickProp?.(event);
+    if (event.defaultPrevented) return;
 
-      store.setState("value", value + 1);
-    },
-    [value, store, onClickProp]
-  );
+    store.setState("value", value + 1);
+  });
 
   return (
     <Button
@@ -1503,20 +1498,17 @@ function TourNext(props: React.ComponentProps<typeof Button>) {
   );
 }
 
-function TourSkip(props: React.ComponentProps<typeof Button>) {
+function TourSkip(props: ComponentProps<typeof Button>) {
   const { children, onClick: onClickProp, ...skipButtonProps } = props;
 
   const store = useStoreContext(SKIP_NAME);
 
-  const onClick = React.useCallback(
-    (event: React.MouseEvent<SkipElement>) => {
-      onClickProp?.(event);
-      if (event.defaultPrevented) return;
+  const onClick = useMemoizedFn((event: ReactMouseEvent<SkipElement>) => {
+    onClickProp?.(event);
+    if (event.defaultPrevented) return;
 
-      store.setState("open", false);
-    },
-    [store, onClickProp]
-  );
+    store.setState("open", false);
+  });
 
   return (
     <Button
@@ -1565,7 +1557,7 @@ function TourFooter(props: DivProps) {
   const { asChild, className, ref, ...footerProps } = props;
 
   const stepContext = useStepContext(FOOTER_NAME);
-  const hasDefaultFooter = React.useContext(DefaultFooterContext);
+  const hasDefaultFooter = use(DefaultFooterContext);
   const context = useTourContext(FOOTER_NAME);
 
   const composedRef = useComposedRefs(

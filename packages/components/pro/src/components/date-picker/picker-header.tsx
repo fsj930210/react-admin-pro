@@ -1,7 +1,7 @@
 import { Button } from "@rap/components-ui/button";
 import { cn } from "@rap/utils";
 import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react";
-import type { ReactNode } from "react";
+import { type ReactNode } from "react";
 import type { PickerPanelMode } from "./types";
 
 interface PickerHeaderProps {

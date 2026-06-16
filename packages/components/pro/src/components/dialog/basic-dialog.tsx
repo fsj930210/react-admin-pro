@@ -11,13 +11,16 @@ import { cn } from "@rap/utils";
 import {
   isValidElement,
   useState,
-  type ComponentProps,
   type CSSProperties,
+  type ComponentProps,
   type ReactNode,
 } from "react";
 
 export interface BasicDialogProps {
   children: ReactNode;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  trigger?: ReactNode;
   triggerChildren?: ReactNode;
   header?: ReactNode;
   footer?: ReactNode | null;
@@ -35,20 +38,19 @@ export interface BasicDialogProps {
   footerProps?: ComponentProps<typeof DialogFooter>;
 }
 
-export interface UseBasicDialogOptions
-  extends Pick<
-    BasicDialogProps,
-    | "dialogProps"
-    | "footer"
-    | "okText"
-    | "cancelText"
-    | "okButtonProps"
-    | "cancelButtonProps"
-    | "confirmLoading"
-    | "onOk"
-    | "onCancel"
-    | "footerProps"
-  > {
+export interface UseBasicDialogOptions extends Pick<
+  BasicDialogProps,
+  | "dialogProps"
+  | "footer"
+  | "okText"
+  | "cancelText"
+  | "okButtonProps"
+  | "cancelButtonProps"
+  | "confirmLoading"
+  | "onOk"
+  | "onCancel"
+  | "footerProps"
+> {
   afterClose?: () => void;
 }
 
@@ -156,6 +158,9 @@ export function useBasicDialog({
 
 export function BasicDialog({
   children,
+  open,
+  onOpenChange,
+  trigger,
   triggerChildren,
   header,
   footer,
@@ -172,8 +177,9 @@ export function BasicDialog({
   headerProps,
   footerProps,
 }: BasicDialogProps) {
+  const mergedDialogProps = { ...dialogProps, open, onOpenChange };
   const dialog = useBasicDialog({
-    dialogProps,
+    dialogProps: mergedDialogProps,
     footer,
     okText,
     cancelText,
@@ -187,7 +193,7 @@ export function BasicDialog({
 
   return (
     <BaseDialog {...dialogProps} open={dialog.open} onOpenChange={dialog.setOpen}>
-      {renderDialogTrigger(triggerChildren)}
+      {renderDialogTrigger(trigger ?? triggerChildren)}
       <DialogContent
         {...contentProps}
         style={{

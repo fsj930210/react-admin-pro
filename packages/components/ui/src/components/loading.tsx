@@ -1,8 +1,9 @@
 import { cn } from "@rap/utils";
+import { type ComponentProps } from "react";
 
 type LoadingProps = {
   text?: string;
-} & React.ComponentProps<"div">;
+} & ComponentProps<"div">;
 export const Loading = ({ text, className, ...props }: LoadingProps) => {
   return (
     <div className={cn("flex-col-center size-full gap-2", className)} {...props}>

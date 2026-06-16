@@ -1,4 +1,5 @@
 import * as React from "react";
+import { useCallback } from "react";
 import type { Editor } from "@tiptap/react";
 import type { Node } from "@tiptap/pm/model";
 import { isUrl } from "../../../utils";

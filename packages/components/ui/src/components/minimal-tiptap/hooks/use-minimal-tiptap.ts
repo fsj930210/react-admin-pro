@@ -1,4 +1,5 @@
 import * as React from "react";
+import { useCallback, type HTMLAttributes } from "react";
 import type { Editor } from "@tiptap/react";
 import type { Content, UseEditorOptions } from "@tiptap/react";
 import { StarterKit } from "@tiptap/starter-kit";

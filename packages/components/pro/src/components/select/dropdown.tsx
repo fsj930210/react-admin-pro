@@ -1,8 +1,9 @@
-import type React from "react";
+import { type ReactNode } from "react";
 import { PopoverContent } from "@rap/components-ui/popover";
 import { cn } from "@rap/utils";
 import { resolvePlacement } from "./utils";
 import type { SelectPlacement } from "./types";
+import * as React from "react";
 
 interface SelectDropdownProps {
   children: React.ReactNode;

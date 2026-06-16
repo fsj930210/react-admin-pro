@@ -1,4 +1,12 @@
-import React from "react";
+import {
+  isValidElement,
+  useState,
+  type ChangeEvent,
+  type ComponentProps,
+  type FocusEvent,
+  type KeyboardEvent,
+  type ReactNode,
+} from "react";
 import { ChevronDown, ChevronUp, Eye, EyeOff, Minus, Plus, XCircle } from "lucide-react";
 import { useTranslation } from "@rap/i18n";
 import { Input as UIInput } from "@rap/components-ui/input";
@@ -12,6 +20,7 @@ import { Space } from "@rap/components-ui/space";
 import { Choose, Otherwise, When } from "@rap/components-ui/when";
 import { cn } from "@rap/utils";
 import { useControllableState } from "@rap/hooks/use-controllable-state";
+import * as React from "react";
 
 export interface InputAffixRenderContext {
   value: string;
@@ -76,7 +85,6 @@ export function Input({
   disabled,
   ...props
 }: InputProps) {
-  const { t } = useTranslation("pro");
   const [val, setVal] = useControllableState({ value, defaultValue, onChange });
   const hasIcon = !!prefix || !!suffix || !!allowClear;
   const clearIcon =

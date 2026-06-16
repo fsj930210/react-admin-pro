@@ -1,4 +1,5 @@
-import { useState, useCallback, useEffect } from "react";
+import * as React from "react";
+import { useCallback, useEffect, useState } from "react";
 
 type ResizeDirection = "left" | "right";
 export type ElementDimensions = { width: number; height: number };

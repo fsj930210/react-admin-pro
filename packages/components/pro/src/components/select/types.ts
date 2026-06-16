@@ -1,4 +1,5 @@
-import type React from "react";
+import { type ComponentProps, type ReactNode, type Ref } from "react";
+import * as React from "react";
 
 export type SelectValue = string | number;
 export type SelectMode = "single" | "multiple" | "tags";
@@ -59,7 +60,7 @@ export interface SelectRef {
 
 export type SelectInputProps = Omit<
   React.ComponentProps<"input">,
-  "value" | "defaultValue" | "onChange" | "prefix" | "suffix" | "onSelect"
+  "value" | "defaultValue" | "onChange" | "prefix" | "suffix" | "onSelect" | "ref"
 >;
 
 export interface SelectProps<V extends SelectValue = string> extends SelectInputProps {

@@ -1,4 +1,14 @@
 import * as React from "react";
+import {
+  createContext,
+  use,
+  useCallback,
+  useMemo,
+  useRef,
+  useState,
+  type ComponentProps,
+  type ReactNode,
+} from "react";
 import { cn } from "@rap/utils";
 
 export type ProSearchErrors<TValues> = Partial<Record<keyof TValues | string, React.ReactNode>>;
@@ -128,7 +138,7 @@ interface SearchBarContextValue {
   itemIndexRef: React.MutableRefObject<number>;
 }
 
-const SearchBarContext = React.createContext<SearchBarContextValue | null>(null);
+const SearchBarContext = createContext<SearchBarContextValue | null>(null);
 
 export interface ProSearchBarProps extends React.ComponentProps<"div"> {
   search: ProSearchController<any>;
@@ -168,7 +178,7 @@ export function ProSearchBar({
   );
 
   return (
-    <SearchBarContext.Provider value={context}>
+    <SearchBarContext value={context}>
       <div
         className={cn(
           "rounded-md border bg-background p-3",
@@ -186,7 +196,7 @@ export function ProSearchBar({
           {children}
         </div>
       </div>
-    </SearchBarContext.Provider>
+    </SearchBarContext>
   );
 }
 
@@ -196,7 +206,7 @@ export interface ProSearchBarItemProps extends React.ComponentProps<"div"> {
 }
 
 function ProSearchBarItem({ span = 1, className, children, ...props }: ProSearchBarItemProps) {
-  const context = React.useContext(SearchBarContext);
+  const context = use(SearchBarContext);
   const index = context ? context.itemIndexRef.current++ : 0;
   const visibleCount = context ? context.collapsedRows * context.columns : Number.POSITIVE_INFINITY;
   const visible = context?.expanded || index < visibleCount;

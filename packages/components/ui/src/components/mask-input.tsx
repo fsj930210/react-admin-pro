@@ -1,9 +1,20 @@
 "use client";
 // 文档地址 https://www.diceui.com/docs/components/radix/mask-input
 import { Slot as SlotPrimitive } from "radix-ui";
-import * as React from "react";
 import { useComposedRefs } from "@rap/utils/compose-refs";
 import { cn } from "@rap/utils";
+import {
+  useRef,
+  useState,
+  type ChangeEvent,
+  type ClipboardEvent,
+  type ComponentProps,
+  type ComponentRef,
+  type CompositionEvent,
+  type FocusEvent,
+  type KeyboardEvent,
+} from "react";
+import { useMemoizedFn } from "@rap/hooks/use-memoized-fn";
 
 const PAST_YEARS_LIMIT = 120;
 const FUTURE_YEARS_LIMIT = 10;
@@ -12,7 +23,7 @@ const DEFAULT_LOCALE = "en-US";
 
 const NUMERIC_MASK_PATTERNS =
   /^(phone|zipCode|zipCodeExtended|ssn|ein|time|date|creditCard|creditCardExpiry)$/;
-const CURRENCY_PERCENTAGE_SYMBOLS = /[€$%]/;
+const CURRENCY_PERCENTAGE_SYMBOLS = /[$€%]/;
 
 interface CurrencySymbols {
   currency: string;
@@ -734,9 +745,9 @@ function getPatternCaretPosition(opts: {
   return position;
 }
 
-type InputElement = React.ComponentRef<"input">;
+type InputElement = ComponentRef<"input">;
 
-interface MaskInputProps extends React.ComponentProps<"input"> {
+interface MaskInputProps extends ComponentProps<"input"> {
   value?: string;
   defaultValue?: string;
   onValueChange?: (maskedValue: string, unmaskedValue: string) => void;
@@ -784,562 +795,474 @@ function MaskInput(props: MaskInputProps) {
     ...inputProps
   } = props;
 
-  const [internalValue, setInternalValue] = React.useState(defaultValue ?? "");
-  const [focused, setFocused] = React.useState(false);
-  const [composing, setComposing] = React.useState(false);
-  const [touched, setTouched] = React.useState(false);
-  const inputRef = React.useRef<HTMLInputElement>(null);
+  const [internalValue, setInternalValue] = useState(defaultValue ?? "");
+  const [focused, setFocused] = useState(false);
+  const [composing, setComposing] = useState(false);
+  const [touched, setTouched] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
   const composedRef = useComposedRefs(ref, inputRef);
 
   const isControlled = valueProp !== undefined;
   const value = isControlled ? valueProp : internalValue;
 
-  const maskPattern = React.useMemo(() => {
-    if (typeof mask === "string") {
-      return MASK_PATTERNS[mask];
-    }
-    return mask;
-  }, [mask]);
+  const maskPattern = typeof mask === "string" ? MASK_PATTERNS[mask] : mask;
+  const transformOpts = { currency, locale };
 
-  const transformOpts = React.useMemo(
-    () => ({
-      currency,
-      locale,
-    }),
-    [currency, locale]
-  );
+  let placeholderValue = placeholder;
+  if (!withoutMask && placeholder && maskPlaceholder) {
+    placeholderValue = focused ? maskPlaceholder : placeholder;
+  } else if (!withoutMask && maskPlaceholder) {
+    placeholderValue = focused ? maskPlaceholder : undefined;
+  }
 
-  const placeholderValue = React.useMemo(() => {
-    if (withoutMask) return placeholder;
-
-    if (placeholder && maskPlaceholder) {
-      return focused ? maskPlaceholder : placeholder;
-    }
-
-    if (maskPlaceholder) {
-      return focused ? maskPlaceholder : undefined;
-    }
-
-    return placeholder;
-  }, [placeholder, maskPlaceholder, focused, withoutMask]);
-
-  const displayValue = React.useMemo(() => {
-    if (withoutMask || !maskPattern || !value) return value ?? "";
-    const unmasked = getUnmaskedValue({
-      value,
-      transform: maskPattern.transform,
-      ...transformOpts,
-    });
-    return applyMask({
-      value: unmasked,
-      pattern: maskPattern.pattern,
-      ...transformOpts,
-      mask,
-    });
-  }, [value, maskPattern, withoutMask, transformOpts, mask]);
-
-  const tokenCount = React.useMemo(() => {
-    if (!maskPattern || CURRENCY_PERCENTAGE_SYMBOLS.test(maskPattern.pattern)) return undefined;
-    return maskPattern.pattern.match(REGEX_CACHE.hashPattern)?.length ?? 0;
-  }, [maskPattern]);
-
-  const calculatedMaxLength = tokenCount ? maskPattern?.pattern.length : maxLength;
-
-  const calculatedInputMode = React.useMemo(() => {
-    if (inputMode) return inputMode;
-    if (!maskPattern) return undefined;
-
-    if (mask === "currency" || mask === "percentage" || mask === "ipv4") {
-      return "decimal";
-    }
-
-    if (typeof mask === "string" && NUMERIC_MASK_PATTERNS.test(mask)) {
-      return "numeric";
-    }
-    return undefined;
-  }, [maskPattern, mask, inputMode]);
-
-  const shouldValidate = React.useCallback(
-    (trigger: "change" | "blur") => {
-      if (!onValidate || !maskPattern?.validate) return false;
-
-      switch (validationMode) {
-        case "onChange":
-          return trigger === "change";
-        case "onBlur":
-          return trigger === "blur";
-        case "onSubmit":
-          return false;
-        case "onTouched":
-          return touched ? trigger === "change" : trigger === "blur";
-        case "all":
-          return true;
-        default:
-          return trigger === "change";
-      }
-    },
-    [onValidate, maskPattern, validationMode, touched]
-  );
-
-  const validationOpts = React.useMemo(
-    () => ({
-      min: typeof min === "string" ? parseFloat(min) : min,
-      max: typeof max === "string" ? parseFloat(max) : max,
-    }),
-    [min, max]
-  );
-
-  const onInputValidate = React.useCallback(
-    (unmaskedValue: string) => {
-      if (onValidate && maskPattern?.validate) {
-        const isValid = maskPattern.validate(unmaskedValue, validationOpts);
-        onValidate(isValid, unmaskedValue);
-      }
-    },
-    [onValidate, maskPattern?.validate, validationOpts]
-  );
-
-  const onValueChange = React.useCallback(
-    (event: React.ChangeEvent<InputElement>) => {
-      const inputValue = event.target.value;
-      let newValue = inputValue;
-      let unmaskedValue = inputValue;
-
-      if (composing) {
-        if (!isControlled) setInternalValue(inputValue);
-        return;
-      }
-
-      if (withoutMask || !maskPattern) {
-        if (!isControlled) setInternalValue(inputValue);
-        if (shouldValidate("change")) onValidate?.(true, inputValue);
-        onValueChangeProp?.(inputValue, inputValue);
-        return;
-      }
-
-      if (maskPattern) {
-        unmaskedValue = getUnmaskedValue({
-          value: inputValue,
-          transform: maskPattern.transform,
-          ...transformOpts,
-        });
-        newValue = applyMask({
-          value: unmaskedValue,
+  const displayValue =
+    withoutMask || !maskPattern || !value
+      ? (value ?? "")
+      : applyMask({
+          value: getUnmaskedValue({
+            value,
+            transform: maskPattern.transform,
+            ...transformOpts,
+          }),
           pattern: maskPattern.pattern,
           ...transformOpts,
           mask,
         });
 
-        if (inputRef.current && newValue !== inputValue) {
-          const inputElement = inputRef.current;
-          if (!(inputElement instanceof HTMLInputElement)) return;
+  const tokenCount =
+    !maskPattern || CURRENCY_PERCENTAGE_SYMBOLS.test(maskPattern.pattern)
+      ? undefined
+      : (maskPattern.pattern.match(REGEX_CACHE.hashPattern)?.length ?? 0);
 
-          const oldCursorPosition = inputElement.selectionStart ?? 0;
+  const calculatedMaxLength = tokenCount ? maskPattern?.pattern.length : maxLength;
 
-          inputElement.value = newValue;
+  let calculatedInputMode = inputMode;
+  if (!calculatedInputMode && maskPattern) {
+    if (mask === "currency" || mask === "percentage" || mask === "ipv4") {
+      calculatedInputMode = "decimal";
+    } else if (typeof mask === "string" && NUMERIC_MASK_PATTERNS.test(mask)) {
+      calculatedInputMode = "numeric";
+    }
+  }
 
-          const currentUnmasked = getUnmaskedValue({
-            value: newValue,
-            transform: maskPattern.transform,
-            ...transformOpts,
-          });
+  const shouldValidate = useMemoizedFn((trigger: "change" | "blur") => {
+    if (!onValidate || !maskPattern?.validate) return false;
 
-          let newCursorPosition: number;
+    switch (validationMode) {
+      case "onChange":
+        return trigger === "change";
+      case "onBlur":
+        return trigger === "blur";
+      case "onSubmit":
+        return false;
+      case "onTouched":
+        return touched ? trigger === "change" : trigger === "blur";
+      case "all":
+        return true;
+      default:
+        return trigger === "change";
+    }
+  });
 
-          const previousUnmasked = getUnmaskedValue({
-            value,
-            transform: maskPattern.transform,
-            ...transformOpts,
-          });
+  const validationOpts = {
+    min: typeof min === "string" ? parseFloat(min) : min,
+    max: typeof max === "string" ? parseFloat(max) : max,
+  };
 
-          if (CURRENCY_PERCENTAGE_SYMBOLS.test(maskPattern.pattern)) {
-            newCursorPosition = getCurrencyCaretPosition({
-              newValue,
-              mask,
-              transformOpts,
-              oldCursorPosition,
-              oldValue: inputValue,
-              previousUnmasked,
-            });
-          } else {
-            newCursorPosition = getPatternCaretPosition({
-              newValue,
-              maskPattern,
-              currentUnmasked,
-              oldCursorPosition,
-              oldValue: inputValue,
-              previousUnmasked,
-            });
-          }
+  const onInputValidate = useMemoizedFn((unmaskedValue: string) => {
+    if (onValidate && maskPattern?.validate) {
+      const isValid = maskPattern.validate(unmaskedValue, validationOpts);
+      onValidate(isValid, unmaskedValue);
+    }
+  });
 
-          if (isCurrencyMask({ mask, pattern: maskPattern.pattern })) {
-            if (mask === "currency") {
-              const currencyAtEnd = isCurrencyAtEnd(transformOpts);
-              if (!currencyAtEnd) {
-                newCursorPosition = Math.max(1, newCursorPosition);
-              }
-            } else {
-              newCursorPosition = Math.max(1, newCursorPosition);
-            }
-          } else if (maskPattern.pattern.includes("%")) {
-            newCursorPosition = Math.min(newValue.length - 1, newCursorPosition);
-          }
+  const onValueChange = useMemoizedFn((event: ChangeEvent<InputElement>) => {
+    const inputValue = event.target.value;
+    let newValue = inputValue;
+    let unmaskedValue = inputValue;
 
-          newCursorPosition = Math.min(newCursorPosition, newValue.length);
+    if (composing) {
+      if (!isControlled) setInternalValue(inputValue);
+      return;
+    }
 
-          inputElement.setSelectionRange(newCursorPosition, newCursorPosition);
-        }
-      }
+    if (withoutMask || !maskPattern) {
+      if (!isControlled) setInternalValue(inputValue);
+      if (shouldValidate("change")) onValidate?.(true, inputValue);
+      onValueChangeProp?.(inputValue, inputValue);
+      return;
+    }
 
-      if (!isControlled) {
-        setInternalValue(newValue);
-      }
-
-      if (shouldValidate("change")) {
-        onInputValidate(unmaskedValue);
-      }
-
-      onValueChangeProp?.(newValue, unmaskedValue);
-    },
-    [
-      maskPattern,
-      isControlled,
-      onValueChangeProp,
-      onValidate,
-      onInputValidate,
-      composing,
-      shouldValidate,
-      withoutMask,
-      transformOpts,
-      mask,
-      value,
-    ]
-  );
-
-  const onFocus = React.useCallback(
-    (event: React.FocusEvent<InputElement>) => {
-      onFocusProp?.(event);
-      if (event.defaultPrevented) return;
-
-      setFocused(true);
-    },
-    [onFocusProp]
-  );
-
-  const onBlur = React.useCallback(
-    (event: React.FocusEvent<InputElement>) => {
-      onBlurProp?.(event);
-      if (event.defaultPrevented) return;
-
-      setFocused(false);
-
-      if (!touched) {
-        setTouched(true);
-      }
-
-      if (shouldValidate("blur")) {
-        const currentValue = event.target.value;
-        const unmaskedValue = maskPattern
-          ? getUnmaskedValue({
-              value: currentValue,
-              transform: maskPattern.transform,
-              ...transformOpts,
-            })
-          : currentValue;
-        onInputValidate(unmaskedValue);
-      }
-    },
-    [onBlurProp, touched, shouldValidate, onInputValidate, maskPattern, transformOpts]
-  );
-
-  const onCompositionStart = React.useCallback(
-    (event: React.CompositionEvent<InputElement>) => {
-      onCompositionStartProp?.(event);
-      if (event.defaultPrevented) return;
-
-      setComposing(true);
-    },
-    [onCompositionStartProp]
-  );
-
-  const onCompositionEnd = React.useCallback(
-    (event: React.CompositionEvent<InputElement>) => {
-      onCompositionEndProp?.(event);
-      if (event.defaultPrevented) return;
-
-      setComposing(false);
-
-      const inputElement = inputRef.current;
-      if (!inputElement) return;
-      if (!(inputElement instanceof HTMLInputElement)) return;
-      const inputValue = inputElement.value;
-
-      if (!maskPattern || withoutMask) {
-        if (!isControlled) setInternalValue(inputValue);
-        if (shouldValidate("change")) onValidate?.(true, inputValue);
-        onValueChangeProp?.(inputValue, inputValue);
-        return;
-      }
-
-      const unmasked = getUnmaskedValue({
+    if (maskPattern) {
+      unmaskedValue = getUnmaskedValue({
         value: inputValue,
         transform: maskPattern.transform,
         ...transformOpts,
       });
-      const masked = applyMask({
-        value: unmasked,
+      newValue = applyMask({
+        value: unmaskedValue,
         pattern: maskPattern.pattern,
         ...transformOpts,
         mask,
       });
 
-      if (!isControlled) setInternalValue(masked);
-      if (shouldValidate("change")) onInputValidate(unmasked);
-      onValueChangeProp?.(masked, unmasked);
-    },
-    [
-      onCompositionEndProp,
-      maskPattern,
-      withoutMask,
-      isControlled,
-      shouldValidate,
-      onValidate,
-      onValueChangeProp,
-      transformOpts,
+      if (inputRef.current && newValue !== inputValue) {
+        const inputElement = inputRef.current;
+        if (!(inputElement instanceof HTMLInputElement)) return;
+
+        const oldCursorPosition = inputElement.selectionStart ?? 0;
+
+        inputElement.value = newValue;
+
+        const currentUnmasked = getUnmaskedValue({
+          value: newValue,
+          transform: maskPattern.transform,
+          ...transformOpts,
+        });
+
+        let newCursorPosition: number;
+
+        const previousUnmasked = getUnmaskedValue({
+          value,
+          transform: maskPattern.transform,
+          ...transformOpts,
+        });
+
+        if (CURRENCY_PERCENTAGE_SYMBOLS.test(maskPattern.pattern)) {
+          newCursorPosition = getCurrencyCaretPosition({
+            newValue,
+            mask,
+            transformOpts,
+            oldCursorPosition,
+            oldValue: inputValue,
+            previousUnmasked,
+          });
+        } else {
+          newCursorPosition = getPatternCaretPosition({
+            newValue,
+            maskPattern,
+            currentUnmasked,
+            oldCursorPosition,
+            oldValue: inputValue,
+            previousUnmasked,
+          });
+        }
+
+        if (isCurrencyMask({ mask, pattern: maskPattern.pattern })) {
+          if (mask === "currency") {
+            const currencyAtEnd = isCurrencyAtEnd(transformOpts);
+            if (!currencyAtEnd) {
+              newCursorPosition = Math.max(1, newCursorPosition);
+            }
+          } else {
+            newCursorPosition = Math.max(1, newCursorPosition);
+          }
+        } else if (maskPattern.pattern.includes("%")) {
+          newCursorPosition = Math.min(newValue.length - 1, newCursorPosition);
+        }
+
+        newCursorPosition = Math.min(newCursorPosition, newValue.length);
+
+        inputElement.setSelectionRange(newCursorPosition, newCursorPosition);
+      }
+    }
+
+    if (!isControlled) {
+      setInternalValue(newValue);
+    }
+
+    if (shouldValidate("change")) {
+      onInputValidate(unmaskedValue);
+    }
+
+    onValueChangeProp?.(newValue, unmaskedValue);
+  });
+
+  const onFocus = useMemoizedFn((event: FocusEvent<InputElement>) => {
+    onFocusProp?.(event);
+    if (event.defaultPrevented) return;
+
+    setFocused(true);
+  });
+
+  const onBlur = useMemoizedFn((event: FocusEvent<InputElement>) => {
+    onBlurProp?.(event);
+    if (event.defaultPrevented) return;
+
+    setFocused(false);
+
+    if (!touched) {
+      setTouched(true);
+    }
+
+    if (shouldValidate("blur")) {
+      const currentValue = event.target.value;
+      const unmaskedValue = maskPattern
+        ? getUnmaskedValue({
+            value: currentValue,
+            transform: maskPattern.transform,
+            ...transformOpts,
+          })
+        : currentValue;
+      onInputValidate(unmaskedValue);
+    }
+  });
+
+  const onCompositionStart = useMemoizedFn((event: CompositionEvent<InputElement>) => {
+    onCompositionStartProp?.(event);
+    if (event.defaultPrevented) return;
+
+    setComposing(true);
+  });
+
+  const onCompositionEnd = useMemoizedFn((event: CompositionEvent<InputElement>) => {
+    onCompositionEndProp?.(event);
+    if (event.defaultPrevented) return;
+
+    setComposing(false);
+
+    const inputElement = inputRef.current;
+    if (!inputElement) return;
+    if (!(inputElement instanceof HTMLInputElement)) return;
+    const inputValue = inputElement.value;
+
+    if (!maskPattern || withoutMask) {
+      if (!isControlled) setInternalValue(inputValue);
+      if (shouldValidate("change")) onValidate?.(true, inputValue);
+      onValueChangeProp?.(inputValue, inputValue);
+      return;
+    }
+
+    const unmasked = getUnmaskedValue({
+      value: inputValue,
+      transform: maskPattern.transform,
+      ...transformOpts,
+    });
+    const masked = applyMask({
+      value: unmasked,
+      pattern: maskPattern.pattern,
+      ...transformOpts,
       mask,
-      onInputValidate,
-    ]
-  );
+    });
 
-  const onPaste = React.useCallback(
-    (event: React.ClipboardEvent<InputElement>) => {
-      onPasteProp?.(event);
-      if (event.defaultPrevented) return;
+    if (!isControlled) setInternalValue(masked);
+    if (shouldValidate("change")) onInputValidate(unmasked);
+    onValueChangeProp?.(masked, unmasked);
+  });
 
-      if (withoutMask || !maskPattern) return;
+  const onPaste = useMemoizedFn((event: ClipboardEvent<InputElement>) => {
+    onPasteProp?.(event);
+    if (event.defaultPrevented) return;
 
-      if (mask === "ipv4") return;
+    if (withoutMask || !maskPattern) return;
 
+    if (mask === "ipv4") return;
+
+    const target = event.target as InputElement;
+    if (!(target instanceof HTMLInputElement)) return;
+
+    const pastedData = event.clipboardData.getData("text");
+    if (!pastedData) return;
+
+    event.preventDefault();
+
+    const currentValue = target.value;
+    const selectionStart = target.selectionStart ?? 0;
+    const selectionEnd = target.selectionEnd ?? 0;
+
+    const beforeSelection = currentValue.slice(0, selectionStart);
+    const afterSelection = currentValue.slice(selectionEnd);
+    const newInputValue = beforeSelection + pastedData + afterSelection;
+
+    const unmasked = getUnmaskedValue({
+      value: newInputValue,
+      transform: maskPattern.transform,
+      ...transformOpts,
+    });
+    const newMaskedValue = applyMask({
+      value: unmasked,
+      pattern: maskPattern.pattern,
+      ...transformOpts,
+      mask,
+    });
+
+    target.value = newMaskedValue;
+
+    if (isCurrencyMask({ mask, pattern: maskPattern.pattern })) {
+      const currencyAtEnd = isCurrencyAtEnd(transformOpts);
+      const caret = currencyAtEnd ? newMaskedValue.search(/\s*[^\d\s]+$/) : newMaskedValue.length;
+      target.setSelectionRange(caret, caret);
+      return;
+    }
+
+    if (maskPattern.pattern.includes("%")) {
+      target.setSelectionRange(newMaskedValue.length - 1, newMaskedValue.length - 1);
+      return;
+    }
+
+    let newCursorPosition = newMaskedValue.length;
+    try {
+      const unmaskedCount = unmasked.length;
+      let position = 0;
+      let count = 0;
+
+      for (let i = 0; i < maskPattern.pattern.length && i < newMaskedValue.length; i++) {
+        if (maskPattern.pattern[i] === "#") {
+          count++;
+          if (count <= unmaskedCount) {
+            position = i + 1;
+          }
+        }
+      }
+      newCursorPosition = position;
+    } catch {
+      // fallback to end
+    }
+
+    target.setSelectionRange(newCursorPosition, newCursorPosition);
+
+    if (!isControlled) setInternalValue(newMaskedValue);
+    if (shouldValidate("change")) onInputValidate(unmasked);
+    onValueChangeProp?.(newMaskedValue, unmasked);
+  });
+
+  const onKeyDown = useMemoizedFn((event: KeyboardEvent<InputElement>) => {
+    onKeyDownProp?.(event);
+    if (event.defaultPrevented) return;
+
+    if (withoutMask || !maskPattern) return;
+
+    if (mask === "ipv4") return;
+
+    if (event.key === "Backspace") {
       const target = event.target as InputElement;
       if (!(target instanceof HTMLInputElement)) return;
-
-      const pastedData = event.clipboardData.getData("text");
-      if (!pastedData) return;
-
-      event.preventDefault();
-
-      const currentValue = target.value;
-      const selectionStart = target.selectionStart ?? 0;
+      const cursorPosition = target.selectionStart ?? 0;
       const selectionEnd = target.selectionEnd ?? 0;
+      const currentValue = target.value;
 
-      const beforeSelection = currentValue.slice(0, selectionStart);
-      const afterSelection = currentValue.slice(selectionEnd);
-      const newInputValue = beforeSelection + pastedData + afterSelection;
-
-      const unmasked = getUnmaskedValue({
-        value: newInputValue,
-        transform: maskPattern.transform,
-        ...transformOpts,
-      });
-      const newMaskedValue = applyMask({
-        value: unmasked,
-        pattern: maskPattern.pattern,
-        ...transformOpts,
-        mask,
-      });
-
-      target.value = newMaskedValue;
-
-      if (isCurrencyMask({ mask, pattern: maskPattern.pattern })) {
-        const currencyAtEnd = isCurrencyAtEnd(transformOpts);
-        const caret = currencyAtEnd ? newMaskedValue.search(/\s*[^\d\s]+$/) : newMaskedValue.length;
-        target.setSelectionRange(caret, caret);
+      if (
+        mask === "currency" ||
+        mask === "percentage" ||
+        maskPattern.pattern.includes("$") ||
+        maskPattern.pattern.includes("€") ||
+        maskPattern.pattern.includes("%")
+      ) {
         return;
       }
 
-      if (maskPattern.pattern.includes("%")) {
-        target.setSelectionRange(newMaskedValue.length - 1, newMaskedValue.length - 1);
+      if (cursorPosition !== selectionEnd) {
         return;
       }
 
-      let newCursorPosition = newMaskedValue.length;
-      try {
-        const unmaskedCount = unmasked.length;
-        let position = 0;
-        let count = 0;
+      if (cursorPosition > 0) {
+        const charBeforeCursor = currentValue[cursorPosition - 1];
 
-        for (let i = 0; i < maskPattern.pattern.length && i < newMaskedValue.length; i++) {
-          if (maskPattern.pattern[i] === "#") {
-            count++;
-            if (count <= unmaskedCount) {
-              position = i + 1;
-            }
-          }
-        }
-        newCursorPosition = position;
-      } catch {
-        // fallback to end
-      }
+        if (charBeforeCursor) {
+          event.preventDefault();
 
-      target.setSelectionRange(newCursorPosition, newCursorPosition);
+          const unmaskedIndex = toUnmaskedIndex({
+            masked: currentValue,
+            pattern: maskPattern.pattern,
+            caret: cursorPosition,
+          });
 
-      if (!isControlled) setInternalValue(newMaskedValue);
-      if (shouldValidate("change")) onInputValidate(unmasked);
-      onValueChangeProp?.(newMaskedValue, unmasked);
-    },
-    [
-      onPasteProp,
-      withoutMask,
-      maskPattern,
-      mask,
-      transformOpts,
-      isControlled,
-      shouldValidate,
-      onInputValidate,
-      onValueChangeProp,
-    ]
-  );
-
-  const onKeyDown = React.useCallback(
-    (event: React.KeyboardEvent<InputElement>) => {
-      onKeyDownProp?.(event);
-      if (event.defaultPrevented) return;
-
-      if (withoutMask || !maskPattern) return;
-
-      if (mask === "ipv4") return;
-
-      if (event.key === "Backspace") {
-        const target = event.target as InputElement;
-        if (!(target instanceof HTMLInputElement)) return;
-        const cursorPosition = target.selectionStart ?? 0;
-        const selectionEnd = target.selectionEnd ?? 0;
-        const currentValue = target.value;
-
-        if (
-          mask === "currency" ||
-          mask === "percentage" ||
-          maskPattern.pattern.includes("$") ||
-          maskPattern.pattern.includes("€") ||
-          maskPattern.pattern.includes("%")
-        ) {
-          return;
-        }
-
-        if (cursorPosition !== selectionEnd) {
-          return;
-        }
-
-        if (cursorPosition > 0) {
-          const charBeforeCursor = currentValue[cursorPosition - 1];
-
-          if (charBeforeCursor) {
-            event.preventDefault();
-
-            const unmaskedIndex = toUnmaskedIndex({
-              masked: currentValue,
-              pattern: maskPattern.pattern,
-              caret: cursorPosition,
-            });
-
-            if (unmaskedIndex > 0) {
-              const currentUnmasked = getUnmaskedValue({
-                value: currentValue,
-                transform: maskPattern.transform,
-                ...transformOpts,
-              });
-              const nextUnmasked =
-                currentUnmasked.slice(0, unmaskedIndex - 1) + currentUnmasked.slice(unmaskedIndex);
-              const nextMasked = applyMask({
-                value: nextUnmasked,
-                pattern: maskPattern.pattern,
-                ...transformOpts,
-                mask,
-              });
-
-              target.value = nextMasked;
-              const nextCaret = fromUnmaskedIndex({
-                masked: nextMasked,
-                pattern: maskPattern.pattern,
-                unmaskedIndex: unmaskedIndex - 1,
-              });
-
-              target.setSelectionRange(nextCaret, nextCaret);
-
-              onValueChangeProp?.(nextMasked, nextUnmasked);
-            }
-            return;
-          }
-        }
-      }
-
-      if (event.key === "Delete") {
-        const target = event.target as InputElement;
-        if (!(target instanceof HTMLInputElement)) return;
-        const cursorPosition = target.selectionStart ?? 0;
-        const selectionEnd = target.selectionEnd ?? 0;
-        const currentValue = target.value;
-
-        if (
-          mask === "currency" ||
-          mask === "percentage" ||
-          maskPattern.pattern.includes("$") ||
-          maskPattern.pattern.includes("€") ||
-          maskPattern.pattern.includes("%")
-        ) {
-          return;
-        }
-
-        if (cursorPosition !== selectionEnd) {
-          return;
-        }
-
-        if (cursorPosition < currentValue.length) {
-          const charAtCursor = currentValue[cursorPosition];
-
-          if (charAtCursor) {
-            event.preventDefault();
-
-            const unmaskedIndex = toUnmaskedIndex({
-              masked: currentValue,
-              pattern: maskPattern.pattern,
-              caret: cursorPosition,
-            });
-
+          if (unmaskedIndex > 0) {
             const currentUnmasked = getUnmaskedValue({
               value: currentValue,
               transform: maskPattern.transform,
               ...transformOpts,
             });
+            const nextUnmasked =
+              currentUnmasked.slice(0, unmaskedIndex - 1) + currentUnmasked.slice(unmaskedIndex);
+            const nextMasked = applyMask({
+              value: nextUnmasked,
+              pattern: maskPattern.pattern,
+              ...transformOpts,
+              mask,
+            });
 
-            if (unmaskedIndex < currentUnmasked.length) {
-              const nextUnmasked =
-                currentUnmasked.slice(0, unmaskedIndex) + currentUnmasked.slice(unmaskedIndex + 1);
-              const nextMasked = applyMask({
-                value: nextUnmasked,
-                pattern: maskPattern.pattern,
-                ...transformOpts,
-                mask,
-              });
+            target.value = nextMasked;
+            const nextCaret = fromUnmaskedIndex({
+              masked: nextMasked,
+              pattern: maskPattern.pattern,
+              unmaskedIndex: unmaskedIndex - 1,
+            });
 
-              target.value = nextMasked;
-              const nextCaret = fromUnmaskedIndex({
-                masked: nextMasked,
-                pattern: maskPattern.pattern,
-                unmaskedIndex: unmaskedIndex,
-              });
+            target.setSelectionRange(nextCaret, nextCaret);
 
-              target.setSelectionRange(nextCaret, nextCaret);
-
-              onValueChangeProp?.(nextMasked, nextUnmasked);
-            }
-            return;
+            onValueChangeProp?.(nextMasked, nextUnmasked);
           }
+          return;
         }
       }
-    },
-    [maskPattern, onKeyDownProp, onValueChangeProp, transformOpts, mask, withoutMask]
-  );
+    }
+
+    if (event.key === "Delete") {
+      const target = event.target as InputElement;
+      if (!(target instanceof HTMLInputElement)) return;
+      const cursorPosition = target.selectionStart ?? 0;
+      const selectionEnd = target.selectionEnd ?? 0;
+      const currentValue = target.value;
+
+      if (
+        mask === "currency" ||
+        mask === "percentage" ||
+        maskPattern.pattern.includes("$") ||
+        maskPattern.pattern.includes("€") ||
+        maskPattern.pattern.includes("%")
+      ) {
+        return;
+      }
+
+      if (cursorPosition !== selectionEnd) {
+        return;
+      }
+
+      if (cursorPosition < currentValue.length) {
+        const charAtCursor = currentValue[cursorPosition];
+
+        if (charAtCursor) {
+          event.preventDefault();
+
+          const unmaskedIndex = toUnmaskedIndex({
+            masked: currentValue,
+            pattern: maskPattern.pattern,
+            caret: cursorPosition,
+          });
+
+          const currentUnmasked = getUnmaskedValue({
+            value: currentValue,
+            transform: maskPattern.transform,
+            ...transformOpts,
+          });
+
+          if (unmaskedIndex < currentUnmasked.length) {
+            const nextUnmasked =
+              currentUnmasked.slice(0, unmaskedIndex) + currentUnmasked.slice(unmaskedIndex + 1);
+            const nextMasked = applyMask({
+              value: nextUnmasked,
+              pattern: maskPattern.pattern,
+              ...transformOpts,
+              mask,
+            });
+
+            target.value = nextMasked;
+            const nextCaret = fromUnmaskedIndex({
+              masked: nextMasked,
+              pattern: maskPattern.pattern,
+              unmaskedIndex: unmaskedIndex,
+            });
+
+            target.setSelectionRange(nextCaret, nextCaret);
+
+            onValueChangeProp?.(nextMasked, nextUnmasked);
+          }
+          return;
+        }
+      }
+    }
+  });
 
   const InputPrimitive = asChild ? SlotPrimitive.Slot : "input";
 

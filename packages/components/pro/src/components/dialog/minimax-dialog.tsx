@@ -1,21 +1,29 @@
 import { Button } from "@rap/components-ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-} from "@rap/components-ui/dialog";
+import { Dialog, DialogContent, DialogFooter, DialogHeader } from "@rap/components-ui/dialog";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@rap/components-ui/hover-card";
 import { useMinimax, type MinimaxOptions, MinimaxState } from "@rap/hooks/use-minimax";
 import { useMove, type MoveOptions } from "@rap/hooks/use-move";
 import { cn } from "@rap/utils";
 import { Maximize2, Minimize2, Minus, Square, X } from "lucide-react";
-import { useEffect, useRef, useState, type ComponentProps } from "react";
+import {
+  useEffect,
+  useRef,
+  useState,
+  type CSSProperties,
+  type ComponentProps,
+  type MouseEvent,
+  type ReactNode,
+} from "react";
 import ReactDOM from "react-dom";
 import { renderDialogTrigger, useBasicDialog } from "./basic-dialog";
+import { createPortal } from "react-dom";
+import * as React from "react";
 
 export interface MinimaxDialogProps {
   children: React.ReactNode;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  trigger?: React.ReactNode;
   triggerChildren?: React.ReactNode;
   header?: React.ReactNode;
   footer?: React.ReactNode | null;
@@ -176,6 +184,9 @@ function MinimizedBar({
 
 export function MinimaxDialog({
   children,
+  open,
+  onOpenChange,
+  trigger,
   triggerChildren,
   header,
   footer,
@@ -241,8 +252,9 @@ export function MinimaxDialog({
     close();
   };
 
+  const mergedDialogProps = { ...dialogProps, open, onOpenChange };
   const dialog = useBasicDialog({
-    dialogProps,
+    dialogProps: mergedDialogProps,
     footer,
     okText,
     cancelText,
@@ -334,7 +346,7 @@ export function MinimaxDialog({
   return (
     <>
       <Dialog modal={false} {...dialogProps} open={dialog.open} onOpenChange={handleOpenChange}>
-        {renderDialogTrigger(triggerChildren)}
+        {renderDialogTrigger(trigger ?? triggerChildren)}
         {!isMinimized && (
           <DialogContent
             {...contentProps}

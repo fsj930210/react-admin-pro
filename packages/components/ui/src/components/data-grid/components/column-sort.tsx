@@ -8,7 +8,8 @@ import { Choose, Otherwise, When } from "@rap/components-ui/when";
 import { cn } from "@rap/utils";
 import type { Column, Table } from "@tanstack/react-table";
 import { ArrowDown, ArrowUp, ChevronsUpDown, EyeOff } from "lucide-react";
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
+import * as React from "react";
 
 export function ColumnSort<TData>({
   column,

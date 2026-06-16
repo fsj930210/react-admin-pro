@@ -1,17 +1,16 @@
 import { Button } from "@rap/components-ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-} from "@rap/components-ui/dialog";
+import { Dialog, DialogContent, DialogFooter, DialogHeader } from "@rap/components-ui/dialog";
 import { useMove, type MoveOptions } from "@rap/hooks/use-move";
 import { cn } from "@rap/utils";
-import type { ComponentProps } from "react";
+import { type CSSProperties, type ComponentProps, type ReactNode } from "react";
 import { renderDialogTrigger, useBasicDialog } from "./basic-dialog";
+import * as React from "react";
 
 export interface MovableDialogProps {
   children: React.ReactNode;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  trigger?: React.ReactNode;
   triggerChildren?: React.ReactNode;
   header?: React.ReactNode;
   footer?: React.ReactNode | null;
@@ -32,6 +31,9 @@ export interface MovableDialogProps {
 
 export function MovableDialog({
   children,
+  open,
+  onOpenChange,
+  trigger,
   triggerChildren,
   header,
   footer,
@@ -49,8 +51,9 @@ export function MovableDialog({
   headerProps,
   footerProps,
 }: MovableDialogProps) {
+  const mergedDialogProps = { ...dialogProps, open, onOpenChange };
   const dialog = useBasicDialog({
-    dialogProps,
+    dialogProps: mergedDialogProps,
     footer,
     okText,
     cancelText,
@@ -77,7 +80,7 @@ export function MovableDialog({
 
   return (
     <Dialog {...dialogProps} open={dialog.open} onOpenChange={dialog.setOpen}>
-      {renderDialogTrigger(triggerChildren)}
+      {renderDialogTrigger(trigger ?? triggerChildren)}
       <DialogContent
         {...contentProps}
         ref={targetRef}

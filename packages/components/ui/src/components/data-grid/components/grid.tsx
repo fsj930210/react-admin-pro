@@ -1,13 +1,14 @@
 import { cn } from "@rap/utils";
+import { type ComponentProps } from "react";
 
 export const gridRowClassName =
   "group/row grid items-center transition-colors hover:bg-muted/50 has-aria-expanded:bg-muted/50 data-[state=selected]:bg-muted";
 
-export function Grid({ className, ...props }: React.ComponentProps<"div">) {
+export function Grid({ className, ...props }: ComponentProps<"div">) {
   return <div role="grid" {...props} className={cn("w-full overflow-hidden", className)} />;
 }
 
-export function GridRow({ className, style, ...props }: React.ComponentProps<"div">) {
+export function GridRow({ className, style, ...props }: ComponentProps<"div">) {
   return (
     <div
       {...props}
@@ -26,7 +27,7 @@ export function GridCell({
   colSpan = 1,
   style,
   ...props
-}: React.ComponentProps<"div"> & { rowSpan?: number; colSpan?: number }) {
+}: ComponentProps<"div"> & { rowSpan?: number; colSpan?: number }) {
   return (
     <div
       {...props}

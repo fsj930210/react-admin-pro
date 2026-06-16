@@ -1,4 +1,5 @@
 import * as React from "react";
+import { useEffect, useState } from "react";
 
 export const useTheme = () => {
   const [isDarkMode, setIsDarkMode] = React.useState(false);

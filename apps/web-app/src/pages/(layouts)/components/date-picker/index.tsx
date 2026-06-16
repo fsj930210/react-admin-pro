@@ -34,7 +34,11 @@ function BasicSection() {
       <FieldGroup className="grid gap-5 md:grid-cols-2">
         <div className="space-y-2">
           <FieldLabel>Default</FieldLabel>
-          <DatePicker value={value} onChange={setValue} format="YYYY-MM-DD" />
+          <DatePicker
+            value={value}
+            onChange={(nextValue) => setValue(dayjs.isDayjs(nextValue) ? nextValue : null)}
+            format="YYYY-MM-DD"
+          />
           <FieldDescription>
             Current value: {value ? value.format("YYYY-MM-DD") : "empty"}
           </FieldDescription>
@@ -65,7 +69,8 @@ function BasicSection() {
             format="YYYY-MM-DD"
           />
           <FieldDescription>
-            Current value: {multipleValue.map((item) => item.format("YYYY-MM-DD")).join(", ") || "empty"}
+            Current value:{" "}
+            {multipleValue.map((item) => item.format("YYYY-MM-DD")).join(", ") || "empty"}
           </FieldDescription>
         </div>
       </FieldGroup>
@@ -119,7 +124,10 @@ function RangeSection() {
             format="YYYY-MM-DD"
             presets={[
               { label: "Last 7 Days", value: () => [dayjs().subtract(6, "day"), dayjs()] },
-              { label: "This Month", value: () => [dayjs().startOf("month"), dayjs().endOf("month")] },
+              {
+                label: "This Month",
+                value: () => [dayjs().startOf("month"), dayjs().endOf("month")],
+              },
             ]}
           />
           <FieldDescription>
@@ -227,7 +235,9 @@ function DateTimeSection() {
               disabledSeconds: (hour, minute) => (hour === 12 && minute === 30 ? [10, 11, 12] : []),
             })}
           />
-          <FieldDescription>Disables selected hours, minutes, and seconds in the time panel.</FieldDescription>
+          <FieldDescription>
+            Disables selected hours, minutes, and seconds in the time panel.
+          </FieldDescription>
         </div>
       </FieldGroup>
     </DemoSection>
@@ -250,7 +260,8 @@ function DisabledDateSection() {
           <RangePicker
             format="YYYY-MM-DD"
             disabledDate={(current, info) =>
-              !!info.from && Math.abs(current.startOf("day").diff(info.from.startOf("day"), "day")) > 30
+              !!info.from &&
+              Math.abs(current.startOf("day").diff(info.from.startOf("day"), "day")) > 30
             }
           />
         </div>
@@ -265,7 +276,8 @@ function RouteComponent() {
       <div>
         <h1 className="text-2xl font-semibold tracking-tight">Date Picker</h1>
         <p className="mt-2 text-sm text-muted-foreground">
-          Dayjs-first date picker demos with date, range, datetime, presets, custom cells, and disabled time.
+          Dayjs-first date picker demos with date, range, datetime, presets, custom cells, and
+          disabled time.
         </p>
       </div>
 

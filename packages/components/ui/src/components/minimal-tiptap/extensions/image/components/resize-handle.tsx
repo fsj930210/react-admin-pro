@@ -1,7 +1,7 @@
-import * as React from "react";
 import { cn } from "@rap/utils";
+import { type ComponentProps } from "react";
 
-interface ResizeProps extends React.ComponentProps<"div"> {
+interface ResizeProps extends ComponentProps<"div"> {
   isResizing?: boolean;
 }
 

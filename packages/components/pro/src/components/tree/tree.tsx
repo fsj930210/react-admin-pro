@@ -84,7 +84,7 @@ export function Tree({
       searchable,
       selectable,
       selectedKeys,
-    ],
+    ]
   );
   const virtualHeight = virtualOptions?.height ?? 320;
 

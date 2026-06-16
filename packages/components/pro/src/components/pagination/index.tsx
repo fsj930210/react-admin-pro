@@ -1,4 +1,4 @@
-import React from "react";
+import { type ChangeEvent, type ReactNode } from "react";
 import { useControllableState } from "@rap/hooks/use-controllable-state";
 import { useTranslation } from "@rap/i18n";
 import {
@@ -19,6 +19,7 @@ import {
 } from "@rap/components-ui/select";
 import { Input } from "@rap/components-ui/input";
 import { cn } from "@rap/utils";
+import * as React from "react";
 
 /**
  * 分页组件属性接口

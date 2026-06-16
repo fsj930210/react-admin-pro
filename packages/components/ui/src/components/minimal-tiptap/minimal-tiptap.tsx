@@ -76,13 +76,13 @@ export const MinimalTiptapEditor = ({
   }
 
   return (
-    <EditorContext.Provider value={{ editor }}>
+    <EditorContext value={{ editor }}>
       <MainMinimalTiptapEditor
         editor={editor}
         className={className}
         editorContentClassName={editorContentClassName}
       />
-    </EditorContext.Provider>
+    </EditorContext>
   );
 };
 

@@ -1,11 +1,11 @@
-import React from "react";
+import { type CSSProperties, type ImgHTMLAttributes } from "react";
 import { Icon as IconifyIconComponent } from "@iconify/react";
 import type { IconProps as IconifyIconComponentProps } from "@iconify/react";
 
 export type IconWrapperProps = {
   title?: string;
   wrapperClassName?: string;
-  wrapperStyle?: React.CSSProperties;
+  wrapperStyle?: CSSProperties;
 };
 export type IconifyIconProps = IconifyIconComponentProps & IconWrapperProps;
 
@@ -29,7 +29,7 @@ export function IconifyIcon({
   );
 }
 
-export type ImageIconProps = React.ImgHTMLAttributes<HTMLImageElement> & IconWrapperProps;
+export type ImageIconProps = ImgHTMLAttributes<HTMLImageElement> & IconWrapperProps;
 
 export function ImageIcon({
   title = "",

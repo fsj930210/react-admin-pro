@@ -1,11 +1,5 @@
 import { Button } from "@rap/components-ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@rap/components-ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@rap/components-ui/card";
 import { createFileRoute } from "@tanstack/react-router";
 import { Maximize2, Minimize2, RotateCcw, X } from "lucide-react";
 import { useState } from "react";
@@ -103,7 +97,8 @@ function MinimaxCardExample() {
               <div className="h-full w-2/3 rounded-full bg-primary" />
             </div>
             <p className="mt-3 text-sm text-muted-foreground">
-              当前状态：{state === "maximized" ? "最大化" : "普通"}。特性页只展示状态模型，组件页展示真实 Dialog。
+              当前状态：{state === "maximized" ? "最大化" : "普通"}
+              。特性页只展示状态模型，组件页展示真实 Dialog。
             </p>
           </div>
           <div className="rounded-md border p-4 text-sm text-muted-foreground">

@@ -2,7 +2,6 @@ import { cn } from "@rap/utils";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { ChevronDown } from "lucide-react";
 import { Slot as SlotPrimitive } from "radix-ui";
-import * as React from "react";
 import { Checkbox } from "../checkbox";
 import { TreeContext, useTreeContext } from "./tree-context";
 import type {
@@ -14,15 +13,23 @@ import type {
   TreeNode,
 } from "./types";
 import { useTree } from "./useTree";
+import {
+  useRef,
+  type CSSProperties,
+  type ComponentProps,
+  type HTMLAttributes,
+  type MouseEvent,
+  type ReactNode,
+} from "react";
 
-interface TreeRootProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "children"> {
+interface TreeRootProps extends Omit<HTMLAttributes<HTMLDivElement>, "children"> {
   data?: TreeNode[];
   treeData?: TreeNode[];
   features?: TreeFeature[];
   indent?: number;
   rowHeight?: number;
   isLeaf?: CreateTreeOptions["isLeaf"];
-  children: React.ReactNode | ((tree: TreeInstance) => React.ReactNode);
+  children: ReactNode | ((tree: TreeInstance) => ReactNode);
 }
 
 function TreeRoot({
@@ -38,7 +45,7 @@ function TreeRoot({
   ...props
 }: TreeRootProps) {
   const tree = useTree(data ?? treeData ?? [], { features, indent, isLeaf });
-  const mergedStyle = { ...style, "--tree-indent": `${indent}px` } as React.CSSProperties;
+  const mergedStyle = { ...style, "--tree-indent": `${indent}px` } as CSSProperties;
 
   return (
     <TreeContext value={{ indent, rowHeight, tree }}>
@@ -54,8 +61,8 @@ function TreeRoot({
   );
 }
 
-interface TreeViewportProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "children"> {
-  children: (item: TreeItemInstance, tree: TreeInstance) => React.ReactNode;
+interface TreeViewportProps extends Omit<HTMLAttributes<HTMLDivElement>, "children"> {
+  children: (item: TreeItemInstance, tree: TreeInstance) => ReactNode;
 }
 
 function TreeViewport({ children, className, ...props }: TreeViewportProps) {
@@ -68,10 +75,10 @@ function TreeViewport({ children, className, ...props }: TreeViewportProps) {
   );
 }
 
-interface TreeVirtualViewportProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "children"> {
+interface TreeVirtualViewportProps extends Omit<HTMLAttributes<HTMLDivElement>, "children"> {
   height: number;
   overscan?: number;
-  children: (item: TreeItemInstance, tree: TreeInstance) => React.ReactNode;
+  children: (item: TreeItemInstance, tree: TreeInstance) => ReactNode;
 }
 
 function TreeVirtualViewport({
@@ -83,7 +90,7 @@ function TreeVirtualViewport({
   ...props
 }: TreeVirtualViewportProps) {
   const { tree, rowHeight } = useTreeContext();
-  const parentRef = React.useRef<HTMLDivElement>(null);
+  const parentRef = useRef<HTMLDivElement>(null);
   const items = tree.getVisibleItems();
   const rowVirtualizer = useVirtualizer({
     count: items.length,
@@ -124,7 +131,7 @@ function TreeVirtualViewport({
   );
 }
 
-interface TreeItemProps extends React.HTMLAttributes<HTMLDivElement> {
+interface TreeItemProps extends HTMLAttributes<HTMLDivElement> {
   item: TreeItemInstance;
   asChild?: boolean;
 }
@@ -136,7 +143,7 @@ function TreeItem({ item, className, asChild, children, style, ...props }: TreeI
     ...style,
     height: rowHeight,
     "--tree-padding": `${item.depth * indent}px`,
-  } as React.CSSProperties;
+  } as CSSProperties;
 
   return (
     <Comp
@@ -163,7 +170,7 @@ function TreeItem({ item, className, asChild, children, style, ...props }: TreeI
   );
 }
 
-interface TreeTriggerProps extends React.HTMLAttributes<HTMLButtonElement> {
+interface TreeTriggerProps extends HTMLAttributes<HTMLButtonElement> {
   item: TreeItemInstance;
   asChild?: boolean;
 }
@@ -181,7 +188,7 @@ function TreeTrigger({ item, className, children, asChild, onClick, ...props }: 
         "inline-flex size-4 shrink-0 items-center justify-center rounded-sm transition-transform aria-[expanded=false]:-rotate-90",
         className
       )}
-      onClick={async (event: React.MouseEvent<HTMLButtonElement>) => {
+      onClick={async (event: MouseEvent<HTMLButtonElement>) => {
         event.stopPropagation();
         if (!item.expanded) await tree.loadChildren?.(item.key);
         tree.toggleExpanded?.(item.key);
@@ -195,7 +202,7 @@ function TreeTrigger({ item, className, children, asChild, onClick, ...props }: 
 }
 
 interface TreeCheckboxProps extends Omit<
-  React.ComponentProps<typeof Checkbox>,
+  ComponentProps<typeof Checkbox>,
   "checked" | "onCheckedChange"
 > {
   item: TreeItemInstance;
@@ -218,9 +225,9 @@ function TreeCheckbox({ item, className, ...props }: TreeCheckboxProps) {
   );
 }
 
-interface TreeLabelProps extends Omit<React.HTMLAttributes<HTMLSpanElement>, "children"> {
+interface TreeLabelProps extends Omit<HTMLAttributes<HTMLSpanElement>, "children"> {
   item: TreeItemInstance;
-  children?: React.ReactNode | ((item: TreeItemInstance) => React.ReactNode);
+  children?: ReactNode | ((item: TreeItemInstance) => ReactNode);
   selectOnClick?: boolean;
 }
 
@@ -252,7 +259,7 @@ function TreeLabel({
   );
 }
 
-interface TreeDropIndicatorProps extends React.HTMLAttributes<HTMLDivElement> {
+interface TreeDropIndicatorProps extends HTMLAttributes<HTMLDivElement> {
   intent?: DropIntent | null;
   item?: TreeItemInstance;
 }

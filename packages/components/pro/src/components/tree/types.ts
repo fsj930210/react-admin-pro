@@ -8,7 +8,7 @@ import type {
   TreeKey,
   TreeNode,
 } from "@rap/components-ui/tree/types";
-import type { HTMLAttributes, MouseEvent, ReactNode } from "react";
+import { type HTMLAttributes, type MouseEvent, type ReactNode } from "react";
 
 export type RenderItemContext = {
   item: TreeItemInstance;
@@ -23,7 +23,7 @@ export type SearchableConfig =
       onSearch?: (
         keyword: string,
         matchedKeys: TreeKey[],
-        matchedItems: TreeItemInstance[],
+        matchedItems: TreeItemInstance[]
       ) => void;
     };
 
@@ -54,7 +54,7 @@ export type TreeDraggableConfig =
       allowDropInsideLeaf?: boolean;
     };
 
-export type TreeBaseProps = Omit<HTMLAttributes<HTMLDivElement>, "children"> & {
+export type TreeBaseProps = Omit<HTMLAttributes<HTMLDivElement>, "children" | "draggable"> & {
   data?: TreeNode[];
   treeData?: TreeNode[];
   features?: TreeFeature[];
@@ -66,7 +66,7 @@ export type TreeBaseProps = Omit<HTMLAttributes<HTMLDivElement>, "children"> & {
   defaultExpandedKeys?: TreeKey[];
   onExpandedKeysChange?: (
     keys: TreeKey[],
-    info: { expanded: boolean; key: TreeKey; item?: TreeItemInstance },
+    info: { expanded: boolean; key: TreeKey; item?: TreeItemInstance }
   ) => void;
 
   selectable?: boolean | { multiple?: boolean };
@@ -74,7 +74,7 @@ export type TreeBaseProps = Omit<HTMLAttributes<HTMLDivElement>, "children"> & {
   defaultSelectedKeys?: TreeKey[];
   onSelectedKeysChange?: (
     keys: TreeKey[],
-    info: { selected: boolean; key: TreeKey; item?: TreeItemInstance },
+    info: { selected: boolean; key: TreeKey; item?: TreeItemInstance }
   ) => void;
 
   checkable?: boolean | { checkStrictly?: boolean };
@@ -82,7 +82,7 @@ export type TreeBaseProps = Omit<HTMLAttributes<HTMLDivElement>, "children"> & {
   defaultCheckedKeys?: TreeKey[];
   onCheckedKeysChange?: (
     keys: TreeKey[],
-    info: { checked: boolean; key: TreeKey; item?: TreeItemInstance },
+    info: { checked: boolean; key: TreeKey; item?: TreeItemInstance }
   ) => void;
 
   searchable?: SearchableConfig;
@@ -90,11 +90,11 @@ export type TreeBaseProps = Omit<HTMLAttributes<HTMLDivElement>, "children"> & {
   asyncLoader?: AsyncLoaderConfig;
 
   renderItem?: (context: RenderItemContext) => ReactNode;
-  labelRender?: (item: TreeItemInstance) => ReactNode;
   extraRender?: (item: TreeItemInstance, tree: TreeInstance) => ReactNode;
+  labelRender?: (item: TreeItemInstance) => ReactNode;
   onItemContextMenu?: (
     event: MouseEvent<HTMLDivElement>,
-    context: { item: TreeItemInstance; tree: TreeInstance },
+    context: { item: TreeItemInstance; tree: TreeInstance }
   ) => void;
   itemClassName?: string;
 };

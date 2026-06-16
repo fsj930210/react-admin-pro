@@ -1,8 +1,20 @@
 "use client";
 // 文档地址 https://www.diceui.com/docs/components/radix/compare-slider
+import {
+  createContext,
+  use,
+  useCallback,
+  useId,
+  useMemo,
+  useRef,
+  useSyncExternalStore,
+  type ComponentProps,
+  type ComponentRef,
+  type KeyboardEvent,
+  type PointerEvent,
+} from "react";
 import { ChevronDownIcon, ChevronLeftIcon, ChevronRightIcon, ChevronUpIcon } from "lucide-react";
 import { Slot as SlotPrimitive } from "radix-ui";
-import * as React from "react";
 import { useComposedRefs } from "@rap/utils/compose-refs";
 import { cn } from "@rap/utils";
 import { useAsRef } from "@rap/hooks/use-as-ref";
@@ -21,11 +33,11 @@ const ARROW_KEYS = ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"];
 type Interaction = "hover" | "drag";
 type Orientation = "horizontal" | "vertical";
 
-interface DivProps extends React.ComponentProps<"div"> {
+interface DivProps extends ComponentProps<"div"> {
   asChild?: boolean;
 }
 
-type RootElement = React.ComponentRef<typeof CompareSlider>;
+type RootElement = ComponentRef<typeof CompareSlider>;
 
 function clamp(value: number, min: number, max: number): number {
   return Math.min(Math.max(value, min), max);
@@ -43,10 +55,10 @@ interface Store {
   notify: () => void;
 }
 
-const StoreContext = React.createContext<Store | null>(null);
+const StoreContext = createContext<Store | null>(null);
 
 function useStore<T>(selector: (state: StoreState) => T, ogStore?: Store | null): T {
-  const contextStore = React.useContext(StoreContext);
+  const contextStore = use(StoreContext);
 
   const store = ogStore ?? contextStore;
 
@@ -54,9 +66,9 @@ function useStore<T>(selector: (state: StoreState) => T, ogStore?: Store | null)
     throw new Error(`\`useStore\` must be used within \`${ROOT_NAME}\``);
   }
 
-  const getSnapshot = React.useCallback(() => selector(store.getState()), [store, selector]);
+  const getSnapshot = useCallback(() => selector(store.getState()), [store, selector]);
 
-  return React.useSyncExternalStore(store.subscribe, getSnapshot, getSnapshot);
+  return useSyncExternalStore(store.subscribe, getSnapshot, getSnapshot);
 }
 
 interface CompareSliderContextValue {
@@ -64,10 +76,10 @@ interface CompareSliderContextValue {
   orientation: Orientation;
 }
 
-const CompareSliderContext = React.createContext<CompareSliderContextValue | null>(null);
+const CompareSliderContext = createContext<CompareSliderContextValue | null>(null);
 
 function useCompareSliderContext(consumerName: string) {
-  const context = React.useContext(CompareSliderContext);
+  const context = use(CompareSliderContext);
   if (!context) {
     throw new Error(`\`${consumerName}\` must be used within \`${ROOT_NAME}\``);
   }
@@ -109,7 +121,7 @@ function CompareSlider(props: CompareSliderProps) {
   const listenersRef = useLazyRef(() => new Set<() => void>());
   const onValueChangeRef = useAsRef(onValueChange);
 
-  const store = React.useMemo<Store>(() => {
+  const store = useMemo<Store>(() => {
     return {
       subscribe: (cb) => {
         listenersRef.current.add(cb);
@@ -134,9 +146,9 @@ function CompareSlider(props: CompareSliderProps) {
     };
   }, [listenersRef, stateRef, onValueChangeRef]);
 
-  const rootRef = React.useRef<RootElement | null>(null);
+  const rootRef = useRef<RootElement | null>(null);
   const composedRef = useComposedRefs(ref, rootRef);
-  const isDraggingRef = React.useRef(false);
+  const isDraggingRef = useRef(false);
 
   const propsRef = useAsRef({
     onPointerMove: onPointerMoveProp,
@@ -156,8 +168,8 @@ function CompareSlider(props: CompareSliderProps) {
     }
   }, [valueProp]);
 
-  const onPointerMove = React.useCallback(
-    (event: React.PointerEvent<RootElement>) => {
+  const onPointerMove = useCallback(
+    (event: PointerEvent<RootElement>) => {
       if (!isDraggingRef.current && propsRef.current.interaction === "drag") {
         return;
       }
@@ -177,8 +189,8 @@ function CompareSlider(props: CompareSliderProps) {
     [propsRef, store]
   );
 
-  const onPointerDown = React.useCallback(
-    (event: React.PointerEvent<RootElement>) => {
+  const onPointerDown = useCallback(
+    (event: PointerEvent<RootElement>) => {
       if (propsRef.current.interaction !== "drag") return;
 
       propsRef.current.onPointerDown?.(event);
@@ -191,8 +203,8 @@ function CompareSlider(props: CompareSliderProps) {
     [store, propsRef]
   );
 
-  const onPointerUp = React.useCallback(
-    (event: React.PointerEvent<RootElement>) => {
+  const onPointerUp = useCallback(
+    (event: PointerEvent<RootElement>) => {
       if (propsRef.current.interaction !== "drag") return;
 
       propsRef.current.onPointerUp?.(event);
@@ -205,8 +217,8 @@ function CompareSlider(props: CompareSliderProps) {
     [store, propsRef]
   );
 
-  const onKeyDown = React.useCallback(
-    (event: React.KeyboardEvent<RootElement>) => {
+  const onKeyDown = useCallback(
+    (event: KeyboardEvent<RootElement>) => {
       propsRef.current.onKeyDown?.(event);
       if (event.defaultPrevented) return;
 
@@ -243,7 +255,7 @@ function CompareSlider(props: CompareSliderProps) {
     [store, propsRef]
   );
 
-  const contextValue = React.useMemo<CompareSliderContextValue>(
+  const contextValue = useMemo<CompareSliderContextValue>(
     () => ({
       interaction,
       orientation,
@@ -254,8 +266,8 @@ function CompareSlider(props: CompareSliderProps) {
   const RootPrimitive = asChild ? SlotPrimitive.Slot : "div";
 
   return (
-    <StoreContext.Provider value={store}>
-      <CompareSliderContext.Provider value={contextValue}>
+    <StoreContext value={store}>
+      <CompareSliderContext value={contextValue}>
         <RootPrimitive
           role="slider"
           aria-orientation={orientation}
@@ -280,8 +292,8 @@ function CompareSlider(props: CompareSliderProps) {
         >
           {children}
         </RootPrimitive>
-      </CompareSliderContext.Provider>
-    </StoreContext.Provider>
+      </CompareSliderContext>
+    </StoreContext>
   );
 }
 
@@ -295,7 +307,7 @@ function CompareSliderBefore(props: CompareSliderBeforeProps) {
   const value = useStore((state) => state.value);
   const { orientation } = useCompareSliderContext(BEFORE_NAME);
 
-  const labelId = React.useId();
+  const labelId = useId();
 
   const isVertical = orientation === "vertical";
   const clipPath = isVertical ? `inset(${value}% 0 0 0)` : `inset(0 0 0 ${value}%)`;
@@ -337,7 +349,7 @@ function CompareSliderAfter(props: CompareSliderAfterProps) {
   const value = useStore((state) => state.value);
   const { orientation } = useCompareSliderContext(AFTER_NAME);
 
-  const labelId = React.useId();
+  const labelId = useId();
 
   const isVertical = orientation === "vertical";
   const clipPath = isVertical ? `inset(0 0 ${100 - value}% 0)` : `inset(0 ${100 - value}% 0 0)`;

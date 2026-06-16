@@ -24,6 +24,6 @@
 
 - 写代码时先看看项目是否有基础组件或者是增强组件，不要一上来就是手搓，特别是button组件。还有就是要看看有没有对应的`hook`或者`utils`，不要自己手写，比如同时支持受控和非受控，直接用项目的`use-controllable-state.ts`就行了，比如遍历树直接用`utils`里面的`traverseTree`方法就行了，不是都要手写的，并且在写的过程中如果觉得这个时比较通用的，可以写到通用的`hook`或者`utils`里面去，而不是每次都去自己手写。
 
-- 写的代码注意看`react`的版本号，项目是基于`react19`以上的，不要写一些过时的代码，比如`fowardRef`,在`react19`已经被标记不推荐使用了，其他的一些`hook api`，`react19`更新了很多，能用上的尽量用。还有`react`的`api`，都解构出来用，不要代码里面一大堆`React.useState`这种，直接`import {useState} from 'react'`;
+- 写的代码注意看`react`的版本号，项目是基于`react19`以上的，不要写一些过时的代码，比如`fowardRef`,在`react19`已经被标记不推荐使用了，像`context`都不用`<Context.Provider></Context.Provider>`了直接`<Context></Context>`,并且`useContext`也使用`use`代替，其他的一些`hook api`，`react19`更新了很多，能用上的尽量用。还有`react`的`api`，都解构出来用，不要代码里面一大堆`React.useState`这种，直接`import {useState} from 'react'`;
 
 - 多组件组合成一个组件时，需要注意有容器组件和逻辑组件。容器组件里面不要有很合业务逻辑，只是组装各个逻辑组件，转发兄弟逻辑组件的`prop`等。逻辑组件才是实际写业务逻辑和`ui`的组件，如果代码复杂，我更建议，逻辑组件还可以划分为 逻辑`hook`和`ui`展示，每个逻辑组件包含一个或多个`hook`,并且`hook`命名都是`use-xxx`而不是随便起个名，然后在`ui`上使用，而不是跟`ui`写在一堆，排查都难。

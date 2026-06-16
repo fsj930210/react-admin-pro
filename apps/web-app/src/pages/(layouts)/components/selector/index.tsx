@@ -248,10 +248,7 @@ function TreeDemo() {
   const flatTree = useMemo(() => flattenTree(treeData), []);
 
   return (
-    <Section
-      title="Tree 渲染"
-      description="真实树场景接 pro Tree，Selector 只同步 checkedKeys。"
-    >
+    <Section title="Tree 渲染" description="真实树场景接 pro Tree，Selector 只同步 checkedKeys。">
       <Selector<TreeNode>
         className="h-[420px]"
         dataSource={flatTree}

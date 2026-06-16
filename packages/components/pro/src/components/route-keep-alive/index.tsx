@@ -1,5 +1,13 @@
-import { Activity, useEffect, useImperativeHandle, useMemo, useReducer, useRef } from "react";
-import type { ReactNode, RefObject } from "react";
+import {
+  Activity,
+  useEffect,
+  useImperativeHandle,
+  useMemo,
+  useReducer,
+  useRef,
+  type ReactNode,
+  type RefObject,
+} from "react";
 import { RaAnimator, type AnimatorConfig } from "@rap/components-ui/animator";
 import { cn } from "@rap/utils";
 import { useLocation, useNavigate, useRouter, useRouterState } from "@tanstack/react-router";

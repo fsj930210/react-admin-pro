@@ -1,5 +1,4 @@
-import type { ReactNode } from "react";
-import { Children, isValidElement, type ReactElement } from "react";
+import { Children, isValidElement, type ReactElement, type ReactNode } from "react";
 
 export interface WhenProps {
   condition: boolean | null | undefined;

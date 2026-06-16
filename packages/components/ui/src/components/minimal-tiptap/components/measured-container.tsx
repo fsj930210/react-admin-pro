@@ -1,20 +1,20 @@
-import * as React from "react";
 import { useContainerSize } from "../hooks/use-container-size";
+import { useRef, type ComponentProps, type ElementType, type ReactNode } from "react";
 
-interface MeasuredContainerProps<T extends React.ElementType> {
+interface MeasuredContainerProps<T extends ElementType> {
   as: T;
   name: string;
-  children?: React.ReactNode;
+  children?: ReactNode;
 }
 
-export const MeasuredContainer = <T extends React.ElementType>({
+export const MeasuredContainer = <T extends ElementType>({
   as: Component,
   name,
   children,
   style = {},
   ...props
-}: MeasuredContainerProps<T> & React.ComponentProps<T>) => {
-  const innerRef = React.useRef<HTMLElement>(null);
+}: MeasuredContainerProps<T> & ComponentProps<T>) => {
+  const innerRef = useRef<HTMLElement>(null);
   const rect = useContainerSize(innerRef.current);
 
   const customStyle = {

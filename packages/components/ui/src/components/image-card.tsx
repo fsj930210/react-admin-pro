@@ -1,10 +1,10 @@
 "use client";
 
-import * as React from "react";
 import { Slot as SlotPrimitive } from "radix-ui";
 
 import { useIsomorphicLayoutEffect } from "@rap/hooks/use-isomorphic-layout-effect";
 import { cn, useComposedRefs } from "@rap/utils";
+import { useMemo, useState, type CSSProperties, type ComponentProps } from "react";
 
 type GapValue = number | { column?: number; row?: number };
 
@@ -13,7 +13,7 @@ interface ImageCardLayout {
   itemWidth: number;
 }
 
-interface ImageCardProps extends React.ComponentProps<"div"> {
+interface ImageCardProps extends ComponentProps<"div"> {
   itemWidth?: number;
   minItemWidth?: number;
   maxItemWidth?: number;
@@ -21,22 +21,22 @@ interface ImageCardProps extends React.ComponentProps<"div"> {
   gap?: GapValue;
   contentHeight?: number;
   imageRatio?: number;
-  imageFit?: React.CSSProperties["objectFit"];
+  imageFit?: CSSProperties["objectFit"];
   asChild?: boolean;
 }
 
-interface ImageCardItemProps extends React.ComponentProps<"div"> {
+interface ImageCardItemProps extends ComponentProps<"div"> {
   asChild?: boolean;
 }
 
-interface ImageCardImageProps extends Omit<React.ComponentProps<"img">, "children"> {
+interface ImageCardImageProps extends Omit<ComponentProps<"img">, "children"> {
   wrapperClassName?: string;
-  wrapperStyle?: React.CSSProperties;
-  fit?: React.CSSProperties["objectFit"];
+  wrapperStyle?: CSSProperties;
+  fit?: CSSProperties["objectFit"];
   ratio?: number;
 }
 
-interface ImageCardContentProps extends React.ComponentProps<"div"> {
+interface ImageCardContentProps extends ComponentProps<"div"> {
   asChild?: boolean;
 }
 
@@ -45,7 +45,7 @@ type ImageCardGridItemProps = ImageCardItemProps;
 type ImageCardGridImageProps = ImageCardImageProps;
 type ImageCardGridContentProps = ImageCardContentProps;
 
-type ImageCardStyle = React.CSSProperties & {
+type ImageCardStyle = CSSProperties & {
   "--image-card-grid-column-gap"?: string;
   "--image-card-grid-row-gap"?: string;
   "--image-card-grid-item-width"?: string;
@@ -53,14 +53,14 @@ type ImageCardStyle = React.CSSProperties & {
   "--image-card-grid-max-item-width"?: string;
   "--image-card-grid-content-height"?: string;
   "--image-card-grid-image-ratio"?: number;
-  "--image-card-grid-image-fit"?: React.CSSProperties["objectFit"];
+  "--image-card-grid-image-fit"?: CSSProperties["objectFit"];
 };
 
 const DEFAULT_ITEM_WIDTH = 240;
 const DEFAULT_GAP = 16;
 const DEFAULT_CONTENT_HEIGHT = 72;
 const DEFAULT_IMAGE_RATIO = 4 / 3;
-const DEFAULT_IMAGE_FIT: React.CSSProperties["objectFit"] = "contain";
+const DEFAULT_IMAGE_FIT: CSSProperties["objectFit"] = "contain";
 const MAX_AUTO_ITEM_WIDTH = 360;
 
 function clamp(value: number, min: number, max: number) {
@@ -162,8 +162,8 @@ function computeGridLayout(
 }
 
 function useElementWidth<T extends HTMLElement>() {
-  const [node, setNode] = React.useState<T | null>(null);
-  const [width, setWidth] = React.useState(0);
+  const [node, setNode] = useState<T | null>(null);
+  const [width, setWidth] = useState(0);
 
   useIsomorphicLayoutEffect(() => {
     if (!node) return;
@@ -225,7 +225,7 @@ function ImageCard(props: ImageCardProps) {
   const gapValue = normalizeGap(gap);
   const [measureRef, containerWidth] = useElementWidth<HTMLDivElement>();
   const composedRef = useComposedRefs(ref, measureRef);
-  const layout = React.useMemo(
+  const layout = useMemo(
     () => computeGridLayout(containerWidth, itemWidth, min, max, gapValue.column, maxColumns),
     [containerWidth, itemWidth, min, max, gapValue.column, maxColumns]
   );
@@ -306,7 +306,7 @@ function ImageCardImage(props: ImageCardImageProps) {
         data-slot="image-card-grid-image"
         className={cn("h-full w-full", className)}
         style={{
-          objectFit: "var(--image-card-grid-image-fit)" as React.CSSProperties["objectFit"],
+          objectFit: "var(--image-card-grid-image-fit)" as CSSProperties["objectFit"],
           ...style,
         }}
         alt={alt}

@@ -1,5 +1,4 @@
-import type React from "react";
-import { useImperativeHandle, useRef, useState } from "react";
+import { useImperativeHandle, useRef, useState, type KeyboardEvent, type Ref } from "react";
 import { useControllableState } from "@rap/hooks/use-controllable-state";
 import type {
   SelectChangeContext,
@@ -21,6 +20,7 @@ import {
   resolveSelectedOption,
   resolveShowSearch,
 } from "./utils";
+import * as React from "react";
 
 function buildChangeContext<V extends SelectValue>(
   multiple: boolean,

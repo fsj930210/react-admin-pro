@@ -1,4 +1,3 @@
-import * as React from "react";
 import type { Editor } from "@tiptap/react";
 import type { toggleVariants } from "../../../toggle";
 import type { VariantProps } from "class-variance-authority";
@@ -8,6 +7,7 @@ import { Popover, PopoverTrigger, PopoverContent } from "../../../popover";
 import { ToggleGroup, ToggleGroupItem } from "../../../toggle-group";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../../../tooltip";
 import { useTheme } from "../../hooks/use-theme";
+import { memo, useCallback, useEffect, useState, type FC, type MouseEvent } from "react";
 
 interface ColorItem {
   cssVar: string;
@@ -63,7 +63,7 @@ const COLORS: ColorPalette[] = [
   },
 ];
 
-const MemoizedColorButton = React.memo<{
+const MemoizedColorButton = memo<{
   color: ColorItem;
   isSelected: boolean;
   inverse: string;
@@ -81,7 +81,7 @@ const MemoizedColorButton = React.memo<{
           value={color.cssVar}
           aria-label={label}
           style={{ backgroundColor: color.cssVar }}
-          onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
+          onClick={(e: MouseEvent<HTMLButtonElement>) => {
             e.preventDefault();
             onClick(color.cssVar);
           }}
@@ -100,7 +100,7 @@ const MemoizedColorButton = React.memo<{
 
 MemoizedColorButton.displayName = "MemoizedColorButton";
 
-const MemoizedColorPicker = React.memo<{
+const MemoizedColorPicker = memo<{
   palette: ColorPalette;
   selectedColor: string;
   inverse: string;
@@ -132,11 +132,11 @@ interface SectionThreeProps extends VariantProps<typeof toggleVariants> {
   editor: Editor;
 }
 
-export const SectionThree: React.FC<SectionThreeProps> = ({ editor, size, variant }) => {
+export const SectionThree: FC<SectionThreeProps> = ({ editor, size, variant }) => {
   const color = editor.getAttributes("textStyle")?.color || "hsl(var(--foreground))";
-  const [selectedColor, setSelectedColor] = React.useState(color);
+  const [selectedColor, setSelectedColor] = useState(color);
 
-  const handleColorChange = React.useCallback(
+  const handleColorChange = useCallback(
     (value: string) => {
       setSelectedColor(value);
       if (editor.state.storedMarks) {
@@ -153,7 +153,7 @@ export const SectionThree: React.FC<SectionThreeProps> = ({ editor, size, varian
     [editor]
   );
 
-  React.useEffect(() => {
+  useEffect(() => {
     setSelectedColor(color);
   }, [color]);
 

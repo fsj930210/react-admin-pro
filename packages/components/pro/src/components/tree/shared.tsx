@@ -22,8 +22,7 @@ import {
 } from "@rap/components-ui/tree/features";
 import { useTranslation } from "@rap/i18n";
 import { cn } from "@rap/utils";
-import { useRef } from "react";
-import type { DragEventHandler, MouseEventHandler } from "react";
+import { useRef, type DragEventHandler, type MouseEventHandler } from "react";
 import type {
   DraggableTreeProps,
   DropIntent,
@@ -72,7 +71,7 @@ export function buildCommonFeatures({
         selectedKeys,
         defaultSelectedKeys,
         onSelectedKeysChange,
-      }),
+      })
     );
   }
 
@@ -84,7 +83,7 @@ export function buildCommonFeatures({
         checkedKeys,
         defaultCheckedKeys,
         onCheckedKeysChange,
-      }),
+      })
     );
   }
 
@@ -104,10 +103,7 @@ export function buildCommonFeatures({
   return nextFeatures;
 }
 
-export function buildDraggableFeatures(
-  props: TreeBaseProps,
-  draggable?: TreeDraggableConfig,
-) {
+export function buildDraggableFeatures(props: TreeBaseProps, draggable?: TreeDraggableConfig) {
   const draggableOptions = typeof draggable === "object" ? draggable : {};
   return [
     crudFeature(),
@@ -300,7 +296,7 @@ export function DraggableTreeContent(props: DraggableTreeProps & { tree: TreeIns
 }
 
 export function DraggableVirtualTreeContent(
-  props: DraggableTreeProps & { height: number; overscan?: number; tree: TreeInstance },
+  props: DraggableTreeProps & { height: number; overscan?: number; tree: TreeInstance }
 ) {
   const {
     tree,

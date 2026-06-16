@@ -1,6 +1,6 @@
 import { cn } from "@rap/utils";
 import type { Header } from "@tanstack/react-table";
-import type { MouseEvent, TouchEvent } from "react";
+import { type MouseEvent, type TouchEvent } from "react";
 
 interface HeaderSeparatorProps<TData> {
   header: Header<TData, unknown>;

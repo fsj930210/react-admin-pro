@@ -12,9 +12,18 @@ import { useResize, type ResizeDirection, type ResizeOptions } from "@rap/hooks/
 import { cn } from "@rap/utils";
 import { useComposedRefs } from "@rap/utils/compose-refs";
 import { Maximize2, Minimize2, Minus, Square, X } from "lucide-react";
-import { useEffect, useRef, useState, type ComponentProps } from "react";
+import {
+  useEffect,
+  useRef,
+  useState,
+  type CSSProperties,
+  type ComponentProps,
+  type MouseEvent,
+  type ReactNode,
+} from "react";
 import { createPortal } from "react-dom";
 import { renderDialogTrigger, useBasicDialog } from "./basic-dialog";
+import * as React from "react";
 
 export interface DialogFeatures {
   movable?: boolean;
@@ -25,6 +34,9 @@ export interface DialogFeatures {
 
 export interface DialogProps {
   children: React.ReactNode;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  trigger?: React.ReactNode;
   triggerChildren?: React.ReactNode;
   header?: React.ReactNode;
   footer?: React.ReactNode | null;
@@ -210,6 +222,9 @@ function MinimizedBar({
 
 export function Dialog({
   children,
+  open,
+  onOpenChange,
+  trigger,
   triggerChildren,
   header,
   footer,
@@ -253,8 +268,9 @@ export function Dialog({
     toggleMaximize,
   } = useMinimax(minimaxOptions);
 
+  const mergedDialogProps = { ...dialogProps, open, onOpenChange };
   const dialog = useBasicDialog({
-    dialogProps,
+    dialogProps: mergedDialogProps,
     footer,
     okText,
     cancelText,
@@ -388,7 +404,7 @@ export function Dialog({
   return (
     <>
       <BaseDialog modal={false} {...dialogProps} open={dialog.open} onOpenChange={handleOpenChange}>
-        {renderDialogTrigger(triggerChildren)}
+        {renderDialogTrigger(trigger ?? triggerChildren)}
         {!isMinimized && (
           <DialogContent
             {...contentProps}

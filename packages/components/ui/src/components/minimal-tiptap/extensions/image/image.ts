@@ -6,6 +6,7 @@ import { ImageViewBlock } from "./components/image-view-block";
 import { filterFiles, randomId, type FileError, type FileValidationOptions } from "../../utils";
 import { ReplaceStep } from "@tiptap/pm/transform";
 import type { Attrs } from "@tiptap/pm/model";
+import { createElement, type HTMLAttributes } from "react";
 
 type ImageAction = "download" | "copyImage" | "copyLink";
 

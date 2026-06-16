@@ -1,16 +1,15 @@
 "use client";
 
-import type React from "react";
 import {
   createContext,
   createElement,
   use,
   useCallback,
-  useContext,
   useEffect,
   useMemo,
   useRef,
   useState,
+  type FC,
 } from "react";
 import type { ColorScheme, ThemeContextValue, ThemeProviderProps } from "./types";
 import {
@@ -45,7 +44,7 @@ type ActiveThemeProviderProps = ThemeProviderProps & {
   scope: Exclude<NonNullable<ThemeProviderProps["scope"]>, "inherit">;
 };
 
-const ActiveThemeProvider: React.FC<ActiveThemeProviderProps> = ({
+const ActiveThemeProvider: FC<ActiveThemeProviderProps> = ({
   children,
   scope,
   storageKey,
@@ -59,7 +58,7 @@ const ActiveThemeProvider: React.FC<ActiveThemeProviderProps> = ({
   as = "div",
   colorSchemeMap,
 }) => {
-  const parentContext = useContext(ThemeContext);
+  const parentContext = use(ThemeContext);
   const containerRef = useRef<HTMLElement | null>(null);
   const appliedThemeRef = useRef<string | undefined>(undefined);
 
@@ -213,13 +212,13 @@ const ActiveThemeProvider: React.FC<ActiveThemeProviderProps> = ({
   );
 };
 
-export const ThemeProvider: React.FC<ThemeProviderProps> = ({
+export const ThemeProvider: FC<ThemeProviderProps> = ({
   scope = "root",
   children,
   forcedTheme,
   ...props
 }) => {
-  const parentContext = useContext(ThemeContext);
+  const parentContext = use(ThemeContext);
 
   if (scope === "inherit") {
     if (!parentContext) {

@@ -6,8 +6,7 @@ import type {
   Variants,
 } from "framer-motion";
 import { AnimatePresence, motion, useAnimationControls } from "framer-motion";
-import { useEffect } from "react";
-import type { ElementType, ReactNode } from "react";
+import { useEffect, type ElementType, type ReactNode } from "react";
 
 export type AnimatorPreset =
   | "none"

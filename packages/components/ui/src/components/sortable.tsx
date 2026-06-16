@@ -8,6 +8,16 @@ import {
   type DragStartEvent,
   type UniqueIdentifier,
 } from "@dnd-kit/abstract";
+import * as React from "react";
+import {
+  createContext,
+  use,
+  useId,
+  useMemo,
+  useState,
+  type ComponentProps,
+  type ReactNode,
+} from "react";
 import { RestrictToHorizontalAxis, RestrictToVerticalAxis } from "@dnd-kit/abstract/modifiers";
 import { arrayMove } from "@dnd-kit/helpers";
 import { DragDropProvider, DragOverlay, PointerSensor } from "@dnd-kit/react";
@@ -15,7 +25,7 @@ import { type UseSortableInput, useSortable } from "@dnd-kit/react/sortable";
 import { cn } from "@rap/utils";
 import { useComposedRefs } from "@rap/utils/compose-refs";
 import { Slot as SlotPrimitive } from "radix-ui";
-import * as React from "react";
+import { useMemoizedFn } from "@rap/hooks/use-memoized-fn";
 
 type SortableId = UniqueIdentifier;
 type DragDropProviderProps = React.ComponentProps<typeof DragDropProvider>;
@@ -47,7 +57,7 @@ type SortableRootProps = Omit<
   onDragMove?: (event: DragMoveEvent) => void;
   onDragOver?: (event: DragOverEvent) => void;
   onDragEnd?: (event: DragEndEvent) => void;
-  children?: React.ReactNode;
+  children?: ReactNode;
 };
 
 interface SortableContextValue {
@@ -97,11 +107,11 @@ const orientationModifiers: Record<SortableOrientation, DragDropProviderProps["m
   mixed: undefined,
 };
 
-const SortableRootContext = React.createContext<SortableContextValue | null>(null);
-const SortableItemContext = React.createContext<SortableItemContextValue | null>(null);
+const SortableRootContext = createContext<SortableContextValue | null>(null);
+const SortableItemContext = createContext<SortableItemContextValue | null>(null);
 
 function useSortableRoot(component: string) {
-  const context = React.useContext(SortableRootContext);
+  const context = use(SortableRootContext);
   if (!context) {
     throw new Error(`\`${component}\` must be rendered inside \`Sortable.Root\``);
   }
@@ -109,7 +119,7 @@ function useSortableRoot(component: string) {
 }
 
 function useSortableItem(component: string) {
-  const context = React.useContext(SortableItemContext);
+  const context = use(SortableItemContext);
   if (!context) {
     throw new Error(`\`${component}\` must be rendered inside \`Sortable.Item\``);
   }
@@ -134,9 +144,9 @@ function Root(props: SortableRootProps) {
     ...providerProps
   } = props;
 
-  const [activeId, setActiveId] = React.useState<SortableId | null>(null);
+  const [activeId, setActiveId] = useState<SortableId | null>(null);
   const resolvedModifiers = modifiers ?? orientationModifiers[orientation];
-  const resolvedSensors = React.useMemo(() => {
+  const resolvedSensors = useMemo(() => {
     if (sensors || activationDistance == null) return sensors;
 
     return [
@@ -146,53 +156,47 @@ function Root(props: SortableRootProps) {
     ] satisfies DragDropProviderProps["sensors"];
   }, [sensors, activationDistance]);
 
-  const handleDragStart = React.useCallback(
-    (event: DragStartEvent) => {
-      onDragStartProp?.(event);
-      setActiveId(event.operation.source?.id ?? null);
-    },
-    [onDragStartProp]
-  );
+  const handleDragStart = useMemoizedFn((event: DragStartEvent) => {
+    onDragStartProp?.(event);
+    setActiveId(event.operation.source?.id ?? null);
+  });
 
-  const handleDragEnd = React.useCallback(
-    (event: DragEndEvent) => {
-      onDragEndProp?.(event);
+  const handleDragEnd = useMemoizedFn((event: DragEndEvent) => {
+    onDragEndProp?.(event);
 
-      const sourceId = event.operation.source?.id;
-      const targetId = event.operation.target?.id;
-      if (!event.canceled && sourceId != null && targetId != null && sourceId !== targetId) {
-        const sourceIndex = items.indexOf(sourceId);
-        const targetIndex = items.indexOf(targetId);
+    const sourceId = event.operation.source?.id;
+    const targetId = event.operation.target?.id;
+    if (!event.canceled && sourceId != null && targetId != null && sourceId !== targetId) {
+      const sourceIndex = items.indexOf(sourceId);
+      const targetIndex = items.indexOf(targetId);
 
-        if (sourceIndex !== -1 && targetIndex !== -1) {
-          const nextItems = arrayMove(items, sourceIndex, targetIndex) as SortableId[];
-          const reorderResult = onReorder?.({
-            ...event,
-            sourceId,
-            targetId,
-            sourceIndex,
-            targetIndex,
-            nextItems,
-          });
+      if (sourceIndex !== -1 && targetIndex !== -1) {
+        const nextItems = arrayMove(items, sourceIndex, targetIndex) as SortableId[];
+        const reorderResult = onReorder?.({
+          ...event,
+          sourceId,
+          targetId,
+          sourceIndex,
+          targetIndex,
+          nextItems,
+        });
 
-          if (reorderResult !== false) {
-            onItemsChange?.(nextItems);
-          }
+        if (reorderResult !== false) {
+          onItemsChange?.(nextItems);
         }
       }
+    }
 
-      setActiveId(null);
-    },
-    [items, onItemsChange, onReorder, onDragEndProp]
-  );
+    setActiveId(null);
+  });
 
-  const contextValue = React.useMemo<SortableContextValue>(
+  const contextValue = useMemo<SortableContextValue>(
     () => ({ items, activeId, flatCursor }),
     [items, activeId, flatCursor]
   );
 
   return (
-    <SortableRootContext.Provider value={contextValue}>
+    <SortableRootContext value={contextValue}>
       <DragDropProvider
         modifiers={resolvedModifiers}
         sensors={resolvedSensors}
@@ -204,11 +208,11 @@ function Root(props: SortableRootProps) {
       >
         {children}
       </DragDropProvider>
-    </SortableRootContext.Provider>
+    </SortableRootContext>
   );
 }
 
-interface SortableListProps extends React.ComponentProps<"div"> {
+interface SortableListProps extends ComponentProps<"div"> {
   asChild?: boolean;
 }
 
@@ -223,7 +227,7 @@ function List(props: SortableListProps) {
 
 interface SortableItemProps
   extends
-    Omit<React.ComponentProps<"div">, "data" | "id">,
+    Omit<ComponentProps<"div">, "data" | "id">,
     Pick<
       UseSortableInput,
       | "accept"
@@ -269,7 +273,7 @@ function Item(props: SortableItemProps) {
   } = props;
 
   const root = useSortableRoot("Sortable.Item");
-  const controlId = React.useId();
+  const controlId = useId();
   const index = indexProp ?? root.items.indexOf(id);
   const {
     handleRef,
@@ -302,7 +306,7 @@ function Item(props: SortableItemProps) {
     if (handle) handleRef(node);
   });
 
-  const contextValue = React.useMemo<SortableItemContextValue>(
+  const contextValue = useMemo<SortableItemContextValue>(
     () => ({ controlId, disabled, isDragging, handleRef }),
     [controlId, disabled, isDragging, handleRef]
   );
@@ -333,7 +337,7 @@ function Item(props: SortableItemProps) {
   );
 }
 
-interface SortableHandleProps extends React.ComponentProps<"button"> {
+interface SortableHandleProps extends ComponentProps<"button"> {
   asChild?: boolean;
 }
 
@@ -367,8 +371,8 @@ function Handle(props: SortableHandleProps) {
   );
 }
 
-interface SortableOverlayProps extends Omit<React.ComponentProps<typeof DragOverlay>, "children"> {
-  children?: ((params: { id: SortableId }) => React.ReactNode) | React.ReactNode;
+interface SortableOverlayProps extends Omit<ComponentProps<typeof DragOverlay>, "children"> {
+  children?: ((params: { id: SortableId }) => ReactNode) | ReactNode;
 }
 
 function Overlay(props: SortableOverlayProps) {

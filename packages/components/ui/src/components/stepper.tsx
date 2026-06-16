@@ -1,13 +1,29 @@
 "use client";
 // 文档地址 https://www.diceui.com/docs/components/radix/stepper
+import {
+  createContext,
+  use,
+  useEffect,
+  useId,
+  useRef,
+  useState,
+  useSyncExternalStore,
+  type ComponentProps,
+  type ComponentRef,
+  type FocusEvent,
+  type KeyboardEvent,
+  type MouseEvent,
+  type ReactNode,
+  type RefObject,
+} from "react";
 import { Check } from "lucide-react";
 import { Direction as DirectionPrimitive, Slot as SlotPrimitive } from "radix-ui";
-import * as React from "react";
 import { useComposedRefs } from "@rap/utils/compose-refs";
 import { cn } from "@rap/utils";
 import { useAsRef } from "@rap/hooks/use-as-ref";
 import { useIsomorphicLayoutEffect } from "@rap/hooks/use-isomorphic-layout-effect";
 import { useLazyRef } from "@rap/hooks/use-lazy-ref";
+import { useMemoizedFn } from "@rap/hooks/use-memoized-fn";
 
 const ROOT_NAME = "Stepper";
 const LIST_NAME = "StepperList";
@@ -31,15 +47,15 @@ type NavigationDirection = "next" | "prev";
 type ActivationMode = "automatic" | "manual";
 type DataState = "inactive" | "active" | "completed";
 
-interface DivProps extends React.ComponentProps<"div"> {
+interface DivProps extends ComponentProps<"div"> {
   asChild?: boolean;
 }
-interface ButtonProps extends React.ComponentProps<"button"> {
+interface ButtonProps extends ComponentProps<"button"> {
   asChild?: boolean;
 }
 
-type ListElement = React.ComponentRef<typeof StepperList>;
-type TriggerElement = React.ComponentRef<typeof StepperTrigger>;
+type ListElement = ComponentRef<typeof StepperList>;
+type TriggerElement = ComponentRef<typeof StepperTrigger>;
 
 function getId(
   id: string,
@@ -68,7 +84,7 @@ function getDirectionAwareKey(key: string, dir?: Direction) {
 }
 
 function getFocusIntent(
-  event: React.KeyboardEvent<TriggerElement>,
+  event: KeyboardEvent<TriggerElement>,
   dir?: Direction,
   orientation?: Orientation
 ) {
@@ -78,7 +94,7 @@ function getFocusIntent(
   return MAP_KEY_TO_FOCUS_INTENT[key];
 }
 
-function focusFirst(candidates: React.RefObject<TriggerElement | null>[], preventScroll = false) {
+function focusFirst(candidates: RefObject<TriggerElement | null>[], preventScroll = false) {
   const PREVIOUSLY_FOCUSED_ELEMENT = document.activeElement;
   for (const candidateRef of candidates) {
     const candidate = candidateRef.current;
@@ -141,10 +157,10 @@ interface Store {
   setStep: (value: string, completed: boolean, disabled: boolean) => void;
 }
 
-const StoreContext = React.createContext<Store | null>(null);
+const StoreContext = createContext<Store | null>(null);
 
 function useStoreContext(consumerName: string) {
-  const context = React.useContext(StoreContext);
+  const context = use(StoreContext);
   if (!context) {
     throw new Error(`\`${consumerName}\` must be used within \`${ROOT_NAME}\``);
   }
@@ -154,14 +170,14 @@ function useStoreContext(consumerName: string) {
 function useStore<T>(selector: (state: StoreState) => T): T {
   const store = useStoreContext("useStore");
 
-  const getSnapshot = React.useCallback(() => selector(store.getState()), [store, selector]);
+  const getSnapshot = useMemoizedFn(() => selector(store.getState()));
 
-  return React.useSyncExternalStore(store.subscribe, getSnapshot, getSnapshot);
+  return useSyncExternalStore(store.subscribe, getSnapshot, getSnapshot);
 }
 
 interface ItemData {
   id: string;
-  ref: React.RefObject<TriggerElement | null>;
+  ref: RefObject<TriggerElement | null>;
   value: string;
   active: boolean;
   disabled: boolean;
@@ -177,10 +193,10 @@ interface StepperContextValue {
   loop: boolean;
 }
 
-const StepperContext = React.createContext<StepperContextValue | null>(null);
+const StepperContext = createContext<StepperContextValue | null>(null);
 
 function useStepperContext(consumerName: string) {
-  const context = React.useContext(StepperContext);
+  const context = use(StepperContext);
   if (!context) {
     throw new Error(`\`${consumerName}\` must be used within \`${ROOT_NAME}\``);
   }
@@ -238,8 +254,8 @@ function Stepper(props: StepperProps) {
     onValidate,
   });
 
-  const store = React.useMemo<Store>(() => {
-    return {
+  const storeRef = useLazyRef<Store>(() => {
+    const store: Store = {
       subscribe: (cb) => {
         listenersRef.current.add(cb);
         return () => listenersRef.current.delete(cb);
@@ -304,8 +320,12 @@ function Stepper(props: StepperProps) {
         }
       },
     };
-  }, [listenersRef, stateRef, propsRef]);
+    return store;
+  });
+  const store = storeRef.current;
 
+  // Controlled value is mirrored into the store before paint.
+  // Steps register with the shared store so order-based navigation stays consistent.
   useIsomorphicLayoutEffect(() => {
     if (value !== undefined) {
       store.setState("value", value);
@@ -314,27 +334,24 @@ function Stepper(props: StepperProps) {
 
   const dir = DirectionPrimitive.useDirection(dirProp);
 
-  const instanceId = React.useId();
+  const instanceId = useId();
   const rootId = id ?? instanceId;
 
-  const contextValue = React.useMemo<StepperContextValue>(
-    () => ({
-      rootId,
-      dir,
-      orientation,
-      activationMode,
-      disabled,
-      nonInteractive,
-      loop,
-    }),
-    [rootId, dir, orientation, activationMode, disabled, nonInteractive, loop]
-  );
+  const contextValue: StepperContextValue = {
+    rootId,
+    dir,
+    orientation,
+    activationMode,
+    disabled,
+    nonInteractive,
+    loop,
+  };
 
   const RootPrimitive = asChild ? SlotPrimitive.Slot : "div";
 
   return (
-    <StoreContext.Provider value={store}>
-      <StepperContext.Provider value={contextValue}>
+    <StoreContext value={store}>
+      <StepperContext value={contextValue}>
         <RootPrimitive
           id={rootId}
           data-disabled={disabled ? "" : undefined}
@@ -348,8 +365,8 @@ function Stepper(props: StepperProps) {
             className
           )}
         />
-      </StepperContext.Provider>
-    </StoreContext.Provider>
+      </StepperContext>
+    </StoreContext>
   );
 }
 
@@ -364,10 +381,10 @@ interface FocusContextValue {
   getItems: () => ItemData[];
 }
 
-const FocusContext = React.createContext<FocusContextValue | null>(null);
+const FocusContext = createContext<FocusContextValue | null>(null);
 
 function useFocusContext(consumerName: string) {
-  const context = React.useContext(FocusContext);
+  const context = use(FocusContext);
   if (!context) {
     throw new Error(`\`${consumerName}\` must be used within \`FocusProvider\``);
   }
@@ -396,39 +413,39 @@ function StepperList(props: DivProps) {
     onMouseDown: onMouseDownProp,
   });
 
-  const [tabStopId, setTabStopId] = React.useState<string | null>(null);
-  const [isTabbingBackOut, setIsTabbingBackOut] = React.useState(false);
-  const [focusableItemCount, setFocusableItemCount] = React.useState(0);
-  const isClickFocusRef = React.useRef(false);
-  const itemsRef = React.useRef<Map<string, ItemData>>(new Map());
-  const listRef = React.useRef<ListElement>(null);
+  const [tabStopId, setTabStopId] = useState<string | null>(null);
+  const [isTabbingBackOut, setIsTabbingBackOut] = useState(false);
+  const [focusableItemCount, setFocusableItemCount] = useState(0);
+  const isClickFocusRef = useRef(false);
+  const itemsRef = useRef<Map<string, ItemData>>(new Map());
+  const listRef = useRef<ListElement>(null);
   const composedRef = useComposedRefs(ref, listRef);
 
-  const onItemFocus = React.useCallback((tabStopId: string) => {
+  const onItemFocus = useMemoizedFn((tabStopId: string) => {
     setTabStopId(tabStopId);
-  }, []);
+  });
 
-  const onItemShiftTab = React.useCallback(() => {
+  const onItemShiftTab = useMemoizedFn(() => {
     setIsTabbingBackOut(true);
-  }, []);
+  });
 
-  const onFocusableItemAdd = React.useCallback(() => {
+  const onFocusableItemAdd = useMemoizedFn(() => {
     setFocusableItemCount((prevCount) => prevCount + 1);
-  }, []);
+  });
 
-  const onFocusableItemRemove = React.useCallback(() => {
+  const onFocusableItemRemove = useMemoizedFn(() => {
     setFocusableItemCount((prevCount) => prevCount - 1);
-  }, []);
+  });
 
-  const onItemRegister = React.useCallback((item: ItemData) => {
+  const onItemRegister = useMemoizedFn((item: ItemData) => {
     itemsRef.current.set(item.id, item);
-  }, []);
+  });
 
-  const onItemUnregister = React.useCallback((id: string) => {
+  const onItemUnregister = useMemoizedFn((id: string) => {
     itemsRef.current.delete(id);
-  }, []);
+  });
 
-  const getItems = React.useCallback(() => {
+  const getItems = useMemoizedFn(() => {
     return Array.from(itemsRef.current.values())
       .filter((item) => item.ref.current)
       .sort((a, b) => {
@@ -444,86 +461,65 @@ function StepperList(props: DivProps) {
         }
         return 0;
       });
-  }, []);
+  });
 
-  const onBlur = React.useCallback(
-    (event: React.FocusEvent<ListElement>) => {
-      propsRef.current.onBlur?.(event);
-      if (event.defaultPrevented) return;
+  const onBlur = useMemoizedFn((event: FocusEvent<ListElement>) => {
+    propsRef.current.onBlur?.(event);
+    if (event.defaultPrevented) return;
 
-      setIsTabbingBackOut(false);
-    },
-    [propsRef]
-  );
+    setIsTabbingBackOut(false);
+  });
 
-  const onFocus = React.useCallback(
-    (event: React.FocusEvent<ListElement>) => {
-      propsRef.current.onFocus?.(event);
-      if (event.defaultPrevented) return;
+  const onFocus = useMemoizedFn((event: FocusEvent<ListElement>) => {
+    propsRef.current.onFocus?.(event);
+    if (event.defaultPrevented) return;
 
-      const isKeyboardFocus = !isClickFocusRef.current;
-      if (event.target === event.currentTarget && isKeyboardFocus && !isTabbingBackOut) {
-        const entryFocusEvent = new CustomEvent(ENTRY_FOCUS, EVENT_OPTIONS);
-        event.currentTarget.dispatchEvent(entryFocusEvent);
+    const isKeyboardFocus = !isClickFocusRef.current;
+    if (event.target === event.currentTarget && isKeyboardFocus && !isTabbingBackOut) {
+      const entryFocusEvent = new CustomEvent(ENTRY_FOCUS, EVENT_OPTIONS);
+      event.currentTarget.dispatchEvent(entryFocusEvent);
 
-        if (!entryFocusEvent.defaultPrevented) {
-          const items = Array.from(itemsRef.current.values()).filter((item) => !item.disabled);
-          const selectedItem = currentValue
-            ? items.find((item) => item.value === currentValue)
-            : undefined;
-          const activeItem = items.find((item) => item.active);
-          const currentItem = items.find((item) => item.id === tabStopId);
+      if (!entryFocusEvent.defaultPrevented) {
+        const items = Array.from(itemsRef.current.values()).filter((item) => !item.disabled);
+        const selectedItem = currentValue
+          ? items.find((item) => item.value === currentValue)
+          : undefined;
+        const activeItem = items.find((item) => item.active);
+        const currentItem = items.find((item) => item.id === tabStopId);
 
-          const candidateItems = [selectedItem, activeItem, currentItem, ...items].filter(
-            Boolean
-          ) as ItemData[];
-          const candidateRefs = candidateItems.map((item) => item.ref);
-          focusFirst(candidateRefs, false);
-        }
+        const candidateItems = [selectedItem, activeItem, currentItem, ...items].filter(
+          Boolean
+        ) as ItemData[];
+        const candidateRefs = candidateItems.map((item) => item.ref);
+        focusFirst(candidateRefs, false);
       }
-      isClickFocusRef.current = false;
-    },
-    [propsRef, isTabbingBackOut, currentValue, tabStopId]
-  );
+    }
+    isClickFocusRef.current = false;
+  });
 
-  const onMouseDown = React.useCallback(
-    (event: React.MouseEvent<ListElement>) => {
-      propsRef.current.onMouseDown?.(event);
+  const onMouseDown = useMemoizedFn((event: MouseEvent<ListElement>) => {
+    propsRef.current.onMouseDown?.(event);
 
-      if (event.defaultPrevented) return;
+    if (event.defaultPrevented) return;
 
-      isClickFocusRef.current = true;
-    },
-    [propsRef]
-  );
+    isClickFocusRef.current = true;
+  });
 
-  const focusContextValue = React.useMemo<FocusContextValue>(
-    () => ({
-      tabStopId,
-      onItemFocus,
-      onItemShiftTab,
-      onFocusableItemAdd,
-      onFocusableItemRemove,
-      onItemRegister,
-      onItemUnregister,
-      getItems,
-    }),
-    [
-      tabStopId,
-      onItemFocus,
-      onItemShiftTab,
-      onFocusableItemAdd,
-      onFocusableItemRemove,
-      onItemRegister,
-      onItemUnregister,
-      getItems,
-    ]
-  );
+  const focusContextValue: FocusContextValue = {
+    tabStopId,
+    onItemFocus,
+    onItemShiftTab,
+    onFocusableItemAdd,
+    onFocusableItemRemove,
+    onItemRegister,
+    onItemUnregister,
+    getItems,
+  };
 
   const ListPrimitive = asChild ? SlotPrimitive.Slot : "div";
 
   return (
-    <FocusContext.Provider value={focusContextValue}>
+    <FocusContext value={focusContextValue}>
       <ListPrimitive
         role="tablist"
         aria-orientation={orientation}
@@ -544,7 +540,7 @@ function StepperList(props: DivProps) {
       >
         {children}
       </ListPrimitive>
-    </FocusContext.Provider>
+    </FocusContext>
   );
 }
 
@@ -553,10 +549,10 @@ interface StepperItemContextValue {
   stepState: StepState | undefined;
 }
 
-const StepperItemContext = React.createContext<StepperItemContextValue | null>(null);
+const StepperItemContext = createContext<StepperItemContextValue | null>(null);
 
 function useStepperItemContext(consumerName: string) {
-  const context = React.useContext(StepperItemContext);
+  const context = use(StepperItemContext);
   if (!context) {
     throw new Error(`\`${consumerName}\` must be used within \`${ITEM_NAME}\``);
   }
@@ -586,6 +582,7 @@ function StepperItem(props: StepperItemProps) {
   const orientation = context.orientation;
   const value = useStore((state) => state.value);
 
+  // Step metadata can change after registration and must update before paint.
   useIsomorphicLayoutEffect(() => {
     store.addStep(itemValue, completed, disabled);
 
@@ -602,18 +599,15 @@ function StepperItem(props: StepperItemProps) {
   const steps = useStore((state) => state.steps);
   const dataState = getDataState(value, itemValue, stepState, steps);
 
-  const itemContextValue = React.useMemo<StepperItemContextValue>(
-    () => ({
-      value: itemValue,
-      stepState,
-    }),
-    [itemValue, stepState]
-  );
+  const itemContextValue: StepperItemContextValue = {
+    value: itemValue,
+    stepState,
+  };
 
   const ItemPrimitive = asChild ? SlotPrimitive.Slot : "div";
 
   return (
-    <StepperItemContext.Provider value={itemContextValue}>
+    <StepperItemContext value={itemContextValue}>
       <ItemPrimitive
         data-disabled={stepState?.disabled ? "" : undefined}
         data-orientation={orientation}
@@ -630,7 +624,7 @@ function StepperItem(props: StepperItemProps) {
       >
         {children}
       </ItemPrimitive>
-    </StepperItemContext.Provider>
+    </StepperItemContext>
   );
 }
 
@@ -683,13 +677,14 @@ function StepperTrigger(props: ButtonProps) {
   const isTabStop = focusContext.tabStopId === triggerId;
   const dataState = getDataState(value, itemValue, stepState, steps);
 
-  const triggerRef = React.useRef<TriggerElement>(null);
+  const triggerRef = useRef<TriggerElement>(null);
   const composedRef = useComposedRefs(ref, triggerRef);
-  const isArrowKeyPressedRef = React.useRef(false);
-  const isMouseClickRef = React.useRef(false);
+  const isArrowKeyPressedRef = useRef(false);
+  const isMouseClickRef = useRef(false);
 
-  React.useEffect(() => {
-    function onKeyDown(event: KeyboardEvent) {
+  // Arrow-key tracking listens at document level because focus can move between triggers.
+  useEffect(() => {
+    function onKeyDown(event: globalThis.KeyboardEvent) {
       if (ARROW_KEYS.includes(event.key)) {
         isArrowKeyPressedRef.current = true;
       }
@@ -705,6 +700,7 @@ function StepperTrigger(props: ButtonProps) {
     };
   }, []);
 
+  // Trigger registration must match the DOM node before keyboard roving focus runs.
   useIsomorphicLayoutEffect(() => {
     focusContext.onItemRegister({
       id: triggerId,
@@ -726,169 +722,130 @@ function StepperTrigger(props: ButtonProps) {
     };
   }, [focusContext, triggerId, itemValue, isTabStop, isDisabled]);
 
-  const onClick = React.useCallback(
-    async (event: React.MouseEvent<TriggerElement>) => {
-      propsRef.current.onClick?.(event);
-      if (event.defaultPrevented) return;
+  const onClick = useMemoizedFn(async (event: MouseEvent<TriggerElement>) => {
+    propsRef.current.onClick?.(event);
+    if (event.defaultPrevented) return;
 
-      if (!isDisabled && !context.nonInteractive) {
-        const currentStepIndex = Array.from(steps.keys()).indexOf(value ?? "");
-        const targetStepIndex = Array.from(steps.keys()).indexOf(itemValue);
-        const direction = targetStepIndex > currentStepIndex ? "next" : "prev";
+    if (!isDisabled && !context.nonInteractive) {
+      const currentStepIndex = Array.from(steps.keys()).indexOf(value ?? "");
+      const targetStepIndex = Array.from(steps.keys()).indexOf(itemValue);
+      const direction = targetStepIndex > currentStepIndex ? "next" : "prev";
 
-        await store.setStateWithValidation(itemValue, direction);
+      await store.setStateWithValidation(itemValue, direction);
+    }
+  });
+
+  const onFocus = useMemoizedFn(async (event: FocusEvent<TriggerElement>) => {
+    propsRef.current.onFocus?.(event);
+    if (event.defaultPrevented) return;
+
+    focusContext.onItemFocus(triggerId);
+
+    const isKeyboardFocus = !isMouseClickRef.current;
+
+    if (
+      !isActive &&
+      !isDisabled &&
+      activationMode !== "manual" &&
+      !context.nonInteractive &&
+      isKeyboardFocus
+    ) {
+      const currentStepIndex = Array.from(steps.keys()).indexOf(value || "");
+      const targetStepIndex = Array.from(steps.keys()).indexOf(itemValue);
+      const direction = targetStepIndex > currentStepIndex ? "next" : "prev";
+
+      await store.setStateWithValidation(itemValue, direction);
+    }
+
+    isMouseClickRef.current = false;
+  });
+
+  const onKeyDown = useMemoizedFn(async (event: KeyboardEvent<TriggerElement>) => {
+    propsRef.current.onKeyDown?.(event);
+    if (event.defaultPrevented) return;
+
+    if (event.key === "Enter" && context.nonInteractive) {
+      event.preventDefault();
+      return;
+    }
+
+    if (
+      (event.key === "Enter" || event.key === " ") &&
+      activationMode === "manual" &&
+      !context.nonInteractive
+    ) {
+      event.preventDefault();
+      if (!isDisabled && triggerRef.current) {
+        triggerRef.current.click();
       }
-    },
-    [isDisabled, context.nonInteractive, store, itemValue, value, steps, propsRef]
-  );
+      return;
+    }
 
-  const onFocus = React.useCallback(
-    async (event: React.FocusEvent<TriggerElement>) => {
-      propsRef.current.onFocus?.(event);
-      if (event.defaultPrevented) return;
+    if (event.key === "Tab" && event.shiftKey) {
+      focusContext.onItemShiftTab();
+      return;
+    }
 
-      focusContext.onItemFocus(triggerId);
+    if (event.target !== event.currentTarget) return;
 
-      const isKeyboardFocus = !isMouseClickRef.current;
+    const focusIntent = getFocusIntent(event, context.dir, orientation);
 
-      if (
-        !isActive &&
-        !isDisabled &&
-        activationMode !== "manual" &&
-        !context.nonInteractive &&
-        isKeyboardFocus
-      ) {
-        const currentStepIndex = Array.from(steps.keys()).indexOf(value || "");
-        const targetStepIndex = Array.from(steps.keys()).indexOf(itemValue);
-        const direction = targetStepIndex > currentStepIndex ? "next" : "prev";
+    if (focusIntent !== undefined) {
+      if (event.metaKey || event.ctrlKey || event.altKey || event.shiftKey) return;
+      event.preventDefault();
 
-        await store.setStateWithValidation(itemValue, direction);
+      const items = focusContext.getItems().filter((item) => !item.disabled);
+      let candidateRefs = items.map((item) => item.ref);
+
+      if (focusIntent === "last") {
+        candidateRefs.reverse();
+      } else if (focusIntent === "prev" || focusIntent === "next") {
+        if (focusIntent === "prev") candidateRefs.reverse();
+        const currentIndex = candidateRefs.findIndex((ref) => ref.current === event.currentTarget);
+        candidateRefs = loop
+          ? wrapArray(candidateRefs, currentIndex + 1)
+          : candidateRefs.slice(currentIndex + 1);
       }
 
-      isMouseClickRef.current = false;
-    },
-    [
-      focusContext,
-      triggerId,
-      activationMode,
-      isActive,
-      isDisabled,
-      context.nonInteractive,
-      store,
-      itemValue,
-      value,
-      steps,
-      propsRef,
-    ]
-  );
+      if (store.hasValidation() && candidateRefs.length > 0) {
+        const nextRef = candidateRefs[0];
+        const nextElement = nextRef?.current;
+        const nextItem = items.find((item) => item.ref.current === nextElement);
 
-  const onKeyDown = React.useCallback(
-    async (event: React.KeyboardEvent<TriggerElement>) => {
-      propsRef.current.onKeyDown?.(event);
-      if (event.defaultPrevented) return;
+        if (nextItem && nextItem.value !== itemValue) {
+          const currentStepIndex = Array.from(steps.keys()).indexOf(value || "");
+          const targetStepIndex = Array.from(steps.keys()).indexOf(nextItem.value);
+          const direction: NavigationDirection =
+            targetStepIndex > currentStepIndex ? "next" : "prev";
 
-      if (event.key === "Enter" && context.nonInteractive) {
-        event.preventDefault();
-        return;
-      }
-
-      if (
-        (event.key === "Enter" || event.key === " ") &&
-        activationMode === "manual" &&
-        !context.nonInteractive
-      ) {
-        event.preventDefault();
-        if (!isDisabled && triggerRef.current) {
-          triggerRef.current.click();
-        }
-        return;
-      }
-
-      if (event.key === "Tab" && event.shiftKey) {
-        focusContext.onItemShiftTab();
-        return;
-      }
-
-      if (event.target !== event.currentTarget) return;
-
-      const focusIntent = getFocusIntent(event, context.dir, orientation);
-
-      if (focusIntent !== undefined) {
-        if (event.metaKey || event.ctrlKey || event.altKey || event.shiftKey) return;
-        event.preventDefault();
-
-        const items = focusContext.getItems().filter((item) => !item.disabled);
-        let candidateRefs = items.map((item) => item.ref);
-
-        if (focusIntent === "last") {
-          candidateRefs.reverse();
-        } else if (focusIntent === "prev" || focusIntent === "next") {
-          if (focusIntent === "prev") candidateRefs.reverse();
-          const currentIndex = candidateRefs.findIndex(
-            (ref) => ref.current === event.currentTarget
-          );
-          candidateRefs = loop
-            ? wrapArray(candidateRefs, currentIndex + 1)
-            : candidateRefs.slice(currentIndex + 1);
-        }
-
-        if (store.hasValidation() && candidateRefs.length > 0) {
-          const nextRef = candidateRefs[0];
-          const nextElement = nextRef?.current;
-          const nextItem = items.find((item) => item.ref.current === nextElement);
-
-          if (nextItem && nextItem.value !== itemValue) {
-            const currentStepIndex = Array.from(steps.keys()).indexOf(value || "");
-            const targetStepIndex = Array.from(steps.keys()).indexOf(nextItem.value);
-            const direction: NavigationDirection =
-              targetStepIndex > currentStepIndex ? "next" : "prev";
-
-            if (direction === "next") {
-              const isValid = await store.setStateWithValidation(nextItem.value, direction);
-              if (!isValid) return;
-            } else {
-              store.setState("value", nextItem.value);
-            }
-
-            queueMicrotask(() => nextElement?.focus());
-            return;
+          if (direction === "next") {
+            const isValid = await store.setStateWithValidation(nextItem.value, direction);
+            if (!isValid) return;
+          } else {
+            store.setState("value", nextItem.value);
           }
+
+          queueMicrotask(() => nextElement?.focus());
+          return;
         }
-
-        queueMicrotask(() => focusFirst(candidateRefs));
       }
-    },
-    [
-      focusContext,
-      context.nonInteractive,
-      context.dir,
-      activationMode,
-      orientation,
-      loop,
-      isDisabled,
-      store,
-      propsRef,
-      itemValue,
-      value,
-      steps,
-    ]
-  );
 
-  const onMouseDown = React.useCallback(
-    (event: React.MouseEvent<TriggerElement>) => {
-      propsRef.current.onMouseDown?.(event);
-      if (event.defaultPrevented) return;
+      queueMicrotask(() => focusFirst(candidateRefs));
+    }
+  });
 
-      isMouseClickRef.current = true;
+  const onMouseDown = useMemoizedFn((event: MouseEvent<TriggerElement>) => {
+    propsRef.current.onMouseDown?.(event);
+    if (event.defaultPrevented) return;
 
-      if (isDisabled) {
-        event.preventDefault();
-      } else {
-        focusContext.onItemFocus(triggerId);
-      }
-    },
-    [focusContext, triggerId, isDisabled, propsRef]
-  );
+    isMouseClickRef.current = true;
+
+    if (isDisabled) {
+      event.preventDefault();
+    } else {
+      focusContext.onItemFocus(triggerId);
+    }
+  });
 
   const TriggerPrimitive = asChild ? SlotPrimitive.Slot : "button";
 
@@ -924,7 +881,7 @@ function StepperTrigger(props: ButtonProps) {
 }
 
 interface StepperIndicatorProps extends Omit<DivProps, "children"> {
-  children?: React.ReactNode | ((dataState: DataState) => React.ReactNode);
+  children?: ReactNode | ((dataState: DataState) => ReactNode);
 }
 
 function StepperIndicator(props: StepperIndicatorProps) {
@@ -1019,7 +976,7 @@ function StepperSeparator(props: StepperSeparatorProps) {
   );
 }
 
-interface StepperTitleProps extends React.ComponentProps<"span"> {
+interface StepperTitleProps extends ComponentProps<"span"> {
   asChild?: boolean;
 }
 
@@ -1045,7 +1002,7 @@ function StepperTitle(props: StepperTitleProps) {
   );
 }
 
-interface StepperDescriptionProps extends React.ComponentProps<"span"> {
+interface StepperDescriptionProps extends ComponentProps<"span"> {
   asChild?: boolean;
 }
 
@@ -1118,20 +1075,17 @@ function StepperPrev(props: ButtonProps) {
   const currentIndex = value ? stepKeys.indexOf(value) : -1;
   const isDisabled = disabled || currentIndex <= 0;
 
-  const onClick = React.useCallback(
-    async (event: React.MouseEvent<HTMLButtonElement>) => {
-      propsRef.current.onClick?.(event);
-      if (event.defaultPrevented || isDisabled) return;
+  const onClick = useMemoizedFn(async (event: MouseEvent<HTMLButtonElement>) => {
+    propsRef.current.onClick?.(event);
+    if (event.defaultPrevented || isDisabled) return;
 
-      const prevIndex = Math.max(currentIndex - 1, 0);
-      const prevStepValue = stepKeys[prevIndex];
+    const prevIndex = Math.max(currentIndex - 1, 0);
+    const prevStepValue = stepKeys[prevIndex];
 
-      if (prevStepValue) {
-        store.setState("value", prevStepValue);
-      }
-    },
-    [propsRef, isDisabled, currentIndex, stepKeys, store]
-  );
+    if (prevStepValue) {
+      store.setState("value", prevStepValue);
+    }
+  });
 
   const PrevPrimitive = asChild ? SlotPrimitive.Slot : "button";
 
@@ -1161,20 +1115,17 @@ function StepperNext(props: ButtonProps) {
   const currentIndex = value ? stepKeys.indexOf(value) : -1;
   const isDisabled = disabled || currentIndex >= stepKeys.length - 1;
 
-  const onClick = React.useCallback(
-    async (event: React.MouseEvent<HTMLButtonElement>) => {
-      propsRef.current.onClick?.(event);
-      if (event.defaultPrevented || isDisabled) return;
+  const onClick = useMemoizedFn(async (event: MouseEvent<HTMLButtonElement>) => {
+    propsRef.current.onClick?.(event);
+    if (event.defaultPrevented || isDisabled) return;
 
-      const nextIndex = Math.min(currentIndex + 1, stepKeys.length - 1);
-      const nextStepValue = stepKeys[nextIndex];
+    const nextIndex = Math.min(currentIndex + 1, stepKeys.length - 1);
+    const nextStepValue = stepKeys[nextIndex];
 
-      if (nextStepValue) {
-        await store.setStateWithValidation(nextStepValue, "next");
-      }
-    },
-    [propsRef, isDisabled, currentIndex, stepKeys, store]
-  );
+    if (nextStepValue) {
+      await store.setStateWithValidation(nextStepValue, "next");
+    }
+  });
 
   const NextPrimitive = asChild ? SlotPrimitive.Slot : "button";
 

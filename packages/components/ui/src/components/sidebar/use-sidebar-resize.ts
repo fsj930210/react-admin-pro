@@ -1,4 +1,5 @@
-import React from "react";
+import * as React from "react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
 
 export interface UseSidebarResizeProps {
   /**

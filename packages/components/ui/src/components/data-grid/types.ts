@@ -22,8 +22,14 @@ import type {
   TableState,
   VisibilityState,
 } from "@tanstack/react-table";
-import type * as React from "react";
-import type { ComponentType, CSSProperties, HTMLAttributes, ReactNode } from "react";
+import * as React from "react";
+import {
+  type CSSProperties,
+  type ComponentProps,
+  type HTMLAttributes,
+  type ReactNode,
+  type ComponentType,
+} from "react";
 import type { EmptyProps } from "./components/empty";
 
 export type DataGridMode = "remote" | "local";

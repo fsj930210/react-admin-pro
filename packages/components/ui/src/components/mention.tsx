@@ -1,10 +1,10 @@
 // 文档地址 https://www.diceui.com/docs/components/radix/mention
 import * as MentionPrimitive from "@diceui/mention";
-import type * as React from "react";
+import { type ComponentProps } from "react";
 
 import { cn } from "@rap/utils";
 
-function Mention({ className, ...props }: React.ComponentProps<typeof MentionPrimitive.Root>) {
+function Mention({ className, ...props }: ComponentProps<typeof MentionPrimitive.Root>) {
   return (
     <MentionPrimitive.Root
       data-slot="mention"
@@ -17,10 +17,7 @@ function Mention({ className, ...props }: React.ComponentProps<typeof MentionPri
   );
 }
 
-function MentionLabel({
-  className,
-  ...props
-}: React.ComponentProps<typeof MentionPrimitive.Label>) {
+function MentionLabel({ className, ...props }: ComponentProps<typeof MentionPrimitive.Label>) {
   return (
     <MentionPrimitive.Label
       data-slot="mention-label"
@@ -30,10 +27,7 @@ function MentionLabel({
   );
 }
 
-function MentionInput({
-  className,
-  ...props
-}: React.ComponentProps<typeof MentionPrimitive.Input>) {
+function MentionInput({ className, ...props }: ComponentProps<typeof MentionPrimitive.Input>) {
   return (
     <MentionPrimitive.Input
       data-slot="mention-input"
@@ -50,7 +44,7 @@ function MentionContent({
   className,
   children,
   ...props
-}: React.ComponentProps<typeof MentionPrimitive.Content>) {
+}: ComponentProps<typeof MentionPrimitive.Content>) {
   return (
     <MentionPrimitive.Portal>
       <MentionPrimitive.Content
@@ -71,7 +65,7 @@ function MentionItem({
   className,
   children,
   ...props
-}: React.ComponentProps<typeof MentionPrimitive.Item>) {
+}: ComponentProps<typeof MentionPrimitive.Item>) {
   return (
     <MentionPrimitive.Item
       data-slot="mention-item"

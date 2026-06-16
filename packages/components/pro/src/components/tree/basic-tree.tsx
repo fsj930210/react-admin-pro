@@ -65,7 +65,7 @@ export function BasicTree({
       searchable,
       selectable,
       selectedKeys,
-    ],
+    ]
   );
 
   return (
@@ -77,14 +77,7 @@ export function BasicTree({
       isLeaf={isLeaf}
       className={className}
     >
-      {(tree) => (
-        <TreeContent
-          {...props}
-          {...featureOptions}
-          renderItem={renderItem}
-          tree={tree}
-        />
-      )}
+      {(tree) => <TreeContent {...props} {...featureOptions} renderItem={renderItem} tree={tree} />}
     </TreeRoot>
   );
 }

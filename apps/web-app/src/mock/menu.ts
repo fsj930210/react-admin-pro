@@ -847,7 +847,7 @@ export default [
     if (!token) {
       return HttpResponse.json(
         { code: "401", message: "unauthorized", data: null },
-        { status: 401, statusText: "unauthorized" },
+        { status: 401, statusText: "unauthorized" }
       );
     }
     const username = token.split(" ")[1] || "";

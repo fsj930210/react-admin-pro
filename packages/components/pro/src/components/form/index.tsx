@@ -1,4 +1,5 @@
 import * as React from "react";
+import { useCallback, useMemo, useState, type ComponentProps, type ReactNode } from "react";
 import {
   Dialog,
   DialogContent,
@@ -15,7 +16,6 @@ import {
 } from "@rap/components-ui/sheet";
 import { Label } from "@rap/components-ui/label";
 import { ProButton } from "../button";
-import { PageOverlay } from "../layout";
 import { cn } from "@rap/utils";
 
 export type ProFormErrors<TValues> = Partial<Record<keyof TValues | string, React.ReactNode>>;
@@ -211,6 +211,33 @@ export function DrawerForm({ open, onOpenChange, title, form, children }: ModalF
         </SheetFooter>
       </SheetContent>
     </Sheet>
+  );
+}
+
+interface PageOverlayProps {
+  open?: boolean;
+  title?: React.ReactNode;
+  onBack?: () => void;
+  footer?: React.ReactNode;
+  children?: React.ReactNode;
+}
+
+function PageOverlay({ open, title, onBack, footer, children }: PageOverlayProps) {
+  if (!open) return null;
+
+  return (
+    <div className="fixed inset-0 z-50 flex flex-col bg-background">
+      <header className="flex h-14 shrink-0 items-center justify-between border-b px-4">
+        <div className="font-medium">{title}</div>
+        <ProButton variant="ghost" onClick={onBack}>
+          返回
+        </ProButton>
+      </header>
+      <main className="min-h-0 flex-1 overflow-auto p-4">{children}</main>
+      {footer ? (
+        <footer className="flex shrink-0 justify-end gap-2 border-t p-4">{footer}</footer>
+      ) : null}
+    </div>
   );
 }
 

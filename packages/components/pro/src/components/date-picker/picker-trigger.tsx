@@ -2,7 +2,7 @@ import { Button } from "@rap/components-ui/button";
 import { Input as UIInput } from "@rap/components-ui/input";
 import { cn } from "@rap/utils";
 import { CalendarDays, ChevronDown, XCircle } from "lucide-react";
-import type { ComponentProps, ReactNode, RefObject } from "react";
+import { type ComponentProps, type ReactNode, type RefObject } from "react";
 
 interface PickerTriggerProps extends Omit<ComponentProps<"div">, "prefix" | "onChange"> {
   open: boolean;

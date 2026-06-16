@@ -1,7 +1,7 @@
 import { Button } from "@rap/components-ui/button";
 import { cn } from "@rap/utils";
 import { ArrowRight, CalendarDays, XCircle } from "lucide-react";
-import type { ComponentProps, ReactNode, RefObject } from "react";
+import { type ComponentProps, type ReactNode, type RefObject } from "react";
 import { RangeTriggerField } from "./range-trigger-field";
 
 interface RangePickerTriggerProps extends Omit<ComponentProps<"div">, "prefix" | "onChange"> {

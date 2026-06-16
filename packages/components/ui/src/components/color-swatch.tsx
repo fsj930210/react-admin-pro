@@ -2,8 +2,8 @@
 // 文档地址 https://www.diceui.com/docs/components/radix/color-swatch
 import { cva, type VariantProps } from "class-variance-authority";
 import { Slot as SlotPrimitive } from "radix-ui";
-import * as React from "react";
 import { cn } from "@rap/utils";
+import { useMemo, type CSSProperties, type ComponentProps } from "react";
 
 const colorSwatchVariants = cva(
   "box-border rounded-sm border bg-clip-padding shadow-sm data-disabled:pointer-events-none data-disabled:opacity-50",
@@ -48,7 +48,7 @@ function getHasAlpha(v: string): boolean {
 }
 
 interface ColorSwatchProps
-  extends Omit<React.ComponentProps<"div">, "children">, VariantProps<typeof colorSwatchVariants> {
+  extends Omit<ComponentProps<"div">, "children">, VariantProps<typeof colorSwatchVariants> {
   color?: string;
   asChild?: boolean;
   disabled?: boolean;
@@ -67,7 +67,8 @@ function ColorSwatch({
 }: ColorSwatchProps) {
   const colorValue = color?.trim();
 
-  const backgroundStyle = React.useMemo<React.CSSProperties>(() => {
+  // useMemo avoids rebuilding layered CSS backgrounds unless color or transparency settings change.
+  const backgroundStyle = useMemo<CSSProperties>(() => {
     if (!colorValue) {
       return {
         background:

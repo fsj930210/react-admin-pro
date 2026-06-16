@@ -1,8 +1,25 @@
 ﻿"use client";
 // 鏂囨。鍦板潃 https://www.diceui.com/docs/components/radix/time-picker
+import {
+  createContext,
+  use,
+  useEffect,
+  useId,
+  useRef,
+  useState,
+  useSyncExternalStore,
+  type CSSProperties,
+  type ChangeEvent,
+  type ComponentProps,
+  type ComponentRef,
+  type FocusEvent,
+  type KeyboardEvent,
+  type MouseEvent,
+  type PointerEvent,
+  type RefObject,
+} from "react";
 import { Clock } from "lucide-react";
 import { Slot as SlotPrimitive } from "radix-ui";
-import * as React from "react";
 import dayjs from "dayjs";
 import { useComposedRefs } from "@rap/utils/compose-refs";
 import { cn } from "@rap/utils";
@@ -12,6 +29,7 @@ import { useIsomorphicLayoutEffect } from "@rap/hooks/use-isomorphic-layout-effe
 import { useLazyRef } from "@rap/hooks/use-lazy-ref";
 import { Button } from "./button";
 import { Popover, PopoverAnchor, PopoverContent, PopoverTrigger } from "./popover";
+import { useMemoizedFn } from "@rap/hooks/use-memoized-fn";
 
 const ROOT_NAME = "TimePicker";
 const LABEL_NAME = "TimePickerLabel";
@@ -37,21 +55,21 @@ type Segment = "hour" | "minute" | "second" | "period";
 type SegmentFormat = "numeric" | "2-digit";
 type Period = (typeof PERIODS)[number];
 
-interface DivProps extends React.ComponentProps<"div"> {
+interface DivProps extends ComponentProps<"div"> {
   asChild?: boolean;
 }
 
-interface ButtonProps extends React.ComponentProps<"button"> {
+interface ButtonProps extends ComponentProps<"button"> {
   asChild?: boolean;
 }
 
-type PopoverContentProps = React.ComponentProps<typeof PopoverContent>;
+type PopoverContentProps = ComponentProps<typeof PopoverContent>;
 
-type InputGroupElement = React.ComponentRef<typeof TimePickerInputGroup>;
-type InputElement = React.ComponentRef<typeof TimePickerInput>;
-type TriggerElement = React.ComponentRef<typeof TimePickerTrigger>;
-type ColumnElement = React.ComponentRef<typeof TimePickerColumn>;
-type ColumnItemElement = React.ComponentRef<typeof TimePickerColumnItem>;
+type InputGroupElement = ComponentRef<typeof TimePickerInputGroup>;
+type InputElement = ComponentRef<typeof TimePickerInput>;
+type TriggerElement = ComponentRef<typeof TimePickerTrigger>;
+type ColumnElement = ComponentRef<typeof TimePickerColumn>;
+type ColumnItemElement = ComponentRef<typeof TimePickerColumnItem>;
 
 interface TimeValue {
   hour?: number;
@@ -62,21 +80,18 @@ interface TimeValue {
 
 interface ItemData {
   value: number | string;
-  ref: React.RefObject<ColumnItemElement | null>;
+  ref: RefObject<ColumnItemElement | null>;
   selected: boolean;
 }
 
 interface ColumnData {
   id: string;
-  ref: React.RefObject<ColumnElement | null>;
-  getSelectedItemRef: () => React.RefObject<ColumnItemElement | null> | null;
+  ref: RefObject<ColumnElement | null>;
+  getSelectedItemRef: () => RefObject<ColumnItemElement | null> | null;
   getItems: () => ItemData[];
 }
 
-function focusFirst(
-  candidates: React.RefObject<ColumnItemElement | null>[],
-  preventScroll = false
-) {
+function focusFirst(candidates: RefObject<ColumnItemElement | null>[], preventScroll = false) {
   const PREVIOUSLY_FOCUSED_ELEMENT = document.activeElement;
   for (const candidateRef of candidates) {
     const candidate = candidateRef.current;
@@ -87,7 +102,7 @@ function focusFirst(
   }
 }
 
-function sortNodes<T extends { ref: React.RefObject<Element | null> }>(items: T[]): T[] {
+function sortNodes<T extends { ref: RefObject<Element | null> }>(items: T[]): T[] {
   return items.sort((a, b) => {
     const elementA = a.ref.current;
     const elementB = b.ref.current;
@@ -165,6 +180,28 @@ function formatTimeValue(value: TimeValue, showSeconds: boolean): string {
   return `${hourStr}:${minuteStr}`;
 }
 
+function formatPickerValue(value: TimePickerValue | undefined, showSeconds: boolean) {
+  if (!value) return "";
+  return typeof value === "string" ? value : value.format(showSeconds ? "HH:mm:ss" : "HH:mm");
+}
+
+function normalizeSegmentPlaceholder(segmentPlaceholder: SegmentPlaceholder) {
+  if (typeof segmentPlaceholder === "string") {
+    return {
+      hour: segmentPlaceholder,
+      minute: segmentPlaceholder,
+      second: segmentPlaceholder,
+      period: segmentPlaceholder,
+    };
+  }
+  return {
+    hour: segmentPlaceholder.hour ?? DEFAULT_SEGMENT_PLACEHOLDER,
+    minute: segmentPlaceholder.minute ?? DEFAULT_SEGMENT_PLACEHOLDER,
+    second: segmentPlaceholder.second ?? DEFAULT_SEGMENT_PLACEHOLDER,
+    period: segmentPlaceholder.period ?? DEFAULT_SEGMENT_PLACEHOLDER,
+  };
+}
+
 function to12Hour(hour24: number): { hour: number; period: Period } {
   const period: Period = hour24 >= 12 ? "PM" : "AM";
   const hour = hour24 % 12 || 12;
@@ -195,10 +232,10 @@ interface Store {
   notify: () => void;
 }
 
-const StoreContext = React.createContext<Store | null>(null);
+const StoreContext = createContext<Store | null>(null);
 
 function useStoreContext(consumerName: string) {
-  const context = React.useContext(StoreContext);
+  const context = use(StoreContext);
   if (!context) {
     throw new Error(`\`${consumerName}\` must be used within \`${ROOT_NAME}\``);
   }
@@ -206,7 +243,7 @@ function useStoreContext(consumerName: string) {
 }
 
 function useStore<T>(selector: (state: StoreState) => T, ogStore?: Store | null): T {
-  const contextStore = React.useContext(StoreContext);
+  const contextStore = use(StoreContext);
 
   const store = ogStore ?? contextStore;
 
@@ -214,9 +251,9 @@ function useStore<T>(selector: (state: StoreState) => T, ogStore?: Store | null)
     throw new Error(`\`useStore\` must be used within \`${ROOT_NAME}\``);
   }
 
-  const getSnapshot = React.useCallback(() => selector(store.getState()), [store, selector]);
+  const getSnapshot = useMemoizedFn(() => selector(store.getState()));
 
-  return React.useSyncExternalStore(store.subscribe, getSnapshot, getSnapshot);
+  return useSyncExternalStore(store.subscribe, getSnapshot, getSnapshot);
 }
 
 type SegmentPlaceholder =
@@ -233,8 +270,8 @@ interface TimePickerContextValue {
   inputGroupId: string;
   labelId: string;
   triggerId: string;
-  inputGroupRef: React.RefObject<InputGroupElement | null>;
-  triggerRef: React.RefObject<TriggerElement | null>;
+  inputGroupRef: RefObject<InputGroupElement | null>;
+  triggerRef: RefObject<TriggerElement | null>;
   openOnFocus: boolean;
   inputGroupClickAction: "focus" | "open";
   onInputGroupChange: (inputGroup: InputGroupElement | null) => void;
@@ -261,10 +298,10 @@ interface TimePickerContextValue {
   disabledPeriods?: () => Period[];
 }
 
-const TimePickerContext = React.createContext<TimePickerContextValue | null>(null);
+const TimePickerContext = createContext<TimePickerContextValue | null>(null);
 
 function useTimePickerContext(consumerName: string) {
-  const context = React.useContext(TimePickerContext);
+  const context = use(TimePickerContext);
   if (!context) {
     throw new Error(`\`${consumerName}\` must be used within \`${ROOT_NAME}\``);
   }
@@ -273,7 +310,7 @@ function useTimePickerContext(consumerName: string) {
 
 type TimePickerValue = string | dayjs.Dayjs;
 
-interface TimePickerProps extends DivProps {
+interface TimePickerProps extends Omit<DivProps, "defaultValue"> {
   value?: TimePickerValue;
   defaultValue?: TimePickerValue;
   onValueChange?: (value: string, date: dayjs.Dayjs | null) => void;
@@ -337,26 +374,22 @@ function TimePicker(props: TimePickerProps) {
     ...rootProps
   } = props;
 
-  const instanceId = React.useId();
+  const instanceId = useId();
   const rootId = id ?? instanceId;
-  const inputGroupId = React.useId();
-  const labelId = React.useId();
-  const triggerId = React.useId();
+  const inputGroupId = useId();
+  const labelId = useId();
+  const triggerId = useId();
 
-  const inputGroupRef = React.useRef<InputGroupElement>(null);
-  const triggerRef = React.useRef<TriggerElement>(null);
+  const inputGroupRef = useRef<InputGroupElement>(null);
+  const triggerRef = useRef<TriggerElement>(null);
 
-  const [inputGroup, setInputGroup] = React.useState<InputGroupElement | null>(null);
+  const [inputGroup, setInputGroup] = useState<InputGroupElement | null>(null);
   const isFormControl = inputGroup ? !!inputGroup.closest("form") : true;
 
   const formatHasSeconds = /s/.test(format);
   const mergedShowSeconds = showSeconds ?? formatHasSeconds;
-  const formatTimePickerValue = React.useCallback(
-    (next: TimePickerValue | undefined) => {
-      if (!next) return "";
-      return typeof next === "string" ? next : next.format(mergedShowSeconds ? "HH:mm:ss" : "HH:mm");
-    },
-    [mergedShowSeconds]
+  const formatTimePickerValue = useMemoizedFn((next: TimePickerValue | undefined) =>
+    formatPickerValue(next, mergedShowSeconds)
   );
 
   const listenersRef = useLazyRef(() => new Set<() => void>());
@@ -367,57 +400,57 @@ function TimePicker(props: TimePickerProps) {
   }));
 
   const propsRef = useAsRef({ onValueChange, onOpenChange });
+  const storeRef = useLazyRef<Store>(() => ({
+    subscribe: (cb) => {
+      listenersRef.current.add(cb);
+      return () => listenersRef.current.delete(cb);
+    },
+    getState: () => stateRef.current,
+    setState: (key, value) => {
+      if (Object.is(stateRef.current[key], value)) return;
 
-  const store: Store = React.useMemo(() => {
-    return {
-      subscribe: (cb) => {
-        listenersRef.current.add(cb);
-        return () => listenersRef.current.delete(cb);
-      },
-      getState: () => stateRef.current,
-      setState: (key, value) => {
-        if (Object.is(stateRef.current[key], value)) return;
-
-        if (key === "value" && typeof value === "string") {
-          stateRef.current.value = value;
-          const parsed = parseTimeString(value);
-          const nextDate =
-            parsed && parsed.hour !== undefined && parsed.minute !== undefined
-              ? dayjs()
-                  .hour(parsed.hour)
-                  .minute(parsed.minute)
-                  .second(parsed.second ?? 0)
-                  .millisecond(0)
-              : null;
-          propsRef.current.onValueChange?.(value, nextDate);
-        } else if (key === "open" && typeof value === "boolean") {
-          stateRef.current.open = value;
-          propsRef.current.onOpenChange?.(value);
-          if (!value) {
-            stateRef.current.openedViaFocus = false;
-          }
-        } else {
-          stateRef.current[key] = value;
+      if (key === "value" && typeof value === "string") {
+        stateRef.current.value = value;
+        const parsed = parseTimeString(value);
+        const nextDate =
+          parsed && parsed.hour !== undefined && parsed.minute !== undefined
+            ? dayjs()
+                .hour(parsed.hour)
+                .minute(parsed.minute)
+                .second(parsed.second ?? 0)
+                .millisecond(0)
+            : null;
+        propsRef.current.onValueChange?.(value, nextDate);
+      } else if (key === "open" && typeof value === "boolean") {
+        stateRef.current.open = value;
+        propsRef.current.onOpenChange?.(value);
+        if (!value) {
+          stateRef.current.openedViaFocus = false;
         }
+      } else {
+        stateRef.current[key] = value;
+      }
 
-        store.notify();
-      },
-      notify: () => {
-        for (const cb of listenersRef.current) {
-          cb();
-        }
-      },
-    };
-  }, [listenersRef, stateRef, propsRef]);
+      storeRef.current.notify();
+    },
+    notify: () => {
+      for (const cb of listenersRef.current) {
+        cb();
+      }
+    },
+  }));
+  const store = storeRef.current;
 
   const value = useStore((state) => state.value, store);
 
+  // Controlled value props must sync into the external store before paint.
   useIsomorphicLayoutEffect(() => {
     if (valueProp !== undefined) {
       store.setState("value", formatTimePickerValue(valueProp));
     }
   }, [valueProp, formatTimePickerValue]);
 
+  // Controlled open props must sync into the external store before popover layout.
   useIsomorphicLayoutEffect(() => {
     if (open !== undefined) {
       store.setState("open", open);
@@ -426,90 +459,44 @@ function TimePicker(props: TimePickerProps) {
 
   const storeOpen = useStore((state) => state.open, store);
 
-  const onPopoverOpenChange = React.useCallback(
-    (newOpen: boolean) => store.setState("open", newOpen),
-    [store]
-  );
+  const onPopoverOpenChange = useMemoizedFn((newOpen: boolean) => store.setState("open", newOpen));
 
-  const is12Hour = React.useMemo(() => getIs12Hour(locale), [locale]);
-
-  const normalizedPlaceholder = React.useMemo(() => {
-    if (typeof segmentPlaceholder === "string") {
-      return {
-        hour: segmentPlaceholder,
-        minute: segmentPlaceholder,
-        second: segmentPlaceholder,
-        period: segmentPlaceholder,
-      };
-    }
-    return {
-      hour: segmentPlaceholder.hour ?? DEFAULT_SEGMENT_PLACEHOLDER,
-      minute: segmentPlaceholder.minute ?? DEFAULT_SEGMENT_PLACEHOLDER,
-      second: segmentPlaceholder.second ?? DEFAULT_SEGMENT_PLACEHOLDER,
-      period: segmentPlaceholder.period ?? DEFAULT_SEGMENT_PLACEHOLDER,
-    };
-  }, [segmentPlaceholder]);
-
-  const rootContext = React.useMemo<TimePickerContextValue>(
-    () => ({
-      id: rootId,
-      inputGroupId,
-      labelId,
-      triggerId,
-      inputGroupRef,
-      triggerRef,
-      openOnFocus,
-      inputGroupClickAction,
-      onInputGroupChange: setInputGroup,
-      disabled,
-      readOnly,
-      required,
-      invalid,
-      showSeconds: mergedShowSeconds,
-      is12Hour,
-      minuteStep,
-      secondStep,
-      hourStep,
-      segmentPlaceholder: normalizedPlaceholder,
-      min,
-      max,
-      disabledHours,
-      disabledMinutes,
-      disabledSeconds,
-      disabledPeriods,
-    }),
-    [
-      rootId,
-      inputGroupId,
-      labelId,
-      triggerId,
-      openOnFocus,
-      inputGroupClickAction,
-      disabled,
-      readOnly,
-      required,
-      invalid,
-      mergedShowSeconds,
-      is12Hour,
-      minuteStep,
-      secondStep,
-      hourStep,
-      normalizedPlaceholder,
-      min,
-      max,
-      disabledHours,
-      disabledMinutes,
-      disabledSeconds,
-      disabledPeriods,
-    ]
-  );
+  const is12Hour = getIs12Hour(locale);
+  const normalizedPlaceholder = normalizeSegmentPlaceholder(segmentPlaceholder);
+  const rootContext: TimePickerContextValue = {
+    id: rootId,
+    inputGroupId,
+    labelId,
+    triggerId,
+    inputGroupRef,
+    triggerRef,
+    openOnFocus,
+    inputGroupClickAction,
+    onInputGroupChange: setInputGroup,
+    disabled,
+    readOnly,
+    required,
+    invalid,
+    showSeconds: mergedShowSeconds,
+    is12Hour,
+    minuteStep,
+    secondStep,
+    hourStep,
+    segmentPlaceholder: normalizedPlaceholder,
+    min,
+    max,
+    disabledHours,
+    disabledMinutes,
+    disabledSeconds,
+    disabledPeriods,
+  };
 
   const RootPrimitive = asChild ? SlotPrimitive.Slot : "div";
 
   return (
     <>
-      <StoreContext.Provider value={store}>
-        <TimePickerContext.Provider value={rootContext}>
+      <StoreContext value={store}>
+        <TimePickerContext value={rootContext}>
           <Popover open={storeOpen} onOpenChange={onPopoverOpenChange}>
             <RootPrimitive
               data-slot="time-picker"
@@ -521,8 +508,8 @@ function TimePicker(props: TimePickerProps) {
               {children}
             </RootPrimitive>
           </Popover>
-        </TimePickerContext.Provider>
-      </StoreContext.Provider>
+        </TimePickerContext>
+      </StoreContext>
       {isFormControl && (
         <VisuallyHiddenInput
           type="hidden"
@@ -538,7 +525,7 @@ function TimePicker(props: TimePickerProps) {
   );
 }
 
-interface TimePickerLabelProps extends React.ComponentProps<"label"> {
+interface TimePickerLabelProps extends ComponentProps<"label"> {
   asChild?: boolean;
 }
 
@@ -563,17 +550,15 @@ function TimePickerLabel(props: TimePickerLabelProps) {
 }
 
 interface TimePickerInputGroupContextValue {
-  onInputRegister: (segment: Segment, ref: React.RefObject<InputElement | null>) => void;
+  onInputRegister: (segment: Segment, ref: RefObject<InputElement | null>) => void;
   onInputUnregister: (segment: Segment) => void;
-  getNextInput: (currentSegment: Segment) => React.RefObject<InputElement | null> | null;
+  getNextInput: (currentSegment: Segment) => RefObject<InputElement | null> | null;
 }
 
-const TimePickerInputGroupContext = React.createContext<TimePickerInputGroupContextValue | null>(
-  null
-);
+const TimePickerInputGroupContext = createContext<TimePickerInputGroupContextValue | null>(null);
 
 function useTimePickerInputGroupContext(consumerName: string) {
-  const context = React.useContext(TimePickerInputGroupContext);
+  const context = use(TimePickerInputGroupContext);
   if (!context) {
     throw new Error(`\`${consumerName}\` must be used within \`${INPUT_GROUP_NAME}\``);
   }
@@ -608,21 +593,18 @@ function TimePickerInputGroup(props: DivProps) {
 
   const composedRef = useComposedRefs(ref, inputGroupRef, onInputGroupChange);
 
-  const inputRefsMap = React.useRef<Map<Segment, React.RefObject<InputElement | null>>>(new Map());
+  const inputRefsMap = useRef<Map<Segment, RefObject<InputElement | null>>>(new Map());
 
-  const onInputRegister = React.useCallback(
-    (segment: Segment, ref: React.RefObject<InputElement | null>) => {
-      inputRefsMap.current.set(segment, ref);
-    },
-    []
-  );
+  const onInputRegister = useMemoizedFn((segment: Segment, ref: RefObject<InputElement | null>) => {
+    inputRefsMap.current.set(segment, ref);
+  });
 
-  const onInputUnregister = React.useCallback((segment: Segment) => {
+  const onInputUnregister = useMemoizedFn((segment: Segment) => {
     inputRefsMap.current.delete(segment);
-  }, []);
+  });
 
-  const getNextInput = React.useCallback(
-    (currentSegment: Segment): React.RefObject<InputElement | null> | null => {
+  const getNextInput = useMemoizedFn(
+    (currentSegment: Segment): RefObject<InputElement | null> | null => {
       const segmentOrder: Segment[] = ["hour", "minute", "second", "period"];
       const currentIndex = segmentOrder.indexOf(currentSegment);
 
@@ -641,82 +623,72 @@ function TimePickerInputGroup(props: DivProps) {
       }
 
       return null;
-    },
-    []
+    }
   );
 
-  const onPointerDown = React.useCallback(
-    (event: React.PointerEvent<InputGroupElement>) => {
-      onPointerDownProp?.(event);
-      if (disabled || readOnly || event.defaultPrevented) return;
+  const onPointerDown = useMemoizedFn((event: PointerEvent<InputGroupElement>) => {
+    onPointerDownProp?.(event);
+    if (disabled || readOnly || event.defaultPrevented) return;
 
-      const target = event.target as HTMLElement;
+    const target = event.target as HTMLElement;
 
-      if (target.tagName === "INPUT" || target.closest("input")) {
-        return;
-      }
+    if (target.tagName === "INPUT" || target.closest("input")) {
+      return;
+    }
 
-      if (triggerRef.current?.contains(target)) {
-        return;
-      }
+    if (triggerRef.current?.contains(target)) {
+      return;
+    }
 
-      event.preventDefault();
-    },
-    [onPointerDownProp, disabled, readOnly, triggerRef]
-  );
+    event.preventDefault();
+  });
 
-  const onClick = React.useCallback(
-    (event: React.MouseEvent<InputGroupElement>) => {
-      onClickProp?.(event);
-      if (disabled || readOnly || event.defaultPrevented) return;
+  const onClick = useMemoizedFn((event: MouseEvent<InputGroupElement>) => {
+    onClickProp?.(event);
+    if (disabled || readOnly || event.defaultPrevented) return;
 
-      const target = event.target as HTMLElement;
+    const target = event.target as HTMLElement;
 
-      if (target.tagName === "INPUT" || target.closest("input")) {
-        return;
-      }
+    if (target.tagName === "INPUT" || target.closest("input")) {
+      return;
+    }
 
-      if (triggerRef.current?.contains(target)) {
-        return;
-      }
+    if (triggerRef.current?.contains(target)) {
+      return;
+    }
 
-      if (inputGroupClickAction === "open") {
-        store.setState("open", true);
-      } else {
-        const activeElement = document.activeElement;
-        const isInputAlreadyFocused =
-          activeElement &&
-          activeElement.tagName === "INPUT" &&
-          inputGroupRef.current?.contains(activeElement);
+    if (inputGroupClickAction === "open") {
+      store.setState("open", true);
+    } else {
+      const activeElement = document.activeElement;
+      const isInputAlreadyFocused =
+        activeElement &&
+        activeElement.tagName === "INPUT" &&
+        inputGroupRef.current?.contains(activeElement);
 
-        if (!isInputAlreadyFocused) {
-          for (const segment of SEGMENTS) {
-            const inputRef = inputRefsMap.current.get(segment);
-            if (inputRef?.current) {
-              inputRef.current.focus();
-              inputRef.current.select();
-              break;
-            }
+      if (!isInputAlreadyFocused) {
+        for (const segment of SEGMENTS) {
+          const inputRef = inputRefsMap.current.get(segment);
+          if (inputRef?.current) {
+            inputRef.current.focus();
+            inputRef.current.select();
+            break;
           }
         }
       }
-    },
-    [onClickProp, disabled, readOnly, inputGroupClickAction, store, triggerRef, inputGroupRef]
-  );
+    }
+  });
 
-  const inputGroupContextValue = React.useMemo<TimePickerInputGroupContextValue>(
-    () => ({
-      onInputRegister,
-      onInputUnregister,
-      getNextInput,
-    }),
-    [onInputRegister, onInputUnregister, getNextInput]
-  );
+  const inputGroupContextValue: TimePickerInputGroupContextValue = {
+    onInputRegister,
+    onInputUnregister,
+    getNextInput,
+  };
 
   const InputGroupPrimitive = asChild ? SlotPrimitive.Slot : "div";
 
   return (
-    <TimePickerInputGroupContext.Provider value={inputGroupContextValue}>
+    <TimePickerInputGroupContext value={inputGroupContextValue}>
       <PopoverAnchor asChild>
         <InputGroupPrimitive
           role="group"
@@ -740,18 +712,18 @@ function TimePickerInputGroup(props: DivProps) {
               "--time-picker-second-input-width": `${segmentPlaceholder.second.length}ch`,
               "--time-picker-period-input-width": `${Math.max(segmentPlaceholder.period.length, 2) + 0.5}ch`,
               ...style,
-            } as React.CSSProperties
+            } as CSSProperties
           }
           ref={composedRef}
           onPointerDown={onPointerDown}
           onClick={onClick}
         />
       </PopoverAnchor>
-    </TimePickerInputGroupContext.Provider>
+    </TimePickerInputGroupContext>
   );
 }
 
-interface TimePickerInputProps extends Omit<React.ComponentProps<"input">, "type" | "value"> {
+interface TimePickerInputProps extends Omit<ComponentProps<"input">, "type" | "value"> {
   segment: Segment;
 }
 
@@ -782,9 +754,10 @@ function TimePickerInput(props: TimePickerInputProps) {
   const value = useStore((state) => state.value);
   const timeValue = parseTimeString(value);
 
-  const inputRef = React.useRef<HTMLInputElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
   const composedRef = useComposedRefs(ref, inputRef);
 
+  // Segment inputs register with the group so keyboard navigation can move across fields.
   useIsomorphicLayoutEffect(() => {
     if (segment) {
       inputGroupContext.onInputRegister(segment as Segment, inputRef);
@@ -792,7 +765,7 @@ function TimePickerInput(props: TimePickerInputProps) {
     }
   }, [inputGroupContext, segment]);
 
-  const getSegmentValue = React.useCallback(() => {
+  const getSegmentValue = useMemoizedFn(() => {
     if (!timeValue) {
       if (!segment) return "";
       return segmentPlaceholder[segment];
@@ -818,20 +791,21 @@ function TimePickerInput(props: TimePickerInputProps) {
       default:
         return "";
     }
-  }, [timeValue, segment, is12Hour, segmentPlaceholder]);
+  });
 
-  const [editValue, setEditValue] = React.useState(getSegmentValue());
-  const [isEditing, setIsEditing] = React.useState(false);
-  const [pendingDigit, setPendingDigit] = React.useState<string | null>(null);
+  const [editValue, setEditValue] = useState(getSegmentValue());
+  const [isEditing, setIsEditing] = useState(false);
+  const [pendingDigit, setPendingDigit] = useState<string | null>(null);
 
-  React.useEffect(() => {
+  // When editing ends externally, clear transient input text and render the committed segment value.
+  useEffect(() => {
     if (!isEditing) {
       setEditValue(getSegmentValue());
       setPendingDigit(null);
     }
   }, [getSegmentValue, isEditing]);
 
-  const updateTimeValue = React.useCallback(
+  const updateTimeValue = useMemoizedFn(
     (newSegmentValue: string | undefined, shouldCreateIfEmpty = false) => {
       const placeholder = segment ? segmentPlaceholder[segment] : DEFAULT_SEGMENT_PLACEHOLDER;
       if (!newSegmentValue || newSegmentValue === placeholder) return;
@@ -894,175 +868,138 @@ function TimePickerInput(props: TimePickerInputProps) {
 
       const newValue = formatTimeValue(newTime, showSeconds);
       store.setState("value", newValue);
-    },
-    [timeValue, segment, is12Hour, showSeconds, store, segmentPlaceholder]
+    }
   );
 
-  const onBlur = React.useCallback(
-    (event: React.FocusEvent<InputElement>) => {
-      onBlurProp?.(event);
-      if (event.defaultPrevented) return;
+  const onBlur = useMemoizedFn((event: FocusEvent<InputElement>) => {
+    onBlurProp?.(event);
+    if (event.defaultPrevented) return;
 
-      setIsEditing(false);
+    setIsEditing(false);
 
-      const placeholder = segment ? segmentPlaceholder[segment] : DEFAULT_SEGMENT_PLACEHOLDER;
-      if (editValue && editValue !== placeholder && editValue.length > 0) {
-        let valueToUpdate = editValue;
+    const placeholder = segment ? segmentPlaceholder[segment] : DEFAULT_SEGMENT_PLACEHOLDER;
+    if (editValue && editValue !== placeholder && editValue.length > 0) {
+      let valueToUpdate = editValue;
 
-        if (segment !== "period") {
-          if (editValue.length === 2) {
-            valueToUpdate = editValue;
-          } else if (editValue.length === 1) {
-            const numValue = Number.parseInt(editValue, 10);
-            if (!Number.isNaN(numValue)) {
-              valueToUpdate = numValue.toString().padStart(2, "0");
-            }
+      if (segment !== "period") {
+        if (editValue.length === 2) {
+          valueToUpdate = editValue;
+        } else if (editValue.length === 1) {
+          const numValue = Number.parseInt(editValue, 10);
+          if (!Number.isNaN(numValue)) {
+            valueToUpdate = numValue.toString().padStart(2, "0");
           }
         }
+      }
 
-        updateTimeValue(valueToUpdate, true);
+      updateTimeValue(valueToUpdate, true);
 
-        queueMicrotask(() => {
-          const currentTimeValue = parseTimeString(store.getState().value);
-          if (currentTimeValue) {
-            const now = new Date();
-            const newTime = { ...currentTimeValue };
-            let needsUpdate = false;
+      queueMicrotask(() => {
+        const currentTimeValue = parseTimeString(store.getState().value);
+        if (currentTimeValue) {
+          const now = new Date();
+          const newTime = { ...currentTimeValue };
+          let needsUpdate = false;
 
-            if (newTime.hour === undefined) {
-              newTime.hour = now.getHours();
-              needsUpdate = true;
-            }
-
-            if (newTime.minute === undefined) {
-              newTime.minute = now.getMinutes();
-              needsUpdate = true;
-            }
-
-            if (showSeconds && newTime.second === undefined) {
-              newTime.second = now.getSeconds();
-              needsUpdate = true;
-            }
-
-            if (needsUpdate) {
-              const newValue = formatTimeValue(newTime, showSeconds);
-              store.setState("value", newValue);
-            }
+          if (newTime.hour === undefined) {
+            newTime.hour = now.getHours();
+            needsUpdate = true;
           }
+
+          if (newTime.minute === undefined) {
+            newTime.minute = now.getMinutes();
+            needsUpdate = true;
+          }
+
+          if (showSeconds && newTime.second === undefined) {
+            newTime.second = now.getSeconds();
+            needsUpdate = true;
+          }
+
+          if (needsUpdate) {
+            const newValue = formatTimeValue(newTime, showSeconds);
+            store.setState("value", newValue);
+          }
+        }
+      });
+    }
+
+    setEditValue(getSegmentValue());
+    setPendingDigit(null);
+  });
+
+  const onChange = useMemoizedFn((event: ChangeEvent<InputElement>) => {
+    onChangeProp?.(event);
+    if (event.defaultPrevented) return;
+
+    let newValue = event.target.value;
+
+    const placeholder = segment ? segmentPlaceholder[segment] : DEFAULT_SEGMENT_PLACEHOLDER;
+    if (editValue === placeholder && newValue.length > 0 && newValue !== placeholder) {
+      newValue = newValue.replace(new RegExp(`^${placeholder}`), "");
+    }
+
+    if (segment === "period") {
+      const firstChar = newValue.charAt(0).toUpperCase();
+      let newPeriod: Period | null = null;
+
+      if (firstChar === "A" || firstChar === "1") {
+        newPeriod = "AM";
+      } else if (firstChar === "P" || firstChar === "2") {
+        newPeriod = "PM";
+      }
+
+      if (newPeriod) {
+        setEditValue(newPeriod);
+        updateTimeValue(newPeriod, true);
+        queueMicrotask(() => {
+          inputRef.current?.select();
         });
       }
+      return;
+    }
 
-      setEditValue(getSegmentValue());
-      setPendingDigit(null);
-    },
-    [
-      onBlurProp,
-      editValue,
-      updateTimeValue,
-      getSegmentValue,
-      segment,
-      segmentPlaceholder,
-      showSeconds,
-      store,
-    ]
-  );
+    if (segment === "hour" || segment === "minute" || segment === "second") {
+      newValue = newValue.replace(/\D/g, "");
+    }
 
-  const onChange = React.useCallback(
-    (event: React.ChangeEvent<InputElement>) => {
-      onChangeProp?.(event);
-      if (event.defaultPrevented) return;
+    if (newValue.length > 2) {
+      newValue = newValue.slice(0, 2);
+    }
+    if (segment === "hour" || segment === "minute" || segment === "second") {
+      const numValue = Number.parseInt(newValue, 10);
 
-      let newValue = event.target.value;
+      if (!Number.isNaN(numValue) && newValue.length > 0) {
+        if (pendingDigit !== null && newValue.length === 1) {
+          const twoDigitValue = pendingDigit + newValue;
+          const combinedNum = Number.parseInt(twoDigitValue, 10);
 
-      const placeholder = segment ? segmentPlaceholder[segment] : DEFAULT_SEGMENT_PLACEHOLDER;
-      if (editValue === placeholder && newValue.length > 0 && newValue !== placeholder) {
-        newValue = newValue.replace(new RegExp(`^${placeholder}`), "");
-      }
+          if (!Number.isNaN(combinedNum)) {
+            const paddedValue = combinedNum.toString().padStart(2, "0");
+            setEditValue(paddedValue);
+            updateTimeValue(paddedValue, true);
+            setPendingDigit(null);
 
-      if (segment === "period") {
-        const firstChar = newValue.charAt(0).toUpperCase();
-        let newPeriod: Period | null = null;
-
-        if (firstChar === "A" || firstChar === "1") {
-          newPeriod = "AM";
-        } else if (firstChar === "P" || firstChar === "2") {
-          newPeriod = "PM";
-        }
-
-        if (newPeriod) {
-          setEditValue(newPeriod);
-          updateTimeValue(newPeriod, true);
-          queueMicrotask(() => {
-            inputRef.current?.select();
-          });
-        }
-        return;
-      }
-
-      if (segment === "hour" || segment === "minute" || segment === "second") {
-        newValue = newValue.replace(/\D/g, "");
-      }
-
-      if (newValue.length > 2) {
-        newValue = newValue.slice(0, 2);
-      }
-      if (segment === "hour" || segment === "minute" || segment === "second") {
-        const numValue = Number.parseInt(newValue, 10);
-
-        if (!Number.isNaN(numValue) && newValue.length > 0) {
-          if (pendingDigit !== null && newValue.length === 1) {
-            const twoDigitValue = pendingDigit + newValue;
-            const combinedNum = Number.parseInt(twoDigitValue, 10);
-
-            if (!Number.isNaN(combinedNum)) {
-              const paddedValue = combinedNum.toString().padStart(2, "0");
-              setEditValue(paddedValue);
-              updateTimeValue(paddedValue, true);
-              setPendingDigit(null);
-
-              queueMicrotask(() => {
-                if (segment) {
-                  const nextInputRef = inputGroupContext.getNextInput(segment);
-                  if (nextInputRef?.current) {
-                    nextInputRef.current.focus();
-                    nextInputRef.current.select();
-                  }
+            queueMicrotask(() => {
+              if (segment) {
+                const nextInputRef = inputGroupContext.getNextInput(segment);
+                if (nextInputRef?.current) {
+                  nextInputRef.current.focus();
+                  nextInputRef.current.select();
                 }
-              });
-              return;
-            }
+              }
+            });
+            return;
           }
+        }
 
-          const maxFirstDigit = segment === "hour" ? (is12Hour ? 1 : 2) : 5;
+        const maxFirstDigit = segment === "hour" ? (is12Hour ? 1 : 2) : 5;
 
-          const firstDigit = Number.parseInt(newValue[0] ?? "0", 10);
-          const shouldAutoAdvance = firstDigit > maxFirstDigit;
+        const firstDigit = Number.parseInt(newValue[0] ?? "0", 10);
+        const shouldAutoAdvance = firstDigit > maxFirstDigit;
 
-          if (newValue.length === 1) {
-            if (shouldAutoAdvance) {
-              const paddedValue = numValue.toString().padStart(2, "0");
-              setEditValue(paddedValue);
-              updateTimeValue(paddedValue, true);
-              setPendingDigit(null);
-
-              queueMicrotask(() => {
-                if (segment) {
-                  const nextInputRef = inputGroupContext.getNextInput(segment);
-                  if (nextInputRef?.current) {
-                    nextInputRef.current.focus();
-                    nextInputRef.current.select();
-                  }
-                }
-              });
-            } else {
-              const paddedValue = numValue.toString().padStart(2, "0");
-              setEditValue(paddedValue);
-              setPendingDigit(newValue);
-              queueMicrotask(() => {
-                inputRef.current?.select();
-              });
-            }
-          } else if (newValue.length === 2) {
+        if (newValue.length === 1) {
+          if (shouldAutoAdvance) {
             const paddedValue = numValue.toString().padStart(2, "0");
             setEditValue(paddedValue);
             updateTimeValue(paddedValue, true);
@@ -1077,295 +1014,287 @@ function TimePickerInput(props: TimePickerInputProps) {
                 }
               }
             });
+          } else {
+            const paddedValue = numValue.toString().padStart(2, "0");
+            setEditValue(paddedValue);
+            setPendingDigit(newValue);
+            queueMicrotask(() => {
+              inputRef.current?.select();
+            });
           }
-        } else if (newValue.length === 0) {
-          setEditValue("");
+        } else if (newValue.length === 2) {
+          const paddedValue = numValue.toString().padStart(2, "0");
+          setEditValue(paddedValue);
+          updateTimeValue(paddedValue, true);
           setPendingDigit(null);
+
+          queueMicrotask(() => {
+            if (segment) {
+              const nextInputRef = inputGroupContext.getNextInput(segment);
+              if (nextInputRef?.current) {
+                nextInputRef.current.focus();
+                nextInputRef.current.select();
+              }
+            }
+          });
+        }
+      } else if (newValue.length === 0) {
+        setEditValue("");
+        setPendingDigit(null);
+      }
+    }
+  });
+
+  const onClick = useMemoizedFn((event: MouseEvent<InputElement>) => {
+    onClickProp?.(event);
+    if (event.defaultPrevented) return;
+
+    event.currentTarget.select();
+  });
+
+  const onFocus = useMemoizedFn((event: FocusEvent<InputElement>) => {
+    onFocusProp?.(event);
+    if (event.defaultPrevented) return;
+
+    setIsEditing(true);
+    setPendingDigit(null);
+
+    if (openOnFocus && !store.getState().open) {
+      store.setState("openedViaFocus", true);
+      store.setState("open", true);
+    }
+
+    queueMicrotask(() => event.target.select());
+  });
+
+  const onKeyDown = useMemoizedFn((event: KeyboardEvent<InputElement>) => {
+    onKeyDownProp?.(event);
+    if (event.defaultPrevented) return;
+
+    if (event.key === "ArrowLeft" || event.key === "ArrowRight") {
+      event.preventDefault();
+
+      const goToPrevious = event.key === "ArrowLeft";
+      const inputGroup = inputRef.current?.closest('[data-slot="time-picker-input-group"]');
+
+      if (inputGroup && inputRef.current) {
+        const allInputs = Array.from(
+          inputGroup.querySelectorAll('input[type="text"]')
+        ) as HTMLInputElement[];
+        const currentIdx = allInputs.indexOf(inputRef.current);
+
+        if (currentIdx !== -1) {
+          const targetIdx = goToPrevious
+            ? Math.max(0, currentIdx - 1)
+            : Math.min(allInputs.length - 1, currentIdx + 1);
+
+          const targetInput = allInputs[targetIdx];
+          if (targetInput && targetInput !== inputRef.current) {
+            targetInput.focus();
+            targetInput.select();
+          }
         }
       }
-    },
-    [
-      segment,
-      updateTimeValue,
-      onChangeProp,
-      editValue,
-      is12Hour,
-      inputGroupContext,
-      pendingDigit,
-      segmentPlaceholder,
-    ]
-  );
+      return;
+    }
 
-  const onClick = React.useCallback(
-    (event: React.MouseEvent<InputElement>) => {
-      onClickProp?.(event);
-      if (event.defaultPrevented) return;
-
-      event.currentTarget.select();
-    },
-    [onClickProp]
-  );
-
-  const onFocus = React.useCallback(
-    (event: React.FocusEvent<InputElement>) => {
-      onFocusProp?.(event);
-      if (event.defaultPrevented) return;
-
-      setIsEditing(true);
-      setPendingDigit(null);
-
-      if (openOnFocus && !store.getState().open) {
-        store.setState("openedViaFocus", true);
-        store.setState("open", true);
-      }
-
-      queueMicrotask(() => event.target.select());
-    },
-    [onFocusProp, openOnFocus, store]
-  );
-
-  const onKeyDown = React.useCallback(
-    (event: React.KeyboardEvent<InputElement>) => {
-      onKeyDownProp?.(event);
-      if (event.defaultPrevented) return;
-
-      if (event.key === "ArrowLeft" || event.key === "ArrowRight") {
+    if (event.key === "Backspace" || event.key === "Delete") {
+      const input = inputRef.current;
+      if (input && input.selectionStart === 0 && input.selectionEnd === input.value.length) {
         event.preventDefault();
+        const placeholder = segment ? segmentPlaceholder[segment] : DEFAULT_SEGMENT_PLACEHOLDER;
+        setEditValue(placeholder);
+        setPendingDigit(null);
 
-        const goToPrevious = event.key === "ArrowLeft";
-        const inputGroup = inputRef.current?.closest('[data-slot="time-picker-input-group"]');
-
-        if (inputGroup && inputRef.current) {
-          const allInputs = Array.from(
-            inputGroup.querySelectorAll('input[type="text"]')
-          ) as HTMLInputElement[];
-          const currentIdx = allInputs.indexOf(inputRef.current);
-
-          if (currentIdx !== -1) {
-            const targetIdx = goToPrevious
-              ? Math.max(0, currentIdx - 1)
-              : Math.min(allInputs.length - 1, currentIdx + 1);
-
-            const targetInput = allInputs[targetIdx];
-            if (targetInput && targetInput !== inputRef.current) {
-              targetInput.focus();
-              targetInput.select();
-            }
+        if (timeValue) {
+          const newTime = { ...timeValue };
+          switch (segment) {
+            case "hour":
+              delete newTime.hour;
+              break;
+            case "minute":
+              delete newTime.minute;
+              break;
+            case "second":
+              delete newTime.second;
+              break;
+            case "period":
+              delete newTime.period;
+              break;
           }
-        }
-        return;
-      }
 
-      if (event.key === "Backspace" || event.key === "Delete") {
-        const input = inputRef.current;
-        if (input && input.selectionStart === 0 && input.selectionEnd === input.value.length) {
-          event.preventDefault();
-          const placeholder = segment ? segmentPlaceholder[segment] : DEFAULT_SEGMENT_PLACEHOLDER;
-          setEditValue(placeholder);
-          setPendingDigit(null);
-
-          if (timeValue) {
-            const newTime = { ...timeValue };
-            switch (segment) {
-              case "hour":
-                delete newTime.hour;
-                break;
-              case "minute":
-                delete newTime.minute;
-                break;
-              case "second":
-                delete newTime.second;
-                break;
-              case "period":
-                delete newTime.period;
-                break;
-            }
-
-            if (
-              newTime.hour !== undefined ||
-              newTime.minute !== undefined ||
-              newTime.second !== undefined ||
-              newTime.period !== undefined
-            ) {
-              const newValue = formatTimeValue(newTime, showSeconds);
-              store.setState("value", newValue);
-            } else {
-              store.setState("value", "");
-            }
+          if (
+            newTime.hour !== undefined ||
+            newTime.minute !== undefined ||
+            newTime.second !== undefined ||
+            newTime.period !== undefined
+          ) {
+            const newValue = formatTimeValue(newTime, showSeconds);
+            store.setState("value", newValue);
           } else {
             store.setState("value", "");
           }
-
-          queueMicrotask(() => {
-            inputRef.current?.select();
-          });
-          return;
+        } else {
+          store.setState("value", "");
         }
-      }
 
-      if (segment === "period") {
-        const key = event.key.toLowerCase();
-        if (key === "a" || key === "p" || key === "1" || key === "2") {
-          event.preventDefault();
-          let newPeriod: Period;
-          if (key === "a" || key === "1") {
-            newPeriod = "AM";
-          } else {
-            newPeriod = "PM";
-          }
-          setEditValue(newPeriod);
-          updateTimeValue(newPeriod, true);
-          queueMicrotask(() => {
-            inputRef.current?.select();
-          });
-        } else if (event.key === "ArrowUp" || event.key === "ArrowDown") {
-          event.preventDefault();
-          const placeholder = segmentPlaceholder.period;
-          const currentPeriod = editValue === placeholder || editValue === "" ? "AM" : editValue;
-          const newPeriod = currentPeriod === "AM" || currentPeriod === "A" ? "PM" : "AM";
-          setEditValue(newPeriod);
-          updateTimeValue(newPeriod, true);
-          queueMicrotask(() => {
-            inputRef.current?.select();
-          });
-        }
+        queueMicrotask(() => {
+          inputRef.current?.select();
+        });
         return;
       }
+    }
 
-      if (event.key === "Tab") {
-        const placeholder = segment ? segmentPlaceholder[segment] : DEFAULT_SEGMENT_PLACEHOLDER;
-        if (editValue && editValue.length > 0 && editValue !== placeholder) {
-          if (editValue.length === 2) {
-            updateTimeValue(editValue, true);
-          } else if (editValue.length === 1) {
-            const numValue = Number.parseInt(editValue, 10);
-            if (!Number.isNaN(numValue)) {
-              const paddedValue = numValue.toString().padStart(2, "0");
-              updateTimeValue(paddedValue, true);
-            }
-          }
-        }
-        return;
-      }
-
-      if (event.key === "Enter") {
+    if (segment === "period") {
+      const key = event.key.toLowerCase();
+      if (key === "a" || key === "p" || key === "1" || key === "2") {
         event.preventDefault();
-        const placeholder = segment ? segmentPlaceholder[segment] : DEFAULT_SEGMENT_PLACEHOLDER;
-        if (editValue && editValue.length > 0 && editValue !== placeholder) {
-          if (editValue.length === 2) {
-            updateTimeValue(editValue, true);
-          } else if (editValue.length === 1) {
-            const numValue = Number.parseInt(editValue, 10);
-            if (!Number.isNaN(numValue)) {
-              const paddedValue = numValue.toString().padStart(2, "0");
-              updateTimeValue(paddedValue, true);
-            }
-          }
+        let newPeriod: Period;
+        if (key === "a" || key === "1") {
+          newPeriod = "AM";
+        } else {
+          newPeriod = "PM";
         }
+        setEditValue(newPeriod);
+        updateTimeValue(newPeriod, true);
+        queueMicrotask(() => {
+          inputRef.current?.select();
+        });
+      } else if (event.key === "ArrowUp" || event.key === "ArrowDown") {
+        event.preventDefault();
+        const placeholder = segmentPlaceholder.period;
+        const currentPeriod = editValue === placeholder || editValue === "" ? "AM" : editValue;
+        const newPeriod = currentPeriod === "AM" || currentPeriod === "A" ? "PM" : "AM";
+        setEditValue(newPeriod);
+        updateTimeValue(newPeriod, true);
         queueMicrotask(() => {
           inputRef.current?.select();
         });
       }
+      return;
+    }
 
-      if (event.key === "Escape") {
-        event.preventDefault();
-        setEditValue(getSegmentValue());
-        inputRef.current?.blur();
-      }
-
-      if (event.key === "ArrowUp") {
-        event.preventDefault();
-        const placeholder = segment ? segmentPlaceholder[segment] : DEFAULT_SEGMENT_PLACEHOLDER;
-        if (editValue === placeholder || editValue === "") {
-          const defaultValue = segment === "hour" ? (is12Hour ? 12 : 0) : 0;
-          const formattedValue = defaultValue.toString().padStart(2, "0");
-          setEditValue(formattedValue);
-          updateTimeValue(formattedValue, true);
-          queueMicrotask(() => {
-            inputRef.current?.select();
-          });
-          return;
-        }
-        const currentValue = Number.parseInt(editValue, 10);
-        if (!Number.isNaN(currentValue)) {
-          let newValue: number;
-          switch (segment) {
-            case "hour":
-              if (is12Hour) {
-                newValue = currentValue === 12 ? 1 : currentValue + 1;
-              } else {
-                newValue = currentValue === 23 ? 0 : currentValue + 1;
-              }
-              break;
-            case "minute":
-            case "second":
-              newValue = currentValue === 59 ? 0 : currentValue + 1;
-              break;
-            default:
-              return;
+    if (event.key === "Tab") {
+      const placeholder = segment ? segmentPlaceholder[segment] : DEFAULT_SEGMENT_PLACEHOLDER;
+      if (editValue && editValue.length > 0 && editValue !== placeholder) {
+        if (editValue.length === 2) {
+          updateTimeValue(editValue, true);
+        } else if (editValue.length === 1) {
+          const numValue = Number.parseInt(editValue, 10);
+          if (!Number.isNaN(numValue)) {
+            const paddedValue = numValue.toString().padStart(2, "0");
+            updateTimeValue(paddedValue, true);
           }
-          const formattedValue = newValue.toString().padStart(2, "0");
-          setEditValue(formattedValue);
-          updateTimeValue(formattedValue, true);
-          queueMicrotask(() => {
-            inputRef.current?.select();
-          });
         }
       }
+      return;
+    }
 
-      if (event.key === "ArrowDown") {
-        event.preventDefault();
-        const placeholder = segment ? segmentPlaceholder[segment] : DEFAULT_SEGMENT_PLACEHOLDER;
-        if (editValue === placeholder || editValue === "") {
-          const defaultValue = segment === "hour" ? (is12Hour ? 12 : 23) : 59;
-          const formattedValue = defaultValue.toString().padStart(2, "0");
-          setEditValue(formattedValue);
-          updateTimeValue(formattedValue, true);
-          queueMicrotask(() => {
-            inputRef.current?.select();
-          });
-          return;
-        }
-        const currentValue = Number.parseInt(editValue, 10);
-        if (!Number.isNaN(currentValue)) {
-          let newValue: number;
-          switch (segment) {
-            case "hour":
-              if (is12Hour) {
-                newValue = currentValue === 1 ? 12 : currentValue - 1;
-              } else {
-                newValue = currentValue === 0 ? 23 : currentValue - 1;
-              }
-              break;
-            case "minute":
-            case "second":
-              newValue = currentValue === 0 ? 59 : currentValue - 1;
-              break;
-            default:
-              return;
+    if (event.key === "Enter") {
+      event.preventDefault();
+      const placeholder = segment ? segmentPlaceholder[segment] : DEFAULT_SEGMENT_PLACEHOLDER;
+      if (editValue && editValue.length > 0 && editValue !== placeholder) {
+        if (editValue.length === 2) {
+          updateTimeValue(editValue, true);
+        } else if (editValue.length === 1) {
+          const numValue = Number.parseInt(editValue, 10);
+          if (!Number.isNaN(numValue)) {
+            const paddedValue = numValue.toString().padStart(2, "0");
+            updateTimeValue(paddedValue, true);
           }
-          const formattedValue = newValue.toString().padStart(2, "0");
-          setEditValue(formattedValue);
-          updateTimeValue(formattedValue, true);
-          queueMicrotask(() => {
-            inputRef.current?.select();
-          });
         }
       }
-    },
-    [
-      onKeyDownProp,
-      editValue,
-      segment,
-      is12Hour,
-      getSegmentValue,
-      updateTimeValue,
-      showSeconds,
-      timeValue,
-      store,
-      segmentPlaceholder,
-    ]
-  );
+      queueMicrotask(() => {
+        inputRef.current?.select();
+      });
+    }
+
+    if (event.key === "Escape") {
+      event.preventDefault();
+      setEditValue(getSegmentValue());
+      inputRef.current?.blur();
+    }
+
+    if (event.key === "ArrowUp") {
+      event.preventDefault();
+      const placeholder = segment ? segmentPlaceholder[segment] : DEFAULT_SEGMENT_PLACEHOLDER;
+      if (editValue === placeholder || editValue === "") {
+        const defaultValue = segment === "hour" ? (is12Hour ? 12 : 0) : 0;
+        const formattedValue = defaultValue.toString().padStart(2, "0");
+        setEditValue(formattedValue);
+        updateTimeValue(formattedValue, true);
+        queueMicrotask(() => {
+          inputRef.current?.select();
+        });
+        return;
+      }
+      const currentValue = Number.parseInt(editValue, 10);
+      if (!Number.isNaN(currentValue)) {
+        let newValue: number;
+        switch (segment) {
+          case "hour":
+            if (is12Hour) {
+              newValue = currentValue === 12 ? 1 : currentValue + 1;
+            } else {
+              newValue = currentValue === 23 ? 0 : currentValue + 1;
+            }
+            break;
+          case "minute":
+          case "second":
+            newValue = currentValue === 59 ? 0 : currentValue + 1;
+            break;
+          default:
+            return;
+        }
+        const formattedValue = newValue.toString().padStart(2, "0");
+        setEditValue(formattedValue);
+        updateTimeValue(formattedValue, true);
+        queueMicrotask(() => {
+          inputRef.current?.select();
+        });
+      }
+    }
+
+    if (event.key === "ArrowDown") {
+      event.preventDefault();
+      const placeholder = segment ? segmentPlaceholder[segment] : DEFAULT_SEGMENT_PLACEHOLDER;
+      if (editValue === placeholder || editValue === "") {
+        const defaultValue = segment === "hour" ? (is12Hour ? 12 : 23) : 59;
+        const formattedValue = defaultValue.toString().padStart(2, "0");
+        setEditValue(formattedValue);
+        updateTimeValue(formattedValue, true);
+        queueMicrotask(() => {
+          inputRef.current?.select();
+        });
+        return;
+      }
+      const currentValue = Number.parseInt(editValue, 10);
+      if (!Number.isNaN(currentValue)) {
+        let newValue: number;
+        switch (segment) {
+          case "hour":
+            if (is12Hour) {
+              newValue = currentValue === 1 ? 12 : currentValue - 1;
+            } else {
+              newValue = currentValue === 0 ? 23 : currentValue - 1;
+            }
+            break;
+          case "minute":
+          case "second":
+            newValue = currentValue === 0 ? 59 : currentValue - 1;
+            break;
+          default:
+            return;
+        }
+        const formattedValue = newValue.toString().padStart(2, "0");
+        setEditValue(formattedValue);
+        updateTimeValue(formattedValue, true);
+        queueMicrotask(() => {
+          inputRef.current?.select();
+        });
+      }
+    }
+  });
 
   const displayValue = isEditing ? editValue : getSegmentValue();
 
@@ -1432,31 +1361,31 @@ interface TimePickerGroupContextValue {
   onColumnUnregister: (id: string) => void;
 }
 
-const TimePickerGroupContext = React.createContext<TimePickerGroupContextValue | null>(null);
+const TimePickerGroupContext = createContext<TimePickerGroupContextValue | null>(null);
 
 function useTimePickerGroupContext(consumerName: string) {
-  const context = React.useContext(TimePickerGroupContext);
+  const context = use(TimePickerGroupContext);
   if (!context) {
     throw new Error(`\`${consumerName}\` must be used within \`${ROOT_NAME}\``);
   }
   return context;
 }
 
-interface TimePickerContentProps extends DivProps, React.ComponentProps<typeof PopoverContent> {}
+interface TimePickerContentProps extends DivProps, ComponentProps<typeof PopoverContent> {}
 
 function TimePickerPanel(props: DivProps) {
   const { className, ...panelProps } = props;
-  const columnsRef = React.useRef<Map<string, Omit<ColumnData, "id">>>(new Map());
+  const columnsRef = useRef<Map<string, Omit<ColumnData, "id">>>(new Map());
 
-  const onColumnRegister = React.useCallback((column: ColumnData) => {
+  const onColumnRegister = useMemoizedFn((column: ColumnData) => {
     columnsRef.current.set(column.id, column);
-  }, []);
+  });
 
-  const onColumnUnregister = React.useCallback((id: string) => {
+  const onColumnUnregister = useMemoizedFn((id: string) => {
     columnsRef.current.delete(id);
-  }, []);
+  });
 
-  const getColumns = React.useCallback(() => {
+  const getColumns = useMemoizedFn(() => {
     const columns = Array.from(columnsRef.current.entries())
       .map(([id, { ref, getSelectedItemRef, getItems }]) => ({
         id,
@@ -1466,21 +1395,22 @@ function TimePickerPanel(props: DivProps) {
       }))
       .filter((c) => c.ref.current !== null);
     return sortNodes(columns);
-  }, []);
+  });
 
-  const groupContextValue = React.useMemo<TimePickerGroupContextValue>(
-    () => ({
-      getColumns,
-      onColumnRegister,
-      onColumnUnregister,
-    }),
-    [getColumns, onColumnRegister, onColumnUnregister]
-  );
+  const groupContextValue: TimePickerGroupContextValue = {
+    getColumns,
+    onColumnRegister,
+    onColumnUnregister,
+  };
 
   return (
-    <TimePickerGroupContext.Provider value={groupContextValue}>
-      <div data-slot="time-picker-panel" {...panelProps} className={cn("flex w-auto p-0", className)} />
-    </TimePickerGroupContext.Provider>
+    <TimePickerGroupContext value={groupContextValue}>
+      <div
+        data-slot="time-picker-panel"
+        {...panelProps}
+        className={cn("flex w-auto p-0", className)}
+      />
+    </TimePickerGroupContext>
   );
 }
 
@@ -1497,17 +1427,17 @@ function TimePickerContent(props: TimePickerContentProps) {
 
   const store = useStoreContext(CONTENT_NAME);
   const { openOnFocus, inputGroupRef } = useTimePickerContext(CONTENT_NAME);
-  const columnsRef = React.useRef<Map<string, Omit<ColumnData, "id">>>(new Map());
+  const columnsRef = useRef<Map<string, Omit<ColumnData, "id">>>(new Map());
 
-  const onColumnRegister = React.useCallback((column: ColumnData) => {
+  const onColumnRegister = useMemoizedFn((column: ColumnData) => {
     columnsRef.current.set(column.id, column);
-  }, []);
+  });
 
-  const onColumnUnregister = React.useCallback((id: string) => {
+  const onColumnUnregister = useMemoizedFn((id: string) => {
     columnsRef.current.delete(id);
-  }, []);
+  });
 
-  const getColumns = React.useCallback(() => {
+  const getColumns = useMemoizedFn(() => {
     const columns = Array.from(columnsRef.current.entries())
       .map(([id, { ref, getSelectedItemRef, getItems }]) => ({
         id,
@@ -1517,18 +1447,15 @@ function TimePickerContent(props: TimePickerContentProps) {
       }))
       .filter((c) => c.ref.current !== null);
     return sortNodes(columns);
-  }, []);
+  });
 
-  const groupContextValue = React.useMemo<TimePickerGroupContextValue>(
-    () => ({
-      getColumns,
-      onColumnRegister,
-      onColumnUnregister,
-    }),
-    [getColumns, onColumnRegister, onColumnUnregister]
-  );
+  const groupContextValue: TimePickerGroupContextValue = {
+    getColumns,
+    onColumnRegister,
+    onColumnUnregister,
+  };
 
-  const onOpenAutoFocus: NonNullable<PopoverContentProps["onOpenAutoFocus"]> = React.useCallback(
+  const onOpenAutoFocus: NonNullable<PopoverContentProps["onOpenAutoFocus"]> = useMemoizedFn(
     (event) => {
       onOpenAutoFocusProp?.(event);
       if (event.defaultPrevented) return;
@@ -1555,31 +1482,28 @@ function TimePickerContent(props: TimePickerContentProps) {
         : items.map((item) => item.ref);
 
       focusFirst(candidateRefs, false);
-    },
-    [onOpenAutoFocusProp, getColumns, store]
+    }
   );
 
-  const onInteractOutside: NonNullable<PopoverContentProps["onInteractOutside"]> =
-    React.useCallback(
-      (event) => {
-        onInteractOutsideProp?.(event);
-        if (event.defaultPrevented) return;
+  const onInteractOutside: NonNullable<PopoverContentProps["onInteractOutside"]> = useMemoizedFn(
+    (event) => {
+      onInteractOutsideProp?.(event);
+      if (event.defaultPrevented) return;
 
-        if (openOnFocus && inputGroupRef.current) {
-          const target = event.target;
-          if (!(target instanceof Node)) return;
-          const isInsideInputGroup = inputGroupRef.current.contains(target);
+      if (openOnFocus && inputGroupRef.current) {
+        const target = event.target;
+        if (!(target instanceof Node)) return;
+        const isInsideInputGroup = inputGroupRef.current.contains(target);
 
-          if (isInsideInputGroup) {
-            event.preventDefault();
-          }
+        if (isInsideInputGroup) {
+          event.preventDefault();
         }
-      },
-      [onInteractOutsideProp, openOnFocus, inputGroupRef]
-    );
+      }
+    }
+  );
 
   return (
-    <TimePickerGroupContext.Provider value={groupContextValue}>
+    <TimePickerGroupContext value={groupContextValue}>
       <PopoverContent
         data-slot="time-picker-content"
         side={side}
@@ -1590,7 +1514,7 @@ function TimePickerContent(props: TimePickerContentProps) {
         onOpenAutoFocus={onOpenAutoFocus}
         onInteractOutside={onInteractOutside}
       />
-    </TimePickerGroupContext.Provider>
+    </TimePickerGroupContext>
   );
 }
 
@@ -1598,16 +1522,16 @@ interface TimePickerColumnContextValue {
   getItems: () => ItemData[];
   onItemRegister: (
     value: number | string,
-    ref: React.RefObject<ColumnItemElement | null>,
+    ref: RefObject<ColumnItemElement | null>,
     selected: boolean
   ) => void;
   onItemUnregister: (value: number | string) => void;
 }
 
-const TimePickerColumnContext = React.createContext<TimePickerColumnContextValue | null>(null);
+const TimePickerColumnContext = createContext<TimePickerColumnContextValue | null>(null);
 
 function useTimePickerColumnContext(consumerName: string) {
-  const context = React.useContext(TimePickerColumnContext);
+  const context = use(TimePickerColumnContext);
   if (!context) {
     throw new Error(`\`${consumerName}\` must be used within a column`);
   }
@@ -1619,15 +1543,15 @@ interface TimePickerColumnProps extends DivProps {}
 function TimePickerColumn(props: TimePickerColumnProps) {
   const { children, className, ref, ...columnProps } = props;
 
-  const columnId = React.useId();
-  const columnRef = React.useRef<ColumnElement | null>(null);
+  const columnId = useId();
+  const columnRef = useRef<ColumnElement | null>(null);
   const composedRef = useComposedRefs(ref, columnRef);
 
-  const itemsRef = React.useRef<
+  const itemsRef = useRef<
     Map<
       number | string,
       {
-        ref: React.RefObject<ColumnItemElement | null>;
+        ref: RefObject<ColumnItemElement | null>;
         selected: boolean;
       }
     >
@@ -1635,18 +1559,17 @@ function TimePickerColumn(props: TimePickerColumnProps) {
 
   const groupContext = useTimePickerGroupContext(COLUMN_NAME);
 
-  const onItemRegister = React.useCallback(
-    (value: number | string, ref: React.RefObject<HTMLButtonElement | null>, selected: boolean) => {
+  const onItemRegister = useMemoizedFn(
+    (value: number | string, ref: RefObject<HTMLButtonElement | null>, selected: boolean) => {
       itemsRef.current.set(value, { ref, selected });
-    },
-    []
+    }
   );
 
-  const onItemUnregister = React.useCallback((value: number | string) => {
+  const onItemUnregister = useMemoizedFn((value: number | string) => {
     itemsRef.current.delete(value);
-  }, []);
+  });
 
-  const getItems = React.useCallback(() => {
+  const getItems = useMemoizedFn(() => {
     const items = Array.from(itemsRef.current.entries())
       .map(([value, { ref, selected }]) => ({
         value,
@@ -1655,13 +1578,14 @@ function TimePickerColumn(props: TimePickerColumnProps) {
       }))
       .filter((item) => item.ref.current);
     return sortNodes(items);
-  }, []);
+  });
 
-  const getSelectedItemRef = React.useCallback(() => {
+  const getSelectedItemRef = useMemoizedFn(() => {
     const items = getItems();
     return items.find((item) => item.selected)?.ref ?? null;
-  }, [getItems]);
+  });
 
+  // Columns register with the group so panel focus can land on selected values.
   useIsomorphicLayoutEffect(() => {
     groupContext.onColumnRegister({
       id: columnId,
@@ -1672,17 +1596,14 @@ function TimePickerColumn(props: TimePickerColumnProps) {
     return () => groupContext.onColumnUnregister(columnId);
   }, [groupContext, columnId, getSelectedItemRef, getItems]);
 
-  const columnContextValue = React.useMemo<TimePickerColumnContextValue>(
-    () => ({
-      getItems,
-      onItemRegister,
-      onItemUnregister,
-    }),
-    [getItems, onItemRegister, onItemUnregister]
-  );
+  const columnContextValue: TimePickerColumnContextValue = {
+    getItems,
+    onItemRegister,
+    onItemUnregister,
+  };
 
   return (
-    <TimePickerColumnContext.Provider value={columnContextValue}>
+    <TimePickerColumnContext value={columnContextValue}>
       <div
         ref={composedRef}
         data-slot="time-picker-column"
@@ -1691,7 +1612,7 @@ function TimePickerColumn(props: TimePickerColumnProps) {
       >
         {children}
       </div>
-    </TimePickerColumnContext.Provider>
+    </TimePickerColumnContext>
   );
 }
 
@@ -1702,17 +1623,27 @@ interface TimePickerColumnItemProps extends ButtonProps {
 }
 
 function TimePickerColumnItem(props: TimePickerColumnItemProps) {
-  const { value, selected = false, format = "numeric", className, ref, disabled, ...itemProps } = props;
+  const {
+    value,
+    selected = false,
+    format = "numeric",
+    className,
+    ref,
+    disabled,
+    ...itemProps
+  } = props;
 
-  const itemRef = React.useRef<ColumnItemElement | null>(null);
-  const scrollAnimationRef = React.useRef<number | null>(null);
+  const itemRef = useRef<ColumnItemElement | null>(null);
+  const scrollAnimationRef = useRef<number | null>(null);
   const composedRef = useComposedRefs(ref, itemRef);
   const columnContext = useTimePickerColumnContext(COLUMN_ITEM_NAME);
   const groupContext = useTimePickerGroupContext(COLUMN_ITEM_NAME);
 
-  const scrollItemToTop = React.useCallback((behavior: ScrollBehavior = "auto") => {
+  const scrollItemToTop = useMemoizedFn((behavior: ScrollBehavior = "auto") => {
     const item = itemRef.current;
-    const column = item?.closest<HTMLElement>("[data-slot='time-picker-hour'], [data-slot='time-picker-minute'], [data-slot='time-picker-second'], [data-slot='time-picker-period']");
+    const column = item?.closest<HTMLElement>(
+      "[data-slot='time-picker-hour'], [data-slot='time-picker-minute'], [data-slot='time-picker-second'], [data-slot='time-picker-period']"
+    );
     if (!item || !column) return;
     const targetTop = Math.max(item.offsetTop - column.offsetTop - 8, 0);
 
@@ -1751,98 +1682,94 @@ function TimePickerColumnItem(props: TimePickerColumnItemProps) {
     };
 
     scrollAnimationRef.current = window.requestAnimationFrame(step);
-  }, []);
+  });
 
+  // Column items register with their column so arrow-key roving focus has ordered targets.
   useIsomorphicLayoutEffect(() => {
     columnContext.onItemRegister(value, itemRef, selected);
     return () => columnContext.onItemUnregister(value);
   }, [columnContext, value, selected]);
 
+  // Selected items scroll into view when selection changes from typing or panel actions.
   useIsomorphicLayoutEffect(() => {
     if (selected && itemRef.current) {
       scrollItemToTop("smooth");
     }
   }, [selected, scrollItemToTop]);
 
-  const onClick = React.useCallback(
-    (event: React.MouseEvent<ColumnItemElement>) => {
-      itemProps.onClick?.(event);
-      if (event.defaultPrevented) return;
+  const onClick = useMemoizedFn((event: MouseEvent<ColumnItemElement>) => {
+    itemProps.onClick?.(event);
+    if (event.defaultPrevented) return;
 
-      itemRef.current?.focus();
-      scrollItemToTop("smooth");
-    },
-    [itemProps, scrollItemToTop]
-  );
+    itemRef.current?.focus();
+    scrollItemToTop("smooth");
+  });
 
-  const onKeyDown = React.useCallback(
-    (event: React.KeyboardEvent<ColumnItemElement>) => {
-      itemProps.onKeyDown?.(event);
-      if (event.defaultPrevented) return;
+  const onKeyDown = useMemoizedFn((event: KeyboardEvent<ColumnItemElement>) => {
+    itemProps.onKeyDown?.(event);
+    if (event.defaultPrevented) return;
 
-      if (event.key === "ArrowUp" || event.key === "ArrowDown") {
-        event.preventDefault();
-        const items = columnContext.getItems().sort((a, b) => {
-          if (typeof a.value === "number" && typeof b.value === "number") {
-            return a.value - b.value;
-          }
-          return 0;
-        });
-        const currentIndex = items.findIndex((item) => item.value === value);
-
-        let nextIndex: number;
-        if (event.key === "ArrowUp") {
-          nextIndex = currentIndex > 0 ? currentIndex - 1 : items.length - 1;
-        } else {
-          nextIndex = currentIndex < items.length - 1 ? currentIndex + 1 : 0;
+    if (event.key === "ArrowUp" || event.key === "ArrowDown") {
+      event.preventDefault();
+      const items = columnContext.getItems().sort((a, b) => {
+        if (typeof a.value === "number" && typeof b.value === "number") {
+          return a.value - b.value;
         }
+        return 0;
+      });
+      const currentIndex = items.findIndex((item) => item.value === value);
 
-        const nextItem = items[nextIndex];
-        nextItem?.ref.current?.focus();
-        nextItem?.ref.current?.click();
-      } else if (
-        (event.key === "Tab" || event.key === "ArrowLeft" || event.key === "ArrowRight") &&
-        groupContext
-      ) {
-        event.preventDefault();
-
-        queueMicrotask(() => {
-          const columns = groupContext.getColumns();
-
-          if (columns.length === 0) return;
-
-          const currentColumnIndex = columns.findIndex(
-            (c) => c.ref.current?.contains(itemRef.current) ?? false
-          );
-
-          if (currentColumnIndex === -1) return;
-
-          const goToPrevious = event.key === "ArrowLeft" || (event.key === "Tab" && event.shiftKey);
-
-          const nextColumnIndex = goToPrevious
-            ? currentColumnIndex > 0
-              ? currentColumnIndex - 1
-              : columns.length - 1
-            : currentColumnIndex < columns.length - 1
-              ? currentColumnIndex + 1
-              : 0;
-
-          const nextColumn = columns[nextColumnIndex];
-          if (nextColumn?.ref.current) {
-            const items = nextColumn.getItems();
-            const selectedItem = items.find((item) => item.selected);
-
-            const candidateRefs = selectedItem
-              ? [selectedItem.ref, ...items.map((item) => item.ref)]
-              : items.map((item) => item.ref);
-
-            focusFirst(candidateRefs, false);
-          }
-        });
+      let nextIndex: number;
+      if (event.key === "ArrowUp") {
+        nextIndex = currentIndex > 0 ? currentIndex - 1 : items.length - 1;
+      } else {
+        nextIndex = currentIndex < items.length - 1 ? currentIndex + 1 : 0;
       }
-    },
-    [itemProps.onKeyDown, columnContext, groupContext, value]
-  );
+
+      const nextItem = items[nextIndex];
+      nextItem?.ref.current?.focus();
+      nextItem?.ref.current?.click();
+    } else if (
+      (event.key === "Tab" || event.key === "ArrowLeft" || event.key === "ArrowRight") &&
+      groupContext
+    ) {
+      event.preventDefault();
+
+      queueMicrotask(() => {
+        const columns = groupContext.getColumns();
+
+        if (columns.length === 0) return;
+
+        const currentColumnIndex = columns.findIndex(
+          (c) => c.ref.current?.contains(itemRef.current) ?? false
+        );
+
+        if (currentColumnIndex === -1) return;
+
+        const goToPrevious = event.key === "ArrowLeft" || (event.key === "Tab" && event.shiftKey);
+
+        const nextColumnIndex = goToPrevious
+          ? currentColumnIndex > 0
+            ? currentColumnIndex - 1
+            : columns.length - 1
+          : currentColumnIndex < columns.length - 1
+            ? currentColumnIndex + 1
+            : 0;
+
+        const nextColumn = columns[nextColumnIndex];
+        if (nextColumn?.ref.current) {
+          const items = nextColumn.getItems();
+          const selectedItem = items.find((item) => item.selected);
+
+          const candidateRefs = selectedItem
+            ? [selectedItem.ref, ...items.map((item) => item.ref)]
+            : items.map((item) => item.ref);
+
+          focusFirst(candidateRefs, false);
+        }
+      });
+    }
+  });
 
   const formattedValue =
     typeof value === "number" && format === "2-digit"
@@ -1897,42 +1824,39 @@ function TimePickerHour(props: TimePickerHourProps) {
     }
   );
 
-  const onHourSelect = React.useCallback(
-    (displayHour: number) => {
-      const now = new Date();
-      const currentTime = timeValue ?? {};
+  const onHourSelect = useMemoizedFn((displayHour: number) => {
+    const now = new Date();
+    const currentTime = timeValue ?? {};
 
-      let hour24 = displayHour;
-      if (is12Hour) {
-        let currentPeriod: Period;
-        if (timeValue?.period !== undefined) {
-          currentPeriod = timeValue.period;
-        } else if (timeValue?.hour !== undefined) {
-          currentPeriod = to12Hour(timeValue.hour).period;
-        } else {
-          currentPeriod = to12Hour(now.getHours()).period;
-        }
-        hour24 = to24Hour(displayHour, currentPeriod);
+    let hour24 = displayHour;
+    if (is12Hour) {
+      let currentPeriod: Period;
+      if (timeValue?.period !== undefined) {
+        currentPeriod = timeValue.period;
+      } else if (timeValue?.hour !== undefined) {
+        currentPeriod = to12Hour(timeValue.hour).period;
+      } else {
+        currentPeriod = to12Hour(now.getHours()).period;
       }
+      hour24 = to24Hour(displayHour, currentPeriod);
+    }
 
-      const newTime = { ...currentTime, hour: hour24 };
-      if (timeValue && timeValue.period !== undefined) {
-        newTime.period = timeValue.period;
-      }
+    const newTime = { ...currentTime, hour: hour24 };
+    if (timeValue && timeValue.period !== undefined) {
+      newTime.period = timeValue.period;
+    }
 
-      if (newTime.minute === undefined) {
-        newTime.minute = now.getMinutes();
-      }
+    if (newTime.minute === undefined) {
+      newTime.minute = now.getMinutes();
+    }
 
-      if (showSeconds && newTime.second === undefined) {
-        newTime.second = now.getSeconds();
-      }
+    if (showSeconds && newTime.second === undefined) {
+      newTime.second = now.getSeconds();
+    }
 
-      const newValue = formatTimeValue(newTime, showSeconds);
-      store.setState("value", newValue);
-    },
-    [timeValue, showSeconds, is12Hour, store]
-  );
+    const newValue = formatTimeValue(newTime, showSeconds);
+    store.setState("value", newValue);
+  });
 
   const now = new Date();
   const referenceHour = timeValue?.hour ?? now.getHours();
@@ -1955,7 +1879,9 @@ function TimePickerHour(props: TimePickerHourProps) {
           key={hour}
           value={hour}
           selected={displayHour === hour}
-          disabled={disabledHourSet.has(is12Hour ? to24Hour(hour, timeValue?.period ?? to12Hour(referenceHour).period) : hour)}
+          disabled={disabledHourSet.has(
+            is12Hour ? to24Hour(hour, timeValue?.period ?? to12Hour(referenceHour).period) : hour
+          )}
           format={format}
           onClick={() => onHourSelect(hour)}
         />
@@ -1979,32 +1905,29 @@ function TimePickerMinute(props: TimePickerMinuteProps) {
 
   const minutes = Array.from({ length: Math.ceil(60 / minuteStep) }, (_, i) => i * minuteStep);
 
-  const onMinuteSelect = React.useCallback(
-    (minute: number) => {
-      const now = new Date();
-      const currentTime = timeValue ?? {};
-      const newTime = { ...currentTime, minute };
+  const onMinuteSelect = useMemoizedFn((minute: number) => {
+    const now = new Date();
+    const currentTime = timeValue ?? {};
+    const newTime = { ...currentTime, minute };
 
-      if (newTime.hour === undefined) {
-        newTime.hour = now.getHours();
-      }
+    if (newTime.hour === undefined) {
+      newTime.hour = now.getHours();
+    }
 
-      if (showSeconds && newTime.second === undefined) {
-        newTime.second = now.getSeconds();
-      }
+    if (showSeconds && newTime.second === undefined) {
+      newTime.second = now.getSeconds();
+    }
 
-      const newValue = formatTimeValue(newTime, showSeconds);
-      store.setState("value", newValue);
-    },
-    [timeValue, showSeconds, store]
-  );
+    const newValue = formatTimeValue(newTime, showSeconds);
+    store.setState("value", newValue);
+  });
 
   const MinutePrimitive = asChild ? SlotPrimitive.Slot : TimePickerColumn;
 
   const now = new Date();
   const referenceMinute = timeValue?.minute ?? now.getMinutes();
   const disabledMinuteSet = new Set(
-    timeValue?.hour !== undefined ? disabledMinutes?.(timeValue.hour) ?? [] : []
+    timeValue?.hour !== undefined ? (disabledMinutes?.(timeValue.hour) ?? []) : []
   );
 
   return (
@@ -2045,25 +1968,22 @@ function TimePickerSecond(props: TimePickerSecondProps) {
 
   const seconds = Array.from({ length: Math.ceil(60 / secondStep) }, (_, i) => i * secondStep);
 
-  const onSecondSelect = React.useCallback(
-    (second: number) => {
-      const now = new Date();
-      const currentTime = timeValue ?? {};
-      const newTime = { ...currentTime, second };
+  const onSecondSelect = useMemoizedFn((second: number) => {
+    const now = new Date();
+    const currentTime = timeValue ?? {};
+    const newTime = { ...currentTime, second };
 
-      if (newTime.hour === undefined) {
-        newTime.hour = now.getHours();
-      }
+    if (newTime.hour === undefined) {
+      newTime.hour = now.getHours();
+    }
 
-      if (newTime.minute === undefined) {
-        newTime.minute = now.getMinutes();
-      }
+    if (newTime.minute === undefined) {
+      newTime.minute = now.getMinutes();
+    }
 
-      const newValue = formatTimeValue(newTime, true);
-      store.setState("value", newValue);
-    },
-    [timeValue, store]
-  );
+    const newValue = formatTimeValue(newTime, true);
+    store.setState("value", newValue);
+  });
 
   const SecondPrimitive = asChild ? SlotPrimitive.Slot : TimePickerColumn;
 
@@ -2071,7 +1991,7 @@ function TimePickerSecond(props: TimePickerSecondProps) {
   const referenceSecond = timeValue?.second ?? now.getSeconds();
   const disabledSecondSet = new Set(
     timeValue?.hour !== undefined && timeValue?.minute !== undefined
-      ? disabledSeconds?.(timeValue.hour, timeValue.minute) ?? []
+      ? (disabledSeconds?.(timeValue.hour, timeValue.minute) ?? [])
       : []
   );
 
@@ -2107,30 +2027,27 @@ function TimePickerPeriod(props: DivProps) {
   const value = useStore((state) => state.value);
   const timeValue = parseTimeString(value);
 
-  const onPeriodToggle = React.useCallback(
-    (period: Period) => {
-      const now = new Date();
-      const currentTime = timeValue ?? {};
+  const onPeriodToggle = useMemoizedFn((period: Period) => {
+    const now = new Date();
+    const currentTime = timeValue ?? {};
 
-      const currentHour = currentTime.hour !== undefined ? currentTime.hour : now.getHours();
-      const currentDisplay = to12Hour(currentHour);
-      const new24Hour = to24Hour(currentDisplay.hour, period);
+    const currentHour = currentTime.hour !== undefined ? currentTime.hour : now.getHours();
+    const currentDisplay = to12Hour(currentHour);
+    const new24Hour = to24Hour(currentDisplay.hour, period);
 
-      const newTime = { ...currentTime, hour: new24Hour };
+    const newTime = { ...currentTime, hour: new24Hour };
 
-      if (newTime.minute === undefined) {
-        newTime.minute = now.getMinutes();
-      }
+    if (newTime.minute === undefined) {
+      newTime.minute = now.getMinutes();
+    }
 
-      if (showSeconds && newTime.second === undefined) {
-        newTime.second = now.getSeconds();
-      }
+    if (showSeconds && newTime.second === undefined) {
+      newTime.second = now.getSeconds();
+    }
 
-      const newValue = formatTimeValue(newTime, showSeconds);
-      store.setState("value", newValue);
-    },
-    [timeValue, showSeconds, store]
-  );
+    const newValue = formatTimeValue(newTime, showSeconds);
+    store.setState("value", newValue);
+  });
 
   if (!is12Hour) return null;
 
@@ -2160,7 +2077,7 @@ function TimePickerPeriod(props: DivProps) {
   );
 }
 
-interface TimePickerSeparatorProps extends React.ComponentProps<"span"> {
+interface TimePickerSeparatorProps extends ComponentProps<"span"> {
   asChild?: boolean;
 }
 
@@ -2184,17 +2101,14 @@ function TimePickerClear(props: ButtonProps) {
 
   const isDisabled = disabledProp || disabled;
 
-  const onClick = React.useCallback(
-    (event: React.MouseEvent<HTMLButtonElement>) => {
-      clearProps.onClick?.(event);
-      if (event.defaultPrevented) return;
+  const onClick = useMemoizedFn((event: MouseEvent<HTMLButtonElement>) => {
+    clearProps.onClick?.(event);
+    if (event.defaultPrevented) return;
 
-      event.preventDefault();
-      if (disabled || readOnly) return;
-      store.setState("value", "");
-    },
-    [clearProps.onClick, disabled, readOnly, store]
-  );
+    event.preventDefault();
+    if (disabled || readOnly) return;
+    store.setState("value", "");
+  });
 
   const ClearPrimitive = asChild ? SlotPrimitive.Slot : "button";
 

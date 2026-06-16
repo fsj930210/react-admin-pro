@@ -1,5 +1,5 @@
 import type { Column, Header, Row } from "@tanstack/react-table";
-import type { CSSProperties } from "react";
+import { type CSSProperties } from "react";
 
 export interface PinningStyleResult {
   className?: string;

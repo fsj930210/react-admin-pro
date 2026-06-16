@@ -1,9 +1,10 @@
+import { type ComponentProps, type ReactNode } from "react";
 export type LogoProps = {
   title?: string;
   showTitle?: boolean;
   url?: string;
-  children?: React.ReactNode;
-} & React.ComponentProps<"div">;
+  children?: ReactNode;
+} & ComponentProps<"div">;
 const Logo = ({
   url,
   title = "React Admin Pro",

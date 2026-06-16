@@ -1,5 +1,6 @@
 import { CodeBlockLowlight as TiptapCodeBlockLowlight } from "@tiptap/extension-code-block-lowlight";
 import { common, createLowlight } from "lowlight";
+import { type HTMLAttributes } from "react";
 
 export const CodeBlockLowlight = TiptapCodeBlockLowlight.extend({
   addOptions() {

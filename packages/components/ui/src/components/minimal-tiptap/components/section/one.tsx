@@ -1,4 +1,3 @@
-import * as React from "react";
 import type { Editor } from "@tiptap/react";
 import type { FormatAction } from "../../types";
 import type { VariantProps } from "class-variance-authority";
@@ -13,13 +12,14 @@ import {
 } from "../../../dropdown-menu";
 import { ToolbarButton } from "../toolbar-button";
 import { ShortcutKey } from "../shortcut-key";
+import { useCallback, useMemo, type FC, type JSX } from "react";
 
 type Level = 1 | 2 | 3 | 4 | 5 | 6;
 interface TextStyle extends Omit<
   FormatAction,
   "value" | "icon" | "action" | "isActive" | "canExecute"
 > {
-  element: keyof React.JSX.IntrinsicElements;
+  element: Extract<keyof JSX.IntrinsicElements, string>;
   level?: Level;
   className: string;
 }
@@ -80,18 +80,18 @@ interface SectionOneProps extends VariantProps<typeof toggleVariants> {
   activeLevels?: Level[];
 }
 
-export const SectionOne: React.FC<SectionOneProps> = ({
+export const SectionOne: FC<SectionOneProps> = ({
   editor,
   activeLevels = [1, 2, 3, 4, 5, 6],
   size,
   variant,
 }) => {
-  const filteredActions = React.useMemo(
+  const filteredActions = useMemo(
     () => formatActions.filter((action) => !action.level || activeLevels.includes(action.level)),
     [activeLevels]
   );
 
-  const handleStyleChange = React.useCallback(
+  const handleStyleChange = useCallback(
     (level?: Level) => {
       if (level) {
         editor.chain().focus().toggleHeading({ level }).run();
@@ -102,7 +102,7 @@ export const SectionOne: React.FC<SectionOneProps> = ({
     [editor]
   );
 
-  const renderMenuItem = React.useCallback(
+  const renderMenuItem = useCallback(
     ({ label, element: Element, level, className, shortcuts }: TextStyle) => (
       <DropdownMenuItem
         key={label}

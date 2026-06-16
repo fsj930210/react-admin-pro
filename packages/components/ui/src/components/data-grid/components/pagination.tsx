@@ -2,7 +2,7 @@ import { When } from "@rap/components-ui/when";
 import { useTranslation } from "@rap/i18n";
 import { cn } from "@rap/utils";
 import type { Table } from "@tanstack/react-table";
-import type * as React from "react";
+import { type ChangeEvent } from "react";
 import { Input } from "../../input";
 import {
   Pagination,
@@ -100,7 +100,7 @@ export function DataGridPagination<TData>({
     paginationConfig.onChange?.(nextPage, nextPageSize);
   };
 
-  const handleJumpChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleJumpChange = (event: ChangeEvent<HTMLInputElement>) => {
     const nextPage = Number(event.target.value);
 
     if (Number.isInteger(nextPage)) {
@@ -188,7 +188,7 @@ export function DataGridPagination<TData>({
                   onBlur={handleJumpChange}
                   onKeyDown={(event) => {
                     if (event.key === "Enter") {
-                      handleJumpChange(event as unknown as React.ChangeEvent<HTMLInputElement>);
+                      handleJumpChange(event as unknown as ChangeEvent<HTMLInputElement>);
                     }
                   }}
                 />

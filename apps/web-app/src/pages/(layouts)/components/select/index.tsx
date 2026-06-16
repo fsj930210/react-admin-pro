@@ -1,9 +1,5 @@
 import { useRef, useState, type ReactNode } from "react";
-import {
-  Select,
-  type SelectOption,
-  type SelectRef,
-} from "@rap/components-pro/select";
+import { Select, type SelectOption, type SelectRef } from "@rap/components-pro/select";
 import { Badge } from "@rap/components-ui/badge";
 import { Button } from "@rap/components-ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@rap/components-ui/card";
@@ -105,7 +101,9 @@ function SingleSearchDemo() {
             }}
           />
         </div>
-        <FieldDescription>当前值：{value ?? "空"}，当前项：{selectedLabel || "空"}</FieldDescription>
+        <FieldDescription>
+          当前值：{value ?? "空"}，当前项：{selectedLabel || "空"}
+        </FieldDescription>
       </FieldGroup>
     </DemoSection>
   );
@@ -132,11 +130,15 @@ function MultipleDemo() {
             maxTagCount={2}
             onChange={(nextValue, context) => {
               setValue((nextValue as string[]) ?? []);
-              setLastAction(`${context.selected ? "选中" : "取消"} ${context.selectedItem?.label ?? ""}`);
+              setLastAction(
+                `${context.selected ? "选中" : "取消"} ${context.selectedItem?.label ?? ""}`
+              );
             }}
           />
         </div>
-        <FieldDescription>当前值：{value.join(", ") || "空"}，最近动作：{lastAction}</FieldDescription>
+        <FieldDescription>
+          当前值：{value.join(", ") || "空"}，最近动作：{lastAction}
+        </FieldDescription>
       </FieldGroup>
     </DemoSection>
   );
@@ -229,8 +231,10 @@ function RemoteSearchDemo() {
               window.setTimeout(() => {
                 setOptions(
                   statusOptions.filter((item) =>
-                    item.label.toLowerCase().includes(keyword.toLowerCase()),
-                  ),
+                    String(item.label ?? "")
+                      .toLowerCase()
+                      .includes(keyword.toLowerCase())
+                  )
                 );
                 setLoading(false);
               }, 300);
@@ -365,7 +369,8 @@ function RouteComponent() {
       <div className="space-y-2">
         <h1 className="text-3xl font-semibold tracking-tight">选择组件</h1>
         <p className="max-w-3xl text-sm text-muted-foreground">
-          这页是当前 Select 的交互验证页，重点覆盖单选搜索、多选、tags、分组、远程搜索、自定义渲染、位置控制和虚拟滚动。
+          这页是当前 Select
+          的交互验证页，重点覆盖单选搜索、多选、tags、分组、远程搜索、自定义渲染、位置控制和虚拟滚动。
         </p>
       </div>
 

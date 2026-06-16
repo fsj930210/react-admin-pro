@@ -1,17 +1,16 @@
 import { Button } from "@rap/components-ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-} from "@rap/components-ui/dialog";
+import { Dialog, DialogContent, DialogFooter, DialogHeader } from "@rap/components-ui/dialog";
 import { useResize, type ResizeDirection, type ResizeOptions } from "@rap/hooks/use-resize";
 import { cn } from "@rap/utils";
-import type { ComponentProps } from "react";
+import { type CSSProperties, type ComponentProps, type ReactNode } from "react";
 import { renderDialogTrigger, useBasicDialog } from "./basic-dialog";
+import * as React from "react";
 
 export interface ResizableDialogProps {
   children: React.ReactNode;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  trigger?: React.ReactNode;
   triggerChildren?: React.ReactNode;
   header?: React.ReactNode;
   footer?: React.ReactNode | null;
@@ -50,6 +49,9 @@ function getHandleClassName(direction: ResizeDirection) {
 
 export function ResizableDialog({
   children,
+  open,
+  onOpenChange,
+  trigger,
   triggerChildren,
   header,
   footer,
@@ -67,8 +69,9 @@ export function ResizableDialog({
   headerProps,
   footerProps,
 }: ResizableDialogProps) {
+  const mergedDialogProps = { ...dialogProps, open, onOpenChange };
   const dialog = useBasicDialog({
-    dialogProps,
+    dialogProps: mergedDialogProps,
     footer,
     okText,
     cancelText,
@@ -101,7 +104,7 @@ export function ResizableDialog({
 
   return (
     <Dialog {...dialogProps} open={dialog.open} onOpenChange={dialog.setOpen}>
-      {renderDialogTrigger(triggerChildren)}
+      {renderDialogTrigger(trigger ?? triggerChildren)}
       <DialogContent
         {...contentProps}
         ref={targetRef}

@@ -1,24 +1,24 @@
-import * as React from "react";
 import type { Editor } from "@tiptap/react";
 import { Button } from "../../../button";
 import { Label } from "../../../label";
 import { Input } from "../../../input";
+import { useCallback, useRef, useState, type ChangeEvent, type FC, type FormEvent } from "react";
 
 interface ImageEditBlockProps {
   editor: Editor;
   close: () => void;
 }
 
-export const ImageEditBlock: React.FC<ImageEditBlockProps> = ({ editor, close }) => {
-  const fileInputRef = React.useRef<HTMLInputElement>(null);
-  const [link, setLink] = React.useState("");
+export const ImageEditBlock: FC<ImageEditBlockProps> = ({ editor, close }) => {
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [link, setLink] = useState("");
 
-  const handleClick = React.useCallback(() => {
+  const handleClick = useCallback(() => {
     fileInputRef.current?.click();
   }, []);
 
-  const handleFile = React.useCallback(
-    async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFile = useCallback(
+    async (e: ChangeEvent<HTMLInputElement>) => {
       const files = e.target.files;
       if (!files?.length) return;
 
@@ -39,8 +39,8 @@ export const ImageEditBlock: React.FC<ImageEditBlockProps> = ({ editor, close })
     [editor, close]
   );
 
-  const handleSubmit = React.useCallback(
-    (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = useCallback(
+    (e: FormEvent<HTMLFormElement>) => {
       e.preventDefault();
       e.stopPropagation();
 
@@ -64,7 +64,7 @@ export const ImageEditBlock: React.FC<ImageEditBlockProps> = ({ editor, close })
             placeholder="https://example.com"
             value={link}
             className="grow"
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setLink(e.target.value)}
+            onChange={(e: ChangeEvent<HTMLInputElement>) => setLink(e.target.value)}
           />
           <Button type="submit" className="ml-2">
             Submit

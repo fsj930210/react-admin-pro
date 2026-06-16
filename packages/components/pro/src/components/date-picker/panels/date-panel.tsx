@@ -1,6 +1,6 @@
 import { cn } from "@rap/utils";
 import dayjs from "dayjs";
-import type { ReactNode } from "react";
+import { type ReactNode } from "react";
 import { WEEKDAYS } from "../constants";
 import { PickerCell } from "../picker-cell";
 import type { Dayjs, MultipleValue, PickerCellRenderInfo, PickerMode, RangeValue } from "../types";

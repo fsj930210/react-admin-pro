@@ -1,4 +1,3 @@
-import * as React from "react";
 import type { Editor } from "@tiptap/react";
 import type { FormatAction } from "../../types";
 import type { toggleVariants } from "../../../toggle";
@@ -7,6 +6,7 @@ import { ChevronDown, Code, Minimize2, Plus, Quote } from "lucide-react";
 import { LinkEditPopover } from "../link/link-edit-popover";
 import { ImageEditDialog } from "../image/image-edit-dialog";
 import { ToolbarSection } from "../toolbar-section";
+import { type FC } from "react";
 
 type InsertElementAction = "codeBlock" | "blockquote" | "horizontalRule";
 interface InsertElement extends FormatAction {
@@ -49,7 +49,7 @@ interface SectionFiveProps extends VariantProps<typeof toggleVariants> {
   mainActionCount?: number;
 }
 
-export const SectionFive: React.FC<SectionFiveProps> = ({
+export const SectionFive: FC<SectionFiveProps> = ({
   editor,
   activeActions = formatActions.map((action) => action.value),
   mainActionCount = 0,

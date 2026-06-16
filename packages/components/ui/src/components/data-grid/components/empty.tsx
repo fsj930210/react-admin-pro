@@ -1,13 +1,13 @@
-import type React from "react";
+import { type ComponentProps, type ReactNode, type SVGProps } from "react";
 import { useTranslation } from "@rap/i18n";
 
 export interface EmptyProps {
   text?: string;
-  icon?: React.ReactNode;
-  render?: () => React.ReactNode;
+  icon?: ReactNode;
+  render?: () => ReactNode;
 }
 
-export function Empty({ text, icon, render, ...rest }: EmptyProps & React.ComponentProps<"div">) {
+export function Empty({ text, icon, render, ...rest }: EmptyProps & ComponentProps<"div">) {
   const { t } = useTranslation("ui");
 
   return (
@@ -24,7 +24,7 @@ export function Empty({ text, icon, render, ...rest }: EmptyProps & React.Compon
   );
 }
 
-function EmptyIcon(props: React.SVGProps<SVGSVGElement>) {
+function EmptyIcon(props: SVGProps<SVGSVGElement>) {
   return (
     <svg
       width="1em"

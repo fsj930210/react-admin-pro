@@ -3,9 +3,20 @@
 import { cva, type VariantProps } from "class-variance-authority";
 import { ChevronDown, ChevronLeft, ChevronRight, ChevronUp } from "lucide-react";
 import { Slot as SlotPrimitive } from "radix-ui";
-import * as React from "react";
 import { useComposedRefs } from "@rap/utils/compose-refs";
 import { cn } from "@rap/utils";
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+  type CSSProperties,
+  type ComponentProps,
+  type ElementType,
+  type MouseEvent,
+} from "react";
 
 const DATA_TOP_SCROLL = "data-top-scroll";
 const DATA_BOTTOM_SCROLL = "data-bottom-scroll";
@@ -47,7 +58,7 @@ type ScrollVisibility = {
   [key in ScrollDirection]: boolean;
 };
 
-interface ScrollerProps extends VariantProps<typeof scrollerVariants>, React.ComponentProps<"div"> {
+interface ScrollerProps extends VariantProps<typeof scrollerVariants>, ComponentProps<"div"> {
   size?: number;
   offset?: number;
   asChild?: boolean;
@@ -72,16 +83,16 @@ function Scroller(props: ScrollerProps) {
     ...scrollerProps
   } = props;
 
-  const containerRef = React.useRef<HTMLDivElement | null>(null);
+  const containerRef = useRef<HTMLDivElement | null>(null);
   const composedRef = useComposedRefs(ref, containerRef);
-  const [scrollVisibility, setScrollVisibility] = React.useState<ScrollVisibility>({
+  const [scrollVisibility, setScrollVisibility] = useState<ScrollVisibility>({
     up: false,
     down: false,
     left: false,
     right: false,
   });
 
-  const onScrollBy = React.useCallback(
+  const onScrollBy = useCallback(
     (direction: ScrollDirection) => {
       const container = containerRef.current;
       if (!container) return;
@@ -98,7 +109,7 @@ function Scroller(props: ScrollerProps) {
     [scrollStep]
   );
 
-  const scrollHandlers = React.useMemo(
+  const scrollHandlers = useMemo(
     () => ({
       up: () => onScrollBy("up"),
       down: () => onScrollBy("down"),
@@ -108,7 +119,7 @@ function Scroller(props: ScrollerProps) {
     [onScrollBy]
   );
 
-  React.useLayoutEffect(() => {
+  useLayoutEffect(() => {
     const container = containerRef.current;
     if (!container) return;
 
@@ -204,7 +215,7 @@ function Scroller(props: ScrollerProps) {
     };
   }, [orientation, offset, withNavigation]);
 
-  const composedStyle = React.useMemo<React.CSSProperties>(
+  const composedStyle = useMemo<CSSProperties>(
     () => ({
       "--scroll-shadow-size": `${size}px`,
       ...style,
@@ -212,7 +223,7 @@ function Scroller(props: ScrollerProps) {
     [size, style]
   );
 
-  const activeDirections = React.useMemo<ScrollDirection[]>(() => {
+  const activeDirections = useMemo<ScrollDirection[]>(() => {
     if (!withNavigation) return [];
     return orientation === "vertical" ? ["up", "down"] : ["left", "right"];
   }, [orientation, withNavigation]);
@@ -229,7 +240,7 @@ function Scroller(props: ScrollerProps) {
     />
   );
 
-  const navigationButtons = React.useMemo(() => {
+  const navigationButtons = useMemo(() => {
     if (!withNavigation) return null;
 
     return activeDirections
@@ -274,14 +285,14 @@ const scrollButtonVariants = cva(
   }
 );
 
-const directionToIcon: Record<ScrollDirection, React.ElementType> = {
+const directionToIcon: Record<ScrollDirection, ElementType> = {
   up: ChevronUp,
   down: ChevronDown,
   left: ChevronLeft,
   right: ChevronRight,
 } as const;
 
-interface ScrollButtonProps extends React.ComponentProps<"button"> {
+interface ScrollButtonProps extends ComponentProps<"button"> {
   direction: ScrollDirection;
   triggerMode?: "press" | "hover" | "click";
 }
@@ -289,10 +300,10 @@ interface ScrollButtonProps extends React.ComponentProps<"button"> {
 function ScrollButton(props: ScrollButtonProps) {
   const { direction, className, triggerMode = "press", onClick, ref, ...buttonProps } = props;
 
-  const [autoScrollTimer, setAutoScrollTimer] = React.useState<number | null>(null);
+  const [autoScrollTimer, setAutoScrollTimer] = useState<number | null>(null);
 
-  const onAutoScrollStart = React.useCallback(
-    (event?: React.MouseEvent<HTMLButtonElement>) => {
+  const onAutoScrollStart = useCallback(
+    (event?: MouseEvent<HTMLButtonElement>) => {
       if (autoScrollTimer !== null) return;
 
       if (triggerMode === "press") {
@@ -308,17 +319,17 @@ function ScrollButton(props: ScrollButtonProps) {
     [autoScrollTimer, onClick, triggerMode]
   );
 
-  const onAutoScrollStop = React.useCallback(() => {
+  const onAutoScrollStop = useCallback(() => {
     if (autoScrollTimer === null) return;
 
     window.clearInterval(autoScrollTimer);
     setAutoScrollTimer(null);
   }, [autoScrollTimer]);
 
-  const eventHandlers = React.useMemo(() => {
+  const eventHandlers = useMemo(() => {
     const triggerModeHandlers: Record<
       NonNullable<ScrollerProps["scrollTriggerMode"]>,
-      React.ComponentProps<"button">
+      ComponentProps<"button">
     > = {
       press: {
         onPointerDown: onAutoScrollStart,
@@ -339,7 +350,7 @@ function ScrollButton(props: ScrollButtonProps) {
     return triggerModeHandlers[triggerMode] ?? {};
   }, [triggerMode, onAutoScrollStart, onAutoScrollStop, onClick]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     return () => onAutoScrollStop();
   }, [onAutoScrollStop]);
 

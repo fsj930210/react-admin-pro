@@ -1,6 +1,6 @@
 import { useIsomorphicLayoutEffect } from "@rap/hooks/use-isomorphic-layout-effect";
 import type { PartialOptions } from "overlayscrollbars";
-import { type CSSProperties, type RefObject, useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useState, type CSSProperties, type RefObject } from "react";
 
 type ScrollRootRef = RefObject<{ getElement?: () => HTMLElement | null } | null>;
 

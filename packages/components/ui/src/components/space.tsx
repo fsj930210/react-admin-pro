@@ -1,8 +1,8 @@
-import * as React from "react";
 import { cva, type VariantProps } from "class-variance-authority";
 import { Slot } from "radix-ui";
 
 import { cn } from "@rap/utils";
+import { type ComponentProps } from "react";
 
 const spaceVariants = cva("flex", {
   variants: {
@@ -84,16 +84,13 @@ const addonVariants = cva(
 type SpaceSize = VariantProps<typeof spaceVariants>["size"] | number;
 
 interface SpaceProps
-  extends
-    Omit<React.ComponentProps<"div">, "size">,
-    Omit<VariantProps<typeof spaceVariants>, "size"> {
+  extends Omit<ComponentProps<"div">, "size">, Omit<VariantProps<typeof spaceVariants>, "size"> {
   size?: SpaceSize;
 }
 
-interface SpaceCompactProps
-  extends React.ComponentProps<"div">, VariantProps<typeof compactVariants> {}
+interface SpaceCompactProps extends ComponentProps<"div">, VariantProps<typeof compactVariants> {}
 
-interface SpaceAddonProps extends React.ComponentProps<"div">, VariantProps<typeof addonVariants> {
+interface SpaceAddonProps extends ComponentProps<"div">, VariantProps<typeof addonVariants> {
   asChild?: boolean;
 }
 

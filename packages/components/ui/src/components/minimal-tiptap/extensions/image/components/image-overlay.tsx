@@ -1,8 +1,8 @@
-import * as React from "react";
 import { Spinner } from "../../../components/spinner";
 import { cn } from "@rap/utils";
+import { memo } from "react";
 
-export const ImageOverlay = React.memo(() => {
+export const ImageOverlay = memo(() => {
   return (
     <div
       className={cn(

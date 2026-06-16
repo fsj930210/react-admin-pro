@@ -1,7 +1,7 @@
 import { Choose, Otherwise, When } from "@rap/components-ui/when";
 import { cn } from "@rap/utils";
 import { type Cell, flexRender, type Row, type Table } from "@tanstack/react-table";
-import { type CSSProperties, Fragment, type ReactNode } from "react";
+import { Fragment, type CSSProperties, type ReactNode } from "react";
 import type { DataGridElementProps, DataGridProps } from "../types";
 import { getOrderedVisibleLeafColumns } from "../utils/column-ordering";
 import { mergeElementProps } from "../utils/merge-element-props";

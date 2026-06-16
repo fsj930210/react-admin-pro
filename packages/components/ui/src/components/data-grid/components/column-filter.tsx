@@ -9,7 +9,8 @@ import { Choose, Otherwise, When } from "@rap/components-ui/when";
 import { cn } from "@rap/utils";
 import type { Column, Table } from "@tanstack/react-table";
 import { Funnel } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
+import * as React from "react";
 
 export function ColumnFilter<TData>({
   column,

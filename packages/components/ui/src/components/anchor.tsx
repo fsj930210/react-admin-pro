@@ -2,7 +2,18 @@
 
 import { useControllableState } from "@rap/hooks/use-controllable-state";
 import { cn } from "@rap/utils";
-import * as React from "react";
+import {
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+  type CSSProperties,
+  type ComponentProps,
+  type MouseEvent,
+  type ReactNode,
+} from "react";
+import { useMemoizedFn } from "@rap/hooks/use-memoized-fn";
 
 type AnchorDirection = "vertical" | "horizontal";
 type AnchorTarget = string | HTMLElement | (() => HTMLElement | null);
@@ -10,12 +21,12 @@ type AnchorActiveMode = "single" | "visible";
 
 interface AnchorItem {
   key: string;
-  title: React.ReactNode;
+  title: ReactNode;
   target: AnchorTarget;
   children?: AnchorItem[];
 }
 
-interface AnchorProps extends Omit<React.ComponentProps<"nav">, "onClick" | "onChange"> {
+interface AnchorProps extends Omit<ComponentProps<"nav">, "onClick" | "onChange"> {
   items: AnchorItem[];
   direction?: AnchorDirection;
   activeKey?: string;
@@ -27,11 +38,11 @@ interface AnchorProps extends Omit<React.ComponentProps<"nav">, "onClick" | "onC
   bounds?: number;
   scrollBehavior?: ScrollBehavior;
   showInk?: boolean;
-  onClick?: (event: React.MouseEvent<HTMLButtonElement>, item: AnchorItem) => void;
+  onClick?: (event: MouseEvent<HTMLButtonElement>, item: AnchorItem) => void;
   onChange?: (activeKey: string, item?: AnchorItem) => void;
 }
 
-type AnchorInkStyle = React.CSSProperties;
+type AnchorInkStyle = CSSProperties;
 
 interface AnchorFlatItem {
   item: AnchorItem;
@@ -46,8 +57,8 @@ interface AnchorActiveEntry {
   level: number;
 }
 
-type AnchorRootStyle = React.CSSProperties & {
-  "--anchor-indent"?: React.CSSProperties["paddingLeft"];
+type AnchorRootStyle = CSSProperties & {
+  "--anchor-indent"?: CSSProperties["paddingLeft"];
 };
 
 function flattenItems(items: AnchorItem[], level = 0, parentKeys: string[] = []): AnchorFlatItem[] {
@@ -160,8 +171,7 @@ function resolveTarget(target: AnchorTarget) {
   }
 }
 
-const useIsomorphicLayoutEffect =
-  typeof window === "undefined" ? React.useEffect : React.useLayoutEffect;
+const useIsomorphicLayoutEffect = typeof window === "undefined" ? useEffect : useLayoutEffect;
 
 function Anchor({
   items,
@@ -182,21 +192,23 @@ function Anchor({
   ref,
   ...props
 }: AnchorProps) {
-  const rootRef = React.useRef<HTMLElement | null>(null);
-  const listRef = React.useRef<HTMLUListElement | null>(null);
-  const linkRefs = React.useRef(new Map<string, HTMLButtonElement>());
-  const [inkStyles, setInkStyles] = React.useState<AnchorInkStyle[]>([]);
-  const [activeKeys, setActiveKeys] = React.useState<string[]>([]);
+  const rootRef = useRef<HTMLElement | null>(null);
+  const listRef = useRef<HTMLUListElement | null>(null);
+  const linkRefs = useRef(new Map<string, HTMLButtonElement>());
+  const [inkStyles, setInkStyles] = useState<AnchorInkStyle[]>([]);
+  const [activeKeys, setActiveKeys] = useState<string[]>([]);
 
-  const flattenedItems = React.useMemo(() => flattenItems(items), [items]);
-  const visibleItems = React.useMemo(
+  // useMemo keeps tree flattening tied to items changes; scroll and ink logic reuse this derived list.
+  const flattenedItems = useMemo(() => flattenItems(items), [items]);
+  const visibleItems = useMemo(
     () =>
       direction === "horizontal"
         ? flattenedItems.filter((flatItem) => flatItem.level === 0)
         : flattenedItems,
     [direction, flattenedItems]
   );
-  const visibleItemMeta = React.useMemo(
+  // useMemo keeps link measurement metadata stable until visible items change.
+  const visibleItemMeta = useMemo(
     () =>
       new Map(
         visibleItems.map((flatItem, index) => [
@@ -219,56 +231,47 @@ function Anchor({
     }
   );
 
-  const activeParents = React.useMemo(() => {
+  // useMemo derives parent highlighting from the active key and flattened tree only.
+  const activeParents = useMemo(() => {
     const activeItem = flattenedItems.find(({ item }) => item.key === currentActiveKey);
 
     return new Set(activeItem?.parentKeys ?? []);
   }, [currentActiveKey, flattenedItems]);
 
-  const setActiveItem = React.useCallback(
-    (item: AnchorItem | undefined) => {
-      if (!item || item.key === currentActiveKey) return;
+  const setActiveItem = useMemoizedFn((item: AnchorItem | undefined) => {
+    if (!item || item.key === currentActiveKey) return;
 
-      setCurrentActiveKey(item.key, item);
-    },
-    [currentActiveKey, setCurrentActiveKey]
+    setCurrentActiveKey(item.key, item);
+  });
+
+  const resolveContainer = useMemoizedFn(
+    () => getContainer?.() ?? getScrollParent(rootRef.current)
   );
 
-  const resolveContainer = React.useCallback(
-    () => getContainer?.() ?? getScrollParent(rootRef.current),
-    [getContainer]
-  );
+  const getTriggerOffset = useMemoizedFn((container: Window | HTMLElement) => {
+    if (typeof offset === "number") return offset;
+    if (!rootRef.current) return 0;
 
-  const getTriggerOffset = React.useCallback(
-    (container: Window | HTMLElement) => {
-      if (typeof offset === "number") return offset;
-      if (!rootRef.current) return 0;
+    const rootRect = rootRef.current.getBoundingClientRect();
+    if (container instanceof Window) {
+      return rootRect.top;
+    }
 
-      const rootRect = rootRef.current.getBoundingClientRect();
-      if (container instanceof Window) {
-        return rootRect.top;
-      }
+    return rootRect.top - container.getBoundingClientRect().top;
+  });
 
-      return rootRect.top - container.getBoundingClientRect().top;
-    },
-    [offset]
-  );
+  const setActiveItems = useMemoizedFn((activeItems: AnchorItem[]) => {
+    const nextActiveKeys = activeItems.map((item) => item.key);
+    setActiveKeys((prevKeys) =>
+      prevKeys.length === nextActiveKeys.length &&
+      prevKeys.every((key, index) => key === nextActiveKeys[index])
+        ? prevKeys
+        : nextActiveKeys
+    );
+    setActiveItem(activeItems[activeItems.length - 1]);
+  });
 
-  const setActiveItems = React.useCallback(
-    (activeItems: AnchorItem[]) => {
-      const nextActiveKeys = activeItems.map((item) => item.key);
-      setActiveKeys((prevKeys) =>
-        prevKeys.length === nextActiveKeys.length &&
-        prevKeys.every((key, index) => key === nextActiveKeys[index])
-          ? prevKeys
-          : nextActiveKeys
-      );
-      setActiveItem(activeItems[activeItems.length - 1]);
-    },
-    [setActiveItem]
-  );
-
-  const updateActiveByScroll = React.useCallback(() => {
+  const updateActiveByScroll = useMemoizedFn(() => {
     const container = resolveContainer();
     const currentTop = getScrollTop(container) + getTriggerOffset(container) + bounds;
     const candidates = visibleItems
@@ -311,17 +314,9 @@ function Anchor({
     }
 
     setActiveItems([candidates[activeIndex].item]);
-  }, [
-    activeMode,
-    bounds,
-    getTriggerOffset,
-    resolveContainer,
-    setActiveItems,
-    visibleItems,
-    visibleThreshold,
-  ]);
+  });
 
-  const updateInk = React.useCallback(() => {
+  const updateInk = useMemoizedFn(() => {
     if (!showInk || activeKeys.length === 0 || !rootRef.current) {
       setInkStyles([]);
       return;
@@ -380,15 +375,17 @@ function Anchor({
     });
 
     setInkStyles(nextInkStyles);
-  }, [activeKeys, direction, showInk, visibleItemMeta]);
+  });
 
-  React.useEffect(() => {
+  // useEffect initializes active state from visible items after the route content mounts.
+  useEffect(() => {
     if (currentActiveKey || !visibleItems[0]) return;
 
     setActiveItems([visibleItems[0].item]);
   }, [currentActiveKey, setActiveItems, visibleItems]);
 
-  React.useEffect(() => {
+  // useEffect wires scroll/resize listeners to external containers; dependencies recreate listeners when targets change.
+  useEffect(() => {
     const container = resolveContainer();
     let frame = 0;
 
@@ -412,7 +409,8 @@ function Anchor({
     updateInk();
   }, [updateInk]);
 
-  React.useEffect(() => {
+  // useEffect keeps the ink position synced when the active link changes programmatically.
+  useEffect(() => {
     const activeLink = currentActiveKey ? linkRefs.current.get(currentActiveKey) : undefined;
     if (direction === "horizontal" && activeLink) {
       activeLink.scrollIntoView({ block: "nearest", inline: "nearest" });
@@ -421,7 +419,8 @@ function Anchor({
     updateInk();
   }, [currentActiveKey, direction, updateInk]);
 
-  React.useEffect(() => {
+  // useEffect observes link list size changes so ink measurements stay correct.
+  useEffect(() => {
     const list = listRef.current;
     if (!list) return;
 
@@ -432,46 +431,40 @@ function Anchor({
     };
   }, [updateInk]);
 
-  const handleClick = React.useCallback(
-    (event: React.MouseEvent<HTMLButtonElement>, item: AnchorItem) => {
-      onClick?.(event, item);
-      if (event.defaultPrevented) return;
+  const handleClick = useMemoizedFn((event: MouseEvent<HTMLButtonElement>, item: AnchorItem) => {
+    onClick?.(event, item);
+    if (event.defaultPrevented) return;
 
-      const target = resolveTarget(item.target);
-      if (!target) return;
+    const target = resolveTarget(item.target);
+    if (!target) return;
 
-      const container = resolveContainer();
-      const top = Math.max(getElementTop(target, container) - getTriggerOffset(container), 0);
+    const container = resolveContainer();
+    const top = Math.max(getElementTop(target, container) - getTriggerOffset(container), 0);
 
-      setActiveItems([item]);
-      scrollTo(container, top, scrollBehavior);
-    },
-    [getTriggerOffset, onClick, resolveContainer, scrollBehavior, setActiveItems]
-  );
+    setActiveItems([item]);
+    scrollTo(container, top, scrollBehavior);
+  });
 
-  const setRootRef = React.useCallback(
-    (node: HTMLElement | null) => {
-      rootRef.current = node;
+  const setRootRef = useMemoizedFn((node: HTMLElement | null) => {
+    rootRef.current = node;
 
-      if (typeof ref === "function") {
-        ref(node);
-      } else if (ref) {
-        ref.current = node;
-      }
-    },
-    [ref]
-  );
+    if (typeof ref === "function") {
+      ref(node);
+    } else if (ref) {
+      ref.current = node;
+    }
+  });
 
-  const setLinkRef = React.useCallback((key: string, node: HTMLButtonElement | null) => {
+  const setLinkRef = useMemoizedFn((key: string, node: HTMLButtonElement | null) => {
     if (node) {
       linkRefs.current.set(key, node);
       return;
     }
 
     linkRefs.current.delete(key);
-  }, []);
+  });
 
-  const rootStyle = React.useMemo<AnchorRootStyle | undefined>(
+  const rootStyle = useMemo<AnchorRootStyle | undefined>(
     () =>
       direction === "vertical"
         ? {
@@ -483,63 +476,60 @@ function Anchor({
     [direction, style]
   );
 
-  const renderItems = React.useCallback(
-    (anchorItems: AnchorItem[], level = 0) => (
-      <ul
-        data-level={level}
-        data-slot="anchor-list"
-        ref={level === 0 ? listRef : undefined}
-        style={
-          direction === "vertical" && level > 0
-            ? { paddingLeft: "var(--anchor-indent, 1rem)" }
-            : undefined
-        }
-        className={cn(
-          "m-0 list-none p-0",
-          direction === "horizontal" && level === 0
-            ? "flex max-w-full items-center gap-1 overflow-x-auto"
-            : "space-y-1",
-          direction === "vertical" && level > 0 && "mt-1"
-        )}
-      >
-        {anchorItems.map((item) => {
-          const isActive = currentActiveKey === item.key;
-          const isActiveKey = activeKeys.includes(item.key);
-          const isParentActive = activeParents.has(item.key);
-          const children = direction === "vertical" ? item.children : undefined;
+  const renderItems = useMemoizedFn((anchorItems: AnchorItem[], level = 0) => (
+    <ul
+      data-level={level}
+      data-slot="anchor-list"
+      ref={level === 0 ? listRef : undefined}
+      style={
+        direction === "vertical" && level > 0
+          ? { paddingLeft: "var(--anchor-indent, 1rem)" }
+          : undefined
+      }
+      className={cn(
+        "m-0 list-none p-0",
+        direction === "horizontal" && level === 0
+          ? "flex max-w-full items-center gap-1 overflow-x-auto"
+          : "space-y-1",
+        direction === "vertical" && level > 0 && "mt-1"
+      )}
+    >
+      {anchorItems.map((item) => {
+        const isActive = currentActiveKey === item.key;
+        const isActiveKey = activeKeys.includes(item.key);
+        const isParentActive = activeParents.has(item.key);
+        const children = direction === "vertical" ? item.children : undefined;
 
-          return (
-            <li
-              key={item.key}
-              data-active={isActive ? "" : undefined}
-              data-parent-active={isParentActive ? "" : undefined}
-              data-slot="anchor-item"
+        return (
+          <li
+            key={item.key}
+            data-active={isActive ? "" : undefined}
+            data-parent-active={isParentActive ? "" : undefined}
+            data-slot="anchor-item"
+          >
+            <button
+              type="button"
+              data-level={level}
+              data-slot="anchor-link"
+              data-current={isActive ? "" : undefined}
+              data-state={isActiveKey ? "active" : undefined}
+              ref={(node) => setLinkRef(item.key, node)}
+              className={cn(
+                "inline-flex max-w-full items-center rounded-sm px-2 py-1 text-left text-sm leading-5 whitespace-nowrap text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 disabled:pointer-events-none disabled:opacity-50",
+                direction === "vertical" && "w-full justify-start",
+                direction === "horizontal" && "justify-center",
+                (isActiveKey || isParentActive) && "font-medium text-primary hover:text-primary"
+              )}
+              onClick={(event) => handleClick(event, item)}
             >
-              <button
-                type="button"
-                data-level={level}
-                data-slot="anchor-link"
-                data-current={isActive ? "" : undefined}
-                data-state={isActiveKey ? "active" : undefined}
-                ref={(node) => setLinkRef(item.key, node)}
-                className={cn(
-                  "inline-flex max-w-full items-center rounded-sm px-2 py-1 text-left text-sm leading-5 whitespace-nowrap text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 disabled:pointer-events-none disabled:opacity-50",
-                  direction === "vertical" && "w-full justify-start",
-                  direction === "horizontal" && "justify-center",
-                  (isActiveKey || isParentActive) && "font-medium text-primary hover:text-primary"
-                )}
-                onClick={(event) => handleClick(event, item)}
-              >
-                {item.title}
-              </button>
-              {children?.length ? renderItems(children, level + 1) : null}
-            </li>
-          );
-        })}
-      </ul>
-    ),
-    [activeKeys, activeParents, currentActiveKey, direction, handleClick, setLinkRef]
-  );
+              {item.title}
+            </button>
+            {children?.length ? renderItems(children, level + 1) : null}
+          </li>
+        );
+      })}
+    </ul>
+  ));
 
   return (
     <nav

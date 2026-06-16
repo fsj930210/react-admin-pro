@@ -1,9 +1,22 @@
+import {
+  createContext,
+  use,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+  type CSSProperties,
+  type ComponentProps,
+  type ReactNode,
+  type Ref,
+} from "react";
 import { useComposedRefs } from "@rap/utils/compose-refs";
 import { cn } from "@rap/utils";
 import { Slot as SlotPrimitive } from "radix-ui";
-import * as React from "react";
 import { createPortal } from "react-dom";
 import { When } from "./when";
+import { useMemoizedFn } from "@rap/hooks/use-memoized-fn";
 
 export type FloatingLayerAlign = "start" | "center" | "end";
 export type FloatingLayerSide = "top" | "right" | "bottom" | "left";
@@ -29,14 +42,14 @@ type FloatingLayerContextValue = {
 };
 
 export interface FloatingLayerRootProps {
-  children: React.ReactNode;
+  children: ReactNode;
   defaultOpen?: boolean;
   onOpenChange?: (open: boolean) => void;
   open?: boolean;
   trigger?: readonly FloatingLayerTriggerMode[];
 }
 
-export interface FloatingLayerContentProps extends React.ComponentProps<"div"> {
+export interface FloatingLayerContentProps extends ComponentProps<"div"> {
   align?: FloatingLayerAlign;
   collisionPadding?: number;
   container?: FloatingLayerContainer;
@@ -48,18 +61,20 @@ export interface FloatingLayerContentProps extends React.ComponentProps<"div"> {
   positionStrategy?: FloatingLayerPositionStrategy;
   side?: FloatingLayerSide;
   sideOffset?: number;
+  ref?: Ref<HTMLDivElement>;
 }
 
-export interface FloatingLayerTriggerProps extends React.ComponentProps<"button"> {
+export interface FloatingLayerTriggerProps extends ComponentProps<"button"> {
   asChild?: boolean;
+  ref?: Ref<HTMLButtonElement>;
 }
 
 export type FloatingLayerProps = FloatingLayerRootProps & FloatingLayerContentProps;
 
-const FloatingLayerContext = React.createContext<FloatingLayerContextValue | null>(null);
+const FloatingLayerContext = createContext<FloatingLayerContextValue | null>(null);
 
 function useFloatingLayerContext(name: string) {
-  const context = React.useContext(FloatingLayerContext);
+  const context = use(FloatingLayerContext);
 
   if (!context) {
     throw new Error(`${name} must be used within FloatingLayer`);
@@ -213,7 +228,7 @@ function getPosition({
   sideOffset: number;
   strategy: FloatingLayerPositionStrategy;
   trigger: HTMLElement | null;
-}): React.CSSProperties {
+}): CSSProperties {
   const layerWidth = layer?.offsetWidth || estimatedWidth;
   const layerHeight = layer?.offsetHeight || estimatedHeight;
   const triggerRect = trigger?.getBoundingClientRect();
@@ -245,7 +260,7 @@ function getPosition({
   };
 }
 
-function getInitialPosition(point?: { x: number; y: number }): React.CSSProperties {
+function getInitialPosition(point?: { x: number; y: number }): CSSProperties {
   if (point) {
     return {
       left: point.x,
@@ -270,43 +285,40 @@ function FloatingLayerRoot({
   open: openProp,
   trigger = DEFAULT_TRIGGER_MODES,
 }: FloatingLayerRootProps) {
-  const [triggerElement, setTriggerElement] = React.useState<HTMLElement | null>(null);
-  const [uncontrolledOpen, setUncontrolledOpen] = React.useState(defaultOpen);
-  const hoverCloseTimerRef = React.useRef<number | null>(null);
-  const openedByHoverRef = React.useRef(false);
+  const [triggerElement, setTriggerElement] = useState<HTMLElement | null>(null);
+  const [uncontrolledOpen, setUncontrolledOpen] = useState(defaultOpen);
+  const hoverCloseTimerRef = useRef<number | null>(null);
+  const openedByHoverRef = useRef(false);
   const open = openProp ?? uncontrolledOpen;
   const isControlled = openProp !== undefined;
 
-  const setOpen = React.useCallback(
-    (nextOpen: boolean) => {
-      if (!nextOpen) {
-        openedByHoverRef.current = false;
-      }
+  const setOpen = useMemoizedFn((nextOpen: boolean) => {
+    if (!nextOpen) {
+      openedByHoverRef.current = false;
+    }
 
-      if (!isControlled) {
-        setUncontrolledOpen(nextOpen);
-      }
-      onOpenChange?.(nextOpen);
-    },
-    [isControlled, onOpenChange]
-  );
+    if (!isControlled) {
+      setUncontrolledOpen(nextOpen);
+    }
+    onOpenChange?.(nextOpen);
+  });
 
-  const clearHoverCloseTimer = React.useCallback(() => {
+  const clearHoverCloseTimer = useMemoizedFn(() => {
     if (hoverCloseTimerRef.current === null) {
       return;
     }
 
     window.clearTimeout(hoverCloseTimerRef.current);
     hoverCloseTimerRef.current = null;
-  }, []);
+  });
 
-  const openByHover = React.useCallback(() => {
+  const openByHover = useMemoizedFn(() => {
     clearHoverCloseTimer();
     openedByHoverRef.current = true;
     setOpen(true);
-  }, [clearHoverCloseTimer, setOpen]);
+  });
 
-  const closeByHover = React.useCallback(() => {
+  const closeByHover = useMemoizedFn(() => {
     clearHoverCloseTimer();
     hoverCloseTimerRef.current = window.setTimeout(() => {
       hoverCloseTimerRef.current = null;
@@ -318,17 +330,18 @@ function FloatingLayerRoot({
       openedByHoverRef.current = false;
       setOpen(false);
     }, 80);
-  }, [clearHoverCloseTimer, setOpen]);
+  });
 
-  const toggleByClick = React.useCallback(() => {
+  const toggleByClick = useMemoizedFn(() => {
     clearHoverCloseTimer();
     openedByHoverRef.current = false;
     setOpen(!open);
-  }, [clearHoverCloseTimer, open, setOpen]);
+  });
 
-  React.useEffect(() => clearHoverCloseTimer, [clearHoverCloseTimer]);
+  // useEffect clears pending hover timers when the root unmounts or the stable cleanup handler changes.
+  useEffect(() => clearHoverCloseTimer, [clearHoverCloseTimer]);
 
-  const context = React.useMemo<FloatingLayerContextValue>(
+  const context = useMemo<FloatingLayerContextValue>(
     () => ({
       closeByHover,
       onOpenChange: setOpen,
@@ -342,197 +355,196 @@ function FloatingLayerRoot({
     [closeByHover, open, openByHover, setOpen, toggleByClick, trigger, triggerElement]
   );
 
-  return <FloatingLayerContext.Provider value={context}>{children}</FloatingLayerContext.Provider>;
+  return <FloatingLayerContext value={context}>{children}</FloatingLayerContext>;
 }
 
-const FloatingLayerTrigger = React.forwardRef<HTMLButtonElement, FloatingLayerTriggerProps>(
-  ({ asChild, onClick, onPointerEnter, onPointerLeave, type = "button", ...props }, ref) => {
-    const context = useFloatingLayerContext("FloatingLayerTrigger");
-    const TriggerPrimitive = asChild ? SlotPrimitive.Slot : "button";
-    const composedRef = useComposedRefs(ref, context.setTriggerElement);
-    const triggerProps = asChild ? props : { ...props, type };
-    const clickEnabled = context.triggerModes.includes("click");
-    const hoverEnabled = context.triggerModes.includes("hover");
+function FloatingLayerTrigger({
+  asChild,
+  onClick,
+  onPointerEnter,
+  onPointerLeave,
+  ref,
+  type = "button",
+  ...props
+}: FloatingLayerTriggerProps) {
+  const context = useFloatingLayerContext("FloatingLayerTrigger");
+  const TriggerPrimitive = asChild ? SlotPrimitive.Slot : "button";
+  const composedRef = useComposedRefs(ref, context.setTriggerElement);
+  const triggerProps = asChild ? props : { ...props, type };
+  const clickEnabled = context.triggerModes.includes("click");
+  const hoverEnabled = context.triggerModes.includes("hover");
 
-    return (
-      <TriggerPrimitive
-        ref={composedRef}
-        {...triggerProps}
-        aria-expanded={context.open}
-        data-slot="floating-layer-trigger"
-        data-state={context.open ? "open" : "closed"}
-        onClick={(event) => {
-          onClick?.(event);
-          if (event.defaultPrevented || !clickEnabled) {
-            return;
-          }
-          context.toggleByClick();
-        }}
-        onPointerEnter={(event) => {
-          onPointerEnter?.(event);
-          if (event.defaultPrevented || !hoverEnabled) {
-            return;
-          }
-          context.openByHover();
-        }}
-        onPointerLeave={(event) => {
-          onPointerLeave?.(event);
-          if (event.defaultPrevented || !hoverEnabled) {
-            return;
-          }
-          context.closeByHover();
-        }}
-      />
-    );
-  }
-);
-FloatingLayerTrigger.displayName = "FloatingLayerTrigger";
-
-const FloatingLayerContent = React.forwardRef<HTMLDivElement, FloatingLayerContentProps>(
-  (
-    {
-      align = "start",
-      children,
-      className,
-      collisionPadding = 8,
-      container: containerProp,
-      estimatedHeight = 240,
-      estimatedWidth = 208,
-      onOpenChange,
-      open: openProp,
-      point,
-      positionStrategy,
-      side = "bottom",
-      sideOffset = 4,
-      style,
-      ...props
-    },
-    ref
-  ) => {
-    const context = useFloatingLayerContext("FloatingLayerContent");
-    const layerRef = React.useRef<HTMLDivElement>(null);
-    const composedRef = useComposedRefs(ref, layerRef);
-    const trigger = context.triggerElement;
-    const container = resolveContainer(containerProp, trigger);
-    const strategy = getDefaultStrategy(container, positionStrategy);
-    const open = openProp ?? context.open;
-    const setOpen = onOpenChange ?? context.onOpenChange;
-    const hoverEnabled = context.triggerModes.includes("hover");
-    const [position, setPosition] = React.useState<React.CSSProperties>(() =>
-      getInitialPosition(point)
-    );
-
-    React.useLayoutEffect(() => {
-      if (!open) {
-        return;
-      }
-
-      const updatePosition = () => {
-        setPosition(
-          getPosition({
-            align,
-            collisionPadding,
-            container,
-            estimatedHeight,
-            estimatedWidth,
-            layer: layerRef.current,
-            point,
-            side,
-            sideOffset,
-            strategy,
-            trigger,
-          })
-        );
-      };
-
-      updatePosition();
-
-      window.addEventListener("resize", updatePosition);
-      window.addEventListener("scroll", updatePosition, true);
-
-      return () => {
-        window.removeEventListener("resize", updatePosition);
-        window.removeEventListener("scroll", updatePosition, true);
-      };
-    }, [
-      align,
-      collisionPadding,
-      container,
-      estimatedHeight,
-      estimatedWidth,
-      open,
-      point,
-      side,
-      sideOffset,
-      strategy,
-      trigger,
-    ]);
-
-    React.useEffect(() => {
-      if (!open) {
-        return;
-      }
-
-      const closeOnOutsidePointerDown = (event: PointerEvent) => {
-        const target = event.target as Node | null;
-        if (trigger?.contains(target) || layerRef.current?.contains(target)) {
+  return (
+    <TriggerPrimitive
+      ref={composedRef}
+      {...triggerProps}
+      aria-expanded={context.open}
+      data-slot="floating-layer-trigger"
+      data-state={context.open ? "open" : "closed"}
+      onClick={(event) => {
+        onClick?.(event);
+        if (event.defaultPrevented || !clickEnabled) {
           return;
         }
-        setOpen(false);
-      };
-      const closeOnEscape = (event: KeyboardEvent) => {
-        if (event.key === "Escape") {
-          setOpen(false);
+        context.toggleByClick();
+      }}
+      onPointerEnter={(event) => {
+        onPointerEnter?.(event);
+        if (event.defaultPrevented || !hoverEnabled) {
+          return;
         }
-      };
+        context.openByHover();
+      }}
+      onPointerLeave={(event) => {
+        onPointerLeave?.(event);
+        if (event.defaultPrevented || !hoverEnabled) {
+          return;
+        }
+        context.closeByHover();
+      }}
+    />
+  );
+}
 
-      document.addEventListener("pointerdown", closeOnOutsidePointerDown);
-      document.addEventListener("keydown", closeOnEscape);
+function FloatingLayerContent({
+  align = "start",
+  children,
+  className,
+  collisionPadding = 8,
+  container: containerProp,
+  estimatedHeight = 240,
+  estimatedWidth = 208,
+  onOpenChange,
+  open: openProp,
+  point,
+  positionStrategy,
+  ref,
+  side = "bottom",
+  sideOffset = 4,
+  style,
+  ...props
+}: FloatingLayerContentProps) {
+  const context = useFloatingLayerContext("FloatingLayerContent");
+  const layerRef = useRef<HTMLDivElement>(null);
+  const composedRef = useComposedRefs(ref, layerRef);
+  const trigger = context.triggerElement;
+  const container = resolveContainer(containerProp, trigger);
+  const strategy = getDefaultStrategy(container, positionStrategy);
+  const open = openProp ?? context.open;
+  const setOpen = onOpenChange ?? context.onOpenChange;
+  const hoverEnabled = context.triggerModes.includes("hover");
+  const [position, setPosition] = useState<CSSProperties>(() => getInitialPosition(point));
 
-      return () => {
-        document.removeEventListener("pointerdown", closeOnOutsidePointerDown);
-        document.removeEventListener("keydown", closeOnEscape);
-      };
-    }, [open, setOpen, trigger]);
-
-    if (!container) {
-      return null;
+  useLayoutEffect(() => {
+    if (!open) {
+      return;
     }
 
-    return (
-      <When condition={open}>
-        {createPortal(
-          <div
-            ref={composedRef}
-            {...props}
-            className={cn("z-[1000]", className)}
-            data-slot="floating-layer-content"
-            data-state={open ? "open" : "closed"}
-            style={{ ...style, ...position }}
-            onPointerEnter={(event) => {
-              props.onPointerEnter?.(event);
-              if (event.defaultPrevented || !hoverEnabled) {
-                return;
-              }
-              context.openByHover();
-            }}
-            onPointerLeave={(event) => {
-              props.onPointerLeave?.(event);
-              if (event.defaultPrevented || !hoverEnabled) {
-                return;
-              }
-              context.closeByHover();
-            }}
-          >
-            {children}
-          </div>,
-          container
-        )}
-      </When>
-    );
+    const updatePosition = () => {
+      setPosition(
+        getPosition({
+          align,
+          collisionPadding,
+          container,
+          estimatedHeight,
+          estimatedWidth,
+          layer: layerRef.current,
+          point,
+          side,
+          sideOffset,
+          strategy,
+          trigger,
+        })
+      );
+    };
+
+    updatePosition();
+
+    window.addEventListener("resize", updatePosition);
+    window.addEventListener("scroll", updatePosition, true);
+
+    return () => {
+      window.removeEventListener("resize", updatePosition);
+      window.removeEventListener("scroll", updatePosition, true);
+    };
+  }, [
+    align,
+    collisionPadding,
+    container,
+    estimatedHeight,
+    estimatedWidth,
+    open,
+    point,
+    side,
+    sideOffset,
+    strategy,
+    trigger,
+  ]);
+
+  // useEffect attaches document-level outside click and escape handlers only while the layer is open.
+  useEffect(() => {
+    if (!open) {
+      return;
+    }
+
+    const closeOnOutsidePointerDown = (event: PointerEvent) => {
+      const target = event.target as Node | null;
+      if (trigger?.contains(target) || layerRef.current?.contains(target)) {
+        return;
+      }
+      setOpen(false);
+    };
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setOpen(false);
+      }
+    };
+
+    document.addEventListener("pointerdown", closeOnOutsidePointerDown);
+    document.addEventListener("keydown", closeOnEscape);
+
+    return () => {
+      document.removeEventListener("pointerdown", closeOnOutsidePointerDown);
+      document.removeEventListener("keydown", closeOnEscape);
+    };
+  }, [open, setOpen, trigger]);
+
+  if (!container) {
+    return null;
   }
-);
-FloatingLayerContent.displayName = "FloatingLayerContent";
+
+  return (
+    <When condition={open}>
+      {createPortal(
+        <div
+          ref={composedRef}
+          {...props}
+          className={cn("z-[1000]", className)}
+          data-slot="floating-layer-content"
+          data-state={open ? "open" : "closed"}
+          style={{ ...style, ...position }}
+          onPointerEnter={(event) => {
+            props.onPointerEnter?.(event);
+            if (event.defaultPrevented || !hoverEnabled) {
+              return;
+            }
+            context.openByHover();
+          }}
+          onPointerLeave={(event) => {
+            props.onPointerLeave?.(event);
+            if (event.defaultPrevented || !hoverEnabled) {
+              return;
+            }
+            context.closeByHover();
+          }}
+        >
+          {children}
+        </div>,
+        container
+      )}
+    </When>
+  );
+}
 
 function FloatingLayer(props: FloatingLayerProps) {
   if (isControlledContentProps(props)) {

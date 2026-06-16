@@ -1,12 +1,21 @@
-import { useControllableState } from "@rap/hooks/use-controllable-state";
-import { cn } from "@rap/utils";
 import { Check, Inbox, SearchIcon } from "lucide-react";
 import * as React from "react";
-import { use, useCallback, useMemo, useRef } from "react";
+import {
+  Fragment,
+  createContext,
+  use,
+  useRef,
+  type ChangeEvent,
+  type ComponentProps,
+  type ReactNode,
+} from "react";
+import { useControllableState } from "@rap/hooks/use-controllable-state";
+import { cn } from "@rap/utils";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { Checkbox } from "./checkbox";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "./input-group";
 import { Label } from "./label";
+import { useMemoizedFn } from "@rap/hooks/use-memoized-fn";
 
 export type SelectorValue = string | number;
 
@@ -38,7 +47,7 @@ export interface SelectorRenderApi<T, V extends SelectorValue = string> {
   selectedItems: T[];
   searchValue: string;
   getValue: (item: T) => V;
-  getLabel: (item: T) => React.ReactNode;
+  getLabel: (item: T) => ReactNode;
   getDisabled: (item: T) => boolean;
   isSelected: (value: V) => boolean;
   toggleValue: (value: V) => void;
@@ -51,7 +60,7 @@ export interface SelectorRenderApi<T, V extends SelectorValue = string> {
 }
 
 export interface SelectorProps<T = SelectorItem, V extends SelectorValue = string> extends Omit<
-  React.ComponentProps<"div">,
+  ComponentProps<"div">,
   "children" | "defaultValue" | "onChange"
 > {
   dataSource: T[];
@@ -59,7 +68,7 @@ export interface SelectorProps<T = SelectorItem, V extends SelectorValue = strin
   defaultValue?: V[];
   onChange?: (value: V[], selectedItems: T[]) => void;
   getValue?: (item: T) => V;
-  getLabel?: (item: T) => React.ReactNode;
+  getLabel?: (item: T) => ReactNode;
   getDisabled?: (item: T) => boolean;
   fieldNames?: SelectorFieldNames<T>;
   multiple?: boolean;
@@ -68,8 +77,10 @@ export interface SelectorProps<T = SelectorItem, V extends SelectorValue = strin
   defaultSearchValue?: string;
   onSearchChange?: (value: string) => void;
   filterOption?: false | ((input: string, item: T) => boolean);
+  showSearch?: boolean;
+  showSelectAll?: boolean;
   virtual?: boolean | SelectorVirtualOptions;
-  children?: React.ReactNode | ((api: SelectorRenderApi<T, V>) => React.ReactNode);
+  children?: ReactNode | ((api: SelectorRenderApi<T, V>) => ReactNode);
 }
 
 type SelectorContextValue<T = SelectorItem, V extends SelectorValue = string> = SelectorRenderApi<
@@ -81,7 +92,7 @@ type SelectorContextValue<T = SelectorItem, V extends SelectorValue = string> = 
   virtual?: boolean | SelectorVirtualOptions;
 };
 
-const SelectorContext = React.createContext<SelectorContextValue<any, any> | undefined>(undefined);
+const SelectorContext = createContext<SelectorContextValue<any, any> | undefined>(undefined);
 
 export function useSelector<T = SelectorItem, V extends SelectorValue = string>() {
   const context = use(SelectorContext);
@@ -91,7 +102,7 @@ export function useSelector<T = SelectorItem, V extends SelectorValue = string>(
   return context as SelectorContextValue<T, V>;
 }
 
-function defaultFilter(input: string, item: unknown, getLabel: (item: unknown) => React.ReactNode) {
+function defaultFilter(input: string, item: unknown, getLabel: (item: unknown) => ReactNode) {
   return String(getLabel(item) ?? "")
     .toLowerCase()
     .includes(input.toLowerCase());
@@ -102,14 +113,42 @@ function readField<T>(item: T, key: keyof T | undefined) {
   return item[key];
 }
 
-function uniqueValues<V extends SelectorValue>(values: V[]) {
+function getUniqueValues<V extends SelectorValue>(values: V[]) {
   return Array.from(new Set(values));
 }
 
-export function Selector<T = SelectorItem, V extends SelectorValue = string>({
+function createItemMap<T, V extends SelectorValue>(items: T[], getValue: (item: T) => V) {
+  const map = new Map<V, T>();
+  for (const item of items) {
+    map.set(getValue(item), item);
+  }
+  return map;
+}
+
+function getSelectedItems<T, V extends SelectorValue>(values: V[], itemMap: Map<V, T>) {
+  return values
+    .map((itemValue) => itemMap.get(itemValue))
+    .filter((item): item is T => Boolean(item));
+}
+
+function filterItems<T>(
+  items: T[],
+  searchValue: string,
+  filterOption: false | ((input: string, item: T) => boolean) | undefined,
+  getLabel: (item: T) => ReactNode
+) {
+  if (!searchValue || filterOption === false) return items;
+  const predicate =
+    filterOption ??
+    ((input: string, item: T) =>
+      defaultFilter(input, item, getLabel as (item: unknown) => ReactNode));
+  return items.filter((item) => predicate(searchValue, item));
+}
+
+function useSelectorState<T, V extends SelectorValue>({
   dataSource,
   value,
-  defaultValue = [],
+  defaultValue,
   onChange,
   getValue: getValueProp,
   getLabel: getLabelProp,
@@ -122,10 +161,7 @@ export function Selector<T = SelectorItem, V extends SelectorValue = string>({
   onSearchChange,
   filterOption,
   virtual = false,
-  children,
-  className,
-  ...props
-}: SelectorProps<T, V>) {
+}: SelectorProps<T, V>): SelectorContextValue<T, V> {
   const [selectedValues, setSelectedValues] = useControllableState<V[]>(
     { value, defaultValue },
     { defaultValue: [] as V[] }
@@ -135,184 +171,143 @@ export function Selector<T = SelectorItem, V extends SelectorValue = string>({
     { defaultValue: "" }
   );
 
-  const getValue = useCallback(
-    (item: T) => {
-      if (getValueProp) return getValueProp(item);
-      return readField(item, fieldNames?.value ?? ("value" as keyof T)) as V;
-    },
-    [getValueProp, fieldNames?.value]
-  );
+  const getValue = (item: T) => {
+    if (getValueProp) return getValueProp(item);
+    return readField(item, fieldNames?.value ?? ("value" as keyof T)) as V;
+  };
 
-  const getLabel = useCallback(
-    (item: T) => {
-      if (getLabelProp) return getLabelProp(item);
-      return readField(item, fieldNames?.label ?? ("label" as keyof T)) as React.ReactNode;
-    },
-    [getLabelProp, fieldNames?.label]
-  );
+  const getLabel = (item: T) => {
+    if (getLabelProp) return getLabelProp(item);
+    return readField(item, fieldNames?.label ?? ("label" as keyof T)) as ReactNode;
+  };
 
-  const getDisabled = useCallback(
-    (item: T) => {
-      if (disabled) return true;
-      if (getDisabledProp) return getDisabledProp(item);
-      return Boolean(readField(item, fieldNames?.disabled ?? ("disabled" as keyof T)));
-    },
-    [disabled, getDisabledProp, fieldNames?.disabled]
-  );
+  const getDisabled = (item: T) => {
+    if (disabled) return true;
+    if (getDisabledProp) return getDisabledProp(item);
+    return Boolean(readField(item, fieldNames?.disabled ?? ("disabled" as keyof T)));
+  };
 
-  const itemMap = useMemo(() => {
-    const map = new Map<V, T>();
-    for (const item of dataSource) {
-      map.set(getValue(item), item);
+  const itemMap = createItemMap(dataSource, getValue);
+  const selectedSet = new Set(selectedValues);
+  const selectedItems = getSelectedItems(selectedValues, itemMap);
+  const filteredItems = filterItems(dataSource, searchValue, filterOption, getLabel);
+
+  const emitChange = (nextValue: V[]) => {
+    const nextValues = multiple ? getUniqueValues(nextValue) : nextValue.slice(0, 1);
+    setSelectedValues(nextValues);
+    onChange?.(nextValues, getSelectedItems(nextValues, itemMap));
+  };
+
+  const isSelectableValue = (itemValue: V) => {
+    const item = itemMap.get(itemValue);
+    return Boolean(item && !getDisabled(item));
+  };
+
+  const isSelected = useMemoizedFn((itemValue: V) => selectedSet.has(itemValue));
+
+  const selectValues = useMemoizedFn((values: V[]) => {
+    const availableValues = values.filter(isSelectableValue);
+    if (!availableValues.length) return;
+    emitChange(multiple ? [...selectedValues, ...availableValues] : [availableValues[0]]);
+  });
+
+  const setValues = useMemoizedFn((values: V[]) => {
+    emitChange(values.filter(isSelectableValue));
+  });
+
+  const deselectValues = useMemoizedFn((values: V[]) => {
+    const removeSet = new Set(values);
+    emitChange(selectedValues.filter((itemValue) => !removeSet.has(itemValue)));
+  });
+
+  const toggleValue = useMemoizedFn((itemValue: V) => {
+    if (!isSelectableValue(itemValue)) return;
+    if (selectedSet.has(itemValue)) {
+      deselectValues([itemValue]);
+    } else {
+      selectValues([itemValue]);
     }
-    return map;
-  }, [dataSource, getValue]);
+  });
 
-  const selectedSet = useMemo(() => new Set(selectedValues), [selectedValues]);
+  const clear = useMemoizedFn(() => emitChange([]));
 
-  const selectedItems = useMemo(() => {
-    return selectedValues
-      .map((itemValue) => itemMap.get(itemValue))
-      .filter((item): item is T => Boolean(item));
-  }, [itemMap, selectedValues]);
+  const selectAll = useMemoizedFn((selected = true, scope: SelectorSelectionScope = "filtered") => {
+    const source = scope === "all" ? dataSource : filteredItems;
+    const values = source.filter((item) => !getDisabled(item)).map(getValue);
+    if (selected) {
+      selectValues(values);
+    } else {
+      deselectValues(values);
+    }
+  });
 
-  const filteredItems = useMemo(() => {
-    if (!searchValue || filterOption === false) return dataSource;
-    const predicate =
-      filterOption ??
-      ((input: string, item: T) =>
-        defaultFilter(input, item, getLabel as (item: unknown) => React.ReactNode));
-    return dataSource.filter((item) => predicate(searchValue, item));
-  }, [dataSource, filterOption, getLabel, searchValue]);
+  const setSearchValue = useMemoizedFn((nextValue: string) => {
+    setSearchValueState(nextValue);
+  });
 
-  const emitChange = useCallback(
-    (nextValue: V[]) => {
-      const nextValues = multiple ? uniqueValues(nextValue) : nextValue.slice(0, 1);
-      setSelectedValues(nextValues);
-      onChange?.(
-        nextValues,
-        nextValues
-          .map((itemValue) => itemMap.get(itemValue))
-          .filter((item): item is T => Boolean(item))
-      );
-    },
-    [itemMap, multiple, onChange, setSelectedValues]
-  );
+  return {
+    dataSource,
+    filteredItems,
+    selectedValues,
+    selectedSet,
+    selectedItems,
+    searchValue,
+    getValue,
+    getLabel,
+    getDisabled,
+    isSelected,
+    toggleValue,
+    setValues,
+    selectValues,
+    deselectValues,
+    clear,
+    selectAll,
+    setSearchValue,
+    multiple,
+    disabled,
+    virtual,
+  };
+}
 
-  const isSelectableValue = useCallback(
-    (itemValue: V) => {
-      const item = itemMap.get(itemValue);
-      return Boolean(item && !getDisabled(item));
-    },
-    [getDisabled, itemMap]
-  );
-
-  const isSelected = useCallback((itemValue: V) => selectedSet.has(itemValue), [selectedSet]);
-
-  const selectValues = useCallback(
-    (values: V[]) => {
-      const availableValues = values.filter(isSelectableValue);
-      if (!availableValues.length) return;
-      emitChange(multiple ? [...selectedValues, ...availableValues] : [availableValues[0]]);
-    },
-    [emitChange, isSelectableValue, multiple, selectedValues]
-  );
-
-  const setValues = useCallback(
-    (values: V[]) => {
-      emitChange(values.filter(isSelectableValue));
-    },
-    [emitChange, isSelectableValue]
-  );
-
-  const deselectValues = useCallback(
-    (values: V[]) => {
-      const removeSet = new Set(values);
-      emitChange(selectedValues.filter((itemValue) => !removeSet.has(itemValue)));
-    },
-    [emitChange, selectedValues]
-  );
-
-  const toggleValue = useCallback(
-    (itemValue: V) => {
-      if (!isSelectableValue(itemValue)) return;
-      if (selectedSet.has(itemValue)) {
-        deselectValues([itemValue]);
-      } else {
-        selectValues([itemValue]);
-      }
-    },
-    [deselectValues, isSelectableValue, selectValues, selectedSet]
-  );
-
-  const clear = useCallback(() => emitChange([]), [emitChange]);
-
-  const selectAll = useCallback(
-    (selected = true, scope: SelectorSelectionScope = "filtered") => {
-      const source = scope === "all" ? dataSource : filteredItems;
-      const values = source.filter((item) => !getDisabled(item)).map(getValue);
-      if (selected) {
-        selectValues(values);
-      } else {
-        deselectValues(values);
-      }
-    },
-    [dataSource, deselectValues, filteredItems, getDisabled, getValue, selectValues]
-  );
-
-  const setSearchValue = useCallback(
-    (nextValue: string) => {
-      setSearchValueState(nextValue);
-    },
-    [setSearchValueState]
-  );
-
-  const api = useMemo<SelectorContextValue<T, V>>(
-    () => ({
-      dataSource,
-      filteredItems,
-      selectedValues,
-      selectedSet,
-      selectedItems,
-      searchValue,
-      getValue,
-      getLabel,
-      getDisabled,
-      isSelected,
-      toggleValue,
-      setValues,
-      selectValues,
-      deselectValues,
-      clear,
-      selectAll,
-      setSearchValue,
-      multiple,
-      disabled,
-      virtual,
-    }),
-    [
-      dataSource,
-      filteredItems,
-      selectedValues,
-      selectedSet,
-      selectedItems,
-      searchValue,
-      getValue,
-      getLabel,
-      getDisabled,
-      isSelected,
-      toggleValue,
-      setValues,
-      selectValues,
-      deselectValues,
-      clear,
-      selectAll,
-      setSearchValue,
-      multiple,
-      disabled,
-      virtual,
-    ]
-  );
+export function Selector<T = SelectorItem, V extends SelectorValue = string>({
+  dataSource,
+  value,
+  defaultValue = [],
+  onChange,
+  getValue,
+  getLabel,
+  getDisabled,
+  fieldNames,
+  multiple = true,
+  disabled = false,
+  searchValue,
+  defaultSearchValue = "",
+  onSearchChange,
+  filterOption,
+  showSearch = true,
+  showSelectAll = true,
+  virtual = false,
+  children,
+  className,
+  ...props
+}: SelectorProps<T, V>) {
+  const api = useSelectorState<T, V>({
+    dataSource,
+    value,
+    defaultValue,
+    onChange,
+    getValue,
+    getLabel,
+    getDisabled,
+    fieldNames,
+    multiple,
+    disabled,
+    searchValue,
+    defaultSearchValue,
+    onSearchChange,
+    filterOption,
+    virtual,
+  });
 
   const content = typeof children === "function" ? children(api) : children;
 
@@ -320,20 +315,38 @@ export function Selector<T = SelectorItem, V extends SelectorValue = string>({
     <SelectorContext value={api}>
       <div className={cn("flex min-h-0 flex-col gap-3", className)} {...props}>
         {content ?? (
-          <>
-            <SelectorSearch />
-            <SelectorSelectAll />
+          <DefaultSelectorContent showSearch={showSearch} showSelectAll={showSelectAll}>
             <SelectorList />
             <SelectorEmpty />
-          </>
+          </DefaultSelectorContent>
         )}
       </div>
     </SelectorContext>
   );
 }
 
+interface DefaultSelectorContentProps {
+  showSearch?: boolean;
+  showSelectAll?: boolean;
+  children?: ReactNode;
+}
+
+function DefaultSelectorContent({
+  showSearch = true,
+  showSelectAll = true,
+  children,
+}: DefaultSelectorContentProps) {
+  return (
+    <>
+      {showSearch ? <SelectorSearch /> : null}
+      {showSelectAll ? <SelectorSelectAll /> : null}
+      {children}
+    </>
+  );
+}
+
 export interface SelectorSearchProps extends Omit<
-  React.ComponentProps<typeof InputGroupInput>,
+  ComponentProps<typeof InputGroupInput>,
   "value" | "onChange"
 > {
   wrapperClassName?: string;
@@ -350,7 +363,7 @@ export function SelectorSearch({
 }: SelectorSearchProps) {
   const { searchValue, setSearchValue } = useSelector();
 
-  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
     const nextValue = event.target.value;
     setSearchValue(nextValue);
     onSearch?.(nextValue);
@@ -376,9 +389,9 @@ export function SelectorSearch({
   );
 }
 
-export interface SelectorSelectAllProps extends React.ComponentProps<"div"> {
+export interface SelectorSelectAllProps extends ComponentProps<"div"> {
   scope?: SelectorSelectionScope;
-  label?: React.ReactNode;
+  label?: ReactNode;
 }
 
 export function SelectorSelectAll({
@@ -411,7 +424,7 @@ export function SelectorSelectAll({
 }
 
 export interface SelectorListProps<T = SelectorItem, V extends SelectorValue = string> extends Omit<
-  React.ComponentProps<"div">,
+  ComponentProps<"div">,
   "children"
 > {
   children?: (api: {
@@ -420,7 +433,7 @@ export interface SelectorListProps<T = SelectorItem, V extends SelectorValue = s
     value: V;
     selected: boolean;
     disabled: boolean;
-  }) => React.ReactNode;
+  }) => ReactNode;
   virtual?: boolean | SelectorVirtualOptions;
   itemSize?: number;
   overscan?: number;
@@ -476,7 +489,7 @@ export function SelectorList<T = SelectorItem, V extends SelectorValue = string>
         {...props}
       >
         {filteredItems.map((item, index) => (
-          <React.Fragment key={String(getValue(item))}>{renderItem(item, index)}</React.Fragment>
+          <Fragment key={String(getValue(item))}>{renderItem(item, index)}</Fragment>
         ))}
       </div>
     );
@@ -518,11 +531,11 @@ export function SelectorList<T = SelectorItem, V extends SelectorValue = string>
 }
 
 export interface SelectorListItemProps<T = SelectorItem> extends Omit<
-  React.ComponentProps<"div">,
+  ComponentProps<"div">,
   "children"
 > {
   item: T;
-  children?: React.ReactNode | ((api: SelectorRenderApi<T, any>) => React.ReactNode);
+  children?: ReactNode | ((api: SelectorRenderApi<T, any>) => ReactNode);
   hideCheckIcon?: boolean;
 }
 
@@ -566,14 +579,14 @@ export function SelectorListItem<T = SelectorItem>({
           {typeof children === "function" ? children(api) : (children ?? label)}
         </div>
       </div>
-      {selected && !hideCheckIcon ? <Check className="size-4 shrink-0 text-green-500" /> : null}
+      {selected && !hideCheckIcon ? <Check className="size-4 shrink-0 text-primary" /> : null}
     </div>
   );
 }
 
-export interface SelectorEmptyProps extends React.ComponentProps<"div"> {
-  emptyText?: React.ReactNode;
-  emptyIcon?: React.ReactNode;
+export interface SelectorEmptyProps extends ComponentProps<"div"> {
+  emptyText?: ReactNode;
+  emptyIcon?: ReactNode;
 }
 
 export function SelectorEmpty({
@@ -605,7 +618,7 @@ export function SelectorEmpty({
   );
 }
 
-export function SelectorCount({ className, ...props }: React.ComponentProps<"div">) {
+export function SelectorCount({ className, ...props }: ComponentProps<"div">) {
   const { filteredItems, selectedValues } = useSelector();
 
   return (
@@ -615,7 +628,7 @@ export function SelectorCount({ className, ...props }: React.ComponentProps<"div
   );
 }
 
-export function SelectorFooter({ className, ...props }: React.ComponentProps<"div">) {
+export function SelectorFooter({ className, ...props }: ComponentProps<"div">) {
   return <div className={cn("border-t pt-3", className)} {...props} />;
 }
 

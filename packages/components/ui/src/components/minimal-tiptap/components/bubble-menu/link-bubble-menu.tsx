@@ -1,9 +1,9 @@
-import * as React from "react";
 import type { ShouldShowProps } from "../../types";
 import type { Editor } from "@tiptap/react";
 import { BubbleMenu } from "@tiptap/react/menus";
 import { LinkEditBlock } from "../link/link-edit-block";
 import { LinkPopoverBlock } from "../link/link-popover-block";
+import { useCallback, useState, type FC } from "react";
 
 interface LinkBubbleMenuProps {
   editor: Editor;
@@ -14,15 +14,15 @@ interface LinkAttributes {
   target: string;
 }
 
-export const LinkBubbleMenu: React.FC<LinkBubbleMenuProps> = ({ editor }) => {
-  const [showEdit, setShowEdit] = React.useState(false);
-  const [linkAttrs, setLinkAttrs] = React.useState<LinkAttributes>({
+export const LinkBubbleMenu: FC<LinkBubbleMenuProps> = ({ editor }) => {
+  const [showEdit, setShowEdit] = useState(false);
+  const [linkAttrs, setLinkAttrs] = useState<LinkAttributes>({
     href: "",
     target: "",
   });
-  const [selectedText, setSelectedText] = React.useState("");
+  const [selectedText, setSelectedText] = useState("");
 
-  const updateLinkState = React.useCallback(() => {
+  const updateLinkState = useCallback(() => {
     const { from, to } = editor.state.selection;
     const { href, target } = editor.getAttributes("link");
     const text = editor.state.doc.textBetween(from, to, " ");
@@ -31,7 +31,7 @@ export const LinkBubbleMenu: React.FC<LinkBubbleMenuProps> = ({ editor }) => {
     setSelectedText(text);
   }, [editor]);
 
-  const shouldShow = React.useCallback(
+  const shouldShow = useCallback(
     ({ editor, from, to }: ShouldShowProps) => {
       if (from === to) {
         return false;
@@ -51,11 +51,11 @@ export const LinkBubbleMenu: React.FC<LinkBubbleMenuProps> = ({ editor }) => {
     [updateLinkState]
   );
 
-  const handleEdit = React.useCallback(() => {
+  const handleEdit = useCallback(() => {
     setShowEdit(true);
   }, []);
 
-  const onSetLink = React.useCallback(
+  const onSetLink = useCallback(
     (url: string, text?: string, openInNewTab?: boolean) => {
       editor
         .chain()
@@ -82,7 +82,7 @@ export const LinkBubbleMenu: React.FC<LinkBubbleMenuProps> = ({ editor }) => {
     [editor, updateLinkState]
   );
 
-  const onUnsetLink = React.useCallback(() => {
+  const onUnsetLink = useCallback(() => {
     editor.chain().focus().extendMarkRange("link").unsetLink().run();
     setShowEdit(false);
     updateLinkState();

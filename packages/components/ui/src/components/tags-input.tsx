@@ -1,9 +1,9 @@
 import * as TagsInputPrimitive from "@diceui/tags-input";
 import { X } from "lucide-react";
-import type * as React from "react";
+import { type ComponentProps } from "react";
 import { cn } from "@rap/utils";
 
-function TagsInput({ className, ...props }: React.ComponentProps<typeof TagsInputPrimitive.Root>) {
+function TagsInput({ className, ...props }: ComponentProps<typeof TagsInputPrimitive.Root>) {
   return (
     <TagsInputPrimitive.Root
       data-slot="tags-input"
@@ -13,10 +13,7 @@ function TagsInput({ className, ...props }: React.ComponentProps<typeof TagsInpu
   );
 }
 
-function TagsInputLabel({
-  className,
-  ...props
-}: React.ComponentProps<typeof TagsInputPrimitive.Label>) {
+function TagsInputLabel({ className, ...props }: ComponentProps<typeof TagsInputPrimitive.Label>) {
   return (
     <TagsInputPrimitive.Label
       data-slot="tags-input-label"
@@ -29,7 +26,7 @@ function TagsInputLabel({
   );
 }
 
-function TagsInputList({ className, ...props }: React.ComponentProps<"div">) {
+function TagsInputList({ className, ...props }: ComponentProps<"div">) {
   return (
     <div
       data-slot="tags-input-list"
@@ -42,10 +39,7 @@ function TagsInputList({ className, ...props }: React.ComponentProps<"div">) {
   );
 }
 
-function TagsInputInput({
-  className,
-  ...props
-}: React.ComponentProps<typeof TagsInputPrimitive.Input>) {
+function TagsInputInput({ className, ...props }: ComponentProps<typeof TagsInputPrimitive.Input>) {
   return (
     <TagsInputPrimitive.Input
       data-slot="tags-input-input"
@@ -62,7 +56,7 @@ function TagsInputItem({
   className,
   children,
   ...props
-}: React.ComponentProps<typeof TagsInputPrimitive.Item>) {
+}: ComponentProps<typeof TagsInputPrimitive.Item>) {
   return (
     <TagsInputPrimitive.Item
       data-slot="tags-input-item"
@@ -80,7 +74,7 @@ function TagsInputItem({
   );
 }
 
-function TagsInputClear({ ...props }: React.ComponentProps<typeof TagsInputPrimitive.Clear>) {
+function TagsInputClear({ ...props }: ComponentProps<typeof TagsInputPrimitive.Clear>) {
   return <TagsInputPrimitive.Clear data-slot="tags-input-clear" {...props} />;
 }
 

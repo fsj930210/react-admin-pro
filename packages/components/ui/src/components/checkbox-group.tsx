@@ -1,13 +1,13 @@
 // 文档地址 https://www.diceui.com/docs/components/radix/checkbox-group
 import * as CheckboxGroupPrimitive from "@diceui/checkbox-group";
 import { Check } from "lucide-react";
-import type * as React from "react";
+import { type ComponentProps } from "react";
 import { cn } from "@rap/utils";
 
 function CheckboxGroup({
   className,
   ...props
-}: React.ComponentProps<typeof CheckboxGroupPrimitive.Root>) {
+}: ComponentProps<typeof CheckboxGroupPrimitive.Root>) {
   return (
     <CheckboxGroupPrimitive.Root
       data-slot="checkbox-group"
@@ -20,7 +20,7 @@ function CheckboxGroup({
 function CheckboxGroupLabel({
   className,
   ...props
-}: React.ComponentProps<typeof CheckboxGroupPrimitive.Label>) {
+}: ComponentProps<typeof CheckboxGroupPrimitive.Label>) {
   return (
     <CheckboxGroupPrimitive.Label
       data-slot="checkbox-group-label"
@@ -36,7 +36,7 @@ function CheckboxGroupLabel({
 function CheckboxGroupList({
   className,
   ...props
-}: React.ComponentProps<typeof CheckboxGroupPrimitive.List>) {
+}: ComponentProps<typeof CheckboxGroupPrimitive.List>) {
   return (
     <CheckboxGroupPrimitive.List
       data-slot="checkbox-group-list"
@@ -53,7 +53,7 @@ function CheckboxGroupItem({
   className,
   children,
   ...props
-}: React.ComponentProps<typeof CheckboxGroupPrimitive.Item>) {
+}: ComponentProps<typeof CheckboxGroupPrimitive.Item>) {
   return (
     <label className="flex w-fit select-none items-center gap-2 text-sm leading-none has-data-disabled:cursor-not-allowed has-data-invalid:text-destructive has-data-disabled:opacity-50">
       <CheckboxGroupPrimitive.Item
@@ -79,7 +79,7 @@ function CheckboxGroupItem({
 function CheckboxGroupDescription({
   className,
   ...props
-}: React.ComponentProps<typeof CheckboxGroupPrimitive.Description>) {
+}: ComponentProps<typeof CheckboxGroupPrimitive.Description>) {
   return (
     <CheckboxGroupPrimitive.Description
       data-slot="checkbox-group-description"
@@ -95,7 +95,7 @@ function CheckboxGroupDescription({
 function CheckboxGroupMessage({
   className,
   ...props
-}: React.ComponentProps<typeof CheckboxGroupPrimitive.Message>) {
+}: ComponentProps<typeof CheckboxGroupPrimitive.Message>) {
   return (
     <CheckboxGroupPrimitive.Message
       data-slot="checkbox-group-message"

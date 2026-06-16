@@ -12,15 +12,29 @@ import {
   size,
   useFloating,
 } from "@floating-ui/react-dom";
+import {
+  createContext,
+  use,
+  useEffect,
+  useMemo,
+  useRef,
+  useSyncExternalStore,
+  type ComponentProps,
+  type ComponentRef,
+  type KeyboardEvent,
+  type MouseEvent,
+  type PointerEvent,
+  type RefObject,
+} from "react";
 import { Slot as SlotPrimitive } from "radix-ui";
-import * as React from "react";
-import * as ReactDOM from "react-dom";
 import { useComposedRefs } from "@rap/utils/compose-refs";
 import { cn } from "@rap/utils";
 import { useAsRef } from "@rap/hooks/use-as-ref";
 import { useIsomorphicLayoutEffect } from "@rap/hooks/use-isomorphic-layout-effect";
 import { useLazyRef } from "@rap/hooks/use-lazy-ref";
 import { Button } from "./button";
+import { useMemoizedFn } from "@rap/hooks/use-memoized-fn";
+import { createPortal } from "react-dom";
 
 const ROOT_NAME = "SelectionToolbar";
 const ITEM_NAME = "SelectionToolbarItem";
@@ -32,11 +46,11 @@ type Side = (typeof SIDE_OPTIONS)[number];
 type Align = (typeof ALIGN_OPTIONS)[number];
 type Boundary = Element | null;
 
-interface DivProps extends React.ComponentProps<"div"> {
+interface DivProps extends ComponentProps<"div"> {
   asChild?: boolean;
 }
 
-type ItemElement = React.ComponentRef<typeof SelectionToolbarItem>;
+type ItemElement = ComponentRef<typeof SelectionToolbarItem>;
 
 function getSideAndAlignFromPlacement(placement: Placement) {
   const [side, align = "center"] = placement.split("-");
@@ -68,10 +82,10 @@ interface Store {
   batch: (fn: () => void) => void;
 }
 
-const StoreContext = React.createContext<Store | null>(null);
+const StoreContext = createContext<Store | null>(null);
 
 function useStoreContext(consumerName: string) {
-  const context = React.useContext(StoreContext);
+  const context = use(StoreContext);
   if (!context) {
     throw new Error(`\`${consumerName}\` must be used within \`${ROOT_NAME}\``);
   }
@@ -79,7 +93,7 @@ function useStoreContext(consumerName: string) {
 }
 
 function useStore<T>(selector: (state: StoreState) => T, ogStore?: Store | null): T {
-  const contextStore = React.useContext(StoreContext);
+  const contextStore = use(StoreContext);
 
   const store = ogStore ?? contextStore;
 
@@ -87,16 +101,16 @@ function useStore<T>(selector: (state: StoreState) => T, ogStore?: Store | null)
     throw new Error(`\`useStore\` must be used within \`${ROOT_NAME}\``);
   }
 
-  const getSnapshot = React.useCallback(() => selector(store.getState()), [store, selector]);
+  const getSnapshot = useMemoizedFn(() => selector(store.getState()));
 
-  return React.useSyncExternalStore(store.subscribe, getSnapshot, getSnapshot);
+  return useSyncExternalStore(store.subscribe, getSnapshot, getSnapshot);
 }
 
 interface SelectionToolbarProps extends DivProps {
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
   onSelectionChange?: (text: string) => void;
-  container?: HTMLElement | React.RefObject<HTMLElement | null> | null;
+  container?: HTMLElement | RefObject<HTMLElement | null> | null;
   portalContainer?: Element | DocumentFragment | null;
   side?: Side;
   sideOffset?: number;
@@ -145,15 +159,15 @@ function SelectionToolbar(props: SelectionToolbarProps) {
     onSelectionChange,
   });
 
-  const getContainer = React.useCallback((): HTMLElement | null => {
+  const getContainer = useMemoizedFn((): HTMLElement | null => {
     if (containerProp === undefined || containerProp === null) return null;
     if (typeof containerProp === "object" && "current" in containerProp) {
       return containerProp.current;
     }
     return containerProp;
-  }, [containerProp]);
+  });
 
-  const store = React.useMemo<Store>(() => {
+  const store = useMemo<Store>(() => {
     let isBatching = false;
 
     return {
@@ -209,15 +223,15 @@ function SelectionToolbar(props: SelectionToolbarProps) {
   const open = useStore((state) => state.open, store);
   const selectionRect = useStore((state) => state.selectionRect, store);
 
-  const rafRef = React.useRef<number | null>(null);
+  const rafRef = useRef<number | null>(null);
 
-  const mounted = React.useSyncExternalStore(
+  const mounted = useSyncExternalStore(
     () => () => {},
     () => true,
     () => false
   );
 
-  const virtualElement = React.useMemo(() => {
+  const virtualElement = useMemo(() => {
     if (!selectionRect) return null;
 
     return {
@@ -234,7 +248,7 @@ function SelectionToolbar(props: SelectionToolbarProps) {
     };
   }, [selectionRect]);
 
-  const transformOrigin = React.useMemo<Middleware>(
+  const transformOrigin = useMemo<Middleware>(
     () => ({
       name: "transformOrigin",
       fn(data) {
@@ -264,12 +278,12 @@ function SelectionToolbar(props: SelectionToolbarProps) {
     []
   );
 
-  const desiredPlacement = React.useMemo(
+  const desiredPlacement = useMemo(
     () => (side + (align !== "center" ? `-${align}` : "")) as Placement,
     [side, align]
   );
 
-  const collisionPadding = React.useMemo(
+  const collisionPadding = useMemo(
     () =>
       typeof collisionPaddingProp === "number"
         ? collisionPaddingProp
@@ -277,14 +291,14 @@ function SelectionToolbar(props: SelectionToolbarProps) {
     [collisionPaddingProp]
   );
 
-  const boundary = React.useMemo(
+  const boundary = useMemo(
     () => (Array.isArray(collisionBoundary) ? collisionBoundary : [collisionBoundary]),
     [collisionBoundary]
   );
 
   const hasExplicitBoundaries = boundary.length > 0;
 
-  const detectOverflowOptions = React.useMemo(
+  const detectOverflowOptions = useMemo(
     () => ({
       padding: collisionPadding,
       boundary: boundary.filter(isNotNull),
@@ -293,7 +307,7 @@ function SelectionToolbar(props: SelectionToolbarProps) {
     [collisionPadding, boundary, hasExplicitBoundaries]
   );
 
-  const sizeMiddleware = React.useMemo(
+  const sizeMiddleware = useMemo(
     () =>
       size({
         ...detectOverflowOptions,
@@ -309,7 +323,7 @@ function SelectionToolbar(props: SelectionToolbarProps) {
     [detectOverflowOptions]
   );
 
-  const middleware = React.useMemo<Array<Middleware | false | undefined>>(
+  const middleware = useMemo<Array<Middleware | false | undefined>>(
     () => [
       offset({ mainAxis: sideOffset, alignmentAxis: alignOffset }),
       avoidCollisions &&
@@ -351,7 +365,7 @@ function SelectionToolbar(props: SelectionToolbarProps) {
     },
   });
 
-  const closeToolbar = React.useCallback(() => {
+  const closeToolbar = useMemoizedFn(() => {
     const state = store.getState();
     if (state.open || state.selectedText || state.selectionRect) {
       store.batch(() => {
@@ -360,9 +374,9 @@ function SelectionToolbar(props: SelectionToolbarProps) {
         store.setState("selectionRect", null);
       });
     }
-  }, [store]);
+  });
 
-  const updateSelection = React.useCallback(() => {
+  const updateSelection = useMemoizedFn(() => {
     const selection = window.getSelection();
     if (!selection || selection.rangeCount === 0) {
       closeToolbar();
@@ -417,9 +431,9 @@ function SelectionToolbar(props: SelectionToolbarProps) {
         store.setState("open", true);
       });
     }
-  }, [containerProp, getContainer, store, closeToolbar]);
+  });
 
-  const scheduleUpdate = React.useCallback(() => {
+  const scheduleUpdate = useMemoizedFn(() => {
     if (rafRef.current !== null) return;
     rafRef.current = requestAnimationFrame(() => {
       if (store.getState().open) {
@@ -427,9 +441,9 @@ function SelectionToolbar(props: SelectionToolbarProps) {
       }
       rafRef.current = null;
     });
-  }, [store, updateSelection]);
+  });
 
-  React.useEffect(() => {
+  useEffect(() => {
     const container = getContainer() ?? document;
 
     function onMouseUp() {
@@ -462,25 +476,25 @@ function SelectionToolbar(props: SelectionToolbarProps) {
     };
   }, [getContainer, updateSelection, closeToolbar, scheduleUpdate]);
 
-  const clearSelection = React.useCallback(() => {
+  const clearSelection = useMemoizedFn(() => {
     const selection = window.getSelection();
     if (selection) {
       selection.removeAllRanges();
     }
     closeToolbar();
-  }, [closeToolbar]);
+  });
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (!open) return;
 
-    function onMouseDown(event: MouseEvent) {
+    function onMouseDown(event: globalThis.MouseEvent) {
       const target = event.target as Node;
       if (refs.floating.current && !refs.floating.current.contains(target)) {
         clearSelection();
       }
     }
 
-    function onKeyDown(event: KeyboardEvent) {
+    function onKeyDown(event: globalThis.KeyboardEvent) {
       if (event.key === "Escape") {
         clearSelection();
       }
@@ -502,8 +516,8 @@ function SelectionToolbar(props: SelectionToolbarProps) {
   const RootPrimitive = asChild ? SlotPrimitive.Slot : "div";
 
   return (
-    <StoreContext.Provider value={store}>
-      {ReactDOM.createPortal(
+    <StoreContext value={store}>
+      {createPortal(
         <div
           ref={refs.setFloating}
           style={{
@@ -541,11 +555,11 @@ function SelectionToolbar(props: SelectionToolbarProps) {
         </div>,
         portalContainer
       )}
-    </StoreContext.Provider>
+    </StoreContext>
   );
 }
 
-interface SelectionToolbarItemProps extends Omit<React.ComponentProps<typeof Button>, "onSelect"> {
+interface SelectionToolbarItemProps extends Omit<ComponentProps<typeof Button>, "onSelect"> {
   onSelect?: (text: string, event: Event) => void;
 }
 
@@ -569,11 +583,11 @@ function SelectionToolbarItem(props: SelectionToolbarItemProps) {
     onPointerUp: onPointerUpProp,
   });
 
-  const itemRef = React.useRef<ItemElement>(null);
+  const itemRef = useRef<ItemElement>(null);
   const composedRef = useComposedRefs(ref, itemRef);
-  const pointerTypeRef = React.useRef<React.PointerEvent["pointerType"]>("touch");
+  const pointerTypeRef = useRef<PointerEvent["pointerType"]>("touch");
 
-  const onSelect = React.useCallback(() => {
+  const onSelect = useMemoizedFn(() => {
     const item = itemRef.current;
     if (!item) return;
 
@@ -594,43 +608,34 @@ function SelectionToolbarItem(props: SelectionToolbarItemProps) {
     );
 
     item.dispatchEvent(selectEvent);
-  }, [propsRef, store]);
+  });
 
-  const onPointerDown = React.useCallback(
-    (event: React.PointerEvent<ItemElement>) => {
-      pointerTypeRef.current = event.pointerType;
-      propsRef.current.onPointerDown?.(event);
+  const onPointerDown = useMemoizedFn((event: PointerEvent<ItemElement>) => {
+    pointerTypeRef.current = event.pointerType;
+    propsRef.current.onPointerDown?.(event);
 
-      if (event.pointerType === "mouse") {
-        event.preventDefault();
-      }
-    },
-    [propsRef]
-  );
+    if (event.pointerType === "mouse") {
+      event.preventDefault();
+    }
+  });
 
-  const onClick = React.useCallback(
-    (event: React.MouseEvent<ItemElement>) => {
-      propsRef.current.onClick?.(event);
-      if (event.defaultPrevented) return;
+  const onClick = useMemoizedFn((event: MouseEvent<ItemElement>) => {
+    propsRef.current.onClick?.(event);
+    if (event.defaultPrevented) return;
 
-      if (pointerTypeRef.current !== "mouse") {
-        onSelect();
-      }
-    },
-    [propsRef, onSelect]
-  );
+    if (pointerTypeRef.current !== "mouse") {
+      onSelect();
+    }
+  });
 
-  const onPointerUp = React.useCallback(
-    (event: React.PointerEvent<ItemElement>) => {
-      propsRef.current.onPointerUp?.(event);
-      if (event.defaultPrevented) return;
+  const onPointerUp = useMemoizedFn((event: PointerEvent<ItemElement>) => {
+    propsRef.current.onPointerUp?.(event);
+    if (event.defaultPrevented) return;
 
-      if (pointerTypeRef.current === "mouse") {
-        onSelect();
-      }
-    },
-    [propsRef, onSelect]
-  );
+    if (pointerTypeRef.current === "mouse") {
+      onSelect();
+    }
+  });
 
   return (
     <Button

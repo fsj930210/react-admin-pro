@@ -67,7 +67,7 @@ export function VirtualTree({
       searchable,
       selectable,
       selectedKeys,
-    ],
+    ]
   );
 
   return (

@@ -1,7 +1,20 @@
 ﻿"use client";
 // 鏂囨。鍦板潃 https://www.diceui.com/docs/components/radix/qr-code
+import {
+  createContext,
+  createElement,
+  use,
+  useCallback,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useSyncExternalStore,
+  type CSSProperties,
+  type ComponentProps,
+  type MouseEvent,
+  type RefObject,
+} from "react";
 import { Slot as SlotPrimitive } from "radix-ui";
-import * as React from "react";
 import { useComposedRefs } from "@rap/utils/compose-refs";
 import { cn } from "@rap/utils";
 import { useLazyRef } from "@rap/hooks/use-lazy-ref";
@@ -52,33 +65,33 @@ interface QRCodeContextValue {
   level: QRCodeLevel;
   backgroundColor: string;
   foregroundColor: string;
-  canvasRef: React.RefObject<HTMLCanvasElement | null>;
+  canvasRef: RefObject<HTMLCanvasElement | null>;
 }
 
-const StoreContext = React.createContext<Store | null>(null);
+const StoreContext = createContext<Store | null>(null);
 
 function useStore<T>(selector: (state: StoreState) => T): T {
-  const store = React.useContext(StoreContext);
+  const store = use(StoreContext);
   if (!store) {
     throw new Error(`\`useQRCode\` must be used within \`${ROOT_NAME}\``);
   }
 
-  const getSnapshot = React.useCallback(() => selector(store.getState()), [store, selector]);
+  const getSnapshot = useCallback(() => selector(store.getState()), [store, selector]);
 
-  return React.useSyncExternalStore(store.subscribe, getSnapshot, getSnapshot);
+  return useSyncExternalStore(store.subscribe, getSnapshot, getSnapshot);
 }
 
-const QRCodeContext = React.createContext<QRCodeContextValue | null>(null);
+const QRCodeContext = createContext<QRCodeContextValue | null>(null);
 
 function useQRCodeContext(consumerName: string) {
-  const context = React.useContext(QRCodeContext);
+  const context = use(QRCodeContext);
   if (!context) {
     throw new Error(`\`${consumerName}\` must be used within \`${ROOT_NAME}\``);
   }
   return context;
 }
 
-interface QRCodeProps extends Omit<React.ComponentProps<"div">, "onError"> {
+interface QRCodeProps extends Omit<ComponentProps<"div">, "onError"> {
   value: string;
   size?: number;
   level?: QRCodeLevel;
@@ -108,7 +121,7 @@ function QRCode(props: QRCodeProps) {
     ...rootProps
   } = props;
 
-  const canvasRef = React.useRef<HTMLCanvasElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
 
   const listenersRef = useLazyRef(() => new Set<() => void>());
   const stateRef = useLazyRef<StoreState>(() => ({
@@ -119,7 +132,7 @@ function QRCode(props: QRCodeProps) {
     generationKey: "",
   }));
 
-  const store = React.useMemo<Store>(() => {
+  const store = useMemo<Store>(() => {
     return {
       subscribe: (cb) => {
         listenersRef.current.add(cb);
@@ -154,7 +167,7 @@ function QRCode(props: QRCodeProps) {
     };
   }, [listenersRef, stateRef]);
 
-  const canvasOpts = React.useMemo<QRCodeCanvasOpts>(
+  const canvasOpts = useMemo<QRCodeCanvasOpts>(
     () => ({
       errorCorrectionLevel: level,
       type: "image/png",
@@ -169,7 +182,7 @@ function QRCode(props: QRCodeProps) {
     [level, margin, foregroundColor, backgroundColor, size, quality]
   );
 
-  const generationKey = React.useMemo(() => {
+  const generationKey = useMemo(() => {
     if (!value) return "";
 
     return JSON.stringify({
@@ -183,7 +196,7 @@ function QRCode(props: QRCodeProps) {
     });
   }, [value, level, margin, foregroundColor, backgroundColor, size, quality]);
 
-  const onQRCodeGenerate = React.useCallback(
+  const onQRCodeGenerate = useCallback(
     async (targetGenerationKey: string) => {
       if (!value || !targetGenerationKey) return;
 
@@ -239,7 +252,7 @@ function QRCode(props: QRCodeProps) {
     [value, canvasOpts, store, onError, onGenerated]
   );
 
-  const contextValue = React.useMemo<QRCodeContextValue>(
+  const contextValue = useMemo<QRCodeContextValue>(
     () => ({
       value,
       size,
@@ -252,7 +265,7 @@ function QRCode(props: QRCodeProps) {
     [value, size, backgroundColor, foregroundColor, level, margin]
   );
 
-  React.useLayoutEffect(() => {
+  useLayoutEffect(() => {
     if (generationKey) {
       const rafId = requestAnimationFrame(() => {
         onQRCodeGenerate(generationKey);
@@ -265,8 +278,8 @@ function QRCode(props: QRCodeProps) {
   const RootPrimitive = asChild ? SlotPrimitive.Slot : "div";
 
   return (
-    <StoreContext.Provider value={store}>
-      <QRCodeContext.Provider value={contextValue}>
+    <StoreContext value={store}>
+      <QRCodeContext value={contextValue}>
         <RootPrimitive
           data-slot="qr-code"
           {...rootProps}
@@ -275,15 +288,15 @@ function QRCode(props: QRCodeProps) {
             {
               "--qr-code-size": `${size}px`,
               ...style,
-            } as React.CSSProperties
+            } as CSSProperties
           }
         />
-      </QRCodeContext.Provider>
-    </StoreContext.Provider>
+      </QRCodeContext>
+    </StoreContext>
   );
 }
 
-interface QRCodeCanvasProps extends React.ComponentProps<"canvas"> {
+interface QRCodeCanvasProps extends ComponentProps<"canvas"> {
   asChild?: boolean;
 }
 
@@ -313,7 +326,7 @@ function QRCodeCanvas(props: QRCodeCanvasProps) {
   );
 }
 
-interface QRCodeSvgProps extends React.ComponentProps<"div"> {
+interface QRCodeSvgProps extends ComponentProps<"div"> {
   asChild?: boolean;
 }
 
@@ -338,7 +351,7 @@ function QRCodeSvg(props: QRCodeSvgProps) {
   );
 }
 
-interface QRCodeImageProps extends React.ComponentProps<"img"> {
+interface QRCodeImageProps extends ComponentProps<"img"> {
   asChild?: boolean;
 }
 
@@ -365,7 +378,7 @@ function QRCodeImage(props: QRCodeImageProps) {
   );
 }
 
-interface QRCodeDownloadProps extends React.ComponentProps<"button"> {
+interface QRCodeDownloadProps extends ComponentProps<"button"> {
   filename?: string;
   format?: "png" | "svg";
   asChild?: boolean;
@@ -384,8 +397,8 @@ function QRCodeDownload(props: QRCodeDownloadProps) {
   const dataUrl = useStore((state) => state.dataUrl);
   const svgString = useStore((state) => state.svgString);
 
-  const onClick = React.useCallback(
-    (event: React.MouseEvent<HTMLButtonElement>) => {
+  const onClick = useCallback(
+    (event: MouseEvent<HTMLButtonElement>) => {
       buttonProps.onClick?.(event);
       if (event.defaultPrevented) return;
 
@@ -428,7 +441,7 @@ function QRCodeDownload(props: QRCodeDownloadProps) {
   );
 }
 
-interface QRCodeOverlayProps extends React.ComponentProps<"div"> {
+interface QRCodeOverlayProps extends ComponentProps<"div"> {
   asChild?: boolean;
 }
 
@@ -449,7 +462,7 @@ function QRCodeOverlay(props: QRCodeOverlayProps) {
   );
 }
 
-interface QRCodeSkeletonProps extends React.ComponentProps<"div"> {
+interface QRCodeSkeletonProps extends ComponentProps<"div"> {
   asChild?: boolean;
 }
 

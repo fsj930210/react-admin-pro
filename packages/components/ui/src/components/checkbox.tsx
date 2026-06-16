@@ -1,12 +1,12 @@
 import { Checkbox as CheckboxPrimitive } from "radix-ui";
 import { cn } from "@rap/utils";
-import type * as React from "react";
+import { type ComponentProps } from "react";
 
 function Checkbox({
   className,
   children,
   ...props
-}: React.ComponentProps<typeof CheckboxPrimitive.Root>) {
+}: ComponentProps<typeof CheckboxPrimitive.Root>) {
   return (
     <CheckboxPrimitive.Root
       data-slot="checkbox"

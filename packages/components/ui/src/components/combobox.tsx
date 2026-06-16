@@ -1,22 +1,22 @@
 "use client";
 
-import * as React from "react";
 import { Command as CommandPrimitive } from "cmdk";
 import { Check, ChevronDown, X } from "lucide-react";
 
 import { cn } from "@rap/utils";
 import { InputGroup, InputGroupAddon, InputGroupButton } from "./input-group";
 import { Popover, PopoverAnchor, PopoverContent } from "./popover";
+import { useRef, type ComponentProps, type ComponentPropsWithRef } from "react";
 
-function Combobox({ ...props }: React.ComponentProps<typeof CommandPrimitive>) {
+function Combobox({ ...props }: ComponentProps<typeof CommandPrimitive>) {
   return <CommandPrimitive data-slot="combobox" {...props} />;
 }
 
-function ComboboxValue({ ...props }: React.ComponentPropsWithRef<"span">) {
+function ComboboxValue({ ...props }: ComponentPropsWithRef<"span">) {
   return <span data-slot="combobox-value" {...props} />;
 }
 
-function ComboboxTrigger({ className, children, ...props }: React.ComponentProps<"button">) {
+function ComboboxTrigger({ className, children, ...props }: ComponentProps<"button">) {
   return (
     <button
       data-slot="combobox-trigger"
@@ -33,7 +33,7 @@ function ComboboxTrigger({ className, children, ...props }: React.ComponentProps
   );
 }
 
-function ComboboxClear({ className, ...props }: React.ComponentProps<"button">) {
+function ComboboxClear({ className, ...props }: ComponentProps<"button">) {
   return (
     <button type="button" data-slot="combobox-clear" className={cn(className)} {...props}>
       <X className="pointer-events-none" />
@@ -47,7 +47,7 @@ function ComboboxInput({
   showTrigger = true,
   showClear = false,
   ...props
-}: React.ComponentProps<typeof CommandPrimitive.Input> & {
+}: ComponentProps<typeof CommandPrimitive.Input> & {
   showTrigger?: boolean;
   showClear?: boolean;
 }) {
@@ -95,7 +95,7 @@ function ComboboxContent({
   open,
   onOpenChange,
   ...props
-}: React.ComponentProps<"div"> & {
+}: ComponentProps<"div"> & {
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
 }) {
@@ -115,7 +115,7 @@ function ComboboxContent({
   );
 }
 
-function ComboboxList({ className, ...props }: React.ComponentProps<typeof CommandPrimitive.List>) {
+function ComboboxList({ className, ...props }: ComponentProps<typeof CommandPrimitive.List>) {
   return (
     <CommandPrimitive.List
       data-slot="combobox-list"
@@ -132,7 +132,7 @@ function ComboboxItem({
   className,
   children,
   ...props
-}: React.ComponentProps<typeof CommandPrimitive.Item>) {
+}: ComponentProps<typeof CommandPrimitive.Item>) {
   return (
     <CommandPrimitive.Item
       data-slot="combobox-item"
@@ -150,14 +150,11 @@ function ComboboxItem({
   );
 }
 
-function ComboboxGroup({
-  className,
-  ...props
-}: React.ComponentProps<typeof CommandPrimitive.Group>) {
+function ComboboxGroup({ className, ...props }: ComponentProps<typeof CommandPrimitive.Group>) {
   return <CommandPrimitive.Group data-slot="combobox-group" className={cn(className)} {...props} />;
 }
 
-function ComboboxLabel({ className, ...props }: React.ComponentProps<"div">) {
+function ComboboxLabel({ className, ...props }: ComponentProps<"div">) {
   return (
     <div
       data-slot="combobox-label"
@@ -170,14 +167,11 @@ function ComboboxLabel({ className, ...props }: React.ComponentProps<"div">) {
   );
 }
 
-function ComboboxCollection({ ...props }: React.ComponentProps<"div">) {
+function ComboboxCollection({ ...props }: ComponentProps<"div">) {
   return <div data-slot="combobox-collection" {...props} />;
 }
 
-function ComboboxEmpty({
-  className,
-  ...props
-}: React.ComponentProps<typeof CommandPrimitive.Empty>) {
+function ComboboxEmpty({ className, ...props }: ComponentProps<typeof CommandPrimitive.Empty>) {
   return (
     <CommandPrimitive.Empty
       data-slot="combobox-empty"
@@ -193,7 +187,7 @@ function ComboboxEmpty({
 function ComboboxSeparator({
   className,
   ...props
-}: React.ComponentProps<typeof CommandPrimitive.Separator>) {
+}: ComponentProps<typeof CommandPrimitive.Separator>) {
   return (
     <CommandPrimitive.Separator
       data-slot="combobox-separator"
@@ -203,7 +197,7 @@ function ComboboxSeparator({
   );
 }
 
-function ComboboxChips({ className, ...props }: React.ComponentProps<"div">) {
+function ComboboxChips({ className, ...props }: ComponentProps<"div">) {
   return (
     <div
       data-slot="combobox-chips"
@@ -221,7 +215,7 @@ function ComboboxChip({
   children,
   closable = true,
   ...props
-}: React.ComponentProps<"div"> & { closable?: boolean }) {
+}: ComponentProps<"div"> & { closable?: boolean }) {
   return (
     <div
       data-slot="combobox-chip"
@@ -245,7 +239,7 @@ function ComboboxChip({
   );
 }
 
-function ComboboxChipsInput({ className, ...props }: React.ComponentProps<"input">) {
+function ComboboxChipsInput({ className, ...props }: ComponentProps<"input">) {
   return (
     <input
       type="text"
@@ -259,12 +253,12 @@ function ComboboxChipsInput({ className, ...props }: React.ComponentProps<"input
   );
 }
 
-function ComboboxAnchor({ ...props }: React.ComponentProps<"div">) {
+function ComboboxAnchor({ ...props }: ComponentProps<"div">) {
   return <PopoverAnchor data-slot="combobox-anchor" {...props} />;
 }
 
 function useComboboxAnchor() {
-  return React.useRef<HTMLDivElement | null>(null);
+  return useRef<HTMLDivElement | null>(null);
 }
 
 export {

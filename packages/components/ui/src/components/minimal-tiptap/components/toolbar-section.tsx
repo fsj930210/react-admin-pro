@@ -1,4 +1,3 @@
-import * as React from "react";
 import type { Editor } from "@tiptap/react";
 import type { FormatAction } from "../types";
 import type { VariantProps } from "class-variance-authority";
@@ -14,18 +13,19 @@ import {
 import { ToolbarButton } from "./toolbar-button";
 import { ShortcutKey } from "./shortcut-key";
 import { getShortcutKey } from "../utils";
+import { useCallback, useMemo, type FC, type ReactNode } from "react";
 
 interface ToolbarSectionProps extends VariantProps<typeof toggleVariants> {
   editor: Editor;
   actions: FormatAction[];
   activeActions?: string[];
   mainActionCount?: number;
-  dropdownIcon?: React.ReactNode;
+  dropdownIcon?: ReactNode;
   dropdownTooltip?: string;
   dropdownClassName?: string;
 }
 
-export const ToolbarSection: React.FC<ToolbarSectionProps> = ({
+export const ToolbarSection: FC<ToolbarSectionProps> = ({
   editor,
   actions,
   activeActions = actions.map((action) => action.value),
@@ -36,7 +36,7 @@ export const ToolbarSection: React.FC<ToolbarSectionProps> = ({
   size,
   variant,
 }) => {
-  const { mainActions, dropdownActions } = React.useMemo(() => {
+  const { mainActions, dropdownActions } = useMemo(() => {
     const sortedActions = actions
       .filter((action) => activeActions.includes(action.value))
       .sort((a, b) => activeActions.indexOf(a.value) - activeActions.indexOf(b.value));
@@ -47,7 +47,7 @@ export const ToolbarSection: React.FC<ToolbarSectionProps> = ({
     };
   }, [actions, activeActions, mainActionCount]);
 
-  const renderToolbarButton = React.useCallback(
+  const renderToolbarButton = useCallback(
     (action: FormatAction) => (
       <ToolbarButton
         key={action.label}
@@ -65,7 +65,7 @@ export const ToolbarSection: React.FC<ToolbarSectionProps> = ({
     [editor, size, variant]
   );
 
-  const renderDropdownMenuItem = React.useCallback(
+  const renderDropdownMenuItem = useCallback(
     (action: FormatAction) => (
       <DropdownMenuItem
         key={action.label}

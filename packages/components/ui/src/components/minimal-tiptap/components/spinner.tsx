@@ -1,7 +1,7 @@
-import * as React from "react";
 import { cn } from "@rap/utils";
+import { memo, type ComponentProps } from "react";
 
-type SpinnerProps = React.ComponentProps<"svg">;
+type SpinnerProps = ComponentProps<"svg">;
 
 const SpinnerComponent = function Spinner({ className, ...props }: SpinnerProps) {
   return (
@@ -24,4 +24,4 @@ const SpinnerComponent = function Spinner({ className, ...props }: SpinnerProps)
 
 SpinnerComponent.displayName = "Spinner";
 
-export const Spinner = React.memo(SpinnerComponent);
+export const Spinner = memo(SpinnerComponent);

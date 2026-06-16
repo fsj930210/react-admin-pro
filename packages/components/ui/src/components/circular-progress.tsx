@@ -1,7 +1,7 @@
 "use client";
 // 文档地址 https://www.diceui.com/docs/components/radix/circular-progress
+import { createContext, use, useId, useMemo, type ComponentProps } from "react";
 import { Slot as SlotPrimitive } from "radix-ui";
-import * as React from "react";
 import { cn } from "@rap/utils";
 
 const CIRCULAR_PROGRESS_NAME = "CircularProgress";
@@ -58,17 +58,17 @@ interface CircularProgressContextValue {
   valueTextId?: string;
 }
 
-const CircularProgressContext = React.createContext<CircularProgressContextValue | null>(null);
+const CircularProgressContext = createContext<CircularProgressContextValue | null>(null);
 
 function useCircularProgressContext(consumerName: string) {
-  const context = React.useContext(CircularProgressContext);
+  const context = use(CircularProgressContext);
   if (!context) {
     throw new Error(`\`${consumerName}\` must be used within \`${CIRCULAR_PROGRESS_NAME}\``);
   }
   return context;
 }
 
-interface CircularProgressProps extends React.ComponentProps<"div"> {
+interface CircularProgressProps extends ComponentProps<"div"> {
   value?: number | null | undefined;
   getValueText?(value: number, min: number, max: number): string;
   min?: number;
@@ -134,10 +134,11 @@ function CircularProgress(props: CircularProgressProps) {
       : (value - min) / (max - min)
     : null;
 
-  const labelId = React.useId();
-  const valueTextId = React.useId();
+  const labelId = useId();
+  const valueTextId = useId();
 
-  const contextValue = React.useMemo<CircularProgressContextValue>(
+  // useMemo keeps provider value stable for compound parts; dependencies are progress value, geometry, and aria ids.
+  const contextValue = useMemo<CircularProgressContextValue>(
     () => ({
       value,
       valueText,
@@ -171,7 +172,7 @@ function CircularProgress(props: CircularProgressProps) {
   const RootPrimitive = asChild ? SlotPrimitive.Slot : "div";
 
   return (
-    <CircularProgressContext.Provider value={contextValue}>
+    <CircularProgressContext value={contextValue}>
       <RootPrimitive
         role="progressbar"
         aria-describedby={valueText ? valueTextId : undefined}
@@ -191,11 +192,11 @@ function CircularProgress(props: CircularProgressProps) {
         {children}
         {label && <div id={labelId}>{label}</div>}
       </RootPrimitive>
-    </CircularProgressContext.Provider>
+    </CircularProgressContext>
   );
 }
 
-function CircularProgressIndicator(props: React.ComponentProps<"svg">) {
+function CircularProgressIndicator(props: ComponentProps<"svg">) {
   const { className, ...indicatorProps } = props;
 
   const context = useCircularProgressContext(INDICATOR_NAME);
@@ -220,7 +221,7 @@ function CircularProgressIndicator(props: React.ComponentProps<"svg">) {
 
 CircularProgressIndicator.displayName = INDICATOR_NAME;
 
-function CircularProgressTrack(props: React.ComponentProps<"circle">) {
+function CircularProgressTrack(props: ComponentProps<"circle">) {
   const { className, ...trackProps } = props;
 
   const context = useCircularProgressContext(TRACK_NAME);
@@ -242,7 +243,7 @@ function CircularProgressTrack(props: React.ComponentProps<"circle">) {
   );
 }
 
-function CircularProgressRange(props: React.ComponentProps<"circle">) {
+function CircularProgressRange(props: ComponentProps<"circle">) {
   const { className, ...rangeProps } = props;
 
   const context = useCircularProgressContext(RANGE_NAME);
@@ -282,7 +283,7 @@ function CircularProgressRange(props: React.ComponentProps<"circle">) {
   );
 }
 
-interface CircularProgressValueTextProps extends React.ComponentProps<"span"> {
+interface CircularProgressValueTextProps extends ComponentProps<"span"> {
   asChild?: boolean;
 }
 

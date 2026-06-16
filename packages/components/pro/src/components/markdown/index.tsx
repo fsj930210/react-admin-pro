@@ -1,8 +1,10 @@
 import { Check, Copy } from "lucide-react";
-import React, { lazy, Suspense, useMemo, useState } from "react";
+import { isValidElement, useMemo, useState, type ComponentProps, type ReactNode } from "react";
 import ReactMarkdown, { type Components } from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { cn } from "@rap/utils";
+import { MarkdownContent } from "./markdown-content";
+import * as React from "react";
 
 export interface MarkdownRendererProps {
   value?: string;
@@ -21,8 +23,6 @@ type MarkdownContentProps = MarkdownRendererProps & {
   value: string;
   baseComponents: Components;
 };
-
-const MarkdownEnhanced = lazy(() => import("./markdown-enhanced"));
 
 function getTextContent(children: React.ReactNode): string {
   if (typeof children === "string" || typeof children === "number") {
@@ -152,7 +152,6 @@ export function MarkdownRenderer({
   contentClassName,
   components,
   emptyFallback = null,
-  loadingFallback = null,
   enableCodeHighlight = false,
   enableRawHtml = false,
   sanitizeRawHtml = true,
@@ -167,16 +166,14 @@ export function MarkdownRenderer({
 
   const content =
     enableCodeHighlight || enableRawHtml ? (
-      <Suspense fallback={loadingFallback}>
-        <MarkdownEnhanced
-          value={markdown}
-          enableGfm={enableGfm}
-          enableCodeHighlight={enableCodeHighlight}
-          enableRawHtml={enableRawHtml}
-          sanitizeRawHtml={sanitizeRawHtml}
-          baseComponents={baseComponents}
-        />
-      </Suspense>
+      <MarkdownContent
+        value={markdown}
+        enableGfm={enableGfm}
+        enableCodeHighlight={enableCodeHighlight}
+        enableRawHtml={enableRawHtml}
+        sanitizeRawHtml={sanitizeRawHtml}
+        baseComponents={baseComponents}
+      />
     ) : (
       <MarkdownBase value={markdown} enableGfm={enableGfm} baseComponents={baseComponents} />
     );

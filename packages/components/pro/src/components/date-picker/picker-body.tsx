@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { type ReactNode } from "react";
 import { DatePanel } from "./panels/date-panel";
 import { MonthPicker } from "./panels/month-picker";
 import { QuarterPicker } from "./panels/quarter-picker";

@@ -1,6 +1,6 @@
 import { Input as UIInput } from "@rap/components-ui/input";
 import { cn } from "@rap/utils";
-import type { RefObject } from "react";
+import { type RefObject } from "react";
 
 interface RangeTriggerFieldProps {
   value: string;

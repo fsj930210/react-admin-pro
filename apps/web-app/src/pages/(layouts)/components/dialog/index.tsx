@@ -17,7 +17,7 @@ import {
 import { DialogDescription, DialogTitle } from "@rap/components-ui/dialog";
 import { createFileRoute } from "@tanstack/react-router";
 import { Maximize2, Move, Plus, Scaling, Square } from "lucide-react";
-import { type ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 
 export const Route = createFileRoute("/(layouts)/components/dialog/")({
   component: DialogComponentPage,
@@ -47,6 +47,8 @@ function DemoCard({
 }
 
 function BasicDialogDemo() {
+  const [open, setOpen] = useState(false);
+
   return (
     <DemoCard
       title="Basic Dialog"
@@ -54,7 +56,9 @@ function BasicDialogDemo() {
       footer={<span className="text-sm text-muted-foreground">默认使用基础 Dialog 交互。</span>}
     >
       <BasicDialog
-        triggerChildren={
+        open={open}
+        onOpenChange={setOpen}
+        trigger={
           <Button>
             <Plus className="mr-2 size-4" />
             打开 Dialog
@@ -66,11 +70,11 @@ function BasicDialogDemo() {
             <DialogDescription>用于展示确认内容、编辑入口或简单说明。</DialogDescription>
           </>
         }
-        okText="确定"
-        cancelText="取消"
+        okButtonProps={{ children: "确定" }}
+        cancelButtonProps={{ children: "取消" }}
       >
         <div className="py-4 text-sm leading-relaxed">
-          Dialog 默认带底部操作区，API 使用 okText、cancelText、onOk、onCancel 这类习惯命名。
+          Dialog 默认带底部操作区，API 使用 okButtonProps、cancelButtonProps、onOk、onCancel。
         </div>
       </BasicDialog>
     </DemoCard>
@@ -78,10 +82,14 @@ function BasicDialogDemo() {
 }
 
 function MovableDialogDemo() {
+  const [open, setOpen] = useState(false);
+
   return (
     <DemoCard title="Movable Dialog" description="标题栏可拖动，关闭后位置会重置。">
       <MovableDialog
-        triggerChildren={
+        open={open}
+        onOpenChange={setOpen}
+        trigger={
           <Button variant="outline">
             <Move className="mr-2 size-4" />
             打开可移动 Dialog
@@ -99,10 +107,14 @@ function MovableDialogDemo() {
 }
 
 function ResizableDialogDemo() {
+  const [open, setOpen] = useState(false);
+
   return (
     <DemoCard title="Resizable Dialog" description="边缘和角落可以拖拽调整弹窗尺寸。">
       <ResizableDialog
-        triggerChildren={
+        open={open}
+        onOpenChange={setOpen}
+        trigger={
           <Button variant="outline">
             <Scaling className="mr-2 size-4" />
             打开可调整 Dialog
@@ -125,13 +137,17 @@ function ResizableDialogDemo() {
 }
 
 function FullDialogDemo() {
+  const [open, setOpen] = useState(false);
+
   return (
     <DemoCard
       title="Dialog"
       description="完整 Dialog 通过 features 属性组合移动、调整尺寸、最小化和最大化。"
     >
       <Dialog
-        triggerChildren={
+        open={open}
+        onOpenChange={setOpen}
+        trigger={
           <Button variant="secondary">
             <Maximize2 className="mr-2 size-4" />
             打开完整 Dialog
@@ -158,8 +174,8 @@ function FullDialogDemo() {
             <DialogDescription>一个入口覆盖常用后台弹窗能力。</DialogDescription>
           </>
         }
-        okText="保存"
-        cancelText="取消"
+        okButtonProps={{ children: "保存" }}
+        cancelButtonProps={{ children: "取消" }}
       >
         <div className="space-y-2 py-4 text-sm leading-relaxed">
           <p>用户只需要配置 features 和 actions，就能打开需要的能力。</p>
@@ -171,10 +187,14 @@ function FullDialogDemo() {
 }
 
 function MinimaxDialogDemo() {
+  const [open, setOpen] = useState(false);
+
   return (
     <DemoCard title="MinimaxDialog" description="只聚焦最小化和最大化的单特性 Dialog。">
       <MinimaxDialog
-        triggerChildren={
+        open={open}
+        onOpenChange={setOpen}
+        trigger={
           <Button variant="outline">
             <Square className="mr-2 size-4" />
             打开 MinimaxDialog

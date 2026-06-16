@@ -1,5 +1,6 @@
 import { CircleCheck, Info, Loader2, OctagonX, TriangleAlert } from "lucide-react";
 import { Toaster as Sonner, type ToasterProps } from "sonner";
+import { type CSSProperties } from "react";
 
 const Toaster = ({ ...props }: ToasterProps) => {
   return (
@@ -19,7 +20,7 @@ const Toaster = ({ ...props }: ToasterProps) => {
           "--normal-text": "var(--popover-foreground)",
           "--normal-border": "var(--border)",
           "--border-radius": "var(--radius)",
-        } as React.CSSProperties
+        } as CSSProperties
       }
       {...props}
     />

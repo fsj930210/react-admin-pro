@@ -1,8 +1,23 @@
 "use client";
 // 文档地址 https://www.diceui.com/docs/components/radix/marquee
+import {
+  Fragment,
+  createContext,
+  use,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  useSyncExternalStore,
+  type CSSProperties,
+  type ComponentProps,
+  type ComponentRef,
+  type KeyboardEvent,
+  type RefObject,
+} from "react";
 import { cva, type VariantProps } from "class-variance-authority";
 import { Direction as DirectionPrimitive, Slot as SlotPrimitive } from "radix-ui";
-import * as React from "react";
 import { useComposedRefs } from "@rap/utils/compose-refs";
 import { cn } from "@rap/utils";
 
@@ -13,8 +28,8 @@ type Side = "left" | "right" | "top" | "bottom";
 type Orientation = "horizontal" | "vertical";
 type Direction = "ltr" | "rtl";
 
-type RootElement = React.ComponentRef<typeof Marquee>;
-type ContentElement = React.ComponentRef<typeof MarqueeContent>;
+type RootElement = ComponentRef<typeof Marquee>;
+type ContentElement = ComponentRef<typeof MarqueeContent>;
 
 interface Dimensions {
   width: number;
@@ -196,24 +211,24 @@ function createResizeObserverStore() {
 const resizeObserverStore = createResizeObserverStore();
 
 function useResizeObserverStore(
-  rootRef: React.RefObject<RootElement | null>,
-  contentRef: React.RefObject<ContentElement | null>,
+  rootRef: RefObject<RootElement | null>,
+  contentRef: RefObject<ContentElement | null>,
   orientation: Orientation
 ) {
-  const onSubscribe = React.useCallback(
+  const onSubscribe = useCallback(
     (callback: () => void) => resizeObserverStore.subscribe(callback),
     []
   );
 
-  const getSnapshot = React.useCallback(
+  const getSnapshot = useCallback(
     () => resizeObserverStore.getSnapshot(rootRef.current, contentRef.current, orientation),
     [rootRef, contentRef, orientation]
   );
 
-  return React.useSyncExternalStore(onSubscribe, getSnapshot, getSnapshot);
+  return useSyncExternalStore(onSubscribe, getSnapshot, getSnapshot);
 }
 
-interface DivProps extends React.ComponentProps<"div"> {
+interface DivProps extends ComponentProps<"div"> {
   asChild?: boolean;
 }
 
@@ -223,8 +238,8 @@ interface MarqueeContextValue {
   dir: Direction;
   speed: number;
   loopCount: number;
-  contentRef: React.RefObject<ContentElement | null>;
-  rootRef: React.RefObject<RootElement | null>;
+  contentRef: RefObject<ContentElement | null>;
+  rootRef: RefObject<RootElement | null>;
   autoFill: boolean;
   pauseOnHover: boolean;
   pauseOnKeyboard: boolean;
@@ -232,10 +247,10 @@ interface MarqueeContextValue {
   paused: boolean;
 }
 
-const MarqueeContext = React.createContext<MarqueeContextValue | null>(null);
+const MarqueeContext = createContext<MarqueeContextValue | null>(null);
 
 function useMarqueeContext(consumerName: string) {
-  const context = React.useContext(MarqueeContext);
+  const context = use(MarqueeContext);
   if (!context) {
     throw new Error(`\`${consumerName}\` must be used within \`${ROOT_NAME}\``);
   }
@@ -278,14 +293,14 @@ function Marquee(props: MarqueeProps) {
 
   const dir = DirectionPrimitive.useDirection(dirProp);
 
-  const rootRef = React.useRef<RootElement>(null);
-  const contentRef = React.useRef<ContentElement>(null);
+  const rootRef = useRef<RootElement>(null);
+  const contentRef = useRef<ContentElement>(null);
   const composedRef = useComposedRefs(ref, rootRef);
 
-  const [paused, setPaused] = React.useState(false);
+  const [paused, setPaused] = useState(false);
 
-  const onKeyDown = React.useCallback(
-    (event: React.KeyboardEvent) => {
+  const onKeyDown = useCallback(
+    (event: KeyboardEvent) => {
       if (pauseOnKeyboard && event.key === " ") {
         event.preventDefault();
         setPaused((prev) => !prev);
@@ -296,7 +311,7 @@ function Marquee(props: MarqueeProps) {
 
   const dimensions = useResizeObserverStore(rootRef, contentRef, orientation);
 
-  const duration = React.useMemo(() => {
+  const duration = useMemo(() => {
     const safeSpeed = Math.max(0.001, speed);
 
     if (!dimensions) {
@@ -314,7 +329,7 @@ function Marquee(props: MarqueeProps) {
     }
   }, [dimensions, speed, autoFill]);
 
-  const style = React.useMemo<React.CSSProperties>(
+  const style = useMemo<CSSProperties>(
     () => ({
       "--marquee-duration": `${duration}s`,
       "--marquee-gap": gap,
@@ -326,7 +341,7 @@ function Marquee(props: MarqueeProps) {
     [duration, gap, delay, loopCount, styleProp]
   );
 
-  const contextValue = React.useMemo<MarqueeContextValue>(
+  const contextValue = useMemo<MarqueeContextValue>(
     () => ({
       side,
       orientation,
@@ -358,7 +373,7 @@ function Marquee(props: MarqueeProps) {
   const MarqueePrimitive = asChild ? SlotPrimitive.Slot : "div";
 
   return (
-    <MarqueeContext.Provider value={contextValue}>
+    <MarqueeContext value={contextValue}>
       <div data-slot="marquee-wrapper" className="grid">
         <MarqueePrimitive
           role="marquee"
@@ -383,7 +398,7 @@ function Marquee(props: MarqueeProps) {
           onKeyDown={pauseOnKeyboard ? onKeyDown : undefined}
         />
       </div>
-    </MarqueeContext.Provider>
+    </MarqueeContext>
   );
 }
 
@@ -443,7 +458,7 @@ function MarqueeContent(props: DivProps) {
     context.orientation
   );
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (context.rootRef.current && context.contentRef.current) {
       resizeObserverStore.observe(context.rootRef.current, context.contentRef.current);
 
@@ -453,7 +468,7 @@ function MarqueeContent(props: DivProps) {
     }
   }, [context.rootRef, context.contentRef]);
 
-  const multiplier = React.useMemo(() => {
+  const multiplier = useMemo(() => {
     if (!context.autoFill || !dimensions) return 1;
 
     const { rootSize, contentSize } = dimensions;
@@ -462,16 +477,16 @@ function MarqueeContent(props: DivProps) {
     return contentSize < rootSize ? Math.ceil(rootSize / contentSize) : 1;
   }, [context.autoFill, dimensions]);
 
-  const onMultipliedChildrenRender = React.useCallback(
+  const onMultipliedChildrenRender = useCallback(
     (count: number) => {
       return Array.from({ length: Math.max(0, count) }).map((_, i) => (
-        <React.Fragment key={i}>{children}</React.Fragment>
+        <Fragment key={i}>{children}</Fragment>
       ));
     },
     [children]
   );
 
-  const style = React.useMemo(
+  const style = useMemo(
     () => ({
       ...styleProp,
       animationDuration: "var(--marquee-duration)",

@@ -1,12 +1,23 @@
 "use client";
 // 文档地址 https://www.diceui.com/docs/components/radix/scroll-spy
+import {
+  createContext,
+  use,
+  useMemo,
+  useRef,
+  useSyncExternalStore,
+  type ComponentProps,
+  type ComponentRef,
+  type MouseEvent,
+  type RefObject,
+} from "react";
 import { Direction as DirectionPrimitive, Slot as SlotPrimitive } from "radix-ui";
-import * as React from "react";
 import { useComposedRefs } from "@rap/utils/compose-refs";
 import { cn } from "@rap/utils";
 import { useAsRef } from "@rap/hooks/use-as-ref";
 import { useIsomorphicLayoutEffect } from "@rap/hooks/use-isomorphic-layout-effect";
 import { useLazyRef } from "@rap/hooks/use-lazy-ref";
+import { useMemoizedFn } from "@rap/hooks/use-memoized-fn";
 
 const ROOT_NAME = "ScrollSpy";
 const NAV_NAME = "ScrollSpyNav";
@@ -17,8 +28,8 @@ const SECTION_NAME = "ScrollSpySection";
 type Direction = "ltr" | "rtl";
 type Orientation = "horizontal" | "vertical";
 
-type LinkElement = React.ComponentRef<typeof ScrollSpyLink>;
-type SectionElement = React.ComponentRef<typeof ScrollSpySection>;
+type LinkElement = ComponentRef<typeof ScrollSpyLink>;
+type SectionElement = ComponentRef<typeof ScrollSpySection>;
 
 function getDefaultScrollBehavior(): ScrollBehavior {
   if (typeof window === "undefined") return "smooth";
@@ -36,10 +47,10 @@ interface Store {
   notify: () => void;
 }
 
-const StoreContext = React.createContext<Store | null>(null);
+const StoreContext = createContext<Store | null>(null);
 
 function useStore<T>(selector: (state: StoreState) => T, ogStore?: Store | null): T {
-  const contextStore = React.useContext(StoreContext);
+  const contextStore = use(StoreContext);
 
   const store = ogStore ?? contextStore;
 
@@ -47,9 +58,9 @@ function useStore<T>(selector: (state: StoreState) => T, ogStore?: Store | null)
     throw new Error(`\`useStore\` must be used within \`${ROOT_NAME}\``);
   }
 
-  const getSnapshot = React.useCallback(() => selector(store.getState()), [store, selector]);
+  const getSnapshot = useMemoizedFn(() => selector(store.getState()));
 
-  return React.useSyncExternalStore(store.subscribe, getSnapshot, getSnapshot);
+  return useSyncExternalStore(store.subscribe, getSnapshot, getSnapshot);
 }
 
 interface ScrollSpyContextValue {
@@ -58,23 +69,23 @@ interface ScrollSpyContextValue {
   dir: Direction;
   orientation: Orientation;
   scrollContainer: HTMLElement | null;
-  isScrollingRef: React.RefObject<boolean>;
+  isScrollingRef: RefObject<boolean>;
   onSectionRegister: (id: string, element: SectionElement) => void;
   onSectionUnregister: (id: string) => void;
   onScrollToSection: (sectionId: string) => void;
 }
 
-const ScrollSpyContext = React.createContext<ScrollSpyContextValue | null>(null);
+const ScrollSpyContext = createContext<ScrollSpyContextValue | null>(null);
 
 function useScrollSpyContext(consumerName: string) {
-  const context = React.useContext(ScrollSpyContext);
+  const context = use(ScrollSpyContext);
   if (!context) {
     throw new Error(`\`${consumerName}\` must be used within \`${ROOT_NAME}\``);
   }
   return context;
 }
 
-interface ScrollSpyProps extends React.ComponentProps<"div"> {
+interface ScrollSpyProps extends ComponentProps<"div"> {
   value?: string;
   defaultValue?: string;
   onValueChange?: (value: string) => void;
@@ -113,7 +124,7 @@ function ScrollSpy(props: ScrollSpyProps) {
   const listenersRef = useLazyRef(() => new Set<() => void>());
   const onValueChangeRef = useAsRef(onValueChange);
 
-  const store = React.useMemo<Store>(() => {
+  const store = useMemo<Store>(() => {
     return {
       subscribe: (cb) => {
         listenersRef.current.add(cb);
@@ -141,65 +152,62 @@ function ScrollSpy(props: ScrollSpyProps) {
     };
   }, [listenersRef, stateRef, onValueChangeRef]);
 
-  const sectionMapRef = React.useRef(new Map<string, Element>());
-  const isScrollingRef = React.useRef(false);
-  const rafIdRef = React.useRef<number | null>(null);
-  const isMountedRef = React.useRef(false);
-  const scrollTimeoutRef = React.useRef<number | null>(null);
+  const sectionMapRef = useRef(new Map<string, Element>());
+  const isScrollingRef = useRef(false);
+  const rafIdRef = useRef<number | null>(null);
+  const isMountedRef = useRef(false);
+  const scrollTimeoutRef = useRef<number | null>(null);
 
-  const onSectionRegister = React.useCallback((id: string, element: SectionElement) => {
+  const onSectionRegister = useMemoizedFn((id: string, element: SectionElement) => {
     sectionMapRef.current.set(id, element);
-  }, []);
+  });
 
-  const onSectionUnregister = React.useCallback((id: string) => {
+  const onSectionUnregister = useMemoizedFn((id: string) => {
     sectionMapRef.current.delete(id);
-  }, []);
+  });
 
-  const onScrollToSection = React.useCallback(
-    (sectionId: string) => {
-      const section = scrollContainer
-        ? scrollContainer.querySelector(`#${sectionId}`)
-        : document.getElementById(sectionId);
+  const onScrollToSection = useMemoizedFn((sectionId: string) => {
+    const section = scrollContainer
+      ? scrollContainer.querySelector(`#${sectionId}`)
+      : document.getElementById(sectionId);
 
-      if (!section) {
-        store.setState("value", sectionId);
-        return;
-      }
-
-      // Set flag to prevent observer from firing during programmatic scroll
-      isScrollingRef.current = true;
+    if (!section) {
       store.setState("value", sectionId);
+      return;
+    }
 
-      if (scrollContainer) {
-        const containerRect = scrollContainer.getBoundingClientRect();
-        const sectionRect = section.getBoundingClientRect();
-        const scrollTop = scrollContainer.scrollTop;
-        const offsetPosition = sectionRect.top - containerRect.top + scrollTop - offset;
+    // Set flag to prevent observer from firing during programmatic scroll
+    isScrollingRef.current = true;
+    store.setState("value", sectionId);
 
-        scrollContainer.scrollTo({
-          top: offsetPosition,
-          behavior: scrollBehavior,
-        });
-      } else {
-        const sectionPosition = section.getBoundingClientRect().top;
-        const offsetPosition = sectionPosition + window.scrollY - offset;
+    if (scrollContainer) {
+      const containerRect = scrollContainer.getBoundingClientRect();
+      const sectionRect = section.getBoundingClientRect();
+      const scrollTop = scrollContainer.scrollTop;
+      const offsetPosition = sectionRect.top - containerRect.top + scrollTop - offset;
 
-        window.scrollTo({
-          top: offsetPosition,
-          behavior: scrollBehavior,
-        });
-      }
+      scrollContainer.scrollTo({
+        top: offsetPosition,
+        behavior: scrollBehavior,
+      });
+    } else {
+      const sectionPosition = section.getBoundingClientRect().top;
+      const offsetPosition = sectionPosition + window.scrollY - offset;
 
-      if (scrollTimeoutRef.current !== null) {
-        clearTimeout(scrollTimeoutRef.current);
-      }
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: scrollBehavior,
+      });
+    }
 
-      scrollTimeoutRef.current = window.setTimeout(() => {
-        isScrollingRef.current = false;
-      }, 500);
-    },
-    [scrollContainer, offset, scrollBehavior, store]
-  );
+    if (scrollTimeoutRef.current !== null) {
+      clearTimeout(scrollTimeoutRef.current);
+    }
+
+    scrollTimeoutRef.current = window.setTimeout(() => {
+      isScrollingRef.current = false;
+    }, 500);
+  });
 
   useIsomorphicLayoutEffect(() => {
     const currentValue = value ?? defaultValue;
@@ -265,7 +273,7 @@ function ScrollSpy(props: ScrollSpyProps) {
     };
   }, [offset, rootMargin, threshold, scrollContainer]);
 
-  const contextValue = React.useMemo<ScrollSpyContextValue>(
+  const contextValue = useMemo<ScrollSpyContextValue>(
     () => ({
       dir,
       orientation,
@@ -292,8 +300,8 @@ function ScrollSpy(props: ScrollSpyProps) {
   const RootPrimitive = asChild ? SlotPrimitive.Slot : "div";
 
   return (
-    <StoreContext.Provider value={store}>
-      <ScrollSpyContext.Provider value={contextValue}>
+    <StoreContext value={store}>
+      <ScrollSpyContext value={contextValue}>
         <RootPrimitive
           data-orientation={orientation}
           data-slot="scroll-spy"
@@ -301,12 +309,12 @@ function ScrollSpy(props: ScrollSpyProps) {
           {...rootProps}
           className={cn("flex", orientation === "horizontal" ? "flex-row" : "flex-col", className)}
         />
-      </ScrollSpyContext.Provider>
-    </StoreContext.Provider>
+      </ScrollSpyContext>
+    </StoreContext>
   );
 }
 
-interface ScrollSpyNavProps extends React.ComponentProps<"nav"> {
+interface ScrollSpyNavProps extends ComponentProps<"nav"> {
   asChild?: boolean;
 }
 
@@ -332,7 +340,7 @@ function ScrollSpyNav(props: ScrollSpyNavProps) {
   );
 }
 
-interface ScrollSpyLinkProps extends React.ComponentProps<"a"> {
+interface ScrollSpyLinkProps extends ComponentProps<"a"> {
   value: string;
   asChild?: boolean;
 }
@@ -344,14 +352,11 @@ function ScrollSpyLink(props: ScrollSpyLinkProps) {
   const value = useStore((state) => state.value);
   const isActive = value === linkValue;
 
-  const onLinkClick = React.useCallback(
-    (event: React.MouseEvent<LinkElement>) => {
-      event.preventDefault();
-      onClick?.(event);
-      onScrollToSection(linkValue);
-    },
-    [linkValue, onClick, onScrollToSection]
-  );
+  const onLinkClick = useMemoizedFn((event: MouseEvent<LinkElement>) => {
+    event.preventDefault();
+    onClick?.(event);
+    onScrollToSection(linkValue);
+  });
 
   const LinkPrimitive = asChild ? SlotPrimitive.Slot : "a";
 
@@ -371,7 +376,7 @@ function ScrollSpyLink(props: ScrollSpyLinkProps) {
   );
 }
 
-interface ScrollSpyViewportProps extends React.ComponentProps<"div"> {
+interface ScrollSpyViewportProps extends ComponentProps<"div"> {
   asChild?: boolean;
 }
 
@@ -393,7 +398,7 @@ function ScrollSpyViewport(props: ScrollSpyViewportProps) {
   );
 }
 
-interface ScrollSpySectionProps extends React.ComponentProps<"div"> {
+interface ScrollSpySectionProps extends ComponentProps<"div"> {
   value: string;
   asChild?: boolean;
 }
@@ -402,7 +407,7 @@ function ScrollSpySection(props: ScrollSpySectionProps) {
   const { asChild, ref, value, ...sectionProps } = props;
 
   const { orientation, onSectionRegister, onSectionUnregister } = useScrollSpyContext(SECTION_NAME);
-  const sectionRef = React.useRef<SectionElement>(null);
+  const sectionRef = useRef<SectionElement>(null);
   const composedRef = useComposedRefs(ref, sectionRef);
 
   useIsomorphicLayoutEffect(() => {

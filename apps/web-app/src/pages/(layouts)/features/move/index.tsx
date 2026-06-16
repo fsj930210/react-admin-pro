@@ -103,9 +103,13 @@ function DraggableCard() {
 }
 
 function DraggableDialog() {
+  const [open, setOpen] = useState(false);
+
   return (
     <MovableDialog
-      triggerChildren={<Button variant="outline">打开可移动 Dialog</Button>}
+      open={open}
+      onOpenChange={setOpen}
+      trigger={<Button variant="outline">打开可移动 Dialog</Button>}
       header={
         <>
           <DialogTitle>可移动 Dialog</DialogTitle>

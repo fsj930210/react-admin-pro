@@ -13,6 +13,7 @@ import type {
   TreeStateStore,
   TreeVisiblePipeline,
 } from "../types";
+import { createContext } from "react";
 
 type Listener = () => void;
 

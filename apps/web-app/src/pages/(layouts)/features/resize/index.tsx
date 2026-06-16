@@ -125,6 +125,8 @@ function ResizableDrawer() {
 }
 
 function ResizeFeaturePage() {
+  const [dialogOpen, setDialogOpen] = useState(false);
+
   return (
     <div className="relative min-h-[800px] space-y-8 p-6">
       <h1 className="text-2xl font-bold">useResize Hook 示例</h1>
@@ -139,8 +141,10 @@ function ResizeFeaturePage() {
       <section className="space-y-4">
         <h2 className="text-xl font-semibold">3. Dialog</h2>
         <ResizableDialog
+          open={dialogOpen}
+          onOpenChange={setDialogOpen}
           header={<DialogTitle>可调整尺寸的 Dialog</DialogTitle>}
-          triggerChildren={<Button>打开 Dialog</Button>}
+          trigger={<Button>打开 Dialog</Button>}
           // resizeOptions={{
           // 	minSize: { width: 320, height: 200 },
           // 	maxSize: { width: 1000, height: 800 },

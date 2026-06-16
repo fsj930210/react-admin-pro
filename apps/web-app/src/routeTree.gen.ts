@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from "./pages/__root";
 import { Route as layoutsRouteRouteImport } from "./pages/(layouts)/route";
 import { Route as IndexRouteImport } from "./pages/index";
+import { Route as UiComponentsTestIndexRouteImport } from "./pages/ui-components-test/index";
 import { Route as LoginIndexRouteImport } from "./pages/login/index";
 import { Route as layoutsSystemIndexRouteImport } from "./pages/(layouts)/system/index";
 import { Route as layoutsOverviewIndexRouteImport } from "./pages/(layouts)/overview/index";
@@ -64,6 +65,11 @@ const layoutsRouteRoute = layoutsRouteRouteImport.update({
 const IndexRoute = IndexRouteImport.update({
   id: "/",
   path: "/",
+  getParentRoute: () => rootRouteImport,
+} as any);
+const UiComponentsTestIndexRoute = UiComponentsTestIndexRouteImport.update({
+  id: "/ui-components-test/",
+  path: "/ui-components-test/",
   getParentRoute: () => rootRouteImport,
 } as any);
 const LoginIndexRoute = LoginIndexRouteImport.update({
@@ -325,6 +331,7 @@ const layoutsNestedMenuNestedMenu1NestedMenu12NestedMenu121Route =
 export interface FileRoutesByFullPath {
   "/": typeof IndexRoute;
   "/login/": typeof LoginIndexRoute;
+  "/ui-components-test/": typeof UiComponentsTestIndexRoute;
   "/nested-menu/nested-menu-3": typeof layoutsNestedMenuNestedMenu3Route;
   "/about/": typeof layoutsAboutIndexRoute;
   "/components/": typeof layoutsComponentsIndexRoute;
@@ -373,6 +380,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   "/": typeof IndexRoute;
   "/login": typeof LoginIndexRoute;
+  "/ui-components-test": typeof UiComponentsTestIndexRoute;
   "/nested-menu/nested-menu-3": typeof layoutsNestedMenuNestedMenu3Route;
   "/about": typeof layoutsAboutIndexRoute;
   "/components": typeof layoutsComponentsIndexRoute;
@@ -423,6 +431,7 @@ export interface FileRoutesById {
   "/": typeof IndexRoute;
   "/(layouts)": typeof layoutsRouteRouteWithChildren;
   "/login/": typeof LoginIndexRoute;
+  "/ui-components-test/": typeof UiComponentsTestIndexRoute;
   "/(layouts)/nested-menu/nested-menu-3": typeof layoutsNestedMenuNestedMenu3Route;
   "/(layouts)/about/": typeof layoutsAboutIndexRoute;
   "/(layouts)/components/": typeof layoutsComponentsIndexRoute;
@@ -473,6 +482,7 @@ export interface FileRouteTypes {
   fullPaths:
     | "/"
     | "/login/"
+    | "/ui-components-test/"
     | "/nested-menu/nested-menu-3"
     | "/about/"
     | "/components/"
@@ -521,6 +531,7 @@ export interface FileRouteTypes {
   to:
     | "/"
     | "/login"
+    | "/ui-components-test"
     | "/nested-menu/nested-menu-3"
     | "/about"
     | "/components"
@@ -570,6 +581,7 @@ export interface FileRouteTypes {
     | "/"
     | "/(layouts)"
     | "/login/"
+    | "/ui-components-test/"
     | "/(layouts)/nested-menu/nested-menu-3"
     | "/(layouts)/about/"
     | "/(layouts)/components/"
@@ -620,6 +632,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute;
   layoutsRouteRoute: typeof layoutsRouteRouteWithChildren;
   LoginIndexRoute: typeof LoginIndexRoute;
+  UiComponentsTestIndexRoute: typeof UiComponentsTestIndexRoute;
 }
 
 declare module "@tanstack/react-router" {
@@ -636,6 +649,13 @@ declare module "@tanstack/react-router" {
       path: "/";
       fullPath: "/";
       preLoaderRoute: typeof IndexRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
+    "/ui-components-test/": {
+      id: "/ui-components-test/";
+      path: "/ui-components-test";
+      fullPath: "/ui-components-test/";
+      preLoaderRoute: typeof UiComponentsTestIndexRouteImport;
       parentRoute: typeof rootRouteImport;
     };
     "/login/": {
@@ -1066,6 +1086,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   layoutsRouteRoute: layoutsRouteRouteWithChildren,
   LoginIndexRoute: LoginIndexRoute,
+  UiComponentsTestIndexRoute: UiComponentsTestIndexRoute,
 };
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

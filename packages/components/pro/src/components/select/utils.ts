@@ -1,4 +1,4 @@
-import type React from "react";
+import { type ReactNode } from "react";
 import type {
   SelectData,
   SelectFieldNames,
@@ -8,6 +8,7 @@ import type {
   SelectRow,
   SelectValue,
 } from "./types";
+import * as React from "react";
 
 function isObjectRecord(value: unknown): value is object {
   return typeof value === "object" && value !== null;

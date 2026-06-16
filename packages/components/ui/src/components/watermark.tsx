@@ -1,8 +1,17 @@
 "use client";
 
-import * as React from "react";
-
 import { cn } from "@rap/utils";
+import {
+  createElement,
+  useEffect,
+  useImperativeHandle,
+  useMemo,
+  useRef,
+  useState,
+  type CSSProperties,
+  type ComponentProps,
+} from "react";
+import { useMemoizedFn } from "@rap/hooks/use-memoized-fn";
 
 type WatermarkContent = string | string[];
 
@@ -10,8 +19,8 @@ interface WatermarkFont {
   color?: string;
   fontFamily?: string;
   fontSize?: number;
-  fontStyle?: React.CSSProperties["fontStyle"];
-  fontWeight?: React.CSSProperties["fontWeight"];
+  fontStyle?: CSSProperties["fontStyle"];
+  fontWeight?: CSSProperties["fontWeight"];
 }
 
 type WatermarkTamperType = "removed" | "style";
@@ -31,7 +40,7 @@ interface WatermarkGuardOptions {
   onTamper?: (event: WatermarkTamperEvent) => void;
 }
 
-interface WatermarkProps extends Omit<React.ComponentProps<"div">, "content"> {
+interface WatermarkProps extends Omit<ComponentProps<"div">, "content"> {
   content?: WatermarkContent;
   image?: string;
   imageCrossOrigin?: HTMLImageElement["crossOrigin"];
@@ -45,7 +54,7 @@ interface WatermarkProps extends Omit<React.ComponentProps<"div">, "content"> {
   opacity?: number;
   fullscreen?: boolean;
   guard?: boolean | WatermarkGuardOptions;
-  pointerEvents?: React.CSSProperties["pointerEvents"];
+  pointerEvents?: CSSProperties["pointerEvents"];
 }
 
 const DEFAULT_CONTENT = "";
@@ -173,7 +182,7 @@ async function createWatermarkDataUrl(options: {
 function isWatermarkStyleChanged(
   element: HTMLElement,
   expectedZIndex: number,
-  expectedPointerEvents: React.CSSProperties["pointerEvents"]
+  expectedPointerEvents: CSSProperties["pointerEvents"]
 ) {
   const style = window.getComputedStyle(element);
 
@@ -210,15 +219,17 @@ function Watermark(props: WatermarkProps) {
     ...rootProps
   } = props;
 
-  const rootRef = React.useRef<HTMLDivElement>(null);
-  const watermarkRef = React.useRef<HTMLDivElement>(null);
-  const restoreCountRef = React.useRef(0);
-  const [backgroundImage, setBackgroundImage] = React.useState("");
-  const guardOptions = React.useMemo(() => getGuardOptions(guard), [guard]);
+  const rootRef = useRef<HTMLDivElement>(null);
+  const watermarkRef = useRef<HTMLDivElement>(null);
+  const restoreCountRef = useRef(0);
+  const [backgroundImage, setBackgroundImage] = useState("");
+  // useMemo normalizes guard options once per guard prop change; observers read the normalized object.
+  const guardOptions = useMemo(() => getGuardOptions(guard), [guard]);
 
-  React.useImperativeHandle(ref, () => rootRef.current as HTMLDivElement);
+  useImperativeHandle(ref, () => rootRef.current as HTMLDivElement);
 
-  React.useEffect(() => {
+  // useEffect regenerates the canvas data URL when visual watermark inputs change.
+  useEffect(() => {
     let cancelled = false;
 
     createWatermarkDataUrl({
@@ -246,7 +257,8 @@ function Watermark(props: WatermarkProps) {
     };
   }, [content, image, imageCrossOrigin, font, width, height, rotate, gap, opacity]);
 
-  const watermarkStyle = React.useMemo<React.CSSProperties>(
+  // useMemo keeps the layer style object stable for guard repair and render reuse.
+  const watermarkStyle = useMemo<CSSProperties>(
     () => ({
       position: fullscreen ? "fixed" : "absolute",
       inset: 0,
@@ -260,37 +272,32 @@ function Watermark(props: WatermarkProps) {
     [backgroundImage, fullscreen, gap, height, offset, pointerEvents, width, zIndex]
   );
 
-  const restoreWatermarkStyle = React.useCallback(
-    (element: HTMLElement) => {
-      Object.assign(element.style, watermarkStyle);
-    },
-    [watermarkStyle]
-  );
+  const restoreWatermarkStyle = useMemoizedFn((element: HTMLElement) => {
+    Object.assign(element.style, watermarkStyle);
+  });
 
-  const repairWatermark = React.useCallback(
-    (type: WatermarkTamperType, target: HTMLElement) => {
-      guardOptions.onTamper({ type, target });
+  const repairWatermark = useMemoizedFn((type: WatermarkTamperType, target: HTMLElement) => {
+    guardOptions.onTamper({ type, target });
 
-      if (!guardOptions.restore) return;
-      if (restoreCountRef.current >= guardOptions.maxRestoreCount) return;
+    if (!guardOptions.restore) return;
+    if (restoreCountRef.current >= guardOptions.maxRestoreCount) return;
 
-      const root = rootRef.current;
-      const watermark = watermarkRef.current;
+    const root = rootRef.current;
+    const watermark = watermarkRef.current;
 
-      if (!root || !watermark) return;
+    if (!root || !watermark) return;
 
-      restoreCountRef.current += 1;
+    restoreCountRef.current += 1;
 
-      if (!root.contains(watermark)) {
-        root.appendChild(watermark);
-      }
+    if (!root.contains(watermark)) {
+      root.appendChild(watermark);
+    }
 
-      restoreWatermarkStyle(watermark);
-    },
-    [guardOptions, restoreWatermarkStyle]
-  );
+    restoreWatermarkStyle(watermark);
+  });
 
-  React.useEffect(() => {
+  // useEffect owns MutationObserver subscriptions and recreates them when guard settings change.
+  useEffect(() => {
     if (!guardOptions.enabled || typeof MutationObserver === "undefined") return;
 
     const root = rootRef.current;
@@ -326,7 +333,8 @@ function Watermark(props: WatermarkProps) {
     };
   }, [fullscreen, guardOptions, pointerEvents, repairWatermark, zIndex]);
 
-  React.useEffect(() => {
+  // useEffect owns interval-based repair checks and clears the timer when settings change.
+  useEffect(() => {
     if (!guardOptions.enabled || !guardOptions.interval) return;
 
     const intervalId = window.setInterval(() => {

@@ -1,19 +1,19 @@
-import * as React from "react";
 import { Separator } from "../../../separator";
 import { ToolbarButton } from "../toolbar-button";
 import { Copy, ExternalLink, Link2 } from "lucide-react";
+import { useCallback, useState, type FC, type MouseEvent } from "react";
 
 interface LinkPopoverBlockProps {
   url: string;
   onClear: () => void;
-  onEdit: (e: React.MouseEvent<HTMLButtonElement>) => void;
+  onEdit: (e: MouseEvent<HTMLButtonElement>) => void;
 }
 
-export const LinkPopoverBlock: React.FC<LinkPopoverBlockProps> = ({ url, onClear, onEdit }) => {
-  const [copyTitle, setCopyTitle] = React.useState<string>("Copy");
+export const LinkPopoverBlock: FC<LinkPopoverBlockProps> = ({ url, onClear, onEdit }) => {
+  const [copyTitle, setCopyTitle] = useState<string>("Copy");
 
-  const handleCopy = React.useCallback(
-    (e: React.MouseEvent<HTMLButtonElement>) => {
+  const handleCopy = useCallback(
+    (e: MouseEvent<HTMLButtonElement>) => {
       e.preventDefault();
       navigator.clipboard
         .writeText(url)
@@ -26,7 +26,7 @@ export const LinkPopoverBlock: React.FC<LinkPopoverBlockProps> = ({ url, onClear
     [url]
   );
 
-  const handleOpenLink = React.useCallback(() => {
+  const handleOpenLink = useCallback(() => {
     window.open(url, "_blank", "noopener,noreferrer");
   }, [url]);
 

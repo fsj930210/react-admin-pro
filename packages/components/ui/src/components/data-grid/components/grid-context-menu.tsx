@@ -3,8 +3,9 @@ import { Choose, Otherwise, When } from "@rap/components-ui/when";
 import { cn } from "@rap/utils";
 import type { Column, Table } from "@tanstack/react-table";
 import { ArrowDown, ArrowRight, ArrowUp, EyeOff, Pin, PinOff } from "lucide-react";
-import { type ReactNode, useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { DataGridColumnToggle } from "./column-toggle";
+import * as React from "react";
 
 export interface HeaderContextMenuState<TData> {
   x: number;

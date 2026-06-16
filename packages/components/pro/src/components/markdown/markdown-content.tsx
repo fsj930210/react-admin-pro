@@ -3,11 +3,12 @@ import rehypeHighlight from "rehype-highlight";
 import rehypeRaw from "rehype-raw";
 import rehypeSanitize from "rehype-sanitize";
 import remarkGfm from "remark-gfm";
-import { useEffect, useMemo } from "react";
+import { useMemo } from "react";
+import "highlight.js/styles/github.css";
 
 import type { MarkdownRendererProps } from "./index";
 
-interface MarkdownEnhancedProps {
+interface MarkdownContentProps {
   value: string;
   baseComponents: Components;
   enableGfm?: MarkdownRendererProps["enableGfm"];
@@ -16,19 +17,14 @@ interface MarkdownEnhancedProps {
   enableCodeHighlight?: MarkdownRendererProps["enableCodeHighlight"];
 }
 
-export default function MarkdownEnhanced({
+export function MarkdownContent({
   value,
   baseComponents,
   enableGfm = true,
   enableRawHtml = false,
   sanitizeRawHtml = true,
   enableCodeHighlight = false,
-}: MarkdownEnhancedProps) {
-  useEffect(() => {
-    if (!enableCodeHighlight) return;
-    void import("highlight.js/styles/github.css");
-  }, [enableCodeHighlight]);
-
+}: MarkdownContentProps) {
   const remarkPlugins = useMemo(() => (enableGfm ? [remarkGfm] : []), [enableGfm]);
   const rehypePlugins = useMemo(
     () => [

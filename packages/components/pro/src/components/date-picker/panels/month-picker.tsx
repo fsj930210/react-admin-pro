@@ -1,5 +1,5 @@
 import { cn } from "@rap/utils";
-import type { ReactNode } from "react";
+import { type ReactNode } from "react";
 import { PickerCell } from "../picker-cell";
 import type { Dayjs, PickerCellRenderInfo, PickerMode, RangeValue } from "../types";
 import { buildMonthCellInfos } from "../utils";

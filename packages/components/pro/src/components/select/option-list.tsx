@@ -1,10 +1,10 @@
-import type React from "react";
+import { useRef, type ReactNode } from "react";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { Check } from "lucide-react";
-import { useRef } from "react";
 import { Listbox, ListboxGroup, ListboxGroupLabel, ListboxItem } from "@rap/components-ui/listbox";
 import { cn } from "@rap/utils";
 import type { SelectOption, SelectOptionRenderInfo, SelectRow, SelectValue } from "./types";
+import * as React from "react";
 
 interface SelectOptionListProps<V extends SelectValue> {
   rows: SelectRow<V>[];

@@ -1,6 +1,5 @@
 import { Match, RouterContextProvider } from "@tanstack/react-router";
-import { Suspense, useCallback, useMemo } from "react";
-import type { ReactNode } from "react";
+import { Suspense, useCallback, useMemo, type ReactNode } from "react";
 import { getContentMatch } from "./route-match";
 import { useRouterStore } from "./use-router-store";
 import type { TabRouterEntry } from "./types";

@@ -1,6 +1,6 @@
 import { Button } from "@rap/components-ui/button";
 import { cn } from "@rap/utils";
-import type { ReactNode } from "react";
+import { type ReactNode } from "react";
 import type { PickerFooterActions, PickerPanelContext } from "./types";
 
 interface PickerFooterProps {

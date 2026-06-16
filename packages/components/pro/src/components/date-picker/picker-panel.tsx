@@ -1,5 +1,5 @@
 import { cn } from "@rap/utils";
-import type { ReactNode } from "react";
+import { type ReactNode } from "react";
 import { PickerBody } from "./picker-body";
 import { PickerFooter } from "./picker-footer";
 import { PickerHeader } from "./picker-header";

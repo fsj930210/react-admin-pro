@@ -1,4 +1,3 @@
-import * as React from "react";
 import { NodeViewWrapper, type NodeViewProps } from "@tiptap/react";
 import type { ElementDimensions } from "../hooks/use-drag-resize";
 import { useDragResize } from "../hooks/use-drag-resize";
@@ -12,6 +11,16 @@ import { AlertCircle, Trash2 } from "lucide-react";
 import { ImageOverlay } from "./image-overlay";
 import { Spinner } from "../../../components/spinner";
 import type { UploadReturnType } from "../image";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type FC,
+  type PointerEvent,
+  type SyntheticEvent,
+} from "react";
 
 const MAX_HEIGHT = 600;
 const MIN_HEIGHT = 120;
@@ -31,23 +40,18 @@ const normalizeUploadResponse = (res: UploadReturnType) => ({
   id: typeof res === "string" ? randomId() : res.id,
 });
 
-export const ImageViewBlock: React.FC<NodeViewProps> = ({
-  editor,
-  node,
-  selected,
-  updateAttributes,
-}) => {
+export const ImageViewBlock: FC<NodeViewProps> = ({ editor, node, selected, updateAttributes }) => {
   const { src: initialSrc, width: initialWidth, height: initialHeight, fileName } = node.attrs;
-  const uploadAttemptedRef = React.useRef(false);
+  const uploadAttemptedRef = useRef(false);
 
-  const initSrc = React.useMemo(() => {
+  const initSrc = useMemo(() => {
     if (typeof initialSrc === "string") {
       return initialSrc;
     }
     return initialSrc.src;
   }, [initialSrc]);
 
-  const [imageState, setImageState] = React.useState<ImageState>({
+  const [imageState, setImageState] = useState<ImageState>({
     src: initSrc,
     isServerUploading: false,
     imageLoaded: false,
@@ -56,10 +60,10 @@ export const ImageViewBlock: React.FC<NodeViewProps> = ({
     naturalSize: { width: initialWidth, height: initialHeight },
   });
 
-  const containerRef = React.useRef<HTMLDivElement>(null);
-  const [activeResizeHandle, setActiveResizeHandle] = React.useState<"left" | "right" | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [activeResizeHandle, setActiveResizeHandle] = useState<"left" | "right" | null>(null);
 
-  const onDimensionsChange = React.useCallback(
+  const onDimensionsChange = useCallback(
     ({ width, height }: ElementDimensions) => {
       updateAttributes({ width, height });
     },
@@ -92,10 +96,10 @@ export const ImageViewBlock: React.FC<NodeViewProps> = ({
       maxWidth: containerMaxWidth > 0 ? containerMaxWidth : maxWidth,
     });
 
-  const shouldMerge = React.useMemo(() => currentWidth <= 180, [currentWidth]);
+  const shouldMerge = useMemo(() => currentWidth <= 180, [currentWidth]);
 
-  const handleImageLoad = React.useCallback(
-    (ev: React.SyntheticEvent<HTMLImageElement>) => {
+  const handleImageLoad = useCallback(
+    (ev: SyntheticEvent<HTMLImageElement>) => {
       const img = ev.target as HTMLImageElement;
       const newNaturalSize = {
         width: img.naturalWidth,
@@ -120,29 +124,29 @@ export const ImageViewBlock: React.FC<NodeViewProps> = ({
     [initialWidth, updateAttributes, updateDimensions]
   );
 
-  const handleImageError = React.useCallback(() => {
+  const handleImageError = useCallback(() => {
     setImageState((prev) => ({ ...prev, error: true, imageLoaded: true }));
   }, []);
 
-  const handleResizeStart = React.useCallback(
-    (direction: "left" | "right") => (event: React.PointerEvent<HTMLDivElement>) => {
+  const handleResizeStart = useCallback(
+    (direction: "left" | "right") => (event: PointerEvent<HTMLDivElement>) => {
       setActiveResizeHandle(direction);
       initiateResize(direction)(event);
     },
     [initiateResize]
   );
 
-  const handleResizeEnd = React.useCallback(() => {
+  const handleResizeEnd = useCallback(() => {
     setActiveResizeHandle(null);
   }, []);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (!isResizing) {
       handleResizeEnd();
     }
   }, [isResizing, handleResizeEnd]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     const handleImage = async () => {
       if (!initSrc.startsWith("blob:") || uploadAttemptedRef.current) {
         return;

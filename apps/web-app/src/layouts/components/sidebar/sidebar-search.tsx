@@ -29,7 +29,7 @@ export function SidebarSearch({ onChange }: sidebarSearchProps) {
         placeholder={t("sidebar.searchPlaceholder")}
         ref={searchRef as React.RefObject<HTMLInputElement>}
         className={cn("w-full", state === "collapsed" ? "hidden" : "")}
-        onValueChange={handleInputChange}
+        onChange={(event) => handleInputChange(event.target.value)}
         value={searchKeyword}
         onClear={handleClearSearch}
         allowClear

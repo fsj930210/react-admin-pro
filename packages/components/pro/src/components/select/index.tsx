@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { type ReactNode } from "react";
 import { Popover, PopoverTrigger } from "@rap/components-ui/popover";
 import { Button } from "@rap/components-ui/button";
 import { useSelect } from "./use-select";

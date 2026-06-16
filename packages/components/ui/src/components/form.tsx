@@ -1,6 +1,6 @@
 "use client";
 
-import * as React from "react";
+import { createContext, use, useId, type ComponentProps, type ReactNode } from "react";
 import { Slot } from "radix-ui";
 import { type AnyFieldApi, type DeepKeys, type ReactFormExtendedApi } from "@tanstack/react-form";
 
@@ -25,10 +25,10 @@ type FormContextValue<TFormData = unknown> = {
   form: AnyFormApi<TFormData>;
 };
 
-const FormContext = React.createContext<FormContextValue<any> | null>(null);
+const FormContext = createContext<FormContextValue<any> | null>(null);
 
 function useFormContext<TFormData = unknown>() {
-  const formContext = React.use(FormContext);
+  const formContext = use(FormContext);
 
   if (!formContext) {
     throw new Error("useFormContext must be used within a Form component");
@@ -46,10 +46,10 @@ type FormFieldContextValue = {
   formMessageId: string;
 };
 
-const FormFieldContext = React.createContext<FormFieldContextValue | null>(null);
+const FormFieldContext = createContext<FormFieldContextValue | null>(null);
 
 function useFormField() {
-  const fieldContext = React.use(FormFieldContext);
+  const fieldContext = use(FormFieldContext);
 
   if (!fieldContext) {
     throw new Error("useFormField must be used within a FormField component");
@@ -88,9 +88,9 @@ function getIsInvalid<TFormData>(
 }
 
 export type FormProps<TFormData = unknown> = {
-  children: React.ReactNode;
+  children: ReactNode;
   form: AnyFormApi<TFormData>;
-} & React.ComponentProps<"form">;
+} & ComponentProps<"form">;
 
 export function Form<TFormData = unknown>({ children, form, ...props }: FormProps<TFormData>) {
   return (
@@ -107,15 +107,15 @@ type FormFieldProps<
   TName extends DeepKeys<TFormData> = DeepKeys<TFormData>,
 > = {
   name: TName;
-  children?: React.ReactNode;
-  description?: React.ReactNode;
-  fieldProps?: React.ComponentProps<typeof Field>;
-  label?: React.ReactNode;
+  children?: ReactNode;
+  description?: ReactNode;
+  fieldProps?: ComponentProps<typeof Field>;
+  label?: ReactNode;
   messageProps?: FormMessageProps;
-  render?: (props: FormFieldRenderProps) => React.ReactNode;
+  render?: (props: FormFieldRenderProps) => ReactNode;
   showMessage?: boolean;
   validateMode?: ErrorDisplayMode;
-} & Omit<React.ComponentProps<AnyFormApi<TFormData>["Field"]>, "children" | "name">;
+} & Omit<ComponentProps<AnyFormApi<TFormData>["Field"]>, "children" | "name">;
 
 export function FormField<
   TFormData = unknown,
@@ -132,7 +132,7 @@ export function FormField<
   validateMode = "touched",
   ...props
 }: FormFieldProps<TFormData, TName>) {
-  const id = React.useId();
+  const id = useId();
   const { form } = useFormContext<TFormData>();
 
   return (
@@ -186,7 +186,7 @@ export function createFormComponents<TFormData>() {
   };
 }
 
-type FormLabelProps = React.ComponentProps<typeof FieldLabel>;
+type FormLabelProps = ComponentProps<typeof FieldLabel>;
 
 export function FormLabel(props: FormLabelProps) {
   const { formItemId } = useFormField();
@@ -194,7 +194,7 @@ export function FormLabel(props: FormLabelProps) {
   return <FieldLabel htmlFor={formItemId} {...props} />;
 }
 
-type FormControlProps = React.ComponentProps<typeof Slot.Root>;
+type FormControlProps = ComponentProps<typeof Slot.Root>;
 
 export function FormControl(props: FormControlProps) {
   const { field, formDescriptionId, formItemId, formMessageId, isInvalid } = useFormField();
@@ -203,12 +203,12 @@ export function FormControl(props: FormControlProps) {
     name: field.name,
     "aria-describedby": isInvalid ? `${formDescriptionId} ${formMessageId}` : formDescriptionId,
     "aria-invalid": isInvalid,
-  } as React.ComponentProps<typeof Slot.Root>;
+  } as ComponentProps<typeof Slot.Root>;
 
   return <Slot.Root {...controlProps} {...props} />;
 }
 
-type FormDescriptionProps = React.ComponentProps<typeof FieldDescription>;
+type FormDescriptionProps = ComponentProps<typeof FieldDescription>;
 
 export function FormDescription(props: FormDescriptionProps) {
   const { formDescriptionId } = useFormField();
@@ -216,7 +216,7 @@ export function FormDescription(props: FormDescriptionProps) {
   return <FieldDescription id={formDescriptionId} {...props} />;
 }
 
-type FormMessageProps = React.ComponentProps<typeof FieldError>;
+type FormMessageProps = ComponentProps<typeof FieldError>;
 
 export function FormMessage(props: FormMessageProps) {
   const { field, formMessageId, isInvalid } = useFormField();

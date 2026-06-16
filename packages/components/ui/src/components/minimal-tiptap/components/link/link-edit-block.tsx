@@ -1,11 +1,11 @@
-import * as React from "react";
 import { Button } from "../../../button";
 import { Label } from "../../../label";
 import { Switch } from "../../../switch";
 import { Input } from "../../../input";
 import { cn } from "@rap/utils";
+import { useCallback, useRef, useState, type ComponentProps, type FormEvent } from "react";
 
-export interface LinkEditorProps extends React.ComponentProps<"div"> {
+export interface LinkEditorProps extends ComponentProps<"div"> {
   defaultUrl?: string;
   defaultText?: string;
   defaultIsNewTab?: boolean;
@@ -19,13 +19,13 @@ export const LinkEditBlock = ({
   defaultText,
   className,
 }: LinkEditorProps) => {
-  const formRef = React.useRef<HTMLDivElement>(null);
-  const [url, setUrl] = React.useState(defaultUrl || "");
-  const [text, setText] = React.useState(defaultText || "");
-  const [isNewTab, setIsNewTab] = React.useState(defaultIsNewTab || false);
+  const formRef = useRef<HTMLDivElement>(null);
+  const [url, setUrl] = useState(defaultUrl || "");
+  const [text, setText] = useState(defaultText || "");
+  const [isNewTab, setIsNewTab] = useState(defaultIsNewTab || false);
 
-  const handleSave = React.useCallback(
-    (e: React.FormEvent) => {
+  const handleSave = useCallback(
+    (e: FormEvent) => {
       e.preventDefault();
       if (formRef.current) {
         const isValid = Array.from(formRef.current.querySelectorAll("input")).every((input) =>

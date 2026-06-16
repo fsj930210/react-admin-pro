@@ -1,10 +1,11 @@
-import type React from "react";
+import { useId, type ComponentProps, type ReactNode, type RefObject } from "react";
 import { ChevronDown, XCircle } from "lucide-react";
 import { Button } from "@rap/components-ui/button";
 import { Input as UIInput } from "@rap/components-ui/input";
 import { cn } from "@rap/utils";
 import { SelectTagList } from "./tag-list";
 import type { SelectInputProps, SelectOption, SelectProps, SelectValue } from "./types";
+import * as React from "react";
 
 interface SelectTriggerProps<V extends SelectValue> extends Omit<
   React.ComponentProps<"div">,
@@ -81,6 +82,7 @@ export function SelectTrigger<V extends SelectValue>({
   onTagRemove,
   ...rootProps
 }: SelectTriggerProps<V>) {
+  const listboxId = useId();
   const displayValue = searchable ? inputValue : selectedLabel;
   const showClear =
     !!allowClear && !disabled && (values.length > 0 || inputValue.length > 0) && hovered;
@@ -118,7 +120,9 @@ export function SelectTrigger<V extends SelectValue>({
         disabled && "cursor-not-allowed opacity-50",
         rootClassName
       )}
+      // oxlint-disable-next-line jsx-a11y/prefer-tag-over-role: composite trigger cannot be represented by native select/input.
       role="combobox"
+      aria-controls={listboxId}
       aria-expanded={open}
       aria-disabled={disabled}
       tabIndex={searchable || disabled ? -1 : 0}

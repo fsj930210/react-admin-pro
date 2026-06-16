@@ -1,13 +1,29 @@
 ﻿"use client";
 // 鏂囨。鍦板潃 https://www.diceui.com/docs/components/radix/angle-slider
+import {
+  createContext,
+  use,
+  useEffect,
+  useId,
+  useMemo,
+  useRef,
+  useState,
+  useSyncExternalStore,
+  type CSSProperties,
+  type ComponentProps,
+  type ComponentRef,
+  type FocusEvent,
+  type KeyboardEvent,
+  type PointerEvent,
+} from "react";
 import { Direction as DirectionPrimitive, Slot as SlotPrimitive } from "radix-ui";
-import * as React from "react";
 import { useComposedRefs } from "@rap/utils/compose-refs";
 import { cn } from "@rap/utils";
 import { VisuallyHiddenInput } from "./visually-hidden-input";
 import { useAsRef } from "@rap/hooks/use-as-ref";
 import { useIsomorphicLayoutEffect } from "@rap/hooks/use-isomorphic-layout-effect";
 import { useLazyRef } from "@rap/hooks/use-lazy-ref";
+import { useMemoizedFn } from "@rap/hooks/use-memoized-fn";
 
 const ROOT_NAME = "AngleSlider";
 const THUMB_NAME = "AngleSliderThumb";
@@ -17,12 +33,12 @@ const ARROW_KEYS = ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"];
 
 type Direction = "ltr" | "rtl";
 
-interface DivProps extends React.ComponentProps<"div"> {
+interface DivProps extends ComponentProps<"div"> {
   asChild?: boolean;
 }
 
-type RootElement = React.ComponentRef<typeof AngleSlider>;
-type ThumbElement = React.ComponentRef<typeof AngleSliderThumb>;
+type RootElement = ComponentRef<typeof AngleSlider>;
+type ThumbElement = ComponentRef<typeof AngleSliderThumb>;
 
 function clamp(value: number, [min, max]: [number, number]) {
   return Math.min(max, Math.max(min, value));
@@ -103,10 +119,10 @@ interface Store {
   getPositionFromAngle: (angle: number) => { x: number; y: number };
 }
 
-const StoreContext = React.createContext<Store | null>(null);
+const StoreContext = createContext<Store | null>(null);
 
 function useStoreContext(consumerName: string) {
-  const context = React.useContext(StoreContext);
+  const context = use(StoreContext);
   if (!context) {
     throw new Error(`\`${consumerName}\` must be used within \`${ROOT_NAME}\``);
   }
@@ -116,9 +132,9 @@ function useStoreContext(consumerName: string) {
 function useStore<T>(selector: (state: StoreState) => T): T {
   const store = useStoreContext("useStore");
 
-  const getSnapshot = React.useCallback(() => selector(store.getState()), [store, selector]);
+  const getSnapshot = useMemoizedFn(() => selector(store.getState()));
 
-  return React.useSyncExternalStore(store.subscribe, getSnapshot, getSnapshot);
+  return useSyncExternalStore(store.subscribe, getSnapshot, getSnapshot);
 }
 
 interface SliderContextValue {
@@ -127,10 +143,10 @@ interface SliderContextValue {
   form?: string;
 }
 
-const SliderContext = React.createContext<SliderContextValue | null>(null);
+const SliderContext = createContext<SliderContextValue | null>(null);
 
 function useSliderContext(consumerName: string) {
-  const context = React.useContext(SliderContext);
+  const context = use(SliderContext);
   if (!context) {
     throw new Error(`\`${consumerName}\` must be used within \`${ROOT_NAME}\``);
   }
@@ -212,7 +228,7 @@ function AngleSlider(props: AngleSliderProps) {
     onKeyDown: onKeyDownProp,
   });
 
-  const store = React.useMemo<Store>(() => {
+  const store = useMemo<Store>(() => {
     return {
       subscribe: (cb) => {
         listenersRef.current.add(cb);
@@ -364,11 +380,11 @@ function AngleSlider(props: AngleSliderProps) {
 
   const dir = DirectionPrimitive.useDirection(dirProp);
 
-  const [sliderElement, setSliderElement] = React.useState<RootElement | null>(null);
+  const [sliderElement, setSliderElement] = useState<RootElement | null>(null);
   const composedRef = useComposedRefs(ref, setSliderElement);
-  const valuesBeforeSlideStartRef = React.useRef(value ?? defaultValue);
+  const valuesBeforeSlideStartRef = useRef(value ?? defaultValue);
 
-  const contextValue = React.useMemo<SliderContextValue>(
+  const contextValue = useMemo<SliderContextValue>(
     () => ({
       dir,
       name,
@@ -377,29 +393,23 @@ function AngleSlider(props: AngleSliderProps) {
     [dir, name, form]
   );
 
-  const onSliderStart = React.useCallback(
-    (pointerValue: number) => {
-      if (disabled) return;
+  const onSliderStart = useMemoizedFn((pointerValue: number) => {
+    if (disabled) return;
 
-      const values = store.getState().values;
-      const closestIndex = getClosestValueIndex(values, pointerValue);
-      store.setState("valueIndexToChange", closestIndex);
-      store.updateValue(pointerValue, closestIndex);
-    },
-    [store, disabled]
-  );
+    const values = store.getState().values;
+    const closestIndex = getClosestValueIndex(values, pointerValue);
+    store.setState("valueIndexToChange", closestIndex);
+    store.updateValue(pointerValue, closestIndex);
+  });
 
-  const onSliderMove = React.useCallback(
-    (pointerValue: number) => {
-      if (disabled) return;
+  const onSliderMove = useMemoizedFn((pointerValue: number) => {
+    if (disabled) return;
 
-      const valueIndexToChange = store.getState().valueIndexToChange;
-      store.updateValue(pointerValue, valueIndexToChange);
-    },
-    [store, disabled]
-  );
+    const valueIndexToChange = store.getState().valueIndexToChange;
+    store.updateValue(pointerValue, valueIndexToChange);
+  });
 
-  const onSliderEnd = React.useCallback(() => {
+  const onSliderEnd = useMemoizedFn(() => {
     if (disabled) return;
 
     const state = store.getState();
@@ -410,106 +420,94 @@ function AngleSlider(props: AngleSliderProps) {
     if (hasChanged) {
       onValueCommit?.(state.values);
     }
-  }, [store, disabled, onValueCommit]);
+  });
 
-  const onKeyDown = React.useCallback(
-    (event: React.KeyboardEvent<RootElement>) => {
-      propsRef.current.onKeyDown?.(event);
-      if (event.defaultPrevented || disabled) return;
+  const onKeyDown = useMemoizedFn((event: KeyboardEvent<RootElement>) => {
+    propsRef.current.onKeyDown?.(event);
+    if (event.defaultPrevented || disabled) return;
 
-      const state = store.getState();
-      const { values, valueIndexToChange, min, max, step } = state;
-      const currentValue = values[valueIndexToChange] ?? min;
+    const state = store.getState();
+    const { values, valueIndexToChange, min, max, step } = state;
+    const currentValue = values[valueIndexToChange] ?? min;
 
-      if (event.key === "Home") {
-        event.preventDefault();
-        store.updateValue(min, 0, { commit: true });
-      } else if (event.key === "End") {
-        event.preventDefault();
-        store.updateValue(max, values.length - 1, { commit: true });
-      } else if (PAGE_KEYS.concat(ARROW_KEYS).includes(event.key)) {
-        event.preventDefault();
-
-        const isPageKey = PAGE_KEYS.includes(event.key);
-        const isSkipKey = isPageKey || (event.shiftKey && ARROW_KEYS.includes(event.key));
-        const multiplier = isSkipKey ? 10 : 1;
-
-        let direction = 0;
-        const isDecreaseKey = ["ArrowLeft", "ArrowUp", "PageUp"].includes(event.key);
-        direction = isDecreaseKey ? -1 : 1;
-        if (inverted) direction *= -1;
-
-        const stepInDirection = step * multiplier * direction;
-        store.updateValue(currentValue + stepInDirection, valueIndexToChange, {
-          commit: true,
-        });
-      }
-    },
-    [store, propsRef, disabled, inverted]
-  );
-
-  const onPointerDown = React.useCallback(
-    (event: React.PointerEvent<RootElement>) => {
-      propsRef.current.onPointerDown?.(event);
-      if (event.defaultPrevented || disabled) return;
-
-      const target = event.target as HTMLElement;
-      target.setPointerCapture(event.pointerId);
+    if (event.key === "Home") {
+      event.preventDefault();
+      store.updateValue(min, 0, { commit: true });
+    } else if (event.key === "End") {
+      event.preventDefault();
+      store.updateValue(max, values.length - 1, { commit: true });
+    } else if (PAGE_KEYS.concat(ARROW_KEYS).includes(event.key)) {
       event.preventDefault();
 
-      if (!disabled) {
-        valuesBeforeSlideStartRef.current = store.getState().values;
+      const isPageKey = PAGE_KEYS.includes(event.key);
+      const isSkipKey = isPageKey || (event.shiftKey && ARROW_KEYS.includes(event.key));
+      const multiplier = isSkipKey ? 10 : 1;
 
-        const thumbs = Array.from(store.getState().thumbs.values());
-        const clickedThumb = thumbs.find((thumb) => thumb.element.contains(target));
+      let direction = 0;
+      const isDecreaseKey = ["ArrowLeft", "ArrowUp", "PageUp"].includes(event.key);
+      direction = isDecreaseKey ? -1 : 1;
+      if (inverted) direction *= -1;
 
-        if (clickedThumb) {
-          clickedThumb.element.focus();
-          store.setState("valueIndexToChange", clickedThumb.index);
-        } else if (sliderElement) {
-          const rect = sliderElement.getBoundingClientRect();
-          const pointerValue = store.getValueFromPointer(event.clientX, event.clientY, rect);
-          onSliderStart(pointerValue);
-        }
-      }
-    },
-    [store, propsRef, disabled, sliderElement, onSliderStart]
-  );
+      const stepInDirection = step * multiplier * direction;
+      store.updateValue(currentValue + stepInDirection, valueIndexToChange, {
+        commit: true,
+      });
+    }
+  });
 
-  const onPointerMove = React.useCallback(
-    (event: React.PointerEvent<RootElement>) => {
-      propsRef.current.onPointerMove?.(event);
-      if (event.defaultPrevented || disabled) return;
+  const onPointerDown = useMemoizedFn((event: PointerEvent<RootElement>) => {
+    propsRef.current.onPointerDown?.(event);
+    if (event.defaultPrevented || disabled) return;
 
-      const target = event.target as HTMLElement;
-      if (target.hasPointerCapture(event.pointerId) && sliderElement) {
+    const target = event.target as HTMLElement;
+    target.setPointerCapture(event.pointerId);
+    event.preventDefault();
+
+    if (!disabled) {
+      valuesBeforeSlideStartRef.current = store.getState().values;
+
+      const thumbs = Array.from(store.getState().thumbs.values());
+      const clickedThumb = thumbs.find((thumb) => thumb.element.contains(target));
+
+      if (clickedThumb) {
+        clickedThumb.element.focus();
+        store.setState("valueIndexToChange", clickedThumb.index);
+      } else if (sliderElement) {
         const rect = sliderElement.getBoundingClientRect();
         const pointerValue = store.getValueFromPointer(event.clientX, event.clientY, rect);
-        onSliderMove(pointerValue);
+        onSliderStart(pointerValue);
       }
-    },
-    [store, propsRef, disabled, sliderElement, onSliderMove]
-  );
+    }
+  });
 
-  const onPointerUp = React.useCallback(
-    (event: React.PointerEvent<RootElement>) => {
-      propsRef.current.onPointerUp?.(event);
-      if (event.defaultPrevented) return;
+  const onPointerMove = useMemoizedFn((event: PointerEvent<RootElement>) => {
+    propsRef.current.onPointerMove?.(event);
+    if (event.defaultPrevented || disabled) return;
 
-      const target = event.target as RootElement;
-      if (target.hasPointerCapture(event.pointerId)) {
-        target.releasePointerCapture(event.pointerId);
-        onSliderEnd();
-      }
-    },
-    [propsRef, onSliderEnd]
-  );
+    const target = event.target as HTMLElement;
+    if (target.hasPointerCapture(event.pointerId) && sliderElement) {
+      const rect = sliderElement.getBoundingClientRect();
+      const pointerValue = store.getValueFromPointer(event.clientX, event.clientY, rect);
+      onSliderMove(pointerValue);
+    }
+  });
+
+  const onPointerUp = useMemoizedFn((event: PointerEvent<RootElement>) => {
+    propsRef.current.onPointerUp?.(event);
+    if (event.defaultPrevented) return;
+
+    const target = event.target as RootElement;
+    if (target.hasPointerCapture(event.pointerId)) {
+      target.releasePointerCapture(event.pointerId);
+      onSliderEnd();
+    }
+  });
 
   const RootPrimitive = asChild ? SlotPrimitive.Slot : "div";
 
   return (
-    <StoreContext.Provider value={store}>
-      <SliderContext.Provider value={contextValue}>
+    <StoreContext value={store}>
+      <SliderContext value={contextValue}>
         <RootPrimitive
           data-disabled={disabled ? "" : undefined}
           data-slot="angle-slider"
@@ -526,12 +524,12 @@ function AngleSlider(props: AngleSliderProps) {
           onPointerMove={onPointerMove}
           onPointerUp={onPointerUp}
         />
-      </SliderContext.Provider>
-    </StoreContext.Provider>
+      </SliderContext>
+    </StoreContext>
   );
 }
 
-function AngleSliderTrack(props: React.ComponentProps<"svg">) {
+function AngleSliderTrack(props: ComponentProps<"svg">) {
   const { className, children, ...trackProps } = props;
 
   const disabled = useStore((state) => state.disabled);
@@ -597,7 +595,7 @@ function AngleSliderTrack(props: React.ComponentProps<"svg">) {
   );
 }
 
-function AngleSliderRange(props: React.ComponentProps<"path">) {
+function AngleSliderRange(props: ComponentProps<"path">) {
   const { className, ...rangeProps } = props;
 
   const values = useStore((state) => state.values);
@@ -670,8 +668,8 @@ function AngleSliderThumb(props: AngleSliderThumbProps) {
   const disabled = useStore((state) => state.disabled);
   const size = useStore((state) => state.size);
 
-  const thumbId = React.useId();
-  const [thumbElement, setThumbElement] = React.useState<ThumbElement | null>(null);
+  const thumbId = useId();
+  const [thumbElement, setThumbElement] = useState<ThumbElement | null>(null);
   const composedRef = useComposedRefs(ref, setThumbElement);
 
   const isFormControl = thumbElement ? context.form || !!thumbElement.closest("form") : true;
@@ -679,7 +677,7 @@ function AngleSliderThumb(props: AngleSliderThumbProps) {
   const index = indexProp ?? 0;
   const value = values[index];
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (thumbElement && value !== undefined) {
       store.addThumb(index, {
         id: thumbId,
@@ -694,7 +692,7 @@ function AngleSliderThumb(props: AngleSliderThumbProps) {
     }
   }, [thumbElement, thumbId, index, value, store]);
 
-  const thumbStyle = React.useMemo<React.CSSProperties>(() => {
+  const thumbStyle = useMemo<CSSProperties>(() => {
     if (value === undefined) return {};
 
     const angle = store.getAngleFromValue(value);
@@ -709,15 +707,12 @@ function AngleSliderThumb(props: AngleSliderThumbProps) {
     };
   }, [value, store, size]);
 
-  const onFocus = React.useCallback(
-    (event: React.FocusEvent<ThumbElement>) => {
-      props.onFocus?.(event);
-      if (event.defaultPrevented) return;
+  const onFocus = useMemoizedFn((event: FocusEvent<ThumbElement>) => {
+    props.onFocus?.(event);
+    if (event.defaultPrevented) return;
 
-      store.setState("valueIndexToChange", index);
-    },
-    [props.onFocus, store, index]
-  );
+    store.setState("valueIndexToChange", index);
+  });
 
   const ThumbPrimitive = asChild ? SlotPrimitive.Slot : "div";
 
@@ -767,7 +762,7 @@ interface AngleSliderValueProps extends DivProps {
 }
 
 function AngleSliderValue(props: AngleSliderValueProps) {
-  const { unit = "掳", formatValue, className, style, asChild, children, ...valueProps } = props;
+  const { unit = "deg", formatValue, className, style, asChild, children, ...valueProps } = props;
 
   const values = useStore((state) => state.values);
   const size = useStore((state) => state.size);
@@ -775,7 +770,7 @@ function AngleSliderValue(props: AngleSliderValueProps) {
 
   const center = size + 20;
 
-  const displayValue = React.useMemo(() => {
+  const displayValue = useMemo(() => {
     if (formatValue) {
       return formatValue(values.length === 1 ? (values[0] ?? 0) : values);
     }
@@ -788,7 +783,7 @@ function AngleSliderValue(props: AngleSliderValueProps) {
     return `${sortedValues[0]}${unit} - ${sortedValues[sortedValues.length - 1]}${unit}`;
   }, [values, formatValue, unit]);
 
-  const valueStyle = React.useMemo<React.CSSProperties>(
+  const valueStyle = useMemo<CSSProperties>(
     () => ({
       position: "absolute",
       left: `${center}px`,

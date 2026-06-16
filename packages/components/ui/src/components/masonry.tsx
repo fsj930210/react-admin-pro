@@ -1,10 +1,31 @@
 "use client";
 // 文档地址 https://www.diceui.com/docs/components/radix/masonry
 
+import {
+  Children,
+  cloneElement,
+  createContext,
+  isValidElement,
+  use,
+  useEffect,
+  useRef,
+  useState,
+  type CSSProperties,
+  type ComponentProps,
+  type ComponentRef,
+  type DependencyList,
+  type Dispatch,
+  type ReactElement,
+  type ReactNode,
+  type Ref,
+  type RefObject,
+  type SetStateAction,
+} from "react";
 import { Slot as SlotPrimitive } from "radix-ui";
-import * as React from "react";
 import { useComposedRefs } from "@rap/utils/compose-refs";
+import { useLazyRef } from "@rap/hooks/use-lazy-ref";
 import { useIsomorphicLayoutEffect } from "@rap/hooks/use-isomorphic-layout-effect";
+import { useMemoizedFn } from "@rap/hooks/use-memoized-fn";
 
 const NODE_COLOR = {
   RED: 0,
@@ -572,9 +593,9 @@ function usePositioner(
     maxColumnCount,
     linear = false,
   }: UsePositionerOptions,
-  deps: React.DependencyList = []
+  deps: DependencyList = []
 ): Positioner {
-  const initPositioner = React.useCallback((): Positioner => {
+  const initPositioner = useMemoizedFn((): Positioner => {
     function binarySearch(a: number[], y: number): number {
       let l = 0;
       let h = a.length - 1;
@@ -759,14 +780,14 @@ function usePositioner(
         return items.filter(Boolean) as PositionerItem[];
       },
     };
-  }, [width, columnWidth, columnGap, rowGap, columnCount, maxColumnCount, linear]);
+  });
 
-  const positionerRef = React.useRef<Positioner | null>(null);
+  const positionerRef = useRef<Positioner | null>(null);
   if (positionerRef.current === null) positionerRef.current = initPositioner();
 
-  const prevDepsRef = React.useRef(deps);
+  const prevDepsRef = useRef(deps);
   const opts = [width, columnWidth, columnGap, rowGap, columnCount, maxColumnCount, linear];
-  const prevOptsRef = React.useRef(opts);
+  const prevOptsRef = useRef(opts);
   const optsChanged = !opts.every((item, i) => prevOptsRef.current[i] === item);
 
   if (optsChanged || !deps.every((item, i) => prevDepsRef.current[i] === item)) {
@@ -790,7 +811,7 @@ function usePositioner(
 }
 
 interface DebouncedWindowSizeOptions {
-  containerRef: React.RefObject<RootElement | null>;
+  containerRef: RefObject<RootElement | null>;
   defaultWidth?: number;
   defaultHeight?: number;
   delayMs?: number;
@@ -799,7 +820,7 @@ interface DebouncedWindowSizeOptions {
 function useDebouncedWindowSize(options: DebouncedWindowSizeOptions) {
   const { containerRef, defaultWidth = 0, defaultHeight = 0, delayMs = DEBOUNCE_DELAY } = options;
 
-  const getDocumentSize = React.useCallback(() => {
+  const getDocumentSize = useMemoizedFn(() => {
     if (typeof document === "undefined") {
       return { width: defaultWidth, height: defaultHeight };
     }
@@ -807,25 +828,23 @@ function useDebouncedWindowSize(options: DebouncedWindowSizeOptions) {
       width: document.documentElement.clientWidth,
       height: document.documentElement.clientHeight,
     };
-  }, [defaultWidth, defaultHeight]);
+  });
 
-  const [size, setSize] = React.useState(getDocumentSize());
-  const timeoutRef = React.useRef<NodeJS.Timeout | null>(null);
+  const [size, setSize] = useState(getDocumentSize());
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const setDebouncedSize = React.useCallback(
-    (value: { width: number; height: number }) => {
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-      }
+  const setDebouncedSize = useMemoizedFn((value: { width: number; height: number }) => {
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
 
-      timeoutRef.current = setTimeout(() => {
-        setSize(value);
-      }, delayMs);
-    },
-    [delayMs]
-  );
+    timeoutRef.current = setTimeout(() => {
+      setSize(value);
+    }, delayMs);
+  });
 
-  React.useEffect(() => {
+  // Window size is an external browser signal and must be subscribed after mount.
+  useEffect(() => {
     function onResize() {
       if (containerRef.current) {
         setDebouncedSize({
@@ -866,7 +885,7 @@ function onRafSchedule<T extends unknown[]>(
   function onCallback(...args: T) {
     lastArgs = args;
 
-    if (frameId)
+    if (frameId === null)
       frameId = requestAnimationFrame(() => {
         frameId = null;
         callback(...lastArgs);
@@ -883,9 +902,9 @@ function onRafSchedule<T extends unknown[]>(
 }
 
 function useResizeObserver(positioner: Positioner) {
-  const [, setLayoutVersion] = React.useState(0);
+  const [, setLayoutVersion] = useState(0);
 
-  const createResizeObserver = React.useMemo(() => {
+  const createResizeObserverRef = useLazyRef(() => {
     if (typeof window === "undefined") {
       return () => ({
         disconnect: () => {},
@@ -947,13 +966,15 @@ function useResizeObserver(positioner: Positioner) {
 
       return observer;
     });
-  }, []);
+  });
+  const createResizeObserver = createResizeObserverRef.current;
 
   const resizeObserver = createResizeObserver(positioner, () =>
     setLayoutVersion((prev) => prev + 1)
   );
 
-  React.useEffect(() => () => resizeObserver.disconnect(), [resizeObserver]);
+  // ResizeObserver is native state tied to item nodes, so disconnect on replacement/unmount.
+  useEffect(() => () => resizeObserver.disconnect(), [resizeObserver]);
 
   return resizeObserver;
 }
@@ -972,21 +993,23 @@ function useScroller({
     { fps, leading: true }
   );
 
-  const onScroll = React.useCallback(() => {
+  const onScroll = useMemoizedFn(() => {
     setScrollY(globalThis.window.scrollY ?? document.documentElement.scrollTop ?? 0);
-  }, [setScrollY]);
+  });
 
-  React.useEffect(() => {
+  // Scroll position is a browser event source used by virtualization.
+  useEffect(() => {
     if (typeof globalThis.window === "undefined") return;
     globalThis.window.addEventListener("scroll", onScroll, { passive: true });
 
     return () => globalThis.window.removeEventListener("scroll", onScroll);
   }, [onScroll]);
 
-  const [isScrolling, setIsScrolling] = React.useState(false);
-  const hasMountedRef = React.useRef(0);
+  const [isScrolling, setIsScrolling] = useState(false);
+  const hasMountedRef = useRef(0);
 
-  React.useEffect(() => {
+  // isScrolling is derived from throttled scroll ticks and resets on an animation timer.
+  useEffect(() => {
     if (hasMountedRef.current === 1) setIsScrolling(true);
     let didUnsubscribe = false;
 
@@ -1027,60 +1050,58 @@ function useThrottle<State>(
     fps?: number;
     leading?: boolean;
   } = {}
-): [State, React.Dispatch<React.SetStateAction<State>>] {
+): [State, Dispatch<SetStateAction<State>>] {
   const { fps = 30, leading = false } = options;
-  const [state, setState] = React.useState(initialState);
-  const latestSetState = React.useRef(setState);
+  const [state, setState] = useState(initialState);
+  const latestSetState = useRef(setState);
   latestSetState.current = setState;
 
   const ms = 1000 / fps;
-  const prevCountRef = React.useRef(0);
-  const trailingTimeout = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+  const prevCountRef = useRef(0);
+  const trailingTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const clearTrailing = React.useCallback(() => {
+  const clearTrailing = useMemoizedFn(() => {
     if (trailingTimeout.current) {
       clearTimeout(trailingTimeout.current);
     }
-  }, []);
+  });
 
-  React.useEffect(() => {
+  // Pending throttled state updates must be cleared when the hook unmounts.
+  useEffect(() => {
     return () => {
       prevCountRef.current = 0;
       clearTrailing();
     };
   }, [clearTrailing]);
 
-  const throttledSetState = React.useCallback(
-    (action: React.SetStateAction<State>) => {
-      const perf = typeof performance !== "undefined" ? performance : Date;
-      const now = () => perf.now();
-      const rightNow = now();
-      const call = () => {
-        prevCountRef.current = rightNow;
-        clearTrailing();
-        latestSetState.current(action);
-      };
-      const current = prevCountRef.current;
+  const throttledSetState = useMemoizedFn((action: SetStateAction<State>) => {
+    const perf = typeof performance !== "undefined" ? performance : Date;
+    const now = () => perf.now();
+    const rightNow = now();
+    const call = () => {
+      prevCountRef.current = rightNow;
+      clearTrailing();
+      latestSetState.current(action);
+    };
+    const current = prevCountRef.current;
 
-      if (leading && current === 0) {
+    if (leading && current === 0) {
+      return call();
+    }
+
+    if (rightNow - current > ms) {
+      if (current > 0) {
         return call();
       }
+      prevCountRef.current = rightNow;
+    }
 
-      if (rightNow - current > ms) {
-        if (current > 0) {
-          return call();
-        }
-        prevCountRef.current = rightNow;
-      }
-
-      clearTrailing();
-      trailingTimeout.current = setTimeout(() => {
-        call();
-        prevCountRef.current = 0;
-      }, ms);
-    },
-    [leading, ms, clearTrailing]
-  );
+    clearTrailing();
+    trailingTimeout.current = setTimeout(() => {
+      call();
+      prevCountRef.current = 0;
+    }, ms);
+  });
 
   return [state, throttledSetState];
 }
@@ -1095,10 +1116,10 @@ const MASONRY_ERROR = {
   [ITEM_NAME]: `\`${ITEM_NAME}\` must be within \`${VIEWPORT_NAME}\``,
 } as const;
 
-interface DivProps extends React.ComponentProps<"div"> {}
+interface DivProps extends ComponentProps<"div"> {}
 
-type RootElement = React.ComponentRef<typeof Masonry>;
-type ItemElement = React.ComponentRef<typeof MasonryItem>;
+type RootElement = ComponentRef<typeof Masonry>;
+type ItemElement = ComponentRef<typeof MasonryItem>;
 
 interface MasonryContextValue {
   positioner: Positioner;
@@ -1110,13 +1131,13 @@ interface MasonryContextValue {
   itemHeight: number;
   overscan: number;
   isScrolling?: boolean;
-  fallback?: React.ReactNode;
+  fallback?: ReactNode;
 }
 
-const MasonryContext = React.createContext<MasonryContextValue | null>(null);
+const MasonryContext = createContext<MasonryContextValue | null>(null);
 
 function useMasonryContext(name: keyof typeof MASONRY_ERROR) {
-  const context = React.useContext(MasonryContext);
+  const context = use(MasonryContext);
   if (!context) {
     throw new Error(MASONRY_ERROR[name]);
   }
@@ -1133,7 +1154,7 @@ interface MasonryProps extends DivProps {
   defaultHeight?: number;
   overscan?: number;
   scrollFps?: number;
-  fallback?: React.ReactNode;
+  fallback?: ReactNode;
   linear?: boolean;
   asChild?: boolean;
 }
@@ -1162,7 +1183,7 @@ function Masonry(props: MasonryProps) {
   const columnGap = gapValue.column;
   const rowGap = gapValue.row;
 
-  const containerRef = React.useRef<RootElement | null>(null);
+  const containerRef = useRef<RootElement | null>(null);
   const composedRef = useComposedRefs(ref, containerRef);
 
   const size = useDebouncedWindowSize({
@@ -1172,11 +1193,12 @@ function Masonry(props: MasonryProps) {
     delayMs: DEBOUNCE_DELAY,
   });
 
-  const [containerPosition, setContainerPosition] = React.useState<{
+  const [containerPosition, setContainerPosition] = useState<{
     offset: number;
     width: number;
   }>({ offset: 0, width: 0 });
 
+  // Container offset is measured from layout boxes, so it needs a layout effect.
   useIsomorphicLayoutEffect(() => {
     if (!containerRef.current) return;
 
@@ -1214,53 +1236,37 @@ function Masonry(props: MasonryProps) {
     fps: scrollFps,
   });
 
-  const itemMap = React.useRef(new WeakMap<ItemElement, number>()).current;
+  const itemMap = useRef(new WeakMap<ItemElement, number>()).current;
 
-  const onItemRegister = React.useCallback(
-    (index: number) => (node: ItemElement | null) => {
-      if (!node) return;
+  const onItemRegister = useMemoizedFn((index: number) => (node: ItemElement | null) => {
+    if (!node) return;
 
-      itemMap.set(node, index);
-      if (resizeObserver) {
-        resizeObserver.observe(node);
-      }
-      if (positioner.get(index) === void 0) {
-        positioner.set(index, node.offsetHeight);
-      }
-    },
-    [itemMap, positioner, resizeObserver]
-  );
+    itemMap.set(node, index);
+    if (resizeObserver) {
+      resizeObserver.observe(node);
+    }
+    if (positioner.get(index) === void 0) {
+      positioner.set(index, node.offsetHeight);
+    }
+  });
 
-  const contextValue = React.useMemo<MasonryContextValue>(
-    () => ({
-      positioner,
-      resizeObserver,
-      columnWidth: positioner.columnWidth,
-      onItemRegister,
-      scrollTop,
-      windowHeight: size.height,
-      itemHeight,
-      overscan,
-      fallback,
-      isScrolling,
-    }),
-    [
-      positioner,
-      resizeObserver,
-      onItemRegister,
-      scrollTop,
-      size.height,
-      itemHeight,
-      overscan,
-      fallback,
-      isScrolling,
-    ]
-  );
+  const contextValue: MasonryContextValue = {
+    positioner,
+    resizeObserver,
+    columnWidth: positioner.columnWidth,
+    onItemRegister,
+    scrollTop,
+    windowHeight: size.height,
+    itemHeight,
+    overscan,
+    fallback,
+    isScrolling,
+  };
 
   const RootPrimitive = asChild ? SlotPrimitive.Slot : "div";
 
   return (
-    <MasonryContext.Provider value={contextValue}>
+    <MasonryContext value={contextValue}>
       <RootPrimitive
         {...rootProps}
         data-slot="masonry"
@@ -1274,21 +1280,22 @@ function Masonry(props: MasonryProps) {
       >
         <MasonryViewport>{children}</MasonryViewport>
       </RootPrimitive>
-    </MasonryContext.Provider>
+    </MasonryContext>
   );
 }
 
 interface MasonryItemPropsWithRef extends MasonryItemProps {
-  ref: React.Ref<ItemElement | null>;
+  ref: Ref<ItemElement | null>;
 }
 
 function MasonryViewport(props: DivProps) {
   const { children, style, ref, ...viewportProps } = props;
   const context = useMasonryContext(VIEWPORT_NAME);
-  const [layoutVersion, setLayoutVersion] = React.useState(0);
-  const rafId = React.useRef<number | null>(null);
-  const [mounted, setMounted] = React.useState(false);
+  const [layoutVersion, setLayoutVersion] = useState(0);
+  const rafId = useRef<number | null>(null);
+  const [mounted, setMounted] = useState(false);
 
+  // Mount state prevents measuring hidden fallback items before the browser has a layout.
   useIsomorphicLayoutEffect(() => {
     setMounted(true);
   }, []);
@@ -1296,9 +1303,9 @@ function MasonryViewport(props: DivProps) {
   let startIndex = 0;
   let stopIndex: number | undefined;
 
-  const validChildren = React.Children.toArray(children).filter(
-    (child): child is React.ReactElement<MasonryItemPropsWithRef> =>
-      React.isValidElement(child) && child.type === MasonryItem
+  const validChildren = Children.toArray(children).filter(
+    (child): child is ReactElement<MasonryItemPropsWithRef> =>
+      isValidElement(child) && child.type === MasonryItem
   );
   const itemCount = validChildren.length;
 
@@ -1309,30 +1316,24 @@ function MasonryViewport(props: DivProps) {
   const rangeEnd = context.scrollTop + overscanPixels;
   const layoutOutdated = shortestColumnSize < rangeEnd && measuredCount < itemCount;
 
-  const positionedChildren: React.ReactElement[] = [];
+  const positionedChildren: ReactElement[] = [];
 
-  const visibleItemStyle = React.useMemo(
-    (): React.CSSProperties => ({
-      position: "absolute",
-      writingMode: "horizontal-tb",
-      visibility: "visible",
-      width: context.columnWidth,
-      transform: context.isScrolling ? "translateZ(0)" : undefined,
-      willChange: context.isScrolling ? "transform" : undefined,
-    }),
-    [context.columnWidth, context.isScrolling]
-  );
+  const visibleItemStyle: CSSProperties = {
+    position: "absolute",
+    writingMode: "horizontal-tb",
+    visibility: "visible",
+    width: context.columnWidth,
+    transform: context.isScrolling ? "translateZ(0)" : undefined,
+    willChange: context.isScrolling ? "transform" : undefined,
+  };
 
-  const hiddenItemStyle = React.useMemo(
-    (): React.CSSProperties => ({
-      position: "absolute",
-      writingMode: "horizontal-tb",
-      visibility: "hidden",
-      width: context.columnWidth,
-      zIndex: -1000,
-    }),
-    [context.columnWidth]
-  );
+  const hiddenItemStyle: CSSProperties = {
+    position: "absolute",
+    writingMode: "horizontal-tb",
+    visibility: "hidden",
+    width: context.columnWidth,
+    zIndex: -1000,
+  };
 
   context.positioner.range(rangeStart, rangeEnd, (index, left, top) => {
     const child = validChildren[index];
@@ -1346,7 +1347,7 @@ function MasonryViewport(props: DivProps) {
     };
 
     positionedChildren.push(
-      React.cloneElement(child, {
+      cloneElement(child, {
         key: child.key ?? index,
         ref: context.onItemRegister(index),
         style: itemStyle,
@@ -1381,7 +1382,7 @@ function MasonryViewport(props: DivProps) {
       };
 
       positionedChildren.push(
-        React.cloneElement(child, {
+        cloneElement(child, {
           key: child.key ?? index,
           ref: context.onItemRegister(index),
           style: itemStyle,
@@ -1390,7 +1391,8 @@ function MasonryViewport(props: DivProps) {
     }
   }
 
-  React.useEffect(() => {
+  // Layout retries are scheduled with RAF so newly measured items can settle first.
+  useEffect(() => {
     if (layoutOutdated && mounted) {
       if (rafId.current) {
         cancelAnimationFrame(rafId.current);
@@ -1406,31 +1408,24 @@ function MasonryViewport(props: DivProps) {
     };
   }, [layoutOutdated, mounted]);
 
-  const estimatedHeight = React.useMemo(() => {
-    const measuredHeight = context.positioner.estimateHeight(measuredCount, context.itemHeight);
-    if (measuredCount === itemCount) {
-      return measuredHeight;
-    }
-    const remainingItems = itemCount - measuredCount;
-    const estimatedRemainingHeight = Math.ceil(
-      (remainingItems / context.positioner.columnCount) * context.itemHeight
-    );
-    return measuredHeight + estimatedRemainingHeight;
-  }, [context.positioner, context.itemHeight, measuredCount, itemCount]);
+  const measuredHeight = context.positioner.estimateHeight(measuredCount, context.itemHeight);
+  const remainingItems = itemCount - measuredCount;
+  const estimatedRemainingHeight =
+    measuredCount === itemCount
+      ? 0
+      : Math.ceil((remainingItems / context.positioner.columnCount) * context.itemHeight);
+  const estimatedHeight = measuredHeight + estimatedRemainingHeight;
 
-  const containerStyle = React.useMemo(
-    () => ({
-      position: "relative" as const,
-      width: "100%",
-      maxWidth: "100%",
-      height: Math.ceil(estimatedHeight),
-      maxHeight: Math.ceil(estimatedHeight),
-      willChange: context.isScrolling ? "contents" : undefined,
-      pointerEvents: context.isScrolling ? ("none" as const) : undefined,
-      ...style,
-    }),
-    [context.isScrolling, estimatedHeight, style]
-  );
+  const containerStyle: CSSProperties = {
+    position: "relative",
+    width: "100%",
+    maxWidth: "100%",
+    height: Math.ceil(estimatedHeight),
+    maxHeight: Math.ceil(estimatedHeight),
+    willChange: context.isScrolling ? "contents" : undefined,
+    pointerEvents: context.isScrolling ? "none" : undefined,
+    ...style,
+  };
 
   if (!mounted && context.fallback) {
     return context.fallback;

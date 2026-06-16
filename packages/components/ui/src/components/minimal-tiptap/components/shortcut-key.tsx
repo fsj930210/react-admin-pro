@@ -1,8 +1,8 @@
-import * as React from "react";
 import { cn } from "@rap/utils";
 import { getShortcutKey } from "../utils";
+import { type ComponentProps } from "react";
 
-export interface ShortcutKeyProps extends React.ComponentProps<"span"> {
+export interface ShortcutKeyProps extends ComponentProps<"span"> {
   keys: string[];
 }
 

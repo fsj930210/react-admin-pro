@@ -1,14 +1,28 @@
 "use client";
 // 文档地址 https://www.diceui.com/docs/components/radix/banner
+import {
+  createContext,
+  use,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+  useSyncExternalStore,
+  type ComponentProps,
+  type ComponentRef,
+  type MouseEvent,
+  type ReactNode,
+} from "react";
 import { cva, type VariantProps } from "class-variance-authority";
 import { X } from "lucide-react";
 import { Slot as SlotPrimitive } from "radix-ui";
-import * as React from "react";
-import * as ReactDOM from "react-dom";
 import { cn } from "@rap/utils";
 import { useAsRef } from "@rap/hooks/use-as-ref";
 import { useLazyRef } from "@rap/hooks/use-lazy-ref";
 import { Button } from "./button";
+import { useMemoizedFn } from "@rap/hooks/use-memoized-fn";
+import { createPortal } from "react-dom";
 
 const BANNER_ANIMATION_DURATION = 400;
 const DEFAULT_BANNER_PRIORITY = 0;
@@ -17,11 +31,11 @@ const DEFAULT_BANNER_DISMISSIBLE = true;
 type BannerVariant = "default" | "info" | "success" | "warning" | "destructive";
 type BannerSide = "top" | "bottom";
 
-interface DivProps extends React.ComponentProps<"div"> {
+interface DivProps extends ComponentProps<"div"> {
   asChild?: boolean;
 }
 
-type CloseElement = React.ComponentRef<typeof BannerClose>;
+type CloseElement = ComponentRef<typeof BannerClose>;
 
 interface BannerRenderProps {
   id: string;
@@ -31,7 +45,7 @@ interface BannerRenderProps {
   onRemove: () => void;
 }
 
-type BannerContent = React.ReactNode | ((props: BannerRenderProps) => React.ReactNode);
+type BannerContent = ReactNode | ((props: BannerRenderProps) => ReactNode);
 
 interface BannerData {
   id: string;
@@ -61,10 +75,10 @@ interface Store {
   onHeightRemove: (id: string) => void;
 }
 
-const StoreContext = React.createContext<Store | null>(null);
+const StoreContext = createContext<Store | null>(null);
 
 function useStoreContext(consumerName: string) {
-  const context = React.useContext(StoreContext);
+  const context = use(StoreContext);
   if (!context) {
     throw new Error(`\`${consumerName}\` must be used within \`Banners\``);
   }
@@ -72,7 +86,7 @@ function useStoreContext(consumerName: string) {
 }
 
 function useStore<T>(store: Store, selector: (state: StoreState) => T): T {
-  return React.useSyncExternalStore(
+  return useSyncExternalStore(
     store.subscribe,
     () => selector(store.getState()),
     () => selector(store.getState())
@@ -86,10 +100,10 @@ interface BannerContextValue {
   onClose?: () => void;
 }
 
-const BannerContext = React.createContext<BannerContextValue | null>(null);
+const BannerContext = createContext<BannerContextValue | null>(null);
 
 function useBannerContext(consumerName: string) {
-  const context = React.useContext(BannerContext);
+  const context = use(BannerContext);
   if (!context) {
     throw new Error(`\`${consumerName}\` must be used within \`Banner\``);
   }
@@ -98,9 +112,9 @@ function useBannerContext(consumerName: string) {
 
 function useBanner() {
   const { id, variant, dismissible, onClose } = useBannerContext("useBanner");
-  const storeContext = React.useContext(StoreContext);
+  const storeContext = use(StoreContext);
 
-  return React.useMemo(() => {
+  return useMemo(() => {
     const onRemove = id && storeContext ? () => storeContext.onBannerRemove(id) : undefined;
 
     return {
@@ -114,7 +128,7 @@ function useBanner() {
 }
 
 interface BannersProps {
-  children?: React.ReactNode;
+  children?: ReactNode;
   maxVisible?: number;
   side?: BannerSide;
   container?: Element | DocumentFragment | null;
@@ -131,7 +145,7 @@ function Banners(props: BannersProps) {
   const listenersRef = useLazyRef<Set<() => void>>(() => new Set());
   const timeoutsRef = useLazyRef<Map<string, ReturnType<typeof setTimeout>>>(() => new Map());
 
-  const store: Store = React.useMemo(
+  const store: Store = useMemo(
     () => ({
       subscribe: (cb) => {
         listenersRef.current.add(cb);
@@ -233,7 +247,7 @@ function Banners(props: BannersProps) {
   const visibleBanners = banners.slice(0, maxVisible);
   const container = containerProp ?? globalThis.document?.body ?? null;
 
-  const totalHeight = React.useMemo(() => {
+  const totalHeight = useMemo(() => {
     let total = 0;
     for (const banner of visibleBanners) {
       total += heights.get(banner.id) ?? 0;
@@ -242,11 +256,11 @@ function Banners(props: BannersProps) {
   }, [visibleBanners, heights]);
 
   return (
-    <StoreContext.Provider value={store}>
+    <StoreContext value={store}>
       {children}
       {container &&
         visibleBanners.length > 0 &&
-        ReactDOM.createPortal(
+        createPortal(
           <div
             data-slot="banner-container"
             data-side={side}
@@ -265,7 +279,7 @@ function Banners(props: BannersProps) {
           </div>,
           container
         )}
-    </StoreContext.Provider>
+    </StoreContext>
   );
 }
 
@@ -273,7 +287,7 @@ function useBanners() {
   const store = useStoreContext("useBanners");
   const banners = useStore(store, (state) => state.banners);
 
-  return React.useMemo(
+  return useMemo(
     () => ({
       onBannerAdd: store.onBannerAdd,
       onBannerRemove: store.onBannerRemove,
@@ -316,11 +330,11 @@ function BannerImpl(props: BannerImplProps) {
   const banners = useStore(store, (state) => state.banners);
   const heights = useStore(store, (state) => state.heights);
 
-  const [mounted, setMounted] = React.useState(false);
-  const bannerRef = React.useRef<HTMLDivElement>(null);
-  const offsetBeforeRemoveRef = React.useRef(0);
+  const [mounted, setMounted] = useState(false);
+  const bannerRef = useRef<HTMLDivElement>(null);
+  const offsetBeforeRemoveRef = useRef(0);
 
-  const offset = React.useMemo(() => {
+  const offset = useMemo(() => {
     let total = 0;
     for (const b of banners) {
       if (b.id === banner.id) break;
@@ -333,39 +347,36 @@ function BannerImpl(props: BannerImplProps) {
     offsetBeforeRemoveRef.current = offset;
   }
 
-  React.useEffect(() => {
+  useEffect(() => {
     const frame = requestAnimationFrame(() => setMounted(true));
     return () => cancelAnimationFrame(frame);
   }, []);
 
-  React.useLayoutEffect(() => {
+  useLayoutEffect(() => {
     if (!bannerRef.current || removing) return;
     const height = bannerRef.current.getBoundingClientRect().height;
     store.onHeightChange(banner.id, height);
   }, [store, banner.id, removing]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (!removing) return;
     store.onHeightRemove(banner.id);
     const timeoutId = setTimeout(() => store.onBannerRemove(banner.id), BANNER_ANIMATION_DURATION);
     return () => clearTimeout(timeoutId);
   }, [removing, store, banner.id]);
 
-  const onClose = React.useCallback(
-    () => store.onRemovingChange(banner.id, true),
-    [store, banner.id]
-  );
+  const onClose = useMemoizedFn(() => store.onRemovingChange(banner.id, true));
 
-  const onRemove = React.useCallback(() => store.onBannerRemove(banner.id), [store, banner.id]);
+  const onRemove = useMemoizedFn(() => store.onBannerRemove(banner.id));
 
   const dismissible = banner.dismissible ?? DEFAULT_BANNER_DISMISSIBLE;
 
-  const contextValue = React.useMemo<BannerContextValue>(
+  const contextValue = useMemo<BannerContextValue>(
     () => ({ id: banner.id, variant: banner.variant, dismissible, onClose }),
     [banner.id, banner.variant, dismissible, onClose]
   );
 
-  const renderProps = React.useMemo<BannerRenderProps>(
+  const renderProps = useMemo<BannerRenderProps>(
     () => ({
       id: banner.id,
       variant: banner.variant,
@@ -390,7 +401,7 @@ function BannerImpl(props: BannerImplProps) {
   }
 
   return (
-    <BannerContext.Provider value={contextValue}>
+    <BannerContext value={contextValue}>
       <div
         role="status"
         aria-live="polite"
@@ -416,7 +427,7 @@ function BannerImpl(props: BannerImplProps) {
       >
         {typeof banner.content === "function" ? banner.content(renderProps) : banner.content}
       </div>
-    </BannerContext.Provider>
+    </BannerContext>
   );
 }
 
@@ -446,14 +457,14 @@ function Banner(props: BannerProps) {
     ...rootProps
   } = props;
 
-  const store = React.useContext(StoreContext);
+  const store = use(StoreContext);
 
   const isInsideStore = store !== null;
   const isControlled = openProp !== undefined;
 
   const openRef = useLazyRef(() => openProp ?? defaultOpen ?? true);
   const listenersRef = useLazyRef<Set<() => void>>(() => new Set());
-  const bannerIdRef = React.useRef<string | null>(null);
+  const bannerIdRef = useRef<string | null>(null);
   const onDismissRef = useAsRef(onDismiss);
   const onOpenChangeRef = useAsRef(onOpenChange);
 
@@ -461,19 +472,16 @@ function Banner(props: BannerProps) {
     openRef.current = openProp;
   }
 
-  const subscribe = React.useCallback(
-    (cb: () => void) => {
-      listenersRef.current.add(cb);
-      return () => listenersRef.current.delete(cb);
-    },
-    [listenersRef]
-  );
+  const subscribe = useMemoizedFn((cb: () => void) => {
+    listenersRef.current.add(cb);
+    return () => listenersRef.current.delete(cb);
+  });
 
-  const getSnapshot = React.useCallback(() => openRef.current, [openRef]);
+  const getSnapshot = useMemoizedFn(() => openRef.current);
 
-  const open = React.useSyncExternalStore(subscribe, getSnapshot, getSnapshot);
+  const open = useSyncExternalStore(subscribe, getSnapshot, getSnapshot);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (!isInsideStore || !store || !open) return;
 
     const id = store.onBannerAdd({
@@ -508,7 +516,7 @@ function Banner(props: BannerProps) {
     onOpenChangeRef,
   ]);
 
-  const onClose = React.useCallback(() => {
+  const onClose = useMemoizedFn(() => {
     if (!isControlled) {
       openRef.current = false;
       for (const listener of listenersRef.current) {
@@ -516,9 +524,9 @@ function Banner(props: BannerProps) {
       }
     }
     onOpenChangeRef.current?.(false);
-  }, [isControlled, openRef, listenersRef, onOpenChangeRef]);
+  });
 
-  const contextValue = React.useMemo<BannerContextValue>(
+  const contextValue = useMemo<BannerContextValue>(
     () => ({
       variant,
       dismissible,
@@ -532,7 +540,7 @@ function Banner(props: BannerProps) {
   const RootPrimitive = asChild ? SlotPrimitive.Slot : "div";
 
   return (
-    <BannerContext.Provider value={contextValue}>
+    <BannerContext value={contextValue}>
       <RootPrimitive
         role="status"
         aria-live="polite"
@@ -543,7 +551,7 @@ function Banner(props: BannerProps) {
       >
         {children}
       </RootPrimitive>
-    </BannerContext.Provider>
+    </BannerContext>
   );
 }
 
@@ -575,7 +583,7 @@ function BannerContent(props: DivProps) {
   );
 }
 
-function BannerTitle(props: React.ComponentProps<"div">) {
+function BannerTitle(props: ComponentProps<"div">) {
   const { className, ...titleProps } = props;
 
   return (
@@ -587,7 +595,7 @@ function BannerTitle(props: React.ComponentProps<"div">) {
   );
 }
 
-function BannerDescription(props: React.ComponentProps<"div">) {
+function BannerDescription(props: ComponentProps<"div">) {
   const { className, ...descriptionProps } = props;
 
   return (
@@ -613,21 +621,18 @@ function BannerActions(props: DivProps) {
   );
 }
 
-function BannerClose(props: React.ComponentProps<typeof Button>) {
+function BannerClose(props: ComponentProps<typeof Button>) {
   const { onClick: onClickProp, disabled, children, ...closeProps } = props;
 
   const { dismissible = DEFAULT_BANNER_DISMISSIBLE, onClose } = useBannerContext("BannerClose");
 
   const isDisabled = disabled ?? !dismissible;
 
-  const onClick = React.useCallback(
-    (event: React.MouseEvent<CloseElement>) => {
-      onClickProp?.(event);
-      if (event.defaultPrevented || isDisabled) return;
-      onClose?.();
-    },
-    [onClickProp, isDisabled, onClose]
-  );
+  const onClick = useMemoizedFn((event: MouseEvent<CloseElement>) => {
+    onClickProp?.(event);
+    if (event.defaultPrevented || isDisabled) return;
+    onClose?.();
+  });
 
   return (
     <Button

@@ -1,8 +1,7 @@
+import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react";
+import { createContext, use, useState, type ComponentProps, type ReactNode } from "react";
 import { useControllableState } from "@rap/hooks/use-controllable-state";
 import { cn } from "@rap/utils";
-import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react";
-import * as React from "react";
-import { use, useCallback, useEffect, useMemo } from "react";
 import { Button } from "./button";
 import {
   Selector,
@@ -15,6 +14,7 @@ import {
   type SelectorValue,
   useSelector,
 } from "./selector";
+import { useMemoizedFn } from "@rap/hooks/use-memoized-fn";
 
 export interface TransferRenderApi<T, V extends SelectorValue = string> {
   sourceItems: T[];
@@ -43,7 +43,7 @@ interface TransferContextValue<
   >;
 }
 
-const TransferContext = React.createContext<TransferContextValue<any, any> | undefined>(undefined);
+const TransferContext = createContext<TransferContextValue<any, any> | undefined>(undefined);
 
 export function useTransfer<T = SelectorItem, V extends SelectorValue = string>() {
   const context = use(TransferContext);
@@ -54,7 +54,7 @@ export function useTransfer<T = SelectorItem, V extends SelectorValue = string>(
 }
 
 export interface TransferProps<T = SelectorItem, V extends SelectorValue = string> extends Omit<
-  React.ComponentProps<"div">,
+  ComponentProps<"div">,
   "defaultValue" | "onChange" | "children"
 > {
   dataSource: T[];
@@ -67,7 +67,7 @@ export interface TransferProps<T = SelectorItem, V extends SelectorValue = strin
   fieldNames?: SelectorProps<T, V>["fieldNames"];
   filterOption?: SelectorProps<T, V>["filterOption"];
   virtual?: SelectorProps<T, V>["virtual"];
-  children?: React.ReactNode | ((api: TransferRenderApi<T, V>) => React.ReactNode);
+  children?: ReactNode | ((api: TransferRenderApi<T, V>) => ReactNode);
 }
 
 function readTransferField<T>(item: T, key: keyof T | undefined) {
@@ -75,14 +75,46 @@ function readTransferField<T>(item: T, key: keyof T | undefined) {
   return item[key];
 }
 
-function uniqueValues<V extends SelectorValue>(values: V[]) {
+function getUniqueValues<V extends SelectorValue>(values: V[]) {
   return Array.from(new Set(values));
 }
 
-export function Transfer<T = SelectorItem, V extends SelectorValue = string>({
+function createValueMap<T, V extends SelectorValue>(items: T[], getValue: (item: T) => V) {
+  const map = new Map<V, T>();
+  for (const item of items) {
+    map.set(getValue(item), item);
+  }
+  return map;
+}
+
+function splitTransferItems<T, V extends SelectorValue>(
+  items: T[],
+  targetValues: V[],
+  getValue: (item: T) => V
+) {
+  const targetValueSet = new Set(targetValues);
+  const sourceItems: T[] = [];
+  const targetItems: T[] = [];
+
+  for (const item of items) {
+    if (targetValueSet.has(getValue(item))) {
+      targetItems.push(item);
+    } else {
+      sourceItems.push(item);
+    }
+  }
+
+  return { sourceItems, targetItems };
+}
+
+function keepExistingValues<V extends SelectorValue>(values: V[], existingValues: Set<V>) {
+  return values.filter((itemValue) => existingValues.has(itemValue));
+}
+
+function useTransferState<T, V extends SelectorValue>({
   dataSource,
   value,
-  defaultValue = [],
+  defaultValue,
   onChange,
   getValue: getValueProp,
   getLabel,
@@ -90,151 +122,126 @@ export function Transfer<T = SelectorItem, V extends SelectorValue = string>({
   fieldNames,
   filterOption,
   virtual,
-  children,
-  className,
-  ...props
-}: TransferProps<T, V>) {
+}: TransferProps<T, V>): TransferContextValue<T, V> {
   const [targetValues, setTargetValues] = useControllableState<V[]>(
     { value, defaultValue },
     { defaultValue: [] as V[] }
   );
-  const [sourceCheckedValues, setSourceCheckedValues] = React.useState<V[]>([]);
-  const [targetCheckedValues, setTargetCheckedValues] = React.useState<V[]>([]);
+  const [sourceCheckedValues, setSourceCheckedValuesState] = useState<V[]>([]);
+  const [targetCheckedValues, setTargetCheckedValuesState] = useState<V[]>([]);
 
-  const getValue = useCallback(
-    (item: T) => {
-      if (getValueProp) return getValueProp(item);
-      return readTransferField(item, fieldNames?.value ?? ("value" as keyof T)) as V;
-    },
-    [getValueProp, fieldNames?.value]
-  );
+  const getValue = (item: T) => {
+    if (getValueProp) return getValueProp(item);
+    return readTransferField(item, fieldNames?.value ?? ("value" as keyof T)) as V;
+  };
 
-  const getDisabled = useCallback(
-    (item: T) => {
-      if (getDisabledProp) return getDisabledProp(item);
-      return Boolean(readTransferField(item, fieldNames?.disabled ?? ("disabled" as keyof T)));
-    },
-    [getDisabledProp, fieldNames?.disabled]
-  );
+  const getDisabled = (item: T) => {
+    if (getDisabledProp) return getDisabledProp(item);
+    return Boolean(readTransferField(item, fieldNames?.disabled ?? ("disabled" as keyof T)));
+  };
 
-  const itemMap = useMemo(() => {
-    const map = new Map<V, T>();
-    for (const item of dataSource) {
-      map.set(getValue(item), item);
-    }
-    return map;
-  }, [dataSource, getValue]);
+  const itemMap = createValueMap(dataSource, getValue);
+  const { sourceItems, targetItems } = splitTransferItems(dataSource, targetValues, getValue);
+  const sourceValueSet = new Set(sourceItems.map(getValue));
+  const targetValueSet = new Set(targetItems.map(getValue));
+  const checkedSourceValues = keepExistingValues(sourceCheckedValues, sourceValueSet);
+  const checkedTargetValues = keepExistingValues(targetCheckedValues, targetValueSet);
 
-  const targetSet = useMemo(() => new Set(targetValues), [targetValues]);
-
-  const sourceItems = useMemo(
-    () => dataSource.filter((item) => !targetSet.has(getValue(item))),
-    [dataSource, getValue, targetSet]
-  );
-
-  const targetItems = useMemo(
-    () => dataSource.filter((item) => targetSet.has(getValue(item))),
-    [dataSource, getValue, targetSet]
-  );
-
-  useEffect(() => {
-    const sourceSet = new Set(sourceItems.map(getValue));
-    setSourceCheckedValues((currentValues) =>
-      currentValues.filter((itemValue) => sourceSet.has(itemValue))
+  const emitChange = (nextValues: V[]) => {
+    const nextTargetValues = getUniqueValues(nextValues);
+    setTargetValues(nextTargetValues);
+    onChange?.(
+      nextTargetValues,
+      nextTargetValues
+        .map((itemValue) => itemMap.get(itemValue))
+        .filter((item): item is T => Boolean(item))
     );
-  }, [getValue, sourceItems]);
+  };
 
-  useEffect(() => {
-    const currentTargetSet = new Set(targetItems.map(getValue));
-    setTargetCheckedValues((currentValues) =>
-      currentValues.filter((itemValue) => currentTargetSet.has(itemValue))
-    );
-  }, [getValue, targetItems]);
+  const setSourceCheckedValues = useMemoizedFn((values: V[]) => {
+    setSourceCheckedValuesState(keepExistingValues(values, sourceValueSet));
+  });
 
-  const emitChange = useCallback(
-    (nextValues: V[]) => {
-      const nextTargetValues = uniqueValues(nextValues);
-      setTargetValues(nextTargetValues);
-      onChange?.(
-        nextTargetValues,
-        nextTargetValues
-          .map((itemValue) => itemMap.get(itemValue))
-          .filter((item): item is T => Boolean(item))
-      );
-    },
-    [itemMap, onChange, setTargetValues]
-  );
+  const setTargetCheckedValues = useMemoizedFn((values: V[]) => {
+    setTargetCheckedValuesState(keepExistingValues(values, targetValueSet));
+  });
 
-  const moveToTarget = useCallback(() => {
-    emitChange([...targetValues, ...sourceCheckedValues]);
-    setSourceCheckedValues([]);
-  }, [emitChange, sourceCheckedValues, targetValues]);
+  const moveToTarget = useMemoizedFn(() => {
+    emitChange([...targetValues, ...checkedSourceValues]);
+    setSourceCheckedValuesState([]);
+  });
 
-  const moveToSource = useCallback(() => {
-    const removeSet = new Set(targetCheckedValues);
+  const moveToSource = useMemoizedFn(() => {
+    const removeSet = new Set(checkedTargetValues);
     emitChange(targetValues.filter((itemValue) => !removeSet.has(itemValue)));
-    setTargetCheckedValues([]);
-  }, [emitChange, targetCheckedValues, targetValues]);
+    setTargetCheckedValuesState([]);
+  });
 
-  const moveAllToTarget = useCallback(() => {
+  const moveAllToTarget = useMemoizedFn(() => {
     const movableValues = sourceItems.filter((item) => !getDisabled(item)).map(getValue);
     emitChange([...targetValues, ...movableValues]);
-    setSourceCheckedValues([]);
-  }, [emitChange, getDisabled, getValue, sourceItems, targetValues]);
+    setSourceCheckedValuesState([]);
+  });
 
-  const moveAllToSource = useCallback(() => {
+  const moveAllToSource = useMemoizedFn(() => {
     const movableSet = new Set(targetItems.filter((item) => !getDisabled(item)).map(getValue));
     emitChange(targetValues.filter((itemValue) => !movableSet.has(itemValue)));
-    setTargetCheckedValues([]);
-  }, [emitChange, getDisabled, getValue, targetItems, targetValues]);
+    setTargetCheckedValuesState([]);
+  });
 
-  const selectorProps = useMemo(
-    () => ({
+  return {
+    sourceItems,
+    targetItems,
+    targetValues,
+    sourceCheckedValues: checkedSourceValues,
+    targetCheckedValues: checkedTargetValues,
+    moveToTarget,
+    moveToSource,
+    moveAllToTarget,
+    moveAllToSource,
+    setSourceCheckedValues,
+    setTargetCheckedValues,
+    getValue,
+    getLabel,
+    getDisabled,
+    selectorProps: {
       fieldNames,
       getValue: getValueProp,
       getLabel,
       getDisabled: getDisabledProp,
       filterOption,
       virtual,
-    }),
-    [fieldNames, filterOption, getDisabledProp, getLabel, getValueProp, virtual]
-  );
+    },
+  };
+}
 
-  const api = useMemo<TransferContextValue<T, V>>(
-    () => ({
-      sourceItems,
-      targetItems,
-      targetValues,
-      sourceCheckedValues,
-      targetCheckedValues,
-      moveToTarget,
-      moveToSource,
-      moveAllToTarget,
-      moveAllToSource,
-      setSourceCheckedValues,
-      setTargetCheckedValues,
-      getValue,
-      getLabel,
-      getDisabled,
-      selectorProps,
-    }),
-    [
-      sourceItems,
-      targetItems,
-      targetValues,
-      sourceCheckedValues,
-      targetCheckedValues,
-      moveToTarget,
-      moveToSource,
-      moveAllToTarget,
-      moveAllToSource,
-      getValue,
-      getLabel,
-      getDisabled,
-      selectorProps,
-    ]
-  );
-
+export function Transfer<T = SelectorItem, V extends SelectorValue = string>({
+  dataSource,
+  value,
+  defaultValue = [],
+  onChange,
+  getValue,
+  getLabel,
+  getDisabled,
+  fieldNames,
+  filterOption,
+  virtual,
+  children,
+  className,
+  ...props
+}: TransferProps<T, V>) {
+  const api = useTransferState<T, V>({
+    dataSource,
+    value,
+    defaultValue,
+    onChange,
+    getValue,
+    getLabel,
+    getDisabled,
+    fieldNames,
+    filterOption,
+    virtual,
+  });
   const content = typeof children === "function" ? children(api) : children;
 
   return (
@@ -254,16 +261,18 @@ export interface TransferPanelProps<
   "dataSource" | "value" | "defaultValue" | "onChange" | "title"
 > {
   type: "source" | "target";
-  title?: React.ReactNode;
-  extra?: React.ReactNode;
-  footer?: React.ReactNode;
+  title?: ReactNode;
+  footer?: ReactNode;
+  showSearch?: boolean;
+  showSelectAll?: boolean;
 }
 
 export function TransferPanel<T = SelectorItem, V extends SelectorValue = string>({
   type,
   title,
-  extra,
   footer,
+  showSearch = true,
+  showSelectAll = true,
   className,
   children,
   ...props
@@ -283,11 +292,8 @@ export function TransferPanel<T = SelectorItem, V extends SelectorValue = string
         className
       )}
     >
-      {title || extra ? (
-        <div className="flex min-h-11 items-center justify-between border-b px-3">
-          <div className="font-medium text-sm">{title}</div>
-          {extra}
-        </div>
+      {title ? (
+        <div className="flex min-h-11 items-center border-b px-3 font-medium text-sm">{title}</div>
       ) : null}
       <Selector
         {...transfer.selectorProps}
@@ -297,20 +303,30 @@ export function TransferPanel<T = SelectorItem, V extends SelectorValue = string
         value={checkedValues}
         onChange={(nextValues) => setCheckedValues(nextValues)}
       >
-        {children ?? <DefaultTransferPanelContent />}
+        {children ?? (
+          <DefaultTransferPanelContent showSearch={showSearch} showSelectAll={showSelectAll} />
+        )}
       </Selector>
       {footer ? <div className="border-t px-3 py-2">{footer}</div> : null}
     </div>
   );
 }
 
-function DefaultTransferPanelContent() {
+interface DefaultTransferPanelContentProps {
+  showSearch?: boolean;
+  showSelectAll?: boolean;
+}
+
+function DefaultTransferPanelContent({
+  showSearch = true,
+  showSelectAll = true,
+}: DefaultTransferPanelContentProps) {
   const { filteredItems } = useSelector();
 
   return (
     <>
-      <SelectorSearch />
-      <SelectorSelectAll />
+      {showSearch ? <SelectorSearch /> : null}
+      {showSelectAll ? <SelectorSelectAll /> : null}
       {filteredItems.length > 0 ? (
         <SelectorList />
       ) : (
@@ -322,7 +338,7 @@ function DefaultTransferPanelContent() {
   );
 }
 
-type TransferActionChildren = (props: { disabled: boolean; action: () => void }) => React.ReactNode;
+type TransferActionChildren = (props: { disabled: boolean; action: () => void }) => ReactNode;
 
 interface TransferActionProps {
   disabled?: boolean;

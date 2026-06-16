@@ -1,4 +1,3 @@
-import * as React from "react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@rap/components-ui/tooltip";
 import { cn } from "@rap/utils";
 import { Button } from "../../../../button";
@@ -9,6 +8,15 @@ import {
   DropdownMenuTrigger,
 } from "../../../../dropdown-menu";
 import { ClipboardCopy, MoreHorizontal, Download, Link, Maximize } from "lucide-react";
+import {
+  useCallback,
+  useMemo,
+  useState,
+  type ComponentProps,
+  type FC,
+  type MouseEvent,
+  type ReactNode,
+} from "react";
 
 interface ImageActionsProps {
   shouldMerge?: boolean;
@@ -19,12 +27,12 @@ interface ImageActionsProps {
   onCopyLink?: () => void;
 }
 
-interface ActionButtonProps extends React.ComponentProps<"button"> {
-  icon: React.ReactNode;
+interface ActionButtonProps extends ComponentProps<"button"> {
+  icon: ReactNode;
   tooltip: string;
 }
 
-export const ActionWrapper = ({ children, className, ...props }: React.ComponentProps<"div">) => (
+export const ActionWrapper = ({ children, className, ...props }: ComponentProps<"div">) => (
   <div
     className={cn(
       "absolute top-3 right-3 flex flex-row rounded px-0.5 opacity-0 group-hover/node-image:opacity-100",
@@ -64,7 +72,7 @@ type ActionKey = "onView" | "onDownload" | "onCopy" | "onCopyLink";
 
 const ActionItems: Array<{
   key: ActionKey;
-  icon: React.ReactNode;
+  icon: ReactNode;
   tooltip: string;
   isLink?: boolean;
 }> = [
@@ -91,23 +99,20 @@ const ActionItems: Array<{
   },
 ];
 
-export const ImageActions: React.FC<ImageActionsProps> = ({
+export const ImageActions: FC<ImageActionsProps> = ({
   shouldMerge = false,
   isLink = false,
   ...actions
 }) => {
-  const [isOpen, setIsOpen] = React.useState(false);
+  const [isOpen, setIsOpen] = useState(false);
 
-  const handleAction = React.useCallback(
-    (e: React.MouseEvent, action: (() => void) | undefined) => {
-      e.preventDefault();
-      e.stopPropagation();
-      action?.();
-    },
-    []
-  );
+  const handleAction = useCallback((e: MouseEvent, action: (() => void) | undefined) => {
+    e.preventDefault();
+    e.stopPropagation();
+    action?.();
+  }, []);
 
-  const filteredActions = React.useMemo(
+  const filteredActions = useMemo(
     () => ActionItems.filter((item) => isLink || !item.isLink),
     [isLink]
   );

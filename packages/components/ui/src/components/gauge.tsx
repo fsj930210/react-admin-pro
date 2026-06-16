@@ -1,7 +1,7 @@
 "use client";
 // 文档地址 https://www.diceui.com/docs/components/radix/gauge
+import { createContext, use, useId, useMemo, type ComponentProps } from "react";
 import { Slot as SlotPrimitive } from "radix-ui";
-import * as React from "react";
 import { cn } from "@rap/utils";
 
 const GAUGE_NAME = "Gauge";
@@ -17,11 +17,11 @@ const DEFAULT_END_ANGLE = 360;
 
 type GaugeState = "indeterminate" | "complete" | "loading";
 
-interface DivProps extends React.ComponentProps<"div"> {
+interface DivProps extends ComponentProps<"div"> {
   asChild?: boolean;
 }
 
-interface PathProps extends React.ComponentProps<"path"> {}
+interface PathProps extends ComponentProps<"path"> {}
 
 function getGaugeState(value: number | undefined | null, maxValue: number): GaugeState {
   return value == null ? "indeterminate" : value === maxValue ? "complete" : "loading";
@@ -125,10 +125,10 @@ interface GaugeContextValue {
   labelId?: string;
 }
 
-const GaugeContext = React.createContext<GaugeContextValue | null>(null);
+const GaugeContext = createContext<GaugeContextValue | null>(null);
 
 function useGaugeContext(consumerName: string) {
-  const context = React.useContext(GaugeContext);
+  const context = use(GaugeContext);
   if (!context) {
     throw new Error(`\`${consumerName}\` must be used within \`${GAUGE_NAME}\``);
   }
@@ -233,10 +233,11 @@ function Gauge(props: GaugeProps) {
     arcCenterY = (minY + maxY) / 2;
   }
 
-  const labelId = React.useId();
-  const valueTextId = React.useId();
+  const labelId = useId();
+  const valueTextId = useId();
 
-  const contextValue = React.useMemo<GaugeContextValue>(
+  // useMemo keeps provider value stable for compound parts; dependencies are all derived gauge geometry and aria ids.
+  const contextValue = useMemo<GaugeContextValue>(
     () => ({
       value,
       valueText,
@@ -278,7 +279,7 @@ function Gauge(props: GaugeProps) {
   const RootPrimitive = asChild ? SlotPrimitive.Slot : "div";
 
   return (
-    <GaugeContext.Provider value={contextValue}>
+    <GaugeContext value={contextValue}>
       <RootPrimitive
         role="meter"
         aria-describedby={valueText ? valueTextId : undefined}
@@ -295,11 +296,11 @@ function Gauge(props: GaugeProps) {
         {...rootProps}
         className={cn("relative inline-flex w-fit flex-col items-center justify-center", className)}
       />
-    </GaugeContext.Provider>
+    </GaugeContext>
   );
 }
 
-function GaugeIndicator(props: React.ComponentProps<"svg">) {
+function GaugeIndicator(props: ComponentProps<"svg">) {
   const { className, ...indicatorProps } = props;
 
   const { size, state, value, max, min, percentage } = useGaugeContext(INDICATOR_NAME);

@@ -1,4 +1,5 @@
-import type React from "react";
+import { type ReactNode } from "react";
+import * as React from "react";
 
 type DataAttribute = `data-${string}`;
 

@@ -53,10 +53,7 @@ export function DraggableTree({
   };
   const mergedFeatures = useMemo(
     () =>
-      buildDraggableFeatures(
-        featureOptions,
-        { canDrag, canDrop, maxDepth, allowDropInsideLeaf },
-      ),
+      buildDraggableFeatures(featureOptions, { canDrag, canDrop, maxDepth, allowDropInsideLeaf }),
     [
       allowDropInsideLeaf,
       asyncLoader,
@@ -77,7 +74,7 @@ export function DraggableTree({
       searchable,
       selectable,
       selectedKeys,
-    ],
+    ]
   );
 
   return (
@@ -90,12 +87,7 @@ export function DraggableTree({
       className={className}
     >
       {(tree) => (
-        <DraggableTreeContent
-          {...props}
-          {...featureOptions}
-          renderItem={renderItem}
-          tree={tree}
-        />
+        <DraggableTreeContent {...props} {...featureOptions} renderItem={renderItem} tree={tree} />
       )}
     </TreeRoot>
   );
