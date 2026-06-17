@@ -9,6 +9,7 @@ import { Switch } from "@rap/components-ui/switch";
 import type { AppTheme, DensityMode, FontScale, RadiusMode } from "@/config/ui-preferences";
 import { densityOptions, fontScaleOptions, radiusOptions, themeOptions } from "./options";
 import { controlClassName, Field, Section, selectContentClassName } from "./shared";
+import { ThemeColorPanel } from "./theme-color-panel";
 import type { PreferencesPanelProps } from "./types";
 
 export function AppearancePanel({ preferences, updatePreferences }: PreferencesPanelProps) {
@@ -123,6 +124,8 @@ export function AppearancePanel({ preferences, updatePreferences }: PreferencesP
           </Select>
         </Field>
       </Section>
+
+      <ThemeColorPanel preferences={preferences} updatePreferences={updatePreferences} />
     </div>
   );
 }

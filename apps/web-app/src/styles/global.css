@@ -26,6 +26,49 @@ html[data-app-density="compact"] [data-sidebar="menu-button"] {
   min-height: 1.75rem;
 }
 
-html[data-app-density="comfortable"] [data-sidebar="menu-button"] {
+html[data-app-density="normal"] [data-sidebar="menu-button"] {
   min-height: 2.5rem;
+}
+
+html[data-app-density="comfortable"] [data-sidebar="menu-button"] {
+  min-height: 2.875rem;
+}
+
+html[data-app-density="compact"] [data-slot="table-head"] {
+  height: 2.25rem;
+}
+
+html[data-app-density="normal"] [data-slot="table-head"] {
+  height: 2.75rem;
+}
+
+html[data-app-density="comfortable"] [data-slot="table-head"] {
+  height: 3.125rem;
+}
+
+html[data-app-density="compact"] [data-slot="table-cell"] {
+  padding-block: 0.375rem;
+}
+
+html[data-app-density="normal"] [data-slot="table-cell"] {
+  padding-block: 0.625rem;
+}
+
+html[data-app-density="comfortable"] [data-slot="table-cell"] {
+  padding-block: 0.875rem;
+}
+
+html[data-app-density="compact"] [data-slot="select-trigger"],
+html[data-app-density="compact"] [data-slot="input"] {
+  min-height: 2rem;
+}
+
+html[data-app-density="normal"] [data-slot="select-trigger"],
+html[data-app-density="normal"] [data-slot="input"] {
+  min-height: 2.5rem;
+}
+
+html[data-app-density="comfortable"] [data-slot="select-trigger"],
+html[data-app-density="comfortable"] [data-slot="input"] {
+  min-height: 2.875rem;
 }

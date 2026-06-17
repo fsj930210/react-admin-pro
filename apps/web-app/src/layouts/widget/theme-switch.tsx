@@ -27,6 +27,7 @@ export function ThemeSwitchFeature({ className }: ThemeSwitchFeatureProps) {
   const { setTheme, theme } = useTheme();
   const preferences = useUIPreferences("preferences");
   const updatePreferences = useUIPreferences((state) => state.updatePreferences);
+  const ActiveIcon = themeOptions.find((item) => item.value === theme)?.icon ?? Sun;
 
   const handleThemeChange = (theme: AppTheme) => {
     setTheme(theme);
@@ -39,8 +40,7 @@ export function ThemeSwitchFeature({ className }: ThemeSwitchFeatureProps) {
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" size="icon" className={className}>
-          <Sun className="h-4 w-4 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-          <Moon className="absolute h-4 w-4 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+          <ActiveIcon className="size-4" />
           <span className="sr-only">切换主题</span>
         </Button>
       </DropdownMenuTrigger>
@@ -60,7 +60,7 @@ export function ThemeSwitchFeature({ className }: ThemeSwitchFeatureProps) {
                 <DropdownMenuRadioItem
                   key={item.value}
                   value={item.value}
-                  className="data-[state=checked]:bg-primary/15 data-[state=checked]:text-popover-foreground data-[state=checked]:[&_svg]:text-primary"
+                  className="pl-2 data-[state=checked]:bg-primary/15 data-[state=checked]:text-popover-foreground data-[state=checked]:[&_svg]:text-primary [&>span:first-child]:hidden"
                 >
                   <Icon className="size-4" />
                   {item.label}

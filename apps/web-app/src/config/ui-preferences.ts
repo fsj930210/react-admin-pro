@@ -2,6 +2,22 @@ import type { AppHeaderFeatures } from "@/layouts/components/header";
 import type { TabType } from "@/layouts/components/tabs/types";
 
 export type AppTheme = "light" | "dark" | "tech-blue" | "eco-green" | "system";
+export type PrimaryColor =
+  | "theme"
+  | "default"
+  | "aurora"
+  | "glacier"
+  | "mint"
+  | "lime"
+  | "amber"
+  | "coral"
+  | "ruby"
+  | "orchid"
+  | "indigo"
+  | "graphite"
+  | "steel"
+  | "sand"
+  | "custom";
 export type LayoutMode =
   | "horizontal"
   | "vertical"
@@ -25,6 +41,8 @@ export interface UIPreferences {
   appearance: {
     theme: AppTheme;
     availableThemes: AppTheme[];
+    primaryColor: PrimaryColor;
+    customPrimaryColor: string;
     followSystem: boolean;
     grayscale: boolean;
     radius: RadiusMode;
@@ -105,6 +123,8 @@ export const DEFAULT_UI_PREFERENCES: UIPreferences = {
   appearance: {
     theme: "light",
     availableThemes: ["light", "dark", "tech-blue", "eco-green", "system"],
+    primaryColor: "theme",
+    customPrimaryColor: "#2f80ed",
     followSystem: true,
     grayscale: false,
     radius: "medium",

@@ -43,7 +43,7 @@ export const fontScaleOptions: { value: FontScale; label: string }[] = [
 export const densityOptions: { value: DensityMode; label: string }[] = [
   { value: "compact", label: "紧凑" },
   { value: "normal", label: "标准" },
-  { value: "comfortable", label: "舒适" },
+  { value: "comfortable", label: "宽松" },
 ];
 
 export const tabTypeOptions: { value: TabType; label: string }[] = [
