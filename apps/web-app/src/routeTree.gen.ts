@@ -44,6 +44,7 @@ import { Route as layoutsComponentsTransferIndexRouteImport } from "./pages/(lay
 import { Route as layoutsComponentsTableIndexRouteImport } from "./pages/(layouts)/components/table/index";
 import { Route as layoutsComponentsSelectorIndexRouteImport } from "./pages/(layouts)/components/selector/index";
 import { Route as layoutsComponentsSelectIndexRouteImport } from "./pages/(layouts)/components/select/index";
+import { Route as layoutsComponentsSearchIndexRouteImport } from "./pages/(layouts)/components/search/index";
 import { Route as layoutsComponentsRichTextIndexRouteImport } from "./pages/(layouts)/components/rich-text/index";
 import { Route as layoutsComponentsInputIndexRouteImport } from "./pages/(layouts)/components/input/index";
 import { Route as layoutsComponentsImageCardIndexRouteImport } from "./pages/(layouts)/components/image-card/index";
@@ -250,6 +251,12 @@ const layoutsComponentsSelectIndexRoute =
     path: "/components/select/",
     getParentRoute: () => layoutsRouteRoute,
   } as any);
+const layoutsComponentsSearchIndexRoute =
+  layoutsComponentsSearchIndexRouteImport.update({
+    id: "/components/search/",
+    path: "/components/search/",
+    getParentRoute: () => layoutsRouteRoute,
+  } as any);
 const layoutsComponentsRichTextIndexRoute =
   layoutsComponentsRichTextIndexRouteImport.update({
     id: "/components/rich-text/",
@@ -359,6 +366,7 @@ export interface FileRoutesByFullPath {
   "/components/image-card/": typeof layoutsComponentsImageCardIndexRoute;
   "/components/input/": typeof layoutsComponentsInputIndexRoute;
   "/components/rich-text/": typeof layoutsComponentsRichTextIndexRoute;
+  "/components/search/": typeof layoutsComponentsSearchIndexRoute;
   "/components/select/": typeof layoutsComponentsSelectIndexRoute;
   "/components/selector/": typeof layoutsComponentsSelectorIndexRoute;
   "/components/table/": typeof layoutsComponentsTableIndexRoute;
@@ -409,6 +417,7 @@ export interface FileRoutesByTo {
   "/components/image-card": typeof layoutsComponentsImageCardIndexRoute;
   "/components/input": typeof layoutsComponentsInputIndexRoute;
   "/components/rich-text": typeof layoutsComponentsRichTextIndexRoute;
+  "/components/search": typeof layoutsComponentsSearchIndexRoute;
   "/components/select": typeof layoutsComponentsSelectIndexRoute;
   "/components/selector": typeof layoutsComponentsSelectorIndexRoute;
   "/components/table": typeof layoutsComponentsTableIndexRoute;
@@ -461,6 +470,7 @@ export interface FileRoutesById {
   "/(layouts)/components/image-card/": typeof layoutsComponentsImageCardIndexRoute;
   "/(layouts)/components/input/": typeof layoutsComponentsInputIndexRoute;
   "/(layouts)/components/rich-text/": typeof layoutsComponentsRichTextIndexRoute;
+  "/(layouts)/components/search/": typeof layoutsComponentsSearchIndexRoute;
   "/(layouts)/components/select/": typeof layoutsComponentsSelectIndexRoute;
   "/(layouts)/components/selector/": typeof layoutsComponentsSelectorIndexRoute;
   "/(layouts)/components/table/": typeof layoutsComponentsTableIndexRoute;
@@ -513,6 +523,7 @@ export interface FileRouteTypes {
     | "/components/image-card/"
     | "/components/input/"
     | "/components/rich-text/"
+    | "/components/search/"
     | "/components/select/"
     | "/components/selector/"
     | "/components/table/"
@@ -563,6 +574,7 @@ export interface FileRouteTypes {
     | "/components/image-card"
     | "/components/input"
     | "/components/rich-text"
+    | "/components/search"
     | "/components/select"
     | "/components/selector"
     | "/components/table"
@@ -614,6 +626,7 @@ export interface FileRouteTypes {
     | "/(layouts)/components/image-card/"
     | "/(layouts)/components/input/"
     | "/(layouts)/components/rich-text/"
+    | "/(layouts)/components/search/"
     | "/(layouts)/components/select/"
     | "/(layouts)/components/selector/"
     | "/(layouts)/components/table/"
@@ -895,6 +908,13 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof layoutsComponentsSelectIndexRouteImport;
       parentRoute: typeof layoutsRouteRoute;
     };
+    "/(layouts)/components/search/": {
+      id: "/(layouts)/components/search/";
+      path: "/components/search";
+      fullPath: "/components/search/";
+      preLoaderRoute: typeof layoutsComponentsSearchIndexRouteImport;
+      parentRoute: typeof layoutsRouteRoute;
+    };
     "/(layouts)/components/rich-text/": {
       id: "/(layouts)/components/rich-text/";
       path: "/components/rich-text";
@@ -1017,6 +1037,7 @@ interface layoutsRouteRouteChildren {
   layoutsComponentsImageCardIndexRoute: typeof layoutsComponentsImageCardIndexRoute;
   layoutsComponentsInputIndexRoute: typeof layoutsComponentsInputIndexRoute;
   layoutsComponentsRichTextIndexRoute: typeof layoutsComponentsRichTextIndexRoute;
+  layoutsComponentsSearchIndexRoute: typeof layoutsComponentsSearchIndexRoute;
   layoutsComponentsSelectIndexRoute: typeof layoutsComponentsSelectIndexRoute;
   layoutsComponentsSelectorIndexRoute: typeof layoutsComponentsSelectorIndexRoute;
   layoutsComponentsTableIndexRoute: typeof layoutsComponentsTableIndexRoute;
@@ -1068,6 +1089,7 @@ const layoutsRouteRouteChildren: layoutsRouteRouteChildren = {
   layoutsComponentsImageCardIndexRoute: layoutsComponentsImageCardIndexRoute,
   layoutsComponentsInputIndexRoute: layoutsComponentsInputIndexRoute,
   layoutsComponentsRichTextIndexRoute: layoutsComponentsRichTextIndexRoute,
+  layoutsComponentsSearchIndexRoute: layoutsComponentsSearchIndexRoute,
   layoutsComponentsSelectIndexRoute: layoutsComponentsSelectIndexRoute,
   layoutsComponentsSelectorIndexRoute: layoutsComponentsSelectorIndexRoute,
   layoutsComponentsTableIndexRoute: layoutsComponentsTableIndexRoute,
