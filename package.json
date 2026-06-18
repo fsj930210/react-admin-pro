@@ -39,7 +39,7 @@
 	"author": "",
 	"license": "ISC",
 	"type": "module",
-	"packageManager": "pnpm@11.5.2",
+	"packageManager": "pnpm@11.7.0",
 	"devDependencies": {
 		"@rap/commitlint-config": "workspace:*",
 		"@rap/oxc-config": "workspace:*",

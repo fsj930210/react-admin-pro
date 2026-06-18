@@ -68,6 +68,7 @@ function RangePickerTrigger(props: RangePickerTriggerProps) {
         "group flex min-h-10 w-full items-center gap-2 rounded-md border border-input bg-background px-3 text-sm shadow-xs transition-[color,box-shadow,border-color]",
         "focus-within:border-ring focus-within:ring-[3px] focus-within:ring-ring/45",
         "hover:border-ring/40",
+        "aria-invalid:border-destructive aria-invalid:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40",
         disabled && "pointer-events-none cursor-not-allowed opacity-50",
         readOnly && "cursor-not-allowed opacity-50",
         className

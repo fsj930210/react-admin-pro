@@ -49,6 +49,7 @@ function RangePicker(props: RangePickerProps) {
     renderPanel,
     className,
     inputClassName,
+    "aria-invalid": ariaInvalid,
     popupClassName,
     panelClassName,
     onCalendarChange,
@@ -225,6 +226,7 @@ function RangePicker(props: RangePickerProps) {
           icon={icon}
           className={cn("inline-flex w-full", className)}
           inputClassName={inputClassName}
+          aria-invalid={ariaInvalid}
           activePart={activePart}
           startRef={startRef}
           endRef={endRef}

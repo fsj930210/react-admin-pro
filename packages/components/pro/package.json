@@ -47,6 +47,7 @@
     "@rap/hooks": "workspace:*",
     "@rap/i18n": "workspace:*",
     "@rap/utils": "workspace:*",
+    "@tanstack/react-form": "catalog:",
     "@tanstack/react-router": "catalog:",
     "@tanstack/react-table": "catalog:",
     "@tanstack/react-virtual": "catalog:",

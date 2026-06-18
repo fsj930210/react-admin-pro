@@ -51,6 +51,7 @@ export function Select<V extends SelectValue = string>(props: SelectProps<V>) {
     virtual = false,
     ...inputProps
   } = props;
+  const ariaInvalid = inputProps["aria-invalid"];
 
   const select = useSelect(props, ref);
 
@@ -89,6 +90,7 @@ export function Select<V extends SelectValue = string>(props: SelectProps<V>) {
           maxTagPlaceholder={maxTagPlaceholder}
           tagRender={tagRender}
           labelRender={labelRender}
+          aria-invalid={ariaInvalid}
           inputRef={select.inputRef}
           onClear={select.handleClear}
           onContainerClick={() => {

@@ -49,6 +49,7 @@ function DateTimePicker(props: DateTimePickerProps) {
     renderPanel,
     className,
     inputClassName,
+    "aria-invalid": ariaInvalid,
     popupClassName,
     panelClassName,
     onSelect,
@@ -191,6 +192,7 @@ function DateTimePicker(props: DateTimePickerProps) {
           icon={icon}
           className={cn("inline-flex w-full", className)}
           inputClassName={inputClassName}
+          aria-invalid={ariaInvalid}
           onValueChange={handleInputCommit}
           onOpenRequest={() => changeOpen(true)}
           onClear={() => {

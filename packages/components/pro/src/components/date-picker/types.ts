@@ -59,6 +59,7 @@ interface BasePickerProps {
   footerActions?: PickerFooterActions;
   className?: string;
   inputClassName?: string;
+  "aria-invalid"?: boolean | "true" | "false";
   popupClassName?: string;
   panelClassName?: string;
   onClear?: () => void;

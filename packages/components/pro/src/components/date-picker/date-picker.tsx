@@ -51,6 +51,7 @@ function DatePicker(props: DatePickerProps) {
     renderPanel,
     className,
     inputClassName,
+    "aria-invalid": ariaInvalid,
     popupClassName,
     panelClassName,
     onSelect,
@@ -182,6 +183,7 @@ function DatePicker(props: DatePickerProps) {
           icon={icon}
           className={cn("inline-flex w-full", className)}
           inputClassName={inputClassName}
+          aria-invalid={ariaInvalid}
           onValueChange={handleInputChange}
           onOpenRequest={() => changeOpen(true)}
           onClear={() => {

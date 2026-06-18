@@ -661,6 +661,9 @@ importers:
       '@rap/utils':
         specifier: workspace:*
         version: link:../../utils
+      '@tanstack/react-form':
+        specifier: 'catalog:'
+        version: 1.33.0(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
       '@tanstack/react-router':
         specifier: 'catalog:'
         version: 1.170.15(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
