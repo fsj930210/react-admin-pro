@@ -88,12 +88,7 @@ export function AdvancedDemo() {
           <NumberInput min={0} precision={2} prefix="$" />
         </FormItem>
 
-        <FormItem
-          name="enabled"
-          label="Enabled"
-          valuePropName="checked"
-          trigger="onCheckedChange"
-        >
+        <FormItem name="enabled" label="Enabled" valuePropName="checked" trigger="onCheckedChange">
           <Checkbox />
         </FormItem>
 

@@ -455,6 +455,9 @@ importers:
       react-markdown:
         specifier: 'catalog:'
         version: 10.1.0(@types/react@19.2.17)(react@19.2.7)
+      recharts:
+        specifier: 'catalog:'
+        version: 3.8.1(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react-is@19.2.6)(react@19.2.7)(redux@5.0.1)
       rehype-highlight:
         specifier: 'catalog:'
         version: 7.0.2

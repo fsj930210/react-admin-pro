@@ -54,12 +54,7 @@ export function DependencyDemo() {
           )}
         </FormItem>
 
-        <FormItem
-          name="city"
-          label="City"
-          dependencies={["province"]}
-          trigger="onValueChange"
-        >
+        <FormItem name="city" label="City" dependencies={["province"]} trigger="onValueChange">
           {({ field, getFieldValue }) => {
             const province = String(getFieldValue("province") ?? "");
             const cities = cityMap[province] ?? [];

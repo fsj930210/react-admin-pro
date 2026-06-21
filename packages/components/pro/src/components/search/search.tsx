@@ -9,30 +9,34 @@ import { cn } from "@rap/utils";
 import { Form, useForm } from "../form";
 import { SearchItem } from "./search-item";
 import { useSearchCollapse } from "./use-search-collapse";
+import type { AnyFormApi } from "../form";
 import type { SearchActionsRenderContext, SearchItemProps, SearchProps } from "./types";
 
-function getActionLayout(actionsLayout: SearchProps["actionsLayout"], canCollapse: boolean) {
+function getActionLayout(actionsLayout: SearchProps["actionsLayout"]) {
   if (actionsLayout === "inline" || actionsLayout === "newline") {
     return actionsLayout;
   }
 
-  return canCollapse ? "newline" : "inline";
+  return "newline";
 }
 
 function SearchRoot<TFormData = Record<string, unknown>>({
   actionsLayout = "auto",
+  actionsClassName,
   children,
   className,
   collapsed: collapsedProp,
   collapsedRows = 1,
   collapsible = "auto",
+  contentClassName,
   defaultCollapsed = true,
   form: formProp,
   formOptions,
+  fieldsClassName,
   initialValues,
-  itemMinWidth = 220,
-  itemWidth = 220,
+  itemMinWidth = 240,
   labelAlign = "right",
+  labelWidth = 88,
   onCollapsedChange,
   onReset,
   onSubmit,
@@ -49,14 +53,14 @@ function SearchRoot<TFormData = Record<string, unknown>>({
       const { formApi, value } = submitProps;
 
       await formOptionsSubmit?.(submitProps);
-      await onSubmit?.(value, formApi);
+      await onSubmit?.(value, formApi as unknown as AnyFormApi<TFormData>);
     },
   });
   const form = formProp ?? innerForm;
   const [innerCollapsed, setInnerCollapsed] = useState(defaultCollapsed);
   const collapsed = collapsedProp ?? innerCollapsed;
   const collapseEnabled = collapsible !== false;
-  const { canCollapse, collapsedHeight, expandedHeight, fieldsRef, itemCount } = useSearchCollapse({
+  const { canCollapse, collapsedHeight, expandedHeight, fieldsRef } = useSearchCollapse({
     collapsedRows,
     enabled: collapseEnabled,
   });
@@ -65,7 +69,7 @@ function SearchRoot<TFormData = Record<string, unknown>>({
     collapseEnabled && canCollapse && expandedHeight > 0
       ? `${actualCollapsed ? collapsedHeight : expandedHeight}px`
       : undefined;
-  const actionLayout = getActionLayout(actionsLayout, canCollapse);
+  const actionLayout = getActionLayout(actionsLayout);
   const submit = useMemoizedFn(() => {
     void form.handleSubmit();
   });
@@ -104,24 +108,23 @@ function SearchRoot<TFormData = Record<string, unknown>>({
         className={cn(
           "flex w-full items-start gap-x-3 gap-y-3",
           actionLayout === "inline" ? "flex-wrap" : "flex-col",
+          contentClassName
         )}
       >
         <div
           ref={fieldsRef}
           data-search-fields
           className={cn(
-            "flex min-w-0 flex-wrap items-start gap-x-5 gap-y-3 overflow-hidden transition-[max-height] duration-200 ease-in-out",
-            actionLayout === "inline" && "max-w-full",
+            "grid min-w-0 grid-cols-[repeat(auto-fill,minmax(min(100%,var(--search-item-min-width)),1fr))] items-start gap-x-5 gap-y-3 overflow-hidden transition-[max-height] duration-200 ease-in-out",
             actionLayout === "newline" && "w-full",
+            fieldsClassName
           )}
           style={
             {
-              "--search-item-width": `${itemMinWidth}px`,
-              "--search-item-flex-width": `${itemWidth}px`,
-              flexBasis:
-                actionLayout === "inline"
-                  ? `min(100%, ${itemCount * itemWidth + Math.max(itemCount - 1, 0) * 20}px)`
-                  : undefined,
+              "--search-item-min-width":
+                typeof itemMinWidth === "number" ? `${itemMinWidth}px` : itemMinWidth,
+              "--search-label-width":
+                typeof labelWidth === "number" ? `${labelWidth}px` : labelWidth,
               maxHeight: fieldsMaxHeight,
             } as CSSProperties
           }
@@ -131,9 +134,10 @@ function SearchRoot<TFormData = Record<string, unknown>>({
 
         <div
           className={cn(
-            "flex shrink-0 items-start gap-2",
+            "ml-auto flex shrink-0 items-start gap-2",
             actionLayout === "inline" && "pt-0.5",
             actionLayout === "newline" && "w-full justify-end pt-0.5",
+            actionsClassName
           )}
         >
           {renderActions ? (
@@ -146,7 +150,7 @@ function SearchRoot<TFormData = Record<string, unknown>>({
               </Button>
               <Button
                 type="button"
-                variant="secondary"
+                variant="outline"
                 className="h-8 border-input bg-background px-3 shadow-xs"
                 onClick={reset}
               >

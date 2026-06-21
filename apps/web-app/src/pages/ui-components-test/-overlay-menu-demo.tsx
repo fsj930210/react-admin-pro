@@ -264,7 +264,7 @@ export function OverlayMenuDemo() {
 
             <Combobox>
               <ComboboxTrigger>
-                <ComboboxValue placeholder="Choose module" />
+                <ComboboxValue>Choose module</ComboboxValue>
               </ComboboxTrigger>
               <ComboboxContent>
                 <ComboboxInput placeholder="Search module" />

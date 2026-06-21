@@ -14,17 +14,20 @@ export type SearchActionsRenderContext<TFormData> = {
 
 export type SearchProps<TFormData = Record<string, unknown>> = {
   actionsLayout?: SearchActionsLayout;
+  actionsClassName?: string;
   children?: ReactNode | ((form: AnyFormApi<TFormData>) => ReactNode);
   collapsed?: boolean;
   collapsedRows?: number;
   collapsible?: boolean | "auto";
+  contentClassName?: string;
   defaultCollapsed?: boolean;
+  fieldsClassName?: string;
   form?: AnyFormApi<TFormData>;
   formOptions?: AnyFormOptions<TFormData>;
   initialValues?: TFormData;
-  itemMinWidth?: number;
-  itemWidth?: number;
+  itemMinWidth?: number | string;
   labelAlign?: FormProps<TFormData>["labelAlign"];
+  labelWidth?: number | string;
   onCollapsedChange?: (collapsed: boolean) => void;
   onReset?: (values: TFormData, form: AnyFormApi<TFormData>) => void | Promise<void>;
   onSubmit?: (values: TFormData, form: AnyFormApi<TFormData>) => void | Promise<void>;
@@ -33,6 +36,4 @@ export type SearchProps<TFormData = Record<string, unknown>> = {
   searchText?: ReactNode;
 } & Omit<ComponentProps<"form">, "children" | "onReset" | "onSubmit">;
 
-export type SearchItemProps = {
-  span?: number;
-} & ComponentProps<"div">;
+export type SearchItemProps = ComponentProps<"div">;

@@ -4,22 +4,19 @@ type SearchCollapseState = {
   canCollapse: boolean;
   collapsedHeight: number;
   expandedHeight: number;
-  itemCount: number;
 };
 
 const initialState: SearchCollapseState = {
   canCollapse: false,
   collapsedHeight: 0,
   expandedHeight: 0,
-  itemCount: 0,
 };
 
 function isSameState(prev: SearchCollapseState, next: SearchCollapseState) {
   return (
     prev.canCollapse === next.canCollapse &&
     Math.abs(prev.collapsedHeight - next.collapsedHeight) < 1 &&
-    Math.abs(prev.expandedHeight - next.expandedHeight) < 1 &&
-    prev.itemCount === next.itemCount
+    Math.abs(prev.expandedHeight - next.expandedHeight) < 1
   );
 }
 
@@ -77,7 +74,6 @@ export function useSearchCollapse({
           canCollapse: rows.length > collapsedRows,
           collapsedHeight: collapsedRow?.bottom ?? fieldsElement.scrollHeight,
           expandedHeight: fieldsElement.scrollHeight,
-          itemCount: fieldsElement.querySelectorAll("[data-search-item]").length,
         };
 
         setState((prev) => (isSameState(prev, nextState) ? prev : nextState));
