@@ -22,8 +22,8 @@ const columns: ColumnDef<User>[] = [
     meta: {
       pinned: "left",
       ellipsis: true,
-      sort: { key: "name" },
-      filter: { key: "name", type: "input" },
+      sort: { sortKey: "name" },
+      filter: { searchKey: "name", type: "input" },
     },
   },
   { accessorKey: "email", header: "Email", meta: { ellipsis: true } },

@@ -46,6 +46,7 @@ import { Route as layoutsComponentsSelectorIndexRouteImport } from "./pages/(lay
 import { Route as layoutsComponentsSelectIndexRouteImport } from "./pages/(layouts)/components/select/index";
 import { Route as layoutsComponentsSearchIndexRouteImport } from "./pages/(layouts)/components/search/index";
 import { Route as layoutsComponentsRichTextIndexRouteImport } from "./pages/(layouts)/components/rich-text/index";
+import { Route as layoutsComponentsProDataGridIndexRouteImport } from "./pages/(layouts)/components/pro-data-grid/index";
 import { Route as layoutsComponentsInputIndexRouteImport } from "./pages/(layouts)/components/input/index";
 import { Route as layoutsComponentsImageCardIndexRouteImport } from "./pages/(layouts)/components/image-card/index";
 import { Route as layoutsComponentsIconIndexRouteImport } from "./pages/(layouts)/components/icon/index";
@@ -263,6 +264,12 @@ const layoutsComponentsRichTextIndexRoute =
     path: "/components/rich-text/",
     getParentRoute: () => layoutsRouteRoute,
   } as any);
+const layoutsComponentsProDataGridIndexRoute =
+  layoutsComponentsProDataGridIndexRouteImport.update({
+    id: "/components/pro-data-grid/",
+    path: "/components/pro-data-grid/",
+    getParentRoute: () => layoutsRouteRoute,
+  } as any);
 const layoutsComponentsInputIndexRoute =
   layoutsComponentsInputIndexRouteImport.update({
     id: "/components/input/",
@@ -365,6 +372,7 @@ export interface FileRoutesByFullPath {
   "/components/icon/": typeof layoutsComponentsIconIndexRoute;
   "/components/image-card/": typeof layoutsComponentsImageCardIndexRoute;
   "/components/input/": typeof layoutsComponentsInputIndexRoute;
+  "/components/pro-data-grid/": typeof layoutsComponentsProDataGridIndexRoute;
   "/components/rich-text/": typeof layoutsComponentsRichTextIndexRoute;
   "/components/search/": typeof layoutsComponentsSearchIndexRoute;
   "/components/select/": typeof layoutsComponentsSelectIndexRoute;
@@ -416,6 +424,7 @@ export interface FileRoutesByTo {
   "/components/icon": typeof layoutsComponentsIconIndexRoute;
   "/components/image-card": typeof layoutsComponentsImageCardIndexRoute;
   "/components/input": typeof layoutsComponentsInputIndexRoute;
+  "/components/pro-data-grid": typeof layoutsComponentsProDataGridIndexRoute;
   "/components/rich-text": typeof layoutsComponentsRichTextIndexRoute;
   "/components/search": typeof layoutsComponentsSearchIndexRoute;
   "/components/select": typeof layoutsComponentsSelectIndexRoute;
@@ -469,6 +478,7 @@ export interface FileRoutesById {
   "/(layouts)/components/icon/": typeof layoutsComponentsIconIndexRoute;
   "/(layouts)/components/image-card/": typeof layoutsComponentsImageCardIndexRoute;
   "/(layouts)/components/input/": typeof layoutsComponentsInputIndexRoute;
+  "/(layouts)/components/pro-data-grid/": typeof layoutsComponentsProDataGridIndexRoute;
   "/(layouts)/components/rich-text/": typeof layoutsComponentsRichTextIndexRoute;
   "/(layouts)/components/search/": typeof layoutsComponentsSearchIndexRoute;
   "/(layouts)/components/select/": typeof layoutsComponentsSelectIndexRoute;
@@ -522,6 +532,7 @@ export interface FileRouteTypes {
     | "/components/icon/"
     | "/components/image-card/"
     | "/components/input/"
+    | "/components/pro-data-grid/"
     | "/components/rich-text/"
     | "/components/search/"
     | "/components/select/"
@@ -573,6 +584,7 @@ export interface FileRouteTypes {
     | "/components/icon"
     | "/components/image-card"
     | "/components/input"
+    | "/components/pro-data-grid"
     | "/components/rich-text"
     | "/components/search"
     | "/components/select"
@@ -625,6 +637,7 @@ export interface FileRouteTypes {
     | "/(layouts)/components/icon/"
     | "/(layouts)/components/image-card/"
     | "/(layouts)/components/input/"
+    | "/(layouts)/components/pro-data-grid/"
     | "/(layouts)/components/rich-text/"
     | "/(layouts)/components/search/"
     | "/(layouts)/components/select/"
@@ -922,6 +935,13 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof layoutsComponentsRichTextIndexRouteImport;
       parentRoute: typeof layoutsRouteRoute;
     };
+    "/(layouts)/components/pro-data-grid/": {
+      id: "/(layouts)/components/pro-data-grid/";
+      path: "/components/pro-data-grid";
+      fullPath: "/components/pro-data-grid/";
+      preLoaderRoute: typeof layoutsComponentsProDataGridIndexRouteImport;
+      parentRoute: typeof layoutsRouteRoute;
+    };
     "/(layouts)/components/input/": {
       id: "/(layouts)/components/input/";
       path: "/components/input";
@@ -1036,6 +1056,7 @@ interface layoutsRouteRouteChildren {
   layoutsComponentsIconIndexRoute: typeof layoutsComponentsIconIndexRoute;
   layoutsComponentsImageCardIndexRoute: typeof layoutsComponentsImageCardIndexRoute;
   layoutsComponentsInputIndexRoute: typeof layoutsComponentsInputIndexRoute;
+  layoutsComponentsProDataGridIndexRoute: typeof layoutsComponentsProDataGridIndexRoute;
   layoutsComponentsRichTextIndexRoute: typeof layoutsComponentsRichTextIndexRoute;
   layoutsComponentsSearchIndexRoute: typeof layoutsComponentsSearchIndexRoute;
   layoutsComponentsSelectIndexRoute: typeof layoutsComponentsSelectIndexRoute;
@@ -1088,6 +1109,8 @@ const layoutsRouteRouteChildren: layoutsRouteRouteChildren = {
   layoutsComponentsIconIndexRoute: layoutsComponentsIconIndexRoute,
   layoutsComponentsImageCardIndexRoute: layoutsComponentsImageCardIndexRoute,
   layoutsComponentsInputIndexRoute: layoutsComponentsInputIndexRoute,
+  layoutsComponentsProDataGridIndexRoute:
+    layoutsComponentsProDataGridIndexRoute,
   layoutsComponentsRichTextIndexRoute: layoutsComponentsRichTextIndexRoute,
   layoutsComponentsSearchIndexRoute: layoutsComponentsSearchIndexRoute,
   layoutsComponentsSelectIndexRoute: layoutsComponentsSelectIndexRoute,

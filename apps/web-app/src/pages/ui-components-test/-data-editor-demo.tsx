@@ -59,15 +59,15 @@ const columns: ColumnDef<ReviewRecord>[] = [
     meta: {
       pinned: "left",
       ellipsis: true,
-      sort: { key: "name" },
-      filter: { key: "name", type: "input" },
+      sort: { sortKey: "name" },
+      filter: { searchKey: "name", type: "input" },
     },
   },
   {
     accessorKey: "owner",
     header: "Owner",
     enableSorting: true,
-    meta: { sort: { key: "owner" }, ellipsis: true },
+    meta: { sort: { sortKey: "owner" }, ellipsis: true },
   },
   {
     accessorKey: "status",
@@ -75,7 +75,7 @@ const columns: ColumnDef<ReviewRecord>[] = [
     enableColumnFilter: true,
     meta: {
       filter: {
-        key: "status",
+        searchKey: "status",
         type: "select",
         options: [
           { label: "Ready", value: "Ready" },

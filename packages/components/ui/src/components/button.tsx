@@ -94,6 +94,7 @@ const Button = ({
     );
   const disabled = userDisabled || !!loading;
   const renderIcon = (placement: ButtonProps["iconPlacement"], isLoading: boolean) => {
+    if (placement !== (iconPlacement ?? "start")) return null;
     const content = isLoading ? loadingIcon : icon;
     if (!content) return null;
     const wrapperClass =

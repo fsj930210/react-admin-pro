@@ -13,8 +13,8 @@ export function createUserColumns(extra?: ColumnDef<DemoUser>[]): ColumnDef<Demo
       meta: {
         pinned: "left",
         ellipsis: true,
-        sort: { key: "name" },
-        filter: { key: "name", type: "input" },
+        sort: { sortKey: "name" },
+        filter: { searchKey: "name", type: "input" },
       },
     },
     {
@@ -29,7 +29,7 @@ export function createUserColumns(extra?: ColumnDef<DemoUser>[]): ColumnDef<Demo
       header: "Age",
       size: 100,
       enableSorting: true,
-      meta: { sort: { key: "age" } },
+      meta: { sort: { sortKey: "age" } },
     },
     {
       accessorKey: "department",
@@ -54,7 +54,7 @@ export function createUserColumns(extra?: ColumnDef<DemoUser>[]): ColumnDef<Demo
       size: 130,
       enableSorting: true,
       cell: ({ getValue }) => `$${Number(getValue()).toLocaleString()}`,
-      meta: { sort: { key: "salary" } },
+      meta: { sort: { sortKey: "salary" } },
     },
     {
       accessorKey: "status",
@@ -88,8 +88,8 @@ export function createRemoteUserColumns(): ColumnDef<User>[] {
       enableColumnFilter: true,
       meta: {
         pinned: "left",
-        sort: { key: "name" },
-        filter: { key: "name", type: "input" },
+        sort: { sortKey: "name" },
+        filter: { searchKey: "name", type: "input" },
         ellipsis: true,
       },
     },
@@ -99,14 +99,14 @@ export function createRemoteUserColumns(): ColumnDef<User>[] {
       header: "年龄",
       size: 90,
       enableSorting: true,
-      meta: { sort: { key: "age" } },
+      meta: { sort: { sortKey: "age" } },
     },
     {
       accessorKey: "department",
       header: "部门",
       size: 130,
       enableColumnFilter: true,
-      meta: { filter: { key: "department", type: "input" } },
+      meta: { filter: { searchKey: "department", type: "input" } },
     },
     { accessorKey: "position", header: "职位", size: 130 },
     { accessorKey: "phone", header: "电话", size: 160 },
@@ -116,7 +116,7 @@ export function createRemoteUserColumns(): ColumnDef<User>[] {
       header: "薪资",
       size: 120,
       enableSorting: true,
-      meta: { sort: { key: "salary" } },
+      meta: { sort: { sortKey: "salary" } },
     },
     { accessorKey: "status", header: "状态", size: 100 },
     {
@@ -124,7 +124,7 @@ export function createRemoteUserColumns(): ColumnDef<User>[] {
       header: "评分",
       size: 100,
       enableSorting: true,
-      meta: { sort: { key: "score" } },
+      meta: { sort: { sortKey: "score" } },
     },
   ];
 }

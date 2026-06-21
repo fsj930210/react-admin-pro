@@ -23,13 +23,7 @@ import type {
   VisibilityState,
 } from "@tanstack/react-table";
 import * as React from "react";
-import {
-  type CSSProperties,
-  type ComponentProps,
-  type HTMLAttributes,
-  type ReactNode,
-  type ComponentType,
-} from "react";
+import { type CSSProperties, type HTMLAttributes, type ReactNode, type ComponentType } from "react";
 import type { EmptyProps } from "./components/empty";
 
 export type DataGridMode = "remote" | "local";
@@ -71,7 +65,9 @@ export interface DataGridFilterOption {
 
 export interface DataGridFilterMeta<TData, TValue> {
   /** Remote field name. Defaults to the column id. */
-  key?: string;
+  searchKey?:
+    | string
+    | ((value: unknown, context: { column: ColumnDef<TData, TValue> }) => Record<string, unknown>);
   /** Built-in dropdown style. Custom rendering can still be supplied with render. */
   type?:
     | "input"
@@ -89,7 +85,12 @@ export interface DataGridFilterMeta<TData, TValue> {
 
 export interface DataGridSortMeta<TData, TValue> {
   /** Remote field name. Defaults to the column id. */
-  key?: string;
+  sortKey?:
+    | string
+    | ((
+        order: "asc" | "desc",
+        context: { column: ColumnDef<TData, TValue> }
+      ) => Record<string, unknown>);
   render?: (ctx: { column: Column<TData, TValue>; table: Table<TData> }) => ReactNode;
 }
 
