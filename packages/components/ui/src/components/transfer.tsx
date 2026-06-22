@@ -246,7 +246,13 @@ export function Transfer<T = SelectorItem, V extends SelectorValue = string>({
 
   return (
     <TransferContext value={api}>
-      <div className={cn("flex min-h-0 flex-col gap-3", className)} {...props}>
+      <div
+        className={cn(
+          "flex min-h-0 flex-col gap-3 rounded-md border border-transparent aria-invalid:border-destructive aria-invalid:ring-destructive/20",
+          className
+        )}
+        {...props}
+      >
         {content}
       </div>
     </TransferContext>
