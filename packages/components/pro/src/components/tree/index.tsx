@@ -11,6 +11,8 @@ export type {
   TreeBaseProps,
   TreeDraggableConfig,
   TreeProps,
+  TreeSearchInfo,
+  TreeSearchOption,
   TreeVirtualConfig,
   VirtualTreeProps,
 } from "./types";

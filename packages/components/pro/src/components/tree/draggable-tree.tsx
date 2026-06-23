@@ -2,7 +2,7 @@
 
 import { TreeRoot } from "@rap/components-ui/tree";
 import { useMemo } from "react";
-import { buildDraggableFeatures, DraggableTreeContent } from "./shared";
+import { buildDraggableFeatures, DraggableTreeContent, TreeSearch } from "./shared";
 import type { DraggableTreeProps } from "./types";
 
 export function DraggableTree({
@@ -30,6 +30,7 @@ export function DraggableTree({
   defaultCheckedKeys,
   onCheckedKeysChange,
   searchable,
+  search,
   filter,
   asyncLoader,
   ...props
@@ -47,7 +48,7 @@ export function DraggableTree({
     checkedKeys,
     defaultCheckedKeys,
     onCheckedKeysChange,
-    searchable,
+    searchable: search ?? searchable,
     filter,
     asyncLoader,
   };
@@ -71,6 +72,7 @@ export function DraggableTree({
       onCheckedKeysChange,
       onExpandedKeysChange,
       onSelectedKeysChange,
+      search,
       searchable,
       selectable,
       selectedKeys,
@@ -87,7 +89,19 @@ export function DraggableTree({
       className={className}
     >
       {(tree) => (
-        <DraggableTreeContent {...props} {...featureOptions} renderItem={renderItem} tree={tree} />
+        <TreeSearch
+          tree={tree}
+          search={search}
+          asyncLoader={asyncLoader}
+          baseProps={{ ...props, ...featureOptions, renderItem }}
+        >
+          <DraggableTreeContent
+            {...props}
+            {...featureOptions}
+            renderItem={renderItem}
+            tree={tree}
+          />
+        </TreeSearch>
       )}
     </TreeRoot>
   );

@@ -40,12 +40,17 @@ export function searchFeature({
       const keyword = ctx.registerState("search.keyword", "");
       const matchedKeys = ctx.registerState<Set<TreeKey>>("search.matchedKeys", new Set());
       const resultKeys = ctx.registerState<Set<TreeKey>>("search.resultKeys", new Set());
+      let expandedKeysBeforeSearch: TreeKey[] | null = null;
 
       const runSearch = (nextKeyword: string) => {
         const trimmed = nextKeyword.trim();
         const nextMatched = new Set<TreeKey>();
         const nextResults = new Set<TreeKey>();
+        const pathKeys = new Set<TreeKey>();
         if (trimmed) {
+          if (!expandedKeysBeforeSearch) {
+            expandedKeysBeforeSearch = ctx.tree.getExpandedKeys?.() ?? null;
+          }
           for (const item of ctx.tree.items.values()) {
             if (getText(item.node, highlightKey).toLowerCase().includes(trimmed.toLowerCase())) {
               nextMatched.add(item.key);
@@ -53,13 +58,28 @@ export function searchFeature({
               let parentKey = item.parentKey;
               while (parentKey) {
                 nextResults.add(parentKey);
+                pathKeys.add(parentKey);
                 parentKey = ctx.tree.parentByKey.get(parentKey) ?? null;
               }
             }
           }
+          if (pathKeys.size > 0 && ctx.tree.updateExpandedKeys) {
+            ctx.tree.updateExpandedKeys([
+              ...new Set([...(ctx.tree.getExpandedKeys?.() ?? []), ...pathKeys]),
+            ]);
+          }
+        } else if (expandedKeysBeforeSearch && ctx.tree.updateExpandedKeys) {
+          ctx.tree.updateExpandedKeys(expandedKeysBeforeSearch);
+          expandedKeysBeforeSearch = null;
         }
-        keyword.set(nextKeyword, { selectorKeys: ["search.keyword"] });
-        matchedKeys.set(nextMatched, { selectorKeys: ["search.matchedKeys"] });
+        keyword.set(nextKeyword, {
+          changedKeys: Array.from(nextResults),
+          selectorKeys: ["search.keyword"],
+        });
+        matchedKeys.set(nextMatched, {
+          changedKeys: Array.from(nextResults),
+          selectorKeys: ["search.matchedKeys"],
+        });
         resultKeys.set(nextResults, { visibleChanged: true, selectorKeys: ["search.resultKeys"] });
         onSearch?.(
           nextKeyword,
@@ -75,6 +95,9 @@ export function searchFeature({
       ctx.tree.getMatchedKeys = () => Array.from(matchedKeys.get());
       ctx.tree.getSearchResultKeys = () => Array.from(resultKeys.get());
 
+      ctx.registerSelector("search.keyword", () => keyword.get());
+      ctx.registerSelector("search.matchedKeys", () => Array.from(matchedKeys.get()));
+      ctx.registerSelector("search.resultKeys", () => Array.from(resultKeys.get()));
       ctx.registerItemState("matched", (item) => matchedKeys.get().has(item.key));
       ctx.registerItemState("matchedSegments", (item) =>
         getHighlightSegments(getText(item.node, highlightKey), keyword.get())

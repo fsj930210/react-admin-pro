@@ -39,6 +39,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Edit3, Plus, Trash2 } from "lucide-react";
 import { useMemo, useRef, useState } from "react";
 import { fetchTreeChildren } from "@/service/tree";
+import { AsyncTreeSearchDemo } from "./-async-search-demo";
+import { SyncTreeSearchDemo } from "./-sync-search-demo";
 
 export const Route = createFileRoute("/(layouts)/components/tree/")({
   component: TreeComponentPage,
@@ -103,13 +105,17 @@ const createRemoteTree = (): TreeNode[] => [
 ];
 
 function renderLabel(item: TreeItemInstance) {
-  const segments = item.matchedSegments as { text: string; matched: boolean }[] | undefined;
+  const segments = item.tree.getItemState<{ text: string; matched: boolean }[]>(
+    item.key,
+    "matchedSegments"
+  );
   if (!segments) return item.node.label;
   return segments.map((segment, index) => (
     <span
       // biome-ignore lint/suspicious/noArrayIndexKey: segments are derived from immutable text slices for this render.
       key={`${item.key}-${index}`}
-      className={segment.matched ? "rounded-sm bg-yellow-300/60 px-0.5 text-foreground" : undefined}
+      className={segment.matched ? "text-destructive" : undefined}
+      style={segment.matched ? { color: "var(--destructive)" } : undefined}
     >
       {segment.text}
     </span>
@@ -667,6 +673,20 @@ function TreeComponentPage() {
         description="Search highlights matched segments while filter narrows visible items."
       >
         <SearchFilterDemo />
+      </Section>
+
+      <Section
+        title="BasicTree sync search"
+        description="Built-in search filters the current tree and highlights matched label text."
+      >
+        <SyncTreeSearchDemo />
+      </Section>
+
+      <Section
+        title="BasicTree async search"
+        description="Async search requests options, then renders a temporary subtree for the selected result."
+      >
+        <AsyncTreeSearchDemo />
       </Section>
 
       <Section

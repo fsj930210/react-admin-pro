@@ -8,6 +8,7 @@ import {
   DraggableTreeContent,
   DraggableVirtualTreeContent,
   TreeContent,
+  TreeSearch,
   VirtualTreeContent,
 } from "./shared";
 import type { TreeProps, TreeVirtualConfig } from "./types";
@@ -40,6 +41,7 @@ export function Tree({
   defaultCheckedKeys,
   onCheckedKeysChange,
   searchable,
+  search,
   filter,
   asyncLoader,
   ...props
@@ -58,7 +60,7 @@ export function Tree({
     checkedKeys,
     defaultCheckedKeys,
     onCheckedKeysChange,
-    searchable,
+    searchable: search ?? searchable,
     filter,
     asyncLoader,
   };
@@ -81,6 +83,7 @@ export function Tree({
       onCheckedKeysChange,
       onExpandedKeysChange,
       onSelectedKeysChange,
+      search,
       searchable,
       selectable,
       selectedKeys,
@@ -100,42 +103,72 @@ export function Tree({
       {(tree) => {
         if (virtualOptions && draggable) {
           return (
-            <DraggableVirtualTreeContent
-              {...props}
-              {...featureOptions}
-              renderItem={renderItem}
-              height={virtualHeight}
-              overscan={virtualOptions.overscan}
+            <TreeSearch
               tree={tree}
-            />
+              search={search}
+              asyncLoader={asyncLoader}
+              baseProps={{ ...props, ...featureOptions, renderItem }}
+            >
+              <DraggableVirtualTreeContent
+                {...props}
+                {...featureOptions}
+                renderItem={renderItem}
+                height={virtualHeight}
+                overscan={virtualOptions.overscan}
+                tree={tree}
+              />
+            </TreeSearch>
           );
         }
 
         if (virtualOptions) {
           return (
-            <VirtualTreeContent
-              {...props}
-              {...featureOptions}
-              renderItem={renderItem}
-              height={virtualHeight}
-              overscan={virtualOptions.overscan}
+            <TreeSearch
               tree={tree}
-            />
+              search={search}
+              asyncLoader={asyncLoader}
+              baseProps={{ ...props, ...featureOptions, renderItem }}
+            >
+              <VirtualTreeContent
+                {...props}
+                {...featureOptions}
+                renderItem={renderItem}
+                height={virtualHeight}
+                overscan={virtualOptions.overscan}
+                tree={tree}
+              />
+            </TreeSearch>
           );
         }
 
         if (draggable) {
           return (
-            <DraggableTreeContent
-              {...props}
-              {...featureOptions}
-              renderItem={renderItem}
+            <TreeSearch
               tree={tree}
-            />
+              search={search}
+              asyncLoader={asyncLoader}
+              baseProps={{ ...props, ...featureOptions, renderItem }}
+            >
+              <DraggableTreeContent
+                {...props}
+                {...featureOptions}
+                renderItem={renderItem}
+                tree={tree}
+              />
+            </TreeSearch>
           );
         }
 
-        return <TreeContent {...props} {...featureOptions} renderItem={renderItem} tree={tree} />;
+        return (
+          <TreeSearch
+            tree={tree}
+            search={search}
+            asyncLoader={asyncLoader}
+            baseProps={{ ...props, ...featureOptions, renderItem }}
+          >
+            <TreeContent {...props} {...featureOptions} renderItem={renderItem} tree={tree} />
+          </TreeSearch>
+        );
       }}
     </TreeRoot>
   );

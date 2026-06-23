@@ -13,6 +13,7 @@
   "type": "module",
   "exports": {
     "./action": "./src/components/action/index.tsx",
+    "./auto-complete": "./src/components/auto-complete/index.tsx",
     "./button": "./src/components/button/index.tsx",
     "./date-picker": "./src/components/date-picker/index.tsx",
     "./data-grid": "./src/components/data-grid/index.tsx",

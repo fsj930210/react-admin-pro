@@ -137,7 +137,7 @@ interface TreeItemProps extends HTMLAttributes<HTMLDivElement> {
 }
 
 function TreeItem({ item, className, asChild, children, style, ...props }: TreeItemProps) {
-  const { indent, rowHeight } = useTreeContext();
+  const { indent, rowHeight, tree } = useTreeContext();
   const Comp = asChild ? SlotPrimitive.Slot : "div";
   const mergedStyle = {
     ...style,
@@ -155,7 +155,7 @@ function TreeItem({ item, className, asChild, children, style, ...props }: TreeI
       data-expanded={Boolean(item.expanded)}
       data-checked={Boolean(item.checked)}
       data-indeterminate={Boolean(item.indeterminate)}
-      data-matched={Boolean(item.matched)}
+      data-matched={Boolean(tree.getItemState(item.key, "matched"))}
       aria-expanded={!item.isLeaf ? Boolean(item.expanded) : undefined}
       aria-disabled={item.disabled}
       style={mergedStyle}
@@ -244,7 +244,7 @@ function TreeLabel({
     <span
       data-slot="tree-label"
       className={cn(
-        "flex min-w-0 items-center gap-1 rounded-sm px-2 text-sm transition-colors group-data-[disabled=true]:opacity-50 group-data-[matched=true]:bg-blue-400/20 group-data-[selected=true]:bg-accent group-data-[selected=true]:text-accent-foreground hover:bg-accent",
+        "flex min-w-0 items-center gap-1 rounded-sm px-2 text-sm transition-colors group-data-[disabled=true]:opacity-50 group-data-[selected=true]:bg-accent group-data-[selected=true]:text-accent-foreground hover:bg-accent",
         item.disabled && "cursor-not-allowed",
         className
       )}

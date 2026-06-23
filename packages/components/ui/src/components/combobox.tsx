@@ -94,10 +94,12 @@ function ComboboxContent({
   className,
   open,
   onOpenChange,
+  onOpenAutoFocus,
   ...props
 }: ComponentProps<"div"> & {
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
+  onOpenAutoFocus?: ComponentProps<typeof PopoverContent>["onOpenAutoFocus"];
 }) {
   return (
     <Popover open={open} onOpenChange={onOpenChange}>
@@ -107,6 +109,10 @@ function ComboboxContent({
         className={cn("w-auto p-0", className)}
         align="start"
         sideOffset={6}
+        onOpenAutoFocus={(event) => {
+          event.preventDefault();
+          onOpenAutoFocus?.(event);
+        }}
         {...props}
       >
         {children}

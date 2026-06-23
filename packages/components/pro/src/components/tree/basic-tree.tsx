@@ -2,7 +2,7 @@
 
 import { TreeRoot } from "@rap/components-ui/tree";
 import { useMemo } from "react";
-import { buildCommonFeatures, TreeContent } from "./shared";
+import { buildCommonFeatures, TreeContent, TreeSearch } from "./shared";
 import type { BasicTreeProps } from "./types";
 
 export function BasicTree({
@@ -26,6 +26,7 @@ export function BasicTree({
   defaultCheckedKeys,
   onCheckedKeysChange,
   searchable,
+  search,
   filter,
   asyncLoader,
   ...props
@@ -43,7 +44,7 @@ export function BasicTree({
     checkedKeys,
     defaultCheckedKeys,
     onCheckedKeysChange,
-    searchable,
+    searchable: search ?? searchable,
     filter,
     asyncLoader,
   };
@@ -62,6 +63,7 @@ export function BasicTree({
       onCheckedKeysChange,
       onExpandedKeysChange,
       onSelectedKeysChange,
+      search,
       searchable,
       selectable,
       selectedKeys,
@@ -77,7 +79,16 @@ export function BasicTree({
       isLeaf={isLeaf}
       className={className}
     >
-      {(tree) => <TreeContent {...props} {...featureOptions} renderItem={renderItem} tree={tree} />}
+      {(tree) => (
+        <TreeSearch
+          tree={tree}
+          search={search}
+          asyncLoader={asyncLoader}
+          baseProps={{ ...props, ...featureOptions, renderItem }}
+        >
+          <TreeContent {...props} {...featureOptions} renderItem={renderItem} tree={tree} />
+        </TreeSearch>
+      )}
     </TreeRoot>
   );
 }

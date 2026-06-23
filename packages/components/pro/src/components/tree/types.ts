@@ -19,12 +19,27 @@ export type RenderItemContext = {
 export type SearchableConfig =
   | boolean
   | {
-      highlightKey?: string;
-      onSearch?: (
-        keyword: string,
-        matchedKeys: TreeKey[],
-        matchedItems: TreeItemInstance[]
-      ) => void;
+      onSearch?: (keyword: string, info: TreeSearchInfo) => void;
+      searchOptions?: (keyword: string) => Promise<TreeSearchOption[]>;
+      searchSubtree?: (option: TreeSearchOption) => Promise<TreeNode[]>;
+    };
+
+export type TreeSearchOption = {
+  key: TreeKey;
+  label: string;
+  pathLabel?: string;
+  [key: string]: unknown;
+};
+
+export type TreeSearchInfo =
+  | {
+      async: false;
+      matchedKeys: TreeKey[];
+      matchedItems: TreeItemInstance[];
+    }
+  | {
+      async: true;
+      options: TreeSearchOption[];
     };
 
 export type AsyncLoaderConfig = {
@@ -86,6 +101,7 @@ export type TreeBaseProps = Omit<HTMLAttributes<HTMLDivElement>, "children" | "d
   ) => void;
 
   searchable?: SearchableConfig;
+  search?: SearchableConfig;
   filter?: (item: TreeItemInstance) => boolean;
   asyncLoader?: AsyncLoaderConfig;
 

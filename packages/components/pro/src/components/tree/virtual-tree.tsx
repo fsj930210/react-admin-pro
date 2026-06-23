@@ -2,7 +2,7 @@
 
 import { TreeRoot } from "@rap/components-ui/tree";
 import { useMemo } from "react";
-import { buildCommonFeatures, VirtualTreeContent } from "./shared";
+import { buildCommonFeatures, TreeSearch, VirtualTreeContent } from "./shared";
 import type { VirtualTreeProps } from "./types";
 
 export function VirtualTree({
@@ -28,6 +28,7 @@ export function VirtualTree({
   defaultCheckedKeys,
   onCheckedKeysChange,
   searchable,
+  search,
   filter,
   asyncLoader,
   ...props
@@ -45,7 +46,7 @@ export function VirtualTree({
     checkedKeys,
     defaultCheckedKeys,
     onCheckedKeysChange,
-    searchable,
+    searchable: search ?? searchable,
     filter,
     asyncLoader,
   };
@@ -64,6 +65,7 @@ export function VirtualTree({
       onCheckedKeysChange,
       onExpandedKeysChange,
       onSelectedKeysChange,
+      search,
       searchable,
       selectable,
       selectedKeys,
@@ -80,14 +82,21 @@ export function VirtualTree({
       className={className}
     >
       {(tree) => (
-        <VirtualTreeContent
-          {...props}
-          {...featureOptions}
-          renderItem={renderItem}
-          height={height}
-          overscan={overscan}
+        <TreeSearch
           tree={tree}
-        />
+          search={search}
+          asyncLoader={asyncLoader}
+          baseProps={{ ...props, ...featureOptions, renderItem }}
+        >
+          <VirtualTreeContent
+            {...props}
+            {...featureOptions}
+            renderItem={renderItem}
+            height={height}
+            overscan={overscan}
+            tree={tree}
+          />
+        </TreeSearch>
       )}
     </TreeRoot>
   );
